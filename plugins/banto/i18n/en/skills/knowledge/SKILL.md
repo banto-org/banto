@@ -4,7 +4,6 @@ description: |
   **UTILITY SKILL** — Review, promote, and organize knowledge drafts (drafts/) into formal knowledge entries.
   Triggers: "promote the draft", "list knowledge drafts", "make this a knowledge entry", "add this to the knowledge base". Also invocable via /knowledge. (The draft-saved hook says "review via /knowledge" — natural language reaches it too.)
   Do not use when: saving design decisions (ai-context skill's decisions/ — don't fire on "decision"), external research (research skill), plain memo saving (memo skill), or a simple single-file copy (direct Bash `mv`).
-  Depends on: Read (list drafts), Write (promotion target .ai-context/docs/knowledges/), Glob, Bash (git mv).
 user-invocable: true
 argument-hint: "[omit: list drafts / 'promote': promotion mode / topic: create new]"
 allowed-tools: Read Write Glob Bash

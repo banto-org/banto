@@ -3,7 +3,7 @@ name: research
 description: |
   Investigate external sources (Web, GitHub, arxiv, X, etc.) anew and document the findings (external research / go fetch new information). If you only need to look through the existing .ai-context/, use the search skill instead.
   Triggers: "research", "investigate", "look into", "what's the latest", "what's the current state of", "best practices", "papers", "trends", "compare libraries/tools", "which is better". Also invocable via /research <topic>.
-  Do not use when: only searching the existing local AI Context (.ai-context/ decisions / docs / past conversations) — that is the search skill (no web access). A bare "tell me about" about the project's own code is answered directly or via the search skill, not external research — research means going to fetch new external information.
+  Do not use when: only searching the existing local AI Context (.ai-context/ decisions / docs / past conversations) — that is the search skill (no web access). A bare "tell me about" about the project's own code is answered directly or via the search skill.
 user-invocable: true
 argument-hint: "[research topic]"
 model: opus

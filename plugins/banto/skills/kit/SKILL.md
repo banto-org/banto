@@ -4,7 +4,6 @@ description: |
   **UTILITY SKILL** — Display a formatted catalog of every skill / agent / hook / rule the banto plugin provides. The natural-language discovery hub: users never need to know a command exists (intent-first).
   Triggers: /kit, "what can banto do", "what can this plugin do", "list all banto features", "what commands are there", "how do I do X with banto".
   Do not use when: inspecting a single skill in detail (Read its SKILL.md directly), auditing a plugin (plugin-audit), or creating a new plugin (plugin-dev).
-  Depends on: Read of the pre-formatted list at the end of this file (no external dependencies; display only). For a simple "what skills exist" check, a lightweight Glob over skills/ is enough.
 user-invocable: true
 compatibility: Claude Code (requires bash, git, jq)
 ---

@@ -56,6 +56,10 @@ jobs:
         run: |
           sh plugins/banto/scripts/i18n-sync-check.sh
 
+      - name: Markdown links (relative targets resolve; README language-flip lint)
+        run: |
+          sh scripts/check-md-links.sh
+
       - name: Declaration sync (versions / skill counts)
         run: |
           pv=$(jq -r .version plugins/banto/.claude-plugin/plugin.json)

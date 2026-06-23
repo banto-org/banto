@@ -1,7 +1,7 @@
 ---
 name: dev-loop
 description: |
-  大玉（spec / ドキュメント / 大きめタスク）を小型タスクへ自動分解し、実装 → 検証（② build-and-verify）→ 問題検知 → 修正 → 再検証を tasks.md が緑になるまで自走し、例外だけ owner に上げる自走開発ループ。② verify-run ＋ ④ 並列分解 ＋ spec ＋ debugger ＋ /loop を束ねる orchestrator（新規スクリプト無し）。検証段を eval 指標に差し替えれば ML 学習ループ（train→eval→調整）の派生になる。
+  大玉（spec / ドキュメント / 大きめタスク）を小型タスクへ自動分解し、実装 → 検証（② build-and-verify）→ 問題検知 → 修正 → 再検証を tasks.md が緑になるまで自走し、例外だけ owner に上げる自走開発ループ。
   トリガー: 「自走で開発」「大玉を分解して回して」「ループで開発」「全部やって（大玉）」「自動で実装してテストまで」「dev loop」「学習ループ」。/dev-loop でも起動可。
   使わない場面: 単発の小さな編集（直接 Edit）／次の 1 タスクを進めるだけ（ai-context next で十分）／設計だけ（spec）／思想だけ（concept）／ブランチ・worktree 操作（ws）。
 allowed-tools: Read Grep Glob Edit Write Bash Agent Skill

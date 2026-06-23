@@ -1,7 +1,7 @@
 ---
 name: spec
 description: |
-  Interactively generate an industry-standard specification document (spec) before implementation. Ideology is upstream (concept skill), implementation is downstream (concept → spec → implementation, self-driving). Order: requirements analysis → template selection → spec generation → adopted-interpretation report.
+  Interactively generate an industry-standard specification document (spec) before implementation. Ideology is upstream (concept skill), implementation is downstream (concept → spec → implementation, self-driving).
   Triggers: "spec", "write a spec", "design only first", "show me the design only", "plan", "design without implementing", "organize the spec", "organize the requirements". Fires when only design is requested.
   Do not use when: starting from ideology/concept (use concept), or when both design and implementation are wanted (run spec, then continue straight into implementation, self-driving).
 user-invocable: true

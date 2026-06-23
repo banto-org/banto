@@ -3,7 +3,7 @@ name: research
 description: |
   外部情報源（Web / GitHub / arxiv / X など）を新規に調査し、その結果をドキュメント化する（外部リサーチ / 新しい情報を取りに行く）。既存の .ai-context/ を眺めるだけなら search skill を使うこと。
   トリガー: 「調べて」「最新の〜」「今どうなってる」「ベストプラクティス」「論文」「トレンド」「ライブラリ/技術を比較して」「どっちがいい」「リサーチ」。/research <topic> でも呼び出し可能。
-  使わない場面: 既存のローカル AI Context（.ai-context/ の decisions / docs / 過去の会話）を検索するだけの場合 — それは search skill（Web アクセスなし）。プロジェクト自身のコードに関する素の「教えて」は、直接か search skill で答える。外部リサーチではない — research は新しい外部情報を取りに行くこと。
+  使わない場面: 既存のローカル AI Context（.ai-context/ の decisions / docs / 過去の会話）を検索するだけの場合 — それは search skill（Web アクセスなし）。プロジェクト自身のコードに関する素の「教えて」は、直接か search skill で答える。
 user-invocable: true
 argument-hint: "[調査トピック]"
 model: opus

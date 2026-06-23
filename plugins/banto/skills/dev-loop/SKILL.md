@@ -1,7 +1,7 @@
 ---
 name: dev-loop
 description: |
-  Self-driving development loop: auto-decompose a big task (spec / document / large task) into small tasks, then implement → verify (② build-and-verify) → detect problems → fix → re-verify, looping until tasks.md is green, escalating only exceptions to the owner. An orchestrator that ties together ② verify-run + ④ parallel decomposition + spec + debugger + /loop (no new scripts). Swap the verify step for an eval metric and it becomes the ML training loop (train→eval→adjust).
+  Self-driving development loop: auto-decompose a big task (spec / document / large task) into small tasks, then implement → verify (② build-and-verify) → detect problems → fix → re-verify, looping until tasks.md is green, escalating only exceptions to the owner.
   Triggers: "self-drive the development", "decompose this big task and run it", "loop the development", "just do all of it (big task)", "auto-implement and test it", "dev loop", "training loop". Also invocable via /dev-loop.
   Do not use when: a small one-off edit (edit directly) / advancing just the next single task (ai-context next is enough) / design only (spec) / ideology only (concept) / branch・worktree operations (ws).
 allowed-tools: Read Grep Glob Edit Write Bash Agent Skill

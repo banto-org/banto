@@ -5,7 +5,6 @@ description: |
   WebFetch の代替（WebFetch は小型モデルの要約を返すため、本文を実際に検証できない）。
   トリガー：URL とともに「読んで」「確認して」「中身見て」「要約して」が与えられたとき；ドキュメント／記事／ブログ／GitHub ページの精読。
   Do not use when：URL を*探す*とき（WebSearch / research skill）、ローカルファイル（直接 Read）、`.md` への直接リンク（WebFetch ではなく Read/curl を使う）。
-  Depends on: python3 + trafilatura（純ローカル、LLM 不使用、本文抽出 F1=0.909）。scripts/webread.sh 経由。
 allowed-tools: Bash Read Write
 user-invocable: true
 argument-hint: "[URL]"
