@@ -44,7 +44,7 @@ hooks, not promises.
   English set is generated from them and kept in sync by a deterministic gate. `/set-language ja|en`
   swaps the whole set to one language, and the choice survives plugin updates (public default: English).
 
-16 skills / 6 agents / 34 hooks / 9 behavioral rules. No bundled MCP servers. Security review and
+15 skills / 6 agents / 34 hooks / 9 behavioral rules. No bundled MCP servers. Security review and
 code review are deliberately **delegated to Anthropic's official plugins** rather than reimplemented.
 
 ## Requirements
@@ -82,6 +82,16 @@ by **native `/init`**; per-project rules via `harness-setup.sh --project`. Code 
 review delegate to the native `/code-review` / `/security-review` (Banto does not reimplement or
 auto-install them). The store works out of the box (repos register automatically on first session;
 git-sync the store when working as a team).
+
+## Language (default is English)
+
+To switch the skill / agent set to Japanese, run this **once**:
+
+```
+/set-language ja
+```
+
+then **restart Claude Code** to load the Japanese set. The choice is persisted and **survives plugin updates**, so you **never need to do it again** (use `/set-language en` + restart only to switch back).
 
 ## How it feels
 

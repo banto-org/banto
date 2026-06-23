@@ -52,7 +52,7 @@ plugins/banto
 #                          deterministic watchdog (harness-drift-check.sh + dead-skill-report.sh,
 #                          run at SessionStart / nightly) stays; only the manual model-judged skill
 #                          is held back from the public surface.
-PLUGIN_EXCLUDE="skills/status skills/harness-audit scripts/migrate-store-layout.sh scripts/migrate-store-v2.sh scripts/migrate-to-store.sh"
+PLUGIN_EXCLUDE="skills/status skills/harness-audit skills/banto-port scripts/migrate-store-layout.sh scripts/migrate-store-v2.sh scripts/migrate-to-store.sh"
 
 mkdir -p "$TARGET"
 for p in $ALLOW; do
@@ -68,12 +68,20 @@ done
 
 for p in $PLUGIN_EXCLUDE; do
     rm -rf "$TARGET/plugins/banto/$p"
-    printf '  - plugins/banto/%s (excluded)\n' "$p"
+    # also drop the i18n source copies, otherwise the EN materialize below re-creates the skill
+    case "$p" in
+      skills/*) rm -rf "$TARGET/plugins/banto/i18n/ja/$p" "$TARGET/plugins/banto/i18n/en/$p" ;;
+    esac
+    printf '  - plugins/banto/%s (excluded, incl i18n)\n' "$p"
 done
 
 # Fresh public changelog (internal history is not carried over)
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
+
+## 0.1.1
+
+- Removed the maintainer-only `banto-port` skill from the public scope (it ports Banto's own dev tree to public — not a user feature; same dev-only category as `harness-audit`).
 
 ## 0.1.0
 
@@ -82,7 +90,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.1.0"
+PUB_VERSION="0.1.1"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"
