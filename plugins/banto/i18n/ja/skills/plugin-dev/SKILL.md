@@ -1,7 +1,7 @@
 ---
 name: plugin-dev
 description: |
-  Claude Code プラグインまたは単一スキルの新規作成・改修を支援する。公式ベストプラクティスに基づき plugin.json / SKILL.md / hooks.json / .mcp.json を scaffold するか、既存スキルを改修する（`refactor <skill-path>`）。複雑な workflow skill を自動検出し、HeavySkill 4-component テンプレを提案する。INVOKES: 品質スコアリングのため plugin-audit skill と連動する。
+  Claude Code プラグインまたは単一スキルの新規作成・改修を支援する。公式ベストプラクティスに基づき skill / plugin / hook を scaffold、または既存スキルを改修する（`refactor <skill-path>`）。INVOKES: 品質スコアリングのため plugin-audit skill と連動する。
   トリガー: 「プラグイン作って」「スキル作って」「フック作って」「skill 改修」
   使ってはいけない場面: 単純な 1 ファイル設定変更 — この skill はスキップし、直接 Edit で十分。
 user-invocable: true

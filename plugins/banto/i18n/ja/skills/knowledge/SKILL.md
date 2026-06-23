@@ -4,7 +4,6 @@ description: |
   **UTILITY SKILL** — ナレッジ下書き（drafts/）をレビュー・昇格し、正式なナレッジエントリへと整理する。
   トリガー: 「ナレッジにして」「ナレッジ昇格」「下書き一覧見せて」「ナレッジに追加」「教訓として残して」。/knowledge でも起動可。（draft 保存 hook は「/knowledge でレビュー」と案内するが、自然言語でも到達する。）
   使わない場面: 設計判断の記録（ai-context skill の decisions/ —「決定」では発火しない）、外部リサーチ（research skill）、単純なメモ保存（memo skill）、単一ファイルの単純コピー（直接 Bash の `mv`）。
-  依存: Read（下書き一覧）、Write（昇格先 .ai-context/docs/knowledges/）、Glob、Bash（git mv）。
 user-invocable: true
 argument-hint: "[省略: 下書き一覧表示 / 'promote': 昇格モード / topic: 新規作成]"
 allowed-tools: Read Write Glob Bash

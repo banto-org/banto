@@ -35,6 +35,7 @@ CLAUDE.md
 .claude-plugin
 .github
 scripts/check-legacy-names.sh
+scripts/check-md-links.sh
 scripts/export-public.sh
 scripts/clean-room-test.sh
 scripts/pre-push-check.sh
@@ -66,18 +67,34 @@ for p in $ALLOW; do
     printf '  + %s\n' "$p"
 done
 
+PUB_MANIFEST="$TARGET/plugins/banto/i18n/.sync-manifest.json"
 for p in $PLUGIN_EXCLUDE; do
     rm -rf "$TARGET/plugins/banto/$p"
-    # also drop the i18n source copies, otherwise the EN materialize below re-creates the skill
+    # also drop the i18n source copies AND the manifest entries. Dropping only the files
+    # leaves the manifest referencing a now-absent ja source, which i18n-sync-check reports
+    # as ORPHAN — the public CI failure this prune exists to prevent.
     case "$p" in
-      skills/*) rm -rf "$TARGET/plugins/banto/i18n/ja/$p" "$TARGET/plugins/banto/i18n/en/$p" ;;
+      skills/*)
+        rm -rf "$TARGET/plugins/banto/i18n/ja/$p" "$TARGET/plugins/banto/i18n/en/$p"
+        if [ -f "$PUB_MANIFEST" ]; then
+            jq --arg pre "$p/" '.files |= with_entries(select((.key | startswith($pre)) | not))' \
+                "$PUB_MANIFEST" > "$PUB_MANIFEST.tmp" && mv "$PUB_MANIFEST.tmp" "$PUB_MANIFEST"
+        fi
+        ;;
     esac
-    printf '  - plugins/banto/%s (excluded, incl i18n)\n' "$p"
+    printf '  - plugins/banto/%s (excluded, incl i18n + manifest)\n' "$p"
 done
 
 # Fresh public changelog (internal history is not carried over)
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
+
+## 0.1.2
+
+- Leaner skill descriptions: removed non-routing detail (dependency lines, internal mechanics, duplicate triggers); triggers and "do not use when" guidance kept intact.
+- `ws`: surfaced the `list` subcommand in the argument hint.
+- Docs: README links now resolve to the correct-language targets.
+- CI: added a markdown link-integrity gate (`check-md-links.sh`); fixed an i18n-sync manifest drift that could fail CI on the published tree.
 
 ## 0.1.1
 
@@ -90,7 +107,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.1.1"
+PUB_VERSION="0.1.2"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"
@@ -119,6 +136,14 @@ fail=0
 for f in $(git ls-files '*.sh'); do sh -n "$f" || { printf 'SH FAIL: %s\n' "$f"; fail=1; }; done
 for f in $(git ls-files '*.json'); do jq empty "$f" 2>/dev/null || { printf 'JSON FAIL: %s\n' "$f"; fail=1; }; done
 [ "$fail" -eq 0 ] && printf 'syntax: all OK\n'
+
+printf '\n--- i18n sync inside the export ---\n'
+# Catches a stale manifest after PLUGIN_EXCLUDE (the ORPHAN class) before it reaches public CI.
+BANTO_PLUGIN_ROOT="$TARGET/plugins/banto" sh "$TARGET/plugins/banto/scripts/i18n-sync-check.sh" || fail=1
+
+printf '\n--- markdown links inside the export ---\n'
+# Catches links that break only in the public tree (PLUGIN_EXCLUDE'd targets, language flips).
+sh scripts/check-md-links.sh || fail=1
 
 printf '\nExport ready: %s (%s files staged, NOT committed)\n' "$TARGET" "$(git ls-files | wc -l | tr -d ' ')"
 printf 'Next (human gate): review, then commit and create the public repo.\n'

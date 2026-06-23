@@ -2,7 +2,7 @@
 name: ai-context
 description: |
   AI コンテキスト管理: 決定ログ / チェックポイント / タスクファイル（tasks.md）編集 + 次タスクナビ + Phase 完了 / ドキュメント振り分け / scaffold 抑止管理。内部検索は `search` skill が所有する。
-  トリガー: 「決定」「設計判断」「保存」「チェックポイント」「compact」「clear」「タスク」「TODO」「Phase」「続き」「続けて」「次」「次のタスク」「続きやって」「次は何」「ドキュメント整理」「散らかってる」「除外」「ignore」「動かさないで」「無効化」
+  トリガー: 「決定」「設計判断」「保存」「チェックポイント」「compact」「clear」「タスク」「TODO」「Phase」「続き」「次のタスク」「続きやって」「ドキュメント整理」「散らかってる」「除外」「動かさないで」「無効化」
   使わない場面: 既に格納済みのコンテキスト検索（`search` skill を使う）や外部ソースの調査（`research` を使う）。実装中の素の「やって」「進めて」は自走（直接動く）を意味し、タスク修飾付きのフレーズ（「次のタスク」「続きやって」）のみが次タスクナビへルーティングされる。スコープ用に git worktree / ブランチを切り替えるのは `ws` であって本 skill ではない。
 allowed-tools: Read Write Edit Glob Grep Bash Agent
 argument-hint: "[init|status|doctor|sort|next|phase-done|ignore|tasks|migrate|prune]"

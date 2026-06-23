@@ -4,7 +4,6 @@ description: |
   **UTILITY SKILL** — banto プラグインが提供する全ての skill / agent / hook / rule を整形済みカタログとして表示する。自然言語による発見ハブ：ユーザーはコマンドの存在を知らなくてよい（intent-first）。
   トリガー: /kit、「banto で何ができる」「機能一覧」「コマンド一覧」「どんなスキルがある」「〜ってどうやるの（banto の機能を探している時）」。
   使わない場面: 個別スキルの詳細確認（その SKILL.md を直接 Read）、プラグインの監査（plugin-audit）、新規プラグインの作成（plugin-dev）。
-  依存: 本ファイル末尾の整形済みリストの Read（外部依存なし。表示のみ）。単純な「どんなスキルがあるか」の確認なら skills/ への軽量な Glob で十分。
 user-invocable: true
 compatibility: Claude Code (requires bash, git, jq)
 ---

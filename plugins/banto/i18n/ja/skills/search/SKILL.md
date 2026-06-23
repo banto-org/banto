@@ -1,7 +1,7 @@
 ---
 name: search
 description: |
-  ローカル AI Context（decisions / docs / 会話履歴）を Claude ネイティブに検索する — すでに蓄積された情報に対する内部検索。Web には一切触れない。クエリを 3 段階の重み付き tier に展開 → ランキングスクリプトでスコアリング → 上位ヒットを Read 検証する。zero-hit / cross-store / 履歴クエリは並列 haiku の deep パスへエスカレーションする。
+  ローカル AI Context（decisions / docs / 会話履歴）を Claude ネイティブに検索する — すでに蓄積された情報に対する内部検索。Web には一切触れない。
   トリガー：「前に話した」「以前の議論」「過去のチャット」「思い出して」「recall」「履歴」「経緯」「なぜこうなった」「前に決めた」「探して」。/search <query> でも呼び出し可能。
   Do not use when：外部ソース（Web / GitHub / arxiv）から新しい情報を取得するとき（research skill を使う）。
 user-invocable: true

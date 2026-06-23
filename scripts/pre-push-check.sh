@@ -22,6 +22,9 @@ done
 # 2b. i18n: EN 生成物が JA canonical と同期しているか（ドリフトを push しない）
 sh "$DIR/plugins/banto/scripts/i18n-sync-check.sh" || fail=1
 
+# 2c. markdown リンクが解決するか（壊れた相対リンク / README の言語フリップを push しない）
+sh "$DIR/scripts/check-md-links.sh" || fail=1
+
 # 3. version 宣言の一致（plugin.json = marketplace.json = CHANGELOG 先頭）
 PJ=$(jq -r '.version' "$DIR/plugins/banto/.claude-plugin/plugin.json")
 MK=$(jq -r '.plugins[0].version' "$DIR/.claude-plugin/marketplace.json")

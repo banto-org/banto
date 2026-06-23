@@ -5,7 +5,6 @@ description: |
   Replacement for WebFetch (WebFetch returns a small-model summary, so the body cannot actually be verified).
   Triggers: given a URL with "read this", "check this", "look at the contents", "summarize this"; close reading of documentation/articles/blogs/GitHub pages.
   Do not use when: *searching for* URLs (WebSearch / research skill), local files (Read directly), direct `.md` links (use Read/curl, not WebFetch).
-  Depends on: python3 + trafilatura (pure local, no LLM, body-extraction F1=0.909). Via scripts/webread.sh.
 allowed-tools: Bash Read Write
 user-invocable: true
 argument-hint: "[URL]"

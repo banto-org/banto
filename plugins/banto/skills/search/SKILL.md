@@ -1,7 +1,7 @@
 ---
 name: search
 description: |
-  Search the local AI Context (decisions / docs / conversation history) natively with Claude — internal search over information that is already accumulated. Never touches the Web. Expands the query into 3 weighted tiers → scores with the ranking script → Read-verifies the top hits; zero-hit, cross-store, and history queries escalate to a parallel-haiku deep path.
+  Search the local AI Context (decisions / docs / conversation history) natively with Claude — internal search over information that is already accumulated. Never touches the Web.
   Triggers: "what did we talk about before", "previous discussion", "past chats", "remember", "recall", "history", "context/backstory", "why did it end up like this", "what did we decide before", "find it". Also invocable via /search <query>.
   Do not use when: fetching new information from external sources (Web / GitHub / arxiv — use the research skill).
 user-invocable: true

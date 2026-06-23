@@ -20,7 +20,7 @@ Banto はその契約を AI 駆動開発に持ち込みます — あなたの�
   中央ナレッジ store（`~/.ai-context-store/<project>/`）に保存し、セッション開始時に再注入。
   **repo は汚れません** — 知識は store へ、code は repo へ。蓄積した知識への Claude ネイティブ
   内部検索（クエリ展開 + ランキング）。store layout は外部ツール向けの安定した read 契約:
-  [ディレクトリ構造](plugins/banto/skills/ai-context/references/directory-structure.md)
+  [ディレクトリ構造](plugins/banto/i18n/ja/skills/ai-context/references/directory-structure.md)
 - **決定論的な安全 hook** — kill-switch（main 直 push / `--no-verify` / force-push の block）、
   egress guard（内部名・PII の客先成果物への流出を名前レジストリ駆動で block）、
   verify-before-claim（検証なしの「完了」発言を block）
@@ -30,7 +30,7 @@ Banto はその契約を AI 駆動開発に持ち込みます — あなたの�
   block。**既定は off** — `harness-setup.sh` は無効状態の hardening ブロックを配置するだけで、
   settings.json の `sandbox.enabled: true` で有効化。影響は Claude の bash のみ（あなたの手動
   ターミナル・権限プロンプトは不変）。egress guard と二層の defense in depth。
-  詳細: [Sandboxing docs](https://code.claude.com/docs/en/sandboxing)
+  詳細: [サンドボックスのドキュメント](https://code.claude.com/docs/ja/sandboxing)
 - **ワークスペースと艦隊運用** — トピック別ワークスペース + 3 階層ブランチ（main ← epic ←
   task worktree、git-town 委譲）、並走セッションの registry と衝突検知
 - **自己監査** — 14 軸の plugin 品質監査（content-hygiene 検査込み）+ 宣言と実体の乖離を見張る

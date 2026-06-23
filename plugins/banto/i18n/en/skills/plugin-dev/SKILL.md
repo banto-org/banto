@@ -1,7 +1,7 @@
 ---
 name: plugin-dev
 description: |
-  Support creating or refactoring a Claude Code plugin or a single skill. Scaffolds plugin.json / SKILL.md / hooks.json / .mcp.json based on official best practices, or refactors an existing skill (`refactor <skill-path>`). Automatically detects complex workflow skills and proposes the HeavySkill 4-component template. INVOKES: works with the plugin-audit skill for quality scoring.
+  Support creating or refactoring a Claude Code plugin or a single skill. Scaffolds a skill / plugin / hook based on official best practices, or refactors an existing skill (`refactor <skill-path>`). INVOKES: works with the plugin-audit skill for quality scoring.
   Triggers: "create a plugin", "make a skill", "write a hook", "refactor a skill", "plugin", "SKILL.md", "hooks.json", "plugin.json"
   Do not use when: making a simple single-file configuration change — skip this skill, a direct Edit is sufficient.
 user-invocable: true

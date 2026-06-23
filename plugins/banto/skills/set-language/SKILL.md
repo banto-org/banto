@@ -1,9 +1,8 @@
 ---
 name: set-language
 description: |
-  **UTILITY SKILL** — Switch the Banto language between Japanese and English. Persists the choice (survives plugin updates) and materializes that language's skill/agent set as the active one.
-  Triggers: "set language to japanese", "switch to english", "use japanese", "make banto japanese/english", 「言語を日本語にして」「英語に切り替えて」「日本語にして」「banto を日本語/英語に」「言語設定」. Also invocable via /set-language.
-  This is the one deliberately bilingual switcher: it must be discoverable in any language so a user on the EN set can switch to JA and vice-versa. After switching, Claude Code must be restarted to load the new set.
+  **UTILITY SKILL** — Switch the Banto language between Japanese and English; persists the choice (survives plugin updates) and requires a Claude Code restart to load the new set.
+  Triggers: "set language to japanese", "switch to english", "make banto japanese/english", 「言語を日本語にして」「英語に切り替えて」「言語設定」. Also invocable via /set-language.
   Do not use when: changing the *output* language of a single document (just write it in that language), or editing one skill's wording (direct Edit).
 user-invocable: true
 argument-hint: "<ja|en | 日本語|英語>"
@@ -15,6 +14,9 @@ compatibility: Claude Code (requires bash, jq)
 
 Banto ships **JA-canonical** skills and **auto-generated EN** skills. This skill makes one of
 them the active set and remembers the choice across plugin updates.
+
+This is the one deliberately bilingual switcher: it must be discoverable in any language so a user
+on the EN set can switch to JA and vice-versa.
 
 ## Step 1: Resolve the argument to `ja` or `en`
 

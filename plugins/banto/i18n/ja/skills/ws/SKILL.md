@@ -2,11 +2,11 @@
 name: ws
 description: |
   3 階層ブランチモデル（main ← epic ← task worktree）のための Workspace + git-town オーケストレータ。切替・並走・スコープ切り出し・完了マージ・main への ship をインテント検出で駆動する（worktree 分離 → git worktree / `claude -w`；ブランチ階層 + drift → git-town）。
-  トリガー: 「ワークスペース」「ws」「作業切り替え」「別の作業」「並走」「複数作業」「ブランチ分けて」「別ブランチで」「worktree」「ワークツリー」「大きめの作業を始める」「epic」「この作業終わった」「マージして」「mainに入れて」「リリースして」「出して」
+  トリガー: 「ワークスペース」「作業切り替え」「並走」「ブランチ分けて」「worktree」「epic」「この作業終わった」「マージして」「リリースして」「出して」
   使わない場面: 現在ブランチ上の小さな単発編集（普通に編集してコミットするだけ）。「同時に」/「並行で」だけでいま並列にタスクを走らせたい場合は、新しい workspace/worktree ではなく自走の並列 Agent（1 メッセージに複数 Agent 呼び出し）を意味する。active.md/tasks.md の次の作業項目を進めるのは本 skill ではなく `ai-context`。
 allowed-tools: Read Write Edit Glob Grep Bash
 user-invocable: true
-argument-hint: "[switch|new|multi|solo|archive|import|epic|task|done|ship]（省略時は会話から意図を自動判定）"
+argument-hint: "[switch|new|multi|solo|archive|import|epic|task|done|ship|list]（省略時は会話から意図を自動判定）"
 compatibility: Claude Code (requires bash, git, jq; git-town 推奨)
 ---
 

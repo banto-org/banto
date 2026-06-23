@@ -24,7 +24,7 @@ hooks, not promises.
   start. **Your repos stay clean** — knowledge goes to the store, code stays in the repo.
   Claude-native internal search (query expansion + ranking) over everything you've accumulated.
   The store layout is a stable read contract for external tools:
-  [directory structure](plugins/banto/skills/ai-context/references/directory-structure.md).
+  [directory structure](plugins/banto/i18n/en/skills/ai-context/references/directory-structure.md).
 - **Deterministic safety hooks** — kill-switch (no direct push to main, no `--no-verify`, no
   force-push), egress guard (blocks internal names / PII from leaking into client deliverables,
   driven by a private name registry), verify-before-claim (no "done" without verified output).

@@ -2,11 +2,11 @@
 name: ws
 description: |
   Workspace + git-town orchestrator for the 3-tier branch model (main ← epic ← task worktree): switching, parallel work, scope carving, completion merges, and shipping to main via intent detection (worktree isolation → git worktree / `claude -w`; branch hierarchy + drift → git-town).
-  Triggers: "workspace", "ws", "switch work", "different task", "multiple workstreams", "separate branch", "split off a branch", "worktree", "parallel branch", "start a bigger piece of work", "epic", "this work is done", "merge it", "put it into main", "release it", "ship it"
+  Triggers: "workspace", "switch work", "parallel branch", "separate branch", "worktree", "epic", "this work is done", "merge it", "release it", "ship it"
   Do not use when: a small one-off edit on the current branch (just edit and commit normally). A bare "in parallel" to run tasks right now means self-driving parallel Agents (one message, multiple Agent calls), not a new workspace/worktree. Advancing the next work item in active.md/tasks.md is `ai-context`, not this skill.
 allowed-tools: Read Write Edit Glob Grep Bash
 user-invocable: true
-argument-hint: "[switch|new|multi|solo|archive|import|epic|task|done|ship] (defaults to natural-language intent detection)"
+argument-hint: "[switch|new|multi|solo|archive|import|epic|task|done|ship|list] (defaults to natural-language intent detection)"
 compatibility: Claude Code (requires bash, git, jq; git-town 推奨)
 ---
 

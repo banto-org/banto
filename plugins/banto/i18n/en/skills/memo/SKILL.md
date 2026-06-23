@@ -4,7 +4,6 @@ description: |
   **UTILITY SKILL** — Save conversation content as a [Memo] document under .ai-context/docs/.
   Triggers: "memo this", "save a memo", "jot this down", "summarize this conversation as a memo". Also invocable via /memo.
   Do not use when: recording design decisions (ai-context skill's decisions/), saving session state (save-checkpoint), promoting knowledge drafts (knowledge), external research (research), or status reports (status). Do NOT fire on "decision", "adopt", "save", "checkpoint", "progress" (those belong to ai-context / save-checkpoint / status). A trivial one-line memo is fine with a direct `echo > file`.
-  Depends on: Read, Write, Glob (duplicate check). No argument = summarize the conversation; with an argument = memo the given content.
 user-invocable: true
 argument-hint: "[content to memo (omit = summarize the conversation)]"
 allowed-tools: Read Write Glob

@@ -2,7 +2,7 @@
 name: ai-context
 description: |
   AI context management: decision logs / checkpoints / task file (tasks.md) editing + next-task navigation + Phase completion / document sorting / scaffold ignore management. Internal search is owned by the `search` skill.
-  Triggers: "decision", "design decision", "save", "checkpoint", "compact", "clear", "task", "TODO", "Phase", "continue", "next", "next task", "continue the work", "what's next", "organize the docs", "docs are a mess", "exclude", "ignore", "don't touch this", "disable"
+  Triggers: "decision", "design decision", "save", "checkpoint", "compact", "clear", "task", "TODO", "Phase", "continue", "next task", "continue the work", "organize the docs", "docs are a mess", "exclude", "don't touch this", "disable"
   Do not use when: searching context that is already stored (use the `search` skill) or investigating external sources (use `research`). A bare "do it" mid-implementation means proceed by self-driving (act directly) — only task-qualified phrases ("next task", "continue the work") route to next-task navigation. Switching the git worktree/branch for a scope is `ws`, not this skill.
 allowed-tools: Read Write Edit Glob Grep Bash Agent
 argument-hint: "[init|status|doctor|sort|next|phase-done|ignore|tasks|migrate|prune]"

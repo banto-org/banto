@@ -4,7 +4,6 @@ description: |
   **UTILITY SKILL** — 会話内容を [Memo] ドキュメントとして .ai-context/docs/ 配下に保存する。
   トリガー: 「メモして」「メモに残して」「メモにまとめて」「書き留めて」「この会話を要約して保存」。/memo でも起動可。
   使わない場面: 設計判断の記録（ai-context skill の decisions/）、セッション状態の保存（save-checkpoint）、ナレッジ下書きの昇格（knowledge）、外部リサーチ（research）、ステータス報告（status）。「決定」「採用」「保存」「チェックポイント」「進捗」では発火しない（それぞれ ai-context / save-checkpoint / status の担当）。一行メモなら直接 `echo > file` で十分。
-  依存: Read, Write, Glob（重複チェック）。引数なし = 会話を要約、引数あり = 指定内容をメモ化。
 user-invocable: true
 argument-hint: "[メモしたい内容（省略時は会話要約）]"
 allowed-tools: Read Write Glob
