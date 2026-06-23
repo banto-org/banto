@@ -1,0 +1,44 @@
+# ODD Spec for research
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: research
+autonomy_level: L3  # Autopilot (run research-agent 5-10 in parallel autonomously; request the user only on exceptions)
+
+in_scope:
+  - New investigation of external sources (Web / GitHub / arxiv / X / official docs)
+  - Launching 5-10 research-agent subagents in parallel
+  - For high-risk / refutation-required topics, launching deep-research (the built-in Workflow) and saving its return value to the store (high-verification path)
+  - Structured saving of results to .ai-context/docs/research/{date}_{topic}.md
+  - Mandatory recording of source URLs and fetch timestamps
+
+out_of_scope:
+  - Searching the internal .ai-context/ (search skill)
+  - A single simple fact check (one webread in the main session is enough)
+  - Summarizing existing research only (direct Read)
+  - Investigation about code implementation (done on the self-driving implementation / code-editing rule side)
+
+safety_boundaries:
+  - Parallel count of research-agent: max 10
+  - Timeout per agent: recommended 180s (including webread + WebSearch)
+  - Cost cap per topic investigation: $2 (research-agent path)
+  - The deep-research high-verification path is an exception to the $2 cap (~4M tokens / ~20 min / ~100 agents). User confirmation before launch is mandatory, up to once per session
+  - The deep-research return value must always be saved to docs/research/ (without saving, the integration is meaningless). If unavailable in the environment, graceful fallback to the research-agent path
+  - Output files only under .ai-context/docs/research/ (writing to other directories is forbidden)
+
+kill_switch_conditions:
+  - WebSearch rate-limited 3 times in a row for the same query
+  - 5 or more of the 10 parallel research-agents hit the same kind of error
+  - cost > $2
+  - 2 consecutive auth failures on a medium requiring authentication (X / Twitter)
+
+approval_gates:
+  - Before accessing a medium that requires authentication (X / Twitter / paid DB)
+  - Before launching with parallel agent count >= 8 (cost warning)
+  - Before launching deep-research (the high-verification Workflow) (high cost: ~4M tokens / ~20 min. An exception to the $2 cap)
+  - When an overwrite of an existing research/ file would occur
+
+metrics:
+  cost_budget_usd: 2.0
+  time_budget_seconds: 600
+  parallel_agent_max: 10

@@ -1,0 +1,146 @@
+# Skill 発火精度 Eval Cases
+#
+# 用途: plugin-audit --eval で使用。各テストプロンプトに対して
+# Agent サブエージェントが「どの skill を起動すべきか」を判定し、
+# expected と一致する率を top-1 accuracy として算出。
+#
+# 設計方針:
+# - 自然言語発火する skill (disable-model-invocation: false) のみ対象
+# - 明示呼出専用 skill (status 等) は対象外（評価不能）
+# - 各 skill を最低 1 回カバー、境界が曖昧なペアを優先
+# - 自走ハーネス原則: 「実装して」「並列で」「深く考えて」は専用 skill を持たず
+#   Claude 自走（concept→spec→自走実装 / Agent 並列 / 深い推論）に流す。
+# - positive ケース（expected: <skill>）に加え、boundary/negative ケース（expected: none）を持つ。
+#   none = どの skill も発火させず Claude 自走 or 直接応答が正解。汎用裸ワード
+#   （やって/同時に/教えて/なぜ）が誤って skill にルートされない（Forbidden 不発火）を検証する。
+#
+# 注意: メインセッション Claude が自己判定するとバイアスがかかるため、
+# 必ず Agent (subagent_type=general-purpose) で独立に判定させる。
+
+version: 1
+created: 2026-05-14
+
+cases:
+  - id: 1
+    prompt: "前に話した OAuth の議論どうなった？"
+    expected: search
+    rationale: "過去の議論を内部から探す → search (内部検索)"
+
+  - id: 2
+    prompt: "Anthropic Claude の最新リリースノートを調べて"
+    expected: research
+    rationale: "外部 Web から新しい情報を取りに行く → research"
+
+  - id: 3
+    prompt: "この製品の思想・世界観を固めたい、なぜ作るか・何の敵かを整理して"
+    expected: concept
+    rationale: "思想形成（WHY/世界観/北極星） → concept（SDD 上流）"
+
+  - id: 4
+    prompt: "まず設計だけ見せて、実装はしないで"
+    expected: spec
+    rationale: "設計のみ要求 → spec"
+
+  - id: 5
+    prompt: "別のブランチで並走したい、worktree 切って"
+    expected: ws
+    rationale: "ワークスペース切替/並走 → ws"
+
+  - id: 6
+    prompt: "この設計判断を decisions/ に保存して"
+    expected: ai-context
+    rationale: "決定ログ保存 → ai-context"
+
+  - id: 7
+    prompt: "compact 前に今の状態を保存しておきたい"
+    expected: save-checkpoint
+    rationale: "compact 前のチェックポイント → save-checkpoint"
+
+  - id: 8
+    prompt: "次のタスクは何？続きやって"
+    expected: ai-context
+    rationale: "next task navigation → ai-context（next サブコマンド）"
+
+  - id: 9
+    prompt: "今週の進捗をステータスドキュメントとしてまとめて"
+    expected: status
+    rationale: "ステータス報告生成 → status"
+
+  # --- boundary / negative cases (expected: none = 不発火が正解) ---
+
+  - id: 10
+    prompt: "さっきの方針でそのまま実装を進めて"
+    expected: none
+    rationale: "実装途中の裸「進めて」= 自走（直接実装）。ai-context next-task ではない（タスク限定句が無い）"
+
+  - id: 11
+    prompt: "このリファクタ2件を同時にやっといて"
+    expected: none
+    rationale: "「同時に」今すぐ走らせる = 自走の並列 Agent。ws のワークスペース/worktree ではない"
+
+  - id: 12
+    prompt: "なぜこの設計に決めたか、前の議論を思い出して"
+    expected: search
+    rationale: "過去の決定経緯の why → search（内部検索）。debugger（エラーの why）でも research（一般知識）でもない"
+
+  - id: 13
+    prompt: "設計して、そのまま実装まで一気にやって"
+    expected: none
+    rationale: "設計から実装まで一気 = 自走。architect（proposal 返却のみ）でも spec（仕様書生成のみ）でもない"
+
+  - id: 14
+    prompt: "この repo の認証まわりどうなってる？教えて"
+    expected: none
+    rationale: "プロジェクト自身のソースコードへの素の「教えて」→ 直接 Read（none・自走）。search は ai-context（decisions/docs/履歴）専用でコードは対象外。research（外部 Web）でもない"
+
+  # --- recall stress（斜めの言い回し・トリガー語が無い）+ 死蔵気味 skill の発見性（v2 追加） ---
+
+  - id: 15
+    prompt: "この会話、あとで見返せるように残しておいて"
+    expected: memo
+    rationale: "「メモ」という語が無い斜めの言い回しでも会話の保存 → memo。recall（見落とし耐性）検証"
+
+  - id: 16
+    prompt: "これは教訓として残したい、ナレッジに昇格して"
+    expected: knowledge
+    rationale: "教訓 → ナレッジ昇格 → knowledge。memo（単発メモ）/ ai-context（決定）ではない"
+
+  - id: 17
+    prompt: "この決定をメモして残して"
+    expected: ai-context
+    rationale: "「決定」→ decisions（ai-context）。「メモ」という語に引っ張られて memo に誤ルートしない（precision）"
+
+  - id: 18
+    prompt: "この URL の中身を読んで: https://example.com/post"
+    expected: webread
+    rationale: "与えられた URL の本文精読 → webread。URL を *探す* research ではない"
+
+  - id: 19
+    prompt: "最新の React の状況を調べて"
+    expected: research
+    rationale: "新しい外部情報を取りに行く → research。webread（既知 URL の精読）ではない"
+
+  - id: 20
+    prompt: "banto を英語に切り替えて"
+    expected: set-language
+    rationale: "言語切替 → set-language（どの言語でも到達すべき bilingual switcher）"
+
+  - id: 21
+    prompt: "banto で何ができるか一覧で見せて"
+    expected: kit
+    rationale: "機能の発見ハブ → kit。個別 skill の監査（plugin-audit）ではない"
+
+  - id: 22
+    prompt: "この前決めた方針、どこに保存したか思い出して"
+    expected: search
+    rationale: "過去の決定の *想起* → search（内部検索）。保存する ai-context ではない（recall vs save の境界）"
+
+  - id: 23
+    prompt: "なるほど、ありがとう助かった"
+    expected: none
+    rationale: "相槌・お礼 = どの skill も不発火（precision を守る）"
+
+  - id: 24
+    prompt: "大きめの作業を始めるので作業場所を分けたい"
+    expected: ws
+    rationale: "「worktree/ブランチ」という語が無くても大きめ作業の場所分け → ws。recall（見落とし耐性）検証"

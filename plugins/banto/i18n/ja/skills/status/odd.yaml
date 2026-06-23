@@ -1,0 +1,21 @@
+# ODD Spec for status
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: status
+autonomy_level: L1  # 軽量ワークフロー（[Status] 報告の生成・保存）
+
+in_scope:
+  - "active.md + 直近作業からのステータス報告生成（{base}/docs/ に [Status] 保存）"
+  - progress サブコマンドでの Phase 進捗率表示
+
+out_of_scope:
+  - タスクの編集（ai-context skill の active.md 管理）
+  - 外部サービスへの報告送信（送信は常にユーザー確認後・別経路）
+
+safety_boundaries:
+  - Write は {base}/docs/ 配下の [Status] ファイルのみ
+  - Bash は git log 等の read-only 集計のみ
+
+kill_switch_conditions: []
+approval_gates: []

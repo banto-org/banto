@@ -1,0 +1,41 @@
+# ODD Spec for plugin-dev
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: plugin-dev
+autonomy_level: L2  # Copilot（Step ごとにテキストで対話、L3 ではない）
+
+in_scope:
+  - Claude Code プラグインの新規作成支援
+  - plugin.json / SKILL.md / hooks.json / .mcp.json / agents/*.md の scaffolding
+  - HeavySkill 4-component テンプレの AI 自動判定 + 提案
+  - Layer 3 3 点セット（skill + rule + hook）の併設判定
+  - plugin-audit との連動
+
+out_of_scope:
+  - 単純な 1 ファイル設定変更（直接 Edit）
+  - 既存 plugin の細部編集（直接 Edit）
+  - skill 単独追加（templates/skill-md.md を直接参照）
+  - rule / hook 単独追加（path-scoped rule なら直接 Write）
+
+safety_boundaries:
+  - 出力先: 新規 plugin ディレクトリ配下のみ
+  - 既存 plugin の上書き禁止（衝突時はテキストで確認）
+  - Step 1 → 2 → 2.2 → 2.5 → 3 の順序厳守
+  - 1 セッションで作成する plugin 数: 推奨 1（複数並列は別セッション）
+
+kill_switch_conditions:
+  - 各 Step でテキスト確認応答が 3 回連続なし / cancel
+  - plugin 名が他 plugin と衝突 + ユーザーが解決を拒否
+  - 既存ディレクトリへの破壊的上書き提案
+
+approval_gates:
+  - Step 1: 要件ヒアリング各項目（plugin 名 / 用途 / コンポーネント構成 / 配布先）
+  - Step 2.2: Layer 3 3 点セット判定（rule + hook 併設の Yes/No）
+  - "Step 2.5: HeavySkill 4-component 適用判定（A: HeavySkill / B: 通常）"
+  - Step 3: 最終ファイル生成前（生成リストの確認）
+  - --global 相当の操作（~/.claude/plugins/ への書き込み）が発生する場合
+
+metrics:
+  # 機械可読（odd-parallel-track.sh が SubagentStart で照合し超過を pending に通知。P3）
+  parallel_agent_max: 4

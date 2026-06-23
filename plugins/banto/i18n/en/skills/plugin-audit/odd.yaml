@@ -1,0 +1,27 @@
+# ODD Spec for plugin-audit
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: plugin-audit
+autonomy_level: L2  # Audit workflow (running the collection scripts → generating the report is automatic; applying fixes happens only on an explicit request to the fix subcommand)
+
+in_scope:
+  - Official compliance checks (Phase 1-8.5) and the 14-axis structural audit (Phase 9) for a plugin / single skill
+  - Running the collection and scoring scripts (plugin-audit-collect / report / matrix / usage)
+  - "Saving the [Audit] report to {base}/docs/"
+
+out_of_scope:
+  - Whole-harness system audit (harness-audit)
+  - Generating / refactoring a skill from scratch (plugin-dev)
+  - Application to repositories outside the audit scope (anything other than banto-family plugins)
+
+safety_boundaries:
+  - Default is read-only + report Write only (does not modify the source of the target plugin)
+  - Applying fixes happens only when the `fix` subcommand is explicitly requested (the diff is shown before applying)
+  - Bash is limited to the bundled scripts and read-only git / jq operations
+
+kill_switch_conditions:
+  - When a source Edit of the target plugin is requested through any path other than fix
+
+approval_gates:
+  - Immediately before applying a fix via the fix subcommand (confirming the diff)

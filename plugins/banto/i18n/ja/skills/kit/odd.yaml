@@ -1,0 +1,19 @@
+# ODD Spec for kit
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: kit
+autonomy_level: L0  # 情報表示のみ（整形済みカタログの表示。外部依存なし）
+
+in_scope:
+  - banto の skill / agent / hook / rule カタログの整形表示（NL 発見ハブ）
+
+out_of_scope:
+  - 個別スキルの詳細調査（SKILL.md を直接 Read）
+  - 監査（plugin-audit / harness-audit）・生成（plugin-dev）
+
+safety_boundaries:
+  - 表示のみ。ファイル書き込み・コマンド実行をしない
+
+kill_switch_conditions: []
+approval_gates: []

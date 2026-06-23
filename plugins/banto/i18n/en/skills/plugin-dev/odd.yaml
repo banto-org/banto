@@ -1,0 +1,41 @@
+# ODD Spec for plugin-dev
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: plugin-dev
+autonomy_level: L2  # Copilot (text dialogue per Step, not L3)
+
+in_scope:
+  - Support for creating a new Claude Code plugin
+  - Scaffolding plugin.json / SKILL.md / hooks.json / .mcp.json / agents/*.md
+  - AI automatic detection + proposal of the HeavySkill 4-component template
+  - Decision to co-ship the Layer 3 trio (skill + rule + hook)
+  - Coordination with plugin-audit
+
+out_of_scope:
+  - Simple single-file config change (direct Edit)
+  - Detailed editing of an existing plugin (direct Edit)
+  - Adding a skill alone (reference templates/skill-md.md directly)
+  - Adding a rule / hook alone (direct Write for a path-scoped rule)
+
+safety_boundaries:
+  - Output destination: only under the new plugin directory
+  - No overwriting an existing plugin (confirm in text on collision)
+  - Strict order of Step 1 → 2 → 2.2 → 2.5 → 3
+  - Number of plugins created per session: recommended 1 (parallel creation goes to a separate session)
+
+kill_switch_conditions:
+  - No text confirmation response 3 times in a row / cancel at any Step
+  - Plugin name collides with another plugin + the user refuses to resolve it
+  - A destructive overwrite proposal onto an existing directory
+
+approval_gates:
+  - Step 1: each requirements-interview item (plugin name / purpose / component composition / distribution target)
+  - Step 2.2: Layer 3 trio decision (Yes/No for co-shipping rule + hook)
+  - "Step 2.5: HeavySkill 4-component application decision (A: HeavySkill / B: standard)"
+  - Step 3: before final file generation (confirm the generation list)
+  - When an operation equivalent to --global occurs (a write to ~/.claude/plugins/)
+
+metrics:
+  # Machine-readable (odd-parallel-track.sh matches it at SubagentStart and notifies pending on overflow. P3)
+  parallel_agent_max: 4

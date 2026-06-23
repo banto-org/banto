@@ -1,0 +1,18 @@
+# CLAUDE.md
+# Project-specific information only. Quality rules are split out into .claude/rules/.
+# Can be auto-generated with native /init (rules deployed by scripts/harness-setup.sh).
+
+## Project information
+- Language:
+- Framework:
+- Package manager:
+- Tests: (run command: )
+- Linter / formatter:
+
+## Directory layout
+- src/: source code
+- tests/: tests
+
+## Project-specific notes
+<!-- Write project-specific rules here -->
+<!-- For quality / safety rules, see .claude/rules/ -->

@@ -1,0 +1,25 @@
+# ODD Spec for webread
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: webread
+autonomy_level: L1  # 軽量ユーティリティ（URL 1 本の全文取得。LLM 要約なしの純ローカル抽出）
+
+in_scope:
+  - 指定 URL の本文を trafilatura で全文 Markdown 取得し、本体モデルが直接読む
+  - SPA 等で本文が空の場合の --html フォールバック（描画後 HTML の手動保存経由）
+
+out_of_scope:
+  - URL の探索（WebSearch / research skill）
+  - 複数ページ横断の調査（research-agent に委譲）
+  - 取得内容の永続保存（必要なら呼び出し元が docs/research/ に保存）
+
+safety_boundaries:
+  - 取得は指定された URL 1 本のみ（リンク先を自動巡回しない）
+  - Write は一時ファイルのみ（{TMPDIR} 配下）。store / repo へは書かない
+  - 認証付き・社内 URL は取得前にユーザーへ確認（外部送信はしない）
+
+kill_switch_conditions:
+  - 1 回の呼び出しで 5 URL を超える連続取得（research-agent の仕事）
+
+approval_gates: []

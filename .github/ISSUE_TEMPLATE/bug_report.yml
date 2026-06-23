@@ -1,0 +1,28 @@
+name: Bug report
+description: Something broke or behaved unexpectedly
+labels: [bug]
+body:
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: OS / shell / Claude Code version / Banto version
+      placeholder: "macOS 15, zsh, Claude Code 2.1.x, banto 1.0.0-beta.1"
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: >
+        Steps to reproduce and what you expected instead. Please mask private
+        paths and names (NDA-clean — see CONTRIBUTING.md content hygiene).
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Hook / command output (if any)
+      description: >
+        Relevant [AI Context] / guard messages or error output. Remove secrets
+        and personal data before pasting.

@@ -1,0 +1,27 @@
+# ODD Spec for plugin-audit
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: plugin-audit
+autonomy_level: L2  # 監査ワークフロー（収集スクリプト実行→レポート生成は自動。修正適用は fix サブコマンドの明示要求時のみ）
+
+in_scope:
+  - plugin / 単一スキルの公式準拠チェック（Phase 1-8.5）と 14 軸構造監査（Phase 9）
+  - 収集・採点スクリプト（plugin-audit-collect / report / matrix / usage）の実行
+  - "[Audit] レポートの {base}/docs/ への保存"
+
+out_of_scope:
+  - ハーネス全体のシステム監査（harness-audit）
+  - スキルの新規生成・リファクタ（plugin-dev）
+  - 監査対象外リポジトリ（banto 系 plugin 以外）への適用
+
+safety_boundaries:
+  - 既定は read-only + レポート Write のみ（対象 plugin のソースを変更しない）
+  - 修正の適用は `fix` サブコマンドが明示で要求された場合に限る（適用前に差分を提示）
+  - Bash は同梱スクリプトと git / jq の read-only 操作のみ
+
+kill_switch_conditions:
+  - fix 以外の経路で対象 plugin のソース Edit を要求された場合
+
+approval_gates:
+  - fix サブコマンドによる修正適用の直前（差分の確認）

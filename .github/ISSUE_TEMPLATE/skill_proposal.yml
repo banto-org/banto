@@ -1,0 +1,34 @@
+name: Skill proposal
+description: Propose a new skill, or a behavior change to an existing one
+labels: [skill-proposal]
+body:
+  - type: textarea
+    id: intent
+    attributes:
+      label: What should Claude do, in the user's words
+      description: >
+        The natural-language sentences that should trigger it (English and/or
+        Japanese). Banto is intent-first — if it can't be reached by natural
+        language, it won't be added.
+    validations:
+      required: true
+  - type: textarea
+    id: gap
+    attributes:
+      label: Why no existing skill covers it
+      description: Which skills you checked and where they fall short.
+    validations:
+      required: true
+  - type: dropdown
+    id: odd
+    attributes:
+      label: Proposed autonomy level (ODD)
+      description: How autonomously may it act? See templates/odd/odd.schema.yaml.
+      options:
+        - "L0 (information display)"
+        - "L1 (light utility)"
+        - "L2 (medium workflow)"
+        - "L3 (heavy workflow)"
+        - "L4+ (autonomous / supervised-auto)"
+    validations:
+      required: true

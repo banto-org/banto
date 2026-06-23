@@ -1,0 +1,26 @@
+
+# === AI Context (managed by banto) ===
+# 個人 / 再生成可能ファイル（git 共有しない）
+.ai-context/sessions/
+.ai-context/project-index/
+.ai-context/full-index/
+.ai-context/*-combined.txt
+.ai-context/.obsidian/
+.ai-context/docs/\[Memo\]*.md
+.ai-context/docs/knowledges/drafts/
+
+# チーム共有（commit 対象、明示列挙）:
+#   .ai-context/decisions/                  ← 設計判断ログ
+#   .ai-context/docs/[Index]*.md            ← 構造俯瞰ドキュメント
+#   .ai-context/docs/[Audit]*.md            ← 監査証跡
+#   .ai-context/docs/[Review]*.md           ← コードレビュー結果
+#   .ai-context/docs/[QA]*.md               ← QA テストレポート
+#   .ai-context/docs/[Status]*.md           ← ステータス報告
+#   .ai-context/docs/[Postmortem]*.md       ← 障害事後検証
+#   .ai-context/docs/[Benchmark]*.md        ← ベンチマーク結果
+#   .ai-context/docs/research/              ← リサーチ
+#   .ai-context/docs/knowledges/*.md        ← ナレッジ（drafts/ 除く）
+#   .ai-context/tasks/active.md             ← 進行中タスク
+#   .ai-context/WORKSPACE.md                ← 現在の作業
+#   .ai-context/workspaces/                 ← 並走ワークスペース
+# === /AI Context ===

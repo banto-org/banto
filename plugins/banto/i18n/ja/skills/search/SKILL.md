@@ -1,0 +1,142 @@
+---
+name: search
+description: |
+  ローカル AI Context（decisions / docs / 会話履歴）を Claude ネイティブに検索する — すでに蓄積された情報に対する内部検索。Web には一切触れない。クエリを 3 段階の重み付き tier に展開 → ランキングスクリプトでスコアリング → 上位ヒットを Read 検証する。zero-hit / cross-store / 履歴クエリは並列 haiku の deep パスへエスカレーションする。
+  トリガー：「前に話した」「以前の議論」「過去のチャット」「思い出して」「recall」「履歴」「経緯」「なぜこうなった」「前に決めた」「探して」。/search <query> でも呼び出し可能。
+  Do not use when：外部ソース（Web / GitHub / arxiv）から新しい情報を取得するとき（research skill を使う）。
+user-invocable: true
+argument-hint: "[検索クエリ]"
+allowed-tools: Grep Glob Read Write Edit Bash Agent
+compatibility: Claude Code (requires bash, git, jq, python3)
+---
+
+# Search — 内部検索（Claude ネイティブ）
+
+> **検索ベース（store-first）**：本スキルでの `{base}` は ai-context ベースを指す。SessionStart/PreCompact hook が「ai-context ベース: &lt;absolute path&gt;」として注入する絶対パス配下を検索する（不明な場合は `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決する）。
+
+ユーザーが日本語で会話している場合は、日本語で応答する（検索レポートも日本語で書く）。
+
+## search vs research
+
+| | `/search`（本スキル） | `/research` |
+|---|---|---|
+| 対象 | **内部**：`{base}/decisions/` `docs/` + 会話履歴 + `extra_docs_dirs` | **外部**：Web、GitHub、arxiv、X、公式ドキュメント |
+| Web アクセス | **なし** | あり（WebSearch + research-agent） |
+| 結果 | 既存ファイルの参照・要約 | `{base}/docs/research/` へ保存される新規ファイル |
+| レイテンシ | fast: 秒 / deep: 分 | 分（research-agent の並列起動） |
+
+**覚え方**：すでに持っているか否か。持っている → `search`、持っていない → `research`。
+
+## 検索対象とデータレイヤー
+
+| パス | 内容 | 鮮度 |
+|---|---|---|
+| `{base}/decisions/` `{base}/docs/` | 設計判断、報告書、リサーチ | 生ファイルを直接検索 |
+| `{base}/project-combined.txt` | 上記を連結したテキスト | 保存時に hook が自動再生成（ai-context-combined-rebuild.sh） |
+| `{base}/full-combined.txt` + `sessions-cache/` | + 会話履歴（compact で失われた内容を含む） | 検索時にオンデマンドで更新（後述の deep パス参照） |
+| `{base}/search-lexicon.md` | **検索レキシコン**（概念 ↔ 訳語 / 同義語 / 略語） | deep パス成功時に追記（後述） |
+| プロジェクトの `docs/` `specs/` など | `{base}/config.json` の `extra_docs_dirs` で追加 | combined 生成に含まれる |
+
+## 検索手順
+
+### Step 0: レキシコンを読む
+
+`{base}/search-lexicon.md` が存在する場合は Read し、一致する行の語を展開に取り込む（無ければスキップ）。
+
+### Step 1: クエリ展開（3 tier、重み付き）
+
+次のルールでクエリを**重み付きグループ**に展開する：
+
+1. **Tier1（×1.0）= 同義語**：日本語の同義語 + **英訳** + カタカナ表記ゆれ + 略語を同じグループに入れる（記録は英語の可能性が常にあると想定する。「漂流」→ drift）
+2. **Tier2（×0.6）= 近接概念**
+3. **Tier3（×0.3）= 隣接概念**：「似ているが意図が異なる」語をここに入れる（監視→監査）。拾うが、支配的にはしない
+4. **疑問形を分解する**：「なぜ X は廃止されたか」→ `[X]` と `[廃止|supersede|撤廃]` を**別々の Tier1 グループ**にする（複数グループ一致のボーナスが soft-AND として働く）
+5. **複合語を分割する**：「ProjectX 漂流」→ `[ProjectX]` + `[漂流|drift]`
+6. 短い ASCII トークン（PR/WS/KD）はそのまま渡してよい（スクリプトが `\b` 境界を付与する）
+
+### Step 2: fast パス（既定、秒）
+
+ランキングスクリプトでスコアリングする：
+
+```bash
+python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_search_rank.py" \
+  --base "{base}" --top 8 \
+  --groups '[[1.0,["認証","auth","OAuth"]],[0.6,["認可"]],[0.3,["ログイン"]]]'
+```
+
+- 出力 JSON の `confident: false`（top score < 1.0）は**ゼロヒット**として扱う → Step 4 へ
+- `confident: true` → Step 3 へ
+
+### Step 3: 検証（Read して判断）
+
+上位 3〜5 ファイルを Read し、**関連性を自分で判断**する：
+
+- 多義語の不一致を除外する（例：「harness」が配線を意味するドキュメント）
+- 自己参照を除外する（いま書いている当のドキュメント、クエリを引用しただけの評価表）
+- supersede 関係を確認する（古い決定が新しい決定に上書きされていないか？）
+
+### Step 4: ゼロヒット時の 2 巡目（1 回だけ）
+
+別の同義語セットで Step 1〜2 をやり直す（訳の方向を反転、略語をフルネームに展開、分割粒度を変える）。なお `confident: false` → Step 5 の deep パスへエスカレーションする。
+
+### Step 5: deep パス（並列 haiku、分）
+
+**トリガー**：2 巡目後もゼロヒット / 「徹底的に」「全部」 / 「他のプロジェクトで」（cross-store） / 「前に話した」（会話履歴）。履歴・cross-store クエリは fast を飛ばしてここから**開始してよい**。
+
+0. 開始時刻を記録する（wall-clock 時間を報告する）。履歴検索ではまず full-combined を更新する：
+   ```bash
+   python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_combined.py" --project-root "$PWD" --scope full
+   ```
+1. **1 メッセージ内で 3〜5 個の `search-agent`（model=haiku）を並列起動**する。標準的な役割分担：
+   - (a) 日本語表記ゆれエージェント：`{base}/decisions/` `{base}/docs/`
+   - (b) 英語 / コード用語エージェント：同じパス
+   - (c) cross-store エージェント：`~/ai-context-store/*/decisions/` `*/docs/`（store ルートを直接 grep）
+   - (d) 会話履歴エージェント：`{base}/full-combined.txt`
+2. 各エージェントには常に：正規表現パターンセット / 対象パス / **limit N（パターンごと top 15、120 文字スニペット）** / 一時ファイル出力パス `{base}/tmp/search/<run-id>-<role>.txt` を渡す。各エージェントも Grep を並列で実行させる
+3. **確信度はエージェント間の候補の一致で判断する**（複数エージェントが同じファイルを浮上させたら強いシグナル。haiku の自己申告の確信度は使わない）
+4. opus（メイン）が上位候補を Read 検証 → 統合する
+
+### Step 6: レキシコンへフィードバック（deep 成功時は必須）
+
+deep パスが正解にたどり着いたら、効いた展開を 1 行として `{base}/search-lexicon.md` へ追記する：
+
+```markdown
+漂流 ↔ drift, W1, Wasserstein   <!-- found via project search -->
+```
+
+これにより**検索すればするほど次の fast パスが決定論的に賢くなる**（git 経由でチーム共有のリコール）。
+
+### Step 7: 報告フォーマット
+
+```markdown
+## Search results: {query}
+
+### Related design decisions
+1. **{title}** ({date}, score: X.XX)
+   - Decision: {summary}
+   - File: {base}/decisions/{filename}
+
+### Related research
+- {research file}: {summary}
+
+### Conversation history (when the deep path found matches)
+- {summary of matched context}
+
+### Notes
+- {supersede relations, explicit "not confident", etc.}
+
+### Search method: {fast (ranking vN) / deep (haiku xN parallel, wall time Xs) / cross-store: {store names,...}}
+```
+
+**確信がない**場合（しきい値を下回って終わった場合）は、推測で埋めず「確信なし」と明示する。
+
+## cross-store の NDA / 機密保持
+
+- cross-store の検索結果は**セッション内の内部参照に留める**。他クライアントの具体（プロジェクト名、決定内容、人物）を現在のプロジェクトの成果物（コード、ドキュメント、コミット）へ転記しない — 書き込み側は pii-protection / egress-guard が強制する
+- どの store を検索したかは常に「Search method」欄に列挙する
+
+## データレイヤーの保守
+
+- `project-combined.txt` は decisions/docs への書き込み時に hook が自動再生成する（ミリ秒スケール、モデル不要）
+- 手動再生成：`python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_combined.py" --project-root "$PWD" --scope all`
+- `{base}/tmp/search/` 配下の一時ファイルは溜まったら削除してよい

@@ -1,0 +1,95 @@
+# ODD (Operational Design Domain) JSON Schema for banto
+# Place an odd.yaml under each skill.
+#
+#
+# Only contains what can be expressed as JSON Schema (pure validation).
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://banto/odd/v1"
+title: "ODD Spec for a Claude Code Skill"
+type: object
+required:
+  - schema_version
+  - skill
+  - autonomy_level
+  - in_scope
+  - out_of_scope
+additionalProperties: false
+
+properties:
+  schema_version:
+    type: integer
+    enum: [1]
+    description: "Version of the ODD schema. Currently only 1."
+
+  skill:
+    type: string
+    pattern: "^[a-z][a-z0-9-]*$"
+    description: "Name of the corresponding skill (must match skills/{name}/)."
+
+  autonomy_level:
+    type: string
+    enum: ["L0", "L1", "L2", "L3", "L4", "L5"]
+    description: |
+      Autonomy level (per SAE J3016 / arXiv 2506.12469).
+      L0=Manual (suggestions only) / L1=Suggest (user approval) / L2=Copilot (partial execution + per-step approval) /
+      L3=Autopilot (continuous execution + user requested on exceptions) / L4=Supervised-Auto (explicit stop conditions) /
+      L5=Self-improving (no human needed; zero real-world examples today).
+      banto covers L0-L3 only. L4-L5 belong to a separate plugin (banto-autonomy).
+
+  in_scope:
+    type: array
+    items:
+      type: string
+    minItems: 1
+    description: "Work the skill is responsible for. One line per item."
+
+  out_of_scope:
+    type: array
+    items:
+      type: string
+    description: "Work the skill does not handle or delegates (proceed with adopted interpretations / use another skill, etc.)."
+
+  safety_boundaries:
+    type: array
+    items:
+      type: string
+    description: |
+      Safety boundaries. Quantitative constraints such as parallel-agent caps,
+      recommended timeouts, cost caps, and file-type restrictions.
+
+  kill_switch_conditions:
+    type: array
+    items:
+      type: string
+    description: |
+      Conditions that trigger the kill switch (human intervention required). Examples:
+      - The same branch fails 3 times in a row
+      - cost > budget_max
+      - Writes to unexpected file types
+      Architectural enforcement on the hook side is preferred.
+
+  approval_gates:
+    type: array
+    items:
+      type: string
+    description: |
+      Gates that require user approval. Examples:
+      - Launching K >= 4 parallel agents
+      - Direct push to an existing main
+      - POST to an external service
+
+  metrics:
+    type: object
+    additionalProperties: false
+    properties:
+      cost_budget_usd:
+        type: number
+        minimum: 0
+      time_budget_seconds:
+        type: integer
+        minimum: 1
+      parallel_agent_max:
+        type: integer
+        minimum: 1
+    description: "Numeric metrics. Referenced as the basis for kill_switch_conditions."

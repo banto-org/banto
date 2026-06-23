@@ -1,0 +1,29 @@
+# ODD Spec for search
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: search
+autonomy_level: L2  # normal path = L1 (lightweight utility: query expansion → ranking → Read verification) / deep path = L2 (entails fan-out of parallel haiku agents)
+
+in_scope:
+  - Internal search of the local AI Context (decisions / docs / sessions / combined.txt)
+  - 3-tier query expansion (synonyms / translations / abbreviations) and scoring with the ranking script
+  - Read verification of the top candidates and a sourced answer
+  - The deep path for zero-hit / cross-store / history queries (parallel launch of search-agent)
+
+out_of_scope:
+  - External Web investigation (research skill / research-agent)
+  - Editing files based on the search results (proposal only; editing is the parent session's responsibility)
+  - Regenerating / repairing the integrity of the store itself (context-keeper agent)
+
+safety_boundaries:
+  - Zero Web access (does not use WebSearch / WebFetch / webread)
+  - Parallel search-agents on the deep path are capped at 5 (fixed model=haiku)
+  - Write only to temp files (under {base}/tmp/search/). Never write to decisions / docs
+  - Raw snippets from cross-store search are used only in the report, never carrying other clients' information into deliverables (PII rule)
+
+kill_switch_conditions:
+  - When a Write / Edit to anything other than a temp file is requested
+  - Fan-out of parallel agents exceeding 5
+
+approval_gates: []

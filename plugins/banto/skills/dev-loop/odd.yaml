@@ -1,0 +1,42 @@
+# ODD Spec for dev-loop
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: dev-loop
+autonomy_level: L3  # Autopilot (continuous execution + user requested on exceptions). Explicit stops are deterministic hooks (odd-gate/verify-claim-guard); human gates are the Phase0 decomposition-plan confirmation + push/PR/main
+
+in_scope:
+  - Auto-decompose a big task (spec / document / large task) into small tasks (spec skill)
+  - Self-drive the implement → ② build-and-verify → fix → re-verify cycle per small task
+  - Advance the tasks.md ledger (next retrieval · [x] update · phase-done archive)
+  - Decide parallel fan-out for independent tasks (④ criteria · no shared file / no sequential dependency)
+  - Detect exceptions (consecutive failures / goal fork / ambiguous spec / irreversible-op request) and escalate to the owner
+  - ML training loop (variant with the verify step swapped for an eval metric)
+
+out_of_scope:
+  - Generating design specs only (spec skill) / forming ideology (concept skill)
+  - Branch / worktree operations (ws skill)
+  - One-off small edits (direct Edit) / advancing just the next task (ai-context next)
+  - push / PR / main merge (human gate · safety rule)
+  - L4+ unsupervised autonomy (the domain of a separate plugin banto-autonomy)
+
+safety_boundaries:
+  - Commits stay on the branch. push / PR / main / delete are not executed (human gate)
+  - Verification uses the existing hooks/verify-run.sh as canonical; detection logic is not reimplemented
+  - Parallel fan-out only for tasks with no shared file and no sequential dependency (④ criteria)
+  - No leakage of internal / other-project names / PII into client paths (egress-guard + ⑤ sandbox)
+  - Parallel fan-out capped at 5 workers
+
+kill_switch_conditions:
+  - 3 consecutive test failures (odd-gate.sh TF counter threshold) → stop the loop · escalate to owner
+  - Claiming completion while verify-last is red (verify-claim-guard.sh blocks it on Stop)
+  - goal fork / ambiguous spec where no adopted interpretation holds → stop · escalate to owner
+  - Request for an irreversible / outward-facing op (push・PR・delete・external post) → stop · escalate to owner
+
+approval_gates:
+  - Phase 0: present the decomposition plan (small-task list + parallel strategy) once and confirm before self-driving
+  - If the big-task scope is epic-sized (multiple branches), route via a ws epic proposal
+
+metrics:
+  test_failure_threshold: 3
+  parallel_fanout_max: 5

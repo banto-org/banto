@@ -1,0 +1,29 @@
+# ODD Spec for search
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: search
+autonomy_level: L2  # 通常パス=L1（クエリ展開→ランキング→Read検証の軽量ユーティリティ）/ deep パス=L2（並列 haiku agent の fan-out を伴う）
+
+in_scope:
+  - ローカル AI Context（decisions / docs / sessions / combined.txt）の内部検索
+  - クエリの 3 tier 展開（同義語・訳語・略語）とランキングスクリプトによるスコアリング
+  - 上位候補の Read 検証と出典付き回答
+  - zero-hit / cross-store / 履歴クエリの deep パス（search-agent の並列起動）
+
+out_of_scope:
+  - 外部 Web の調査（research skill / research-agent）
+  - 検索結果に基づくファイル編集（提案のみ。編集は親セッションの責務）
+  - store 本体の再生成・整合性修復（context-keeper agent）
+
+safety_boundaries:
+  - Web アクセスゼロ（WebSearch / WebFetch / webread を使わない）
+  - deep パスの並列 search-agent は最大 5（model=haiku 固定）
+  - Write は一時ファイル（{base}/tmp/search/ 配下）のみ。decisions / docs へは書かない
+  - cross-store 検索の生スニペットは報告にのみ使い、他クライアント情報を成果物へ持ち出さない（PII ルール）
+
+kill_switch_conditions:
+  - 一時ファイル以外への Write / Edit を要求された場合
+  - 並列 agent が 5 を超える fan-out
+
+approval_gates: []

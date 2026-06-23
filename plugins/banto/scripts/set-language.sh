@@ -1,0 +1,34 @@
+#!/bin/sh
+# set-language.sh <ja|en> — persist the banto language preference (user scope, survives
+# plugin updates) and materialize the chosen language onto the active skill/agent set.
+#
+# Called by the /set-language skill. Override BANTO_LANG_FILE for tests.
+set -eu
+
+LANG_SEL=${1:?usage: set-language.sh <ja|en>}
+case "$LANG_SEL" in ja|en) ;; *) echo "set-language: lang must be ja|en (got '$LANG_SEL')"; exit 2 ;; esac
+
+LANG_FILE=${BANTO_LANG_FILE:-$HOME/.claude/banto-language}
+mkdir -p "$(dirname "$LANG_FILE")"
+printf '%s\n' "$LANG_SEL" > "$LANG_FILE"
+
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+sh "$SCRIPT_DIR/i18n-materialize.sh" "$LANG_SEL"
+
+# 言語固有ルール（writing-ja）を ~/.claude/rules/ で言語に追従させる（A 案: 言語は set-language の領分）。
+# ja → 配置（無ければ template から）。en → 撤去（ただし template と同一のときだけ。個人改変は残す）。
+# ~/.claude/rules/ が無い（ハーネス未セットアップ）なら no-op。
+RULES_USER="$HOME/.claude/rules"
+WJ_SRC="$SCRIPT_DIR/../templates/rules/writing-ja.md"
+WJ_DST="$RULES_USER/writing-ja.md"
+if [ -d "$RULES_USER" ] && [ -f "$WJ_SRC" ]; then
+    if [ "$LANG_SEL" = ja ]; then
+        [ -e "$WJ_DST" ] || { cp "$WJ_SRC" "$WJ_DST" && echo "set-language: deployed writing-ja.md (JA-specific rule)"; }
+    else
+        if [ -e "$WJ_DST" ] && cmp -s "$WJ_SRC" "$WJ_DST"; then
+            rm -f "$WJ_DST" && echo "set-language: removed writing-ja.md (EN — JA-only rule, unmodified)"
+        fi
+    fi
+fi
+
+echo "set-language: preference saved ($LANG_FILE = $LANG_SEL). Restart Claude Code to load the '$LANG_SEL' skill set."

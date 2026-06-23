@@ -1,0 +1,79 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell syntax (sh -n)
+        run: |
+          fail=0
+          for f in $(git ls-files '*.sh'); do
+            sh -n "$f" || { echo "FAIL: $f"; fail=1; }
+          done
+          exit $fail
+
+      - name: JSON validity (jq)
+        run: |
+          for f in $(git ls-files '*.json'); do
+            jq empty "$f"
+          done
+
+      - name: Python compile
+        run: |
+          for f in $(git ls-files '*.py'); do
+            python3 -m py_compile "$f"
+          done
+
+      - name: YAML validity (plugin odd/schema)
+        run: |
+          python3 -c "
+          import glob, yaml
+          for p in glob.glob('plugins/banto/templates/odd/*.yaml') + glob.glob('plugins/banto/skills/*/odd.yaml') + glob.glob('plugins/banto/i18n/*/skills/*/odd.yaml'):
+              yaml.safe_load(open(p))
+          print('yaml OK')
+          "
+
+      - name: Unit tests (hook wiring / store resolver / scaffold guard / store-first session / safety cores)
+        run: |
+          sh plugins/banto/scripts/test-ai-context-paths-wiring.sh
+          sh plugins/banto/scripts/test-resolve-store-path.sh
+          sh plugins/banto/scripts/test-scaffold-root-guard.sh
+          sh plugins/banto/scripts/test-store-first-session.sh
+          sh plugins/banto/scripts/test-release-guard.sh
+          sh plugins/banto/scripts/test-odd-kill-switch.sh
+          sh plugins/banto/scripts/test-egress-guard.sh
+          sh plugins/banto/scripts/test-hook-payloads.sh
+          sh plugins/banto/scripts/test-i18n.sh
+
+      - name: i18n sync (EN generated from JA canonical)
+        run: |
+          sh plugins/banto/scripts/i18n-sync-check.sh
+
+      - name: Declaration sync (versions / skill counts)
+        run: |
+          pv=$(jq -r .version plugins/banto/.claude-plugin/plugin.json)
+          mv=$(jq -r '.plugins[0].version' .claude-plugin/marketplace.json)
+          mm=$(jq -r '.metadata.version' .claude-plugin/marketplace.json)
+          [ "$pv" = "$mv" ] && [ "$pv" = "$mm" ] || { echo "version drift: plugin=$pv marketplace=$mv metadata=$mm"; exit 1; }
+          total=$(ls plugins/banto/skills | wc -l)
+          # count only exclusions that exist in THIS tree (the public export has them removed)
+          pending=0
+          for p in $(grep -m1 '^PLUGIN_EXCLUDE=' scripts/export-public.sh | sed 's/^PLUGIN_EXCLUDE="//;s/"$//'); do
+            [ -d "plugins/banto/$p" ] && pending=$((pending+1))
+          done
+          expected=$((total - pending))
+          grep -q "^${expected} skills / " README.md || { echo "README.md skill count != ${expected}"; exit 1; }
+          grep -q "^${expected} skill / " README.ja.md || { echo "README.ja.md skill count != ${expected}"; exit 1; }
+          echo "declarations OK (version=$pv, public skills=$expected)"
+
+      - name: Brand gate (no legacy names)
+        run: |
+          sh scripts/check-legacy-names.sh --code
+          sh scripts/check-legacy-names.sh

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Nightly auto-push for the central ai-context store (macOS launchd).
+
+  ⚠️ Not recommended for new adoption. For unattended harness monitoring, prefer the
+     native `/schedule`:
+     → templates/ci/harness-nightly.routine.md (lean / no home-grown scheduler)
+  This plist remains for existing users who want to run store auto-push on the OS scheduler.
+
+  Setup:
+    1. List store repo paths in ~/.claude/banto-ai-context-stores
+       (create the marker in each store first: `touch <store>/.ai-context-store`)
+    2. Replace __SCRIPT__ in this file with the real path and place it in ~/Library/LaunchAgents/:
+         cp com.banto.ai-context-nightly.plist.example \
+            ~/Library/LaunchAgents/com.banto.ai-context-nightly.plist
+         # Replace __SCRIPT__ with sed (example):
+         #   /Users/<you>/.claude/plugins/cache/banto-marketplace/banto/<ver>/scripts/ai-context-nightly-push.sh
+    3. Load:
+         launchctl load ~/Library/LaunchAgents/com.banto.ai-context-nightly.plist
+    4. Manual test:
+         launchctl start com.banto.ai-context-nightly
+         tail -n 50 /tmp/banto-ai-context-nightly.log
+
+  If you prefer cron (alternative):
+    30 2 * * *  /bin/sh __SCRIPT__ >> /tmp/banto-ai-context-nightly.log 2>&1
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.banto.ai-context-nightly</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>__SCRIPT__</string>
+  </array>
+
+  <!-- Run daily at 02:30 -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>2</integer>
+    <key>Minute</key><integer>30</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/banto-ai-context-nightly.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/banto-ai-context-nightly.log</string>
+
+  <!-- Put git / uv on PATH (adjust to your environment) -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <false/>
+</dict>
+</plist>

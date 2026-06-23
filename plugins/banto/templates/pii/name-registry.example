@@ -1,0 +1,30 @@
+# banto name registry (for egress-guard) — sample
+#
+# Copy this file to ~/.claude/banto-name-registry and fill in real values.
+#   cp name-registry.example ~/.claude/banto-name-registry
+#
+# ⚠️ Never commit the real file to a repo / the central store (the name list itself is sensitive).
+#    ~/.claude/ is an "internal = exempt" path for egress-guard, so placing it there keeps it out of scans.
+#
+# Format:
+#   - One entry per line
+#   - Default is case-insensitive substring match
+#   - `re:` prefix for regular expressions (IGNORECASE)
+#   - Lines starting with `#` and blank lines are comments
+#
+# Operating tips:
+#   - Add full names / highly identifying terms (short, common words cause false positives)
+#   - List "internal member names" and "other project / company names" that must never appear in client deliverables
+#   - Optionally add your own sensitive terms (internal codenames, rate notation, etc.)
+
+# --- Internal members (examples; replace with real names) ---
+# 山田太郎
+# Taro Yamada
+
+# --- Other project / company identifiers (examples) ---
+# AcmeCorp
+# project-zeta
+
+# --- PII patterns (regex examples) ---
+# re:\b[\w.+-]+@[\w-]+\.[\w.-]+\b          # email address
+# re:\b0\d{1,4}-\d{1,4}-\d{3,4}\b          # phone number (Japan)

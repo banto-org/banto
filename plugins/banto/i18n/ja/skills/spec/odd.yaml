@@ -1,0 +1,33 @@
+# ODD Spec for spec (旧 design-first, v5.20.0 改名)
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: spec
+autonomy_level: L1  # Suggest（仕様書生成、テンプレ選択 + ゴール分岐時に対話）
+
+in_scope:
+  - 業界標準 6 種テンプレ（Spec Kit / PRD / Design Doc / RFC / ADR / Scope Doc）の対話選択
+  - 仕様書を .ai-context/specs/ に Write
+  - 採用解釈レポートの開示
+  - architect subagent への委譲（5 ファイル超 or 複数モジュール跨ぎ）
+
+out_of_scope:
+  - 設計 + 実装の両方（spec 後そのまま自走実装）
+  - ゴール分岐なしの微修正（採用解釈で進む）
+  - 既存仕様書の細部編集（直接 Edit）
+
+safety_boundaries:
+  - 書き込み先: .ai-context/specs/ 配下のみ
+  - コード本体への変更禁止（設計のみ）
+  - Bash(git:*) 経由の readonly 操作のみ許可
+
+kill_switch_conditions:
+  - 同一仕様書ファイルを 3 回続けて上書き
+  - architect subagent が 3 回連続失敗
+  - 仕様書サイズが 5000 行超（過剰肥大）
+
+approval_gates:
+  - テンプレ種別の確定（6 種から 1 つ）
+  - ゴール分岐がある場合（受け入れ基準・影響範囲・セキュリティが変わる選択肢）
+  - 既存 .ai-context/specs/ ファイル上書き
+  - architect subagent 委譲の起動前

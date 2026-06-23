@@ -1,0 +1,22 @@
+# ODD Spec for set-language
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: set-language
+autonomy_level: L1  # 軽量ユーティリティ（言語 preference の保存 + active セットの materialize）
+
+in_scope:
+  - "言語 preference（~/.claude/banto-language）の保存"
+  - "i18n/<lang>/{skills,agents} を active セットに materialize"
+
+out_of_scope:
+  - 単一ドキュメントの出力言語変更（その言語で書けばよい）
+  - skill 個別の文言編集（直接 Edit）
+  - EN 成果物の生成（i18n-gen.sh の責務）
+
+safety_boundaries:
+  - "Write は ~/.claude/banto-language と plugin 内 active dirs / skills/.banto-lang のみ"
+  - "言語コードは ja|en に限定（不正値は exit 2）"
+
+kill_switch_conditions: []
+approval_gates: []

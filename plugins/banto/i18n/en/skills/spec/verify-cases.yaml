@@ -1,0 +1,14 @@
+# verify-cases for spec — functional verification (plugin-audit verify)
+# Schema: see skills/memo/verify-cases.yaml header.
+skill: spec
+tier: A
+cases:
+  - id: spec-basic
+    fixture:
+      prompt: "write a spec for the auth redesign"
+    assert:
+      glob: "docs/specs/"
+      headings: "## Scope boundaries|### ✅ Always|### ⚠️ Ask first|### 🚫 Never"
+      no_template_vars: "{{"
+    invariants:
+      writes_only_under: "docs/"

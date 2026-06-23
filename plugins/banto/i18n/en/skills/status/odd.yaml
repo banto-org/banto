@@ -1,0 +1,21 @@
+# ODD Spec for status
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: status
+autonomy_level: L1  # lightweight workflow (generating/saving a [Status] report)
+
+in_scope:
+  - "Status report generation from active.md + recent work (saved as [Status] under {base}/docs/)"
+  - Phase completion-rate display via the progress subcommand
+
+out_of_scope:
+  - Editing tasks (active.md management — ai-context skill)
+  - Sending reports to external services (sending is always after user confirmation, via a separate path)
+
+safety_boundaries:
+  - Write only to [Status] files under {base}/docs/
+  - Bash only for read-only aggregation such as git log
+
+kill_switch_conditions: []
+approval_gates: []

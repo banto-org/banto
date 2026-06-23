@@ -1,0 +1,24 @@
+# ODD Spec for save-checkpoint
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: save-checkpoint
+autonomy_level: L1  # lightweight utility (saving a single session-state document)
+
+in_scope:
+  - Checkpoint save of the current session state (under {base}/sessions/)
+  - Recommending compact / clear (recommendation only)
+
+out_of_scope:
+  - Running /compact or /clear themselves (this skill never runs them)
+  - Recording design decisions (decisions/ — ai-context skill)
+  - Editing the task file (active.md) (ai-context skill)
+
+safety_boundaries:
+  - Write only to new files under {base}/sessions/ (never overwrite existing files)
+  - Bash only for read-only purposes such as fetching date/time and resolving paths
+
+kill_switch_conditions:
+  - When a Write outside sessions/ is requested
+
+approval_gates: []

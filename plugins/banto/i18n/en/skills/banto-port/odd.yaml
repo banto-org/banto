@@ -1,0 +1,37 @@
+# ODD Spec for banto-port
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: banto-port
+autonomy_level: L2  # Copilot (gate execution self-drives, allowlist changes are proposed, publishing is a human gate)
+
+in_scope:
+  - Review and propose additions to the public allowlist (export-public.sh)
+  - Apply rename / i18n / hygiene conventions (to ported content only)
+  - Run the full gate suite (brand gate / sh -n / jq / unit tests)
+  - Generate the public tree via export-public.sh
+  - NDA sweep on the export tree (registry + manual patterns)
+  - Run the clean-room container test
+
+out_of_scope:
+  - Creating / committing / pushing the public repository (owner's manual gate)
+  - Skill quality scoring (plugin-audit) / system audit (harness-audit)
+  - Publishing non-public skills / internal artifacts
+
+safety_boundaries:
+  - The export target is a new directory only (overwriting an existing directory is forbidden — the script also rejects it)
+  - The allowlist keeps default-deny (additions are presented one at a time as text)
+  - No skipping a failing gate (FAIL → fix → re-run the same step)
+
+kill_switch_conditions:
+  - The same gate FAILs 3 times in a row
+  - The NDA sweep hits a registry name (when attempting to continue without fixing)
+  - A git commit / push attempt inside the export
+
+approval_gates:
+  - Porting from a dirty working tree (confirm whether to commit first)
+  - Adding a new entry to the allowlist
+  - Publishing (commit / push of the export / repo creation) — always performed by a human
+
+metrics:
+  time_budget_seconds: 1200

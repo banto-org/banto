@@ -1,0 +1,146 @@
+# Skill Routing-Precision Eval Cases
+#
+# Purpose: used by plugin-audit --eval. For each test prompt, an Agent
+# subagent judges "which skill should fire", and the rate of matching
+# expected is computed as top-1 accuracy.
+#
+# Design policy:
+# - Only skills that fire on natural language (disable-model-invocation: false) are in scope
+# - Explicit-invocation-only skills (status, etc.) are out of scope (not evaluable)
+# - Cover each skill at least once, prioritizing boundary-ambiguous pairs
+# - Self-driving harness principle: "implement it", "in parallel", "think deeply" have no
+#   dedicated skill and flow to Claude self-driving (concept→spec→self-driving implementation / Agent parallelism / deep reasoning).
+# - In addition to positive cases (expected: <skill>), there are boundary/negative cases (expected: none).
+#   none = the correct answer is to fire no skill and let Claude self-drive or respond directly. Verifies that
+#   generic bare words (do it / at the same time / tell me / why) are not mis-routed to a skill (Forbidden non-firing).
+#
+# Note: since the main-session Claude judging itself introduces bias,
+# always judge independently with an Agent (subagent_type=general-purpose).
+
+version: 1
+created: 2026-05-14
+
+cases:
+  - id: 1
+    prompt: "what happened with the OAuth discussion we had before?"
+    expected: search
+    rationale: "Find a past discussion from inside → search (internal search)"
+
+  - id: 2
+    prompt: "look up the latest Anthropic Claude release notes"
+    expected: research
+    rationale: "Go fetch new information from the external Web → research"
+
+  - id: 3
+    prompt: "I want to firm up this product's ideology and worldview; organize why we build it and what the enemy is"
+    expected: concept
+    rationale: "Ideology formation (WHY/worldview/North Star) → concept (SDD upstream)"
+
+  - id: 4
+    prompt: "just show me the design first, don't implement"
+    expected: spec
+    rationale: "Design only requested → spec"
+
+  - id: 5
+    prompt: "I want to work in parallel on a separate branch, cut a worktree"
+    expected: ws
+    rationale: "Workspace switch/parallel work → ws"
+
+  - id: 6
+    prompt: "save this design decision to decisions/"
+    expected: ai-context
+    rationale: "Saving a decision log → ai-context"
+
+  - id: 7
+    prompt: "I want to save the current state before compact"
+    expected: save-checkpoint
+    rationale: "Checkpoint before compact → save-checkpoint"
+
+  - id: 8
+    prompt: "what's the next task? continue the work"
+    expected: ai-context
+    rationale: "next task navigation → ai-context (next subcommand)"
+
+  - id: 9
+    prompt: "summarize this week's progress as a status document"
+    expected: status
+    rationale: "Generating a status report → status"
+
+  # --- boundary / negative cases (expected: none = non-firing is correct) ---
+
+  - id: 10
+    prompt: "go ahead and proceed with the implementation per the earlier plan"
+    expected: none
+    rationale: "A bare 'proceed' mid-implementation = self-driving (direct implementation). Not ai-context next-task (no task-qualifying phrase)"
+
+  - id: 11
+    prompt: "do these 2 refactors at the same time"
+    expected: none
+    rationale: "'at the same time', run right now = self-driving parallel Agents. Not ws's workspace/worktree"
+
+  - id: 12
+    prompt: "recall the earlier discussion of why we decided on this design"
+    expected: search
+    rationale: "The why behind a past decision → search (internal search). Not debugger (the why of an error) nor research (general knowledge)"
+
+  - id: 13
+    prompt: "design it and then carry it all the way through to implementation in one go"
+    expected: none
+    rationale: "From design straight through implementation in one go = self-driving. Not architect (returns a proposal only) nor spec (generates a spec only)"
+
+  - id: 14
+    prompt: "how does the auth in this repo work? tell me"
+    expected: none
+    rationale: "A bare 'tell me' about the project's own source code → direct Read (none, self-driving). search is for ai-context (decisions/docs/history), not source code; not research (external Web) either"
+
+  # --- recall stress (oblique phrasing, trigger word absent) + dormant-skill discoverability (v2) ---
+
+  - id: 15
+    prompt: "keep this conversation so I can look back at it later"
+    expected: memo
+    rationale: "Saving the conversation even without the word 'memo' → memo. Tests recall (oversight resistance)"
+
+  - id: 16
+    prompt: "I want to keep this as a lesson, promote it to a knowledge entry"
+    expected: knowledge
+    rationale: "Lesson → knowledge promotion → knowledge. Not memo (one-off memo) nor ai-context (decision)"
+
+  - id: 17
+    prompt: "note and save this decision"
+    expected: ai-context
+    rationale: "'decision' → decisions (ai-context). Don't mis-route to memo just because 'note' appears (precision)"
+
+  - id: 18
+    prompt: "read the contents of this URL: https://example.com/post"
+    expected: webread
+    rationale: "Close-read the body of a given URL → webread. Not research (which *finds* URLs)"
+
+  - id: 19
+    prompt: "look into the latest state of React"
+    expected: research
+    rationale: "Go fetch new external information → research. Not webread (close-reading a known URL)"
+
+  - id: 20
+    prompt: "switch banto to English"
+    expected: set-language
+    rationale: "Language switch → set-language (the bilingual switcher must be reachable in any language)"
+
+  - id: 21
+    prompt: "show me everything banto can do, as a list"
+    expected: kit
+    rationale: "Capability discovery hub → kit. Not auditing an individual skill (plugin-audit)"
+
+  - id: 22
+    prompt: "remind me where I saved the policy we decided earlier"
+    expected: search
+    rationale: "*Recalling* a past decision → search (internal search). Not ai-context which *saves* (recall vs save boundary)"
+
+  - id: 23
+    prompt: "got it, thanks, that helped"
+    expected: none
+    rationale: "Acknowledgement / thanks = no skill fires (protects precision)"
+
+  - id: 24
+    prompt: "I'm starting a biggish task, I want to separate the workspace"
+    expected: ws
+    rationale: "Separating the workspace for a biggish task even without the word 'worktree/branch' → ws. Tests recall (oversight resistance)"

@@ -1,0 +1,24 @@
+# ODD Spec for save-checkpoint
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: save-checkpoint
+autonomy_level: L1  # 軽量ユーティリティ（セッション状態の単一ドキュメント保存）
+
+in_scope:
+  - 現在のセッション状態のチェックポイント保存（{base}/sessions/ 配下）
+  - compact / clear の実行推奨（推奨のみ）
+
+out_of_scope:
+  - /compact・/clear の実行そのもの（このスキルは決して自分で実行しない）
+  - 設計判断の記録（ai-context skill の decisions/）
+  - タスクファイル（active.md）の編集（ai-context skill）
+
+safety_boundaries:
+  - Write は {base}/sessions/ 配下の新規ファイルのみ（既存ファイルの上書きをしない）
+  - Bash は日時取得・パス解決などの read-only 用途のみ
+
+kill_switch_conditions:
+  - sessions/ 以外への Write を要求された場合
+
+approval_gates: []

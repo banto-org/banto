@@ -1,0 +1,37 @@
+# verify-cases for memo — functional verification (plugin-audit verify)
+#
+# Schema (read by the `plugin-audit verify` procedure):
+#   skill:  the skill under test
+#   tier:   A (deterministic) | B (semi: deterministic + judge) | C (judgmental: verify-exempt)
+#   cases[]:
+#     id:        case identifier
+#     fixture:   { prompt: ..., seed?: [files to pre-create in the fixture base] }
+#     assert:    deterministic checks → flags to plugin-audit-verify-assert.sh
+#                glob / headings (|-sep) / forbidden (|-sep) / no_template_vars
+#     invariants: writes_only_under (path prefix) / no_web_access (bool; structural via allowed-tools)
+#
+# Procedure: spawn a general-purpose subagent that loads memo with base=<fixture base>,
+# process fixture.prompt, then run plugin-audit-verify-assert.sh --dir <fixture base> <assert flags>.
+skill: memo
+tier: A
+cases:
+  - id: memo-mode1-summary
+    fixture:
+      prompt: "この会話をメモして"
+    assert:
+      glob: "docs/[Memo] session-summary-"
+      headings: "## Topics discussed|## Decisions made|## Open issues|## Key findings"
+      forbidden: "{topic 1}|{today's date}"
+    invariants:
+      writes_only_under: "docs/"
+      no_web_access: true
+  - id: memo-mode2-content
+    fixture:
+      prompt: "メモして: API レート制限を 100req/min に決めた背景"
+    assert:
+      glob: "docs/[Memo] "
+      headings: "## Content"
+      forbidden: "{title from the argument}"
+    invariants:
+      writes_only_under: "docs/"
+      no_web_access: true

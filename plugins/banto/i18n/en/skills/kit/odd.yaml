@@ -1,0 +1,19 @@
+# ODD Spec for kit
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: kit
+autonomy_level: L0  # information display only (renders the pre-formatted catalog; no external dependencies)
+
+in_scope:
+  - Formatted display of the banto skill / agent / hook / rule catalog (NL discovery hub)
+
+out_of_scope:
+  - Detailed investigation of a single skill (Read its SKILL.md directly)
+  - Auditing (plugin-audit / harness-audit) / generation (plugin-dev)
+
+safety_boundaries:
+  - Display only. Performs no file writes or command execution
+
+kill_switch_conditions: []
+approval_gates: []

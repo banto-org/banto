@@ -1,0 +1,40 @@
+# ODD Spec for ws
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: ws
+autonomy_level: L2  # Copilot 基準。操作別: done/sync=L3（自動実行・報告のみ）/ epic/task=L2（採用解釈つき提案）/ ship=人間ゲート（PR 確認）/ switch/multi=L1
+# 昇格条件: epic 提案の誤発火率を telemetry で観測し、低ければ L3 へ（decisions/2026-06-10_intent-first）
+
+in_scope:
+  - workspace 一覧 / 切替 / 新規作成 / アーカイブ / multi / import（従来機能・後方互換）
+  - インテント検出による 3 階層ブランチ運用の駆動（main ← epic ← task worktree）
+  - "git town hack / append / merge / sync / propose の orchestration（git-town 未導入は plain git fallback）"
+  - task worktree の物理分離（git worktree add）と完了時の掃除
+  - WORKSPACE ポインタ編集 + branch 自動切替
+
+out_of_scope:
+  - PR のマージ実行（人間がマージ。safety rule）
+  - main への直接 push（odd-kill-switch が block）
+  - sync conflict の自動解決（報告して人間判断）
+  - workspace 内の個別ファイル編集（直接 Edit）
+  - .ai-context/decisions/ 管理（ai-context skill）
+
+safety_boundaries:
+  - switch / epic / task は uncommitted changes があれば中止（既定）
+  - done のマージ前に親ブランチ検証必須（git-town-branch.<task>.parent が意図した epic か）
+  - worktree remove は uncommitted 残存時に force しない（報告のみ）
+  - multi モードでは primary 1 つだけが書き込み対象、他は read-only
+  - worktree 並走は 4-8 が実務上限（超過は艦隊 dashboard と odd-parallel-track が可視化）
+
+kill_switch_conditions:
+  - switch / done で uncommitted changes を強制無視する操作を 3 回連続要求
+  - done の親検証で意図しない親（main 等）を検出
+  - sync conflict を検出（自動解決せず停止）
+  - import で衝突するファイルを 3 件以上検出
+
+approval_gates:
+  - ship（epic → main の PR 作成）の直前 — 唯一の人間ゲート
+  - epic 新設の提案時（採用解釈を開示して進める。明示却下されたら巻き戻し）
+  - archive 実行前
+  - import で既存ファイルとの衝突がある場合

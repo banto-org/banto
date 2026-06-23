@@ -1,0 +1,23 @@
+# ODD (Operational Design Domain) — concept skill
+# 思想形成は「提案」: AI が思想を生成するのでなく、引き出して尖らせ、ユーザーが採否を決める。
+autonomy_level: L1  # Suggest — 思想 doc を対話で提案、ユーザーが確定。捏造禁止・共感ゲート必須
+
+domain:
+  in_scope:
+    - 製品/サービス/機能の思想（WHY・世界観・Tribe・反NG・美的シグナル・北極星）の対話形成
+    - 既存思想の尖鋭化・遡及的一貫性の言語化
+    - CONCEPT.md の生成と CLAUDE.md への @import 注入提案
+    - 軽量モード（実験向け 1 行思想）
+  out_of_scope:
+    - 仕様書・要件定義の生成（spec skill）
+    - 実装・コード生成（spec 後の自走実装）
+    - 持っていない思想の捏造（禁止）
+    - 共感を装ったダークパターン設計（禁止）
+
+guardrails:
+  - 思想の起源は人間。AI は引き出す/尖らせるのみ（捏造しない）
+  - 共感ゲート 7 項目 + 倫理（TARES）を通すまで CONCEPT.md を確定しない
+  - AskUserQuestion を使わずテキストで対話する
+  - 5 要素を空欄や「後で」で残さない（採用解釈で埋めて開示）
+
+human_oversight: 各 Phase の出力をユーザーが確認・修正。最終 CONCEPT.md は採用解釈レポートとして開示し、ユーザーが確定する。

@@ -1,0 +1,28 @@
+# ODD Spec template — copy to skills/{name}/odd.yaml
+# schema: templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: REPLACE_ME
+autonomy_level: L2  # choose from L0-L3 (L4-L5 belong to a separate plugin)
+
+in_scope:
+  - "REPLACE: work the skill is responsible for 1"
+  - "REPLACE: work the skill is responsible for 2"
+
+out_of_scope:
+  - "REPLACE: work not handled / situations to delegate"
+
+safety_boundaries:
+  - "REPLACE: quantitative constraints such as parallel-agent cap / timeout / cost cap"
+
+kill_switch_conditions:
+  - "REPLACE: kill-switch trigger conditions (architectural enforcement via hooks recommended)"
+
+approval_gates:
+  - "REPLACE: gates requiring approval"
+
+# metrics is optional (numeric basis for kill switches / approval gates)
+# metrics:
+#   cost_budget_usd: 1.0
+#   time_budget_seconds: 60
+#   parallel_agent_max: 5

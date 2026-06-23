@@ -1,0 +1,42 @@
+# ODD Spec for dev-loop
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: dev-loop
+autonomy_level: L3  # Autopilot（継続実行＋例外時のみ owner 要求）。explicit stop は deterministic hook（odd-gate/verify-claim-guard）/ human gate は Phase0 分解プラン確認＋push/PR/main
+
+in_scope:
+  - 大玉（spec / ドキュメント / 大きめタスク）の小型タスクへの自動分解（spec skill 連携）
+  - 各小型タスクの実装 → ② build-and-verify 検証 → 修正 → 再検証の自走周回
+  - tasks.md 台帳の前進（next 取得・[x] 更新・phase 完了アーカイブ）
+  - 独立タスクの並列 fan-out 判定（④ の判断基準・同一ファイル非接触/直列依存なし）
+  - 例外（連続失敗 / goal fork / 仕様曖昧 / 不可逆操作要求）の検出と owner エスカレーション
+  - ML 学習ループ（検証段を eval 指標に差し替えた派生）
+
+out_of_scope:
+  - 設計仕様だけの生成（spec skill）／思想形成（concept skill）
+  - ブランチ / worktree 操作（ws skill）
+  - 単発の小編集（直接 Edit）／次の 1 タスクだけ進める（ai-context next）
+  - push / PR / main マージ（人間ゲート・safety rule）
+  - L4+ の無監督自走（別 plugin banto-autonomy の領域）
+
+safety_boundaries:
+  - commit はブランチ止まり。push / PR / main / 削除は実行しない（人間ゲート）
+  - 検証は既存 hooks/verify-run.sh を正本とし検出ロジックを再実装しない
+  - 並列 fan-out は同一ファイル非接触・直列依存なしのタスクに限る（④ 基準）
+  - client パスへの内部名 / 他案件名 / PII の流出禁止（egress-guard ＋ ⑤ sandbox）
+  - 並列 fan-out は最大 5 worker
+
+kill_switch_conditions:
+  - テスト 3 連続失敗（odd-gate.sh の TF カウンタ閾値）→ 周回停止・owner へ
+  - verify-last が red のまま「完了」主張（verify-claim-guard.sh が Stop でブロック）
+  - goal fork / 仕様が曖昧で採用解釈が立たない → 停止・owner へ
+  - 不可逆 / 外向き操作（push・PR・削除・外部投稿）の要求 → 停止・owner へ
+
+approval_gates:
+  - Phase 0: 自走に入る前に分解プラン（小型タスク列＋並列方針）を 1 度提示して確認
+  - 大玉スコープが epic 相当（複数ブランチ）の場合は ws epic 提案を経由
+
+metrics:
+  test_failure_threshold: 3
+  parallel_fanout_max: 5

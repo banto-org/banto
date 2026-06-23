@@ -1,0 +1,36 @@
+# ODD Spec for ai-context
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: ai-context
+autonomy_level: L1  # Suggest (the init/sort/ignore subcommands write; interactive approval)
+
+in_scope:
+  - Subcommand router (init / status / doctor / sort / sort project / next / phase-done / ignore / tasks split)
+  - Decision log saving (.ai-context/decisions/)
+  - Checkpoint saving (.ai-context/sessions/)
+  - active.md editing + per-Phase splitting
+  - Next-task navigation (next, merged from sdd-core in v5.16.0)
+  - Phase completion check + archive (phase-done, merged the phase-done skill in v5.16.0)
+  - Whole-project document organization (sort project, merged doc-sort in v5.16.0)
+  - scaffold suppression path management (~/.claude/banto-ignore)
+
+out_of_scope:
+  - Internal search (search skill)
+  - workspace switching (ws skill)
+
+safety_boundaries:
+  - "Write destination: only under .ai-context/ (exception: ~/.claude/banto-ignore is limited to the ignore subcommand)"
+  - decisions/ files are append-only in principle (do not destroy existing ones)
+  - When no subcommand is specified, only display usage (no writes)
+  - combined.txt regeneration is left to the hook (do not run it manually)
+
+kill_switch_conditions:
+  - When the sort subcommand attempts to bulk-move more than 50 files
+  - When attempting to overwrite 3 or more existing files in decisions/
+  - When adding the project root to ~/.claude/banto-ignore
+
+approval_gates:
+  - The actual move operation of the sort subcommand
+  - Adding a path with the ignore subcommand
+  - Finalizing the per-Phase split of active.md

@@ -1,0 +1,27 @@
+{
+  "name": "banto-marketplace",
+  "owner": {
+    "name": "Banto Project"
+  },
+  "metadata": {
+    "description": "Banto — a self-driving harness plugin for Claude Code",
+    "version": "0.1.0",
+    "homepage": "https://github.com/banto-org/banto"
+  },
+  "plugins": [
+    {
+      "name": "banto",
+      "source": "./plugins/banto",
+      "description": "Self-driving harness: SDD workflow (concept → spec → autonomous implementation), AI context store, fleet awareness for parallel sessions, and deterministic safety hooks. Security and code review are delegated to Anthropic official plugins.",
+      "version": "0.1.0",
+      "keywords": [
+        "sdd",
+        "harness",
+        "ai-context",
+        "safety-hooks",
+        "workflow"
+      ],
+      "category": "development"
+    }
+  ]
+}

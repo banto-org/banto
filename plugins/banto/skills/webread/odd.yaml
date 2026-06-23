@@ -1,0 +1,25 @@
+# ODD Spec for webread
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: webread
+autonomy_level: L1  # Lightweight utility (full-text fetch of a single URL; pure-local extraction with no LLM summarization)
+
+in_scope:
+  - Fetch the body of the given URL as full-text Markdown with trafilatura, for the main model to read directly
+  - The --html fallback when the body is empty on SPAs and the like (via manual save of the rendered HTML)
+
+out_of_scope:
+  - Searching for URLs (WebSearch / research skill)
+  - Cross-page investigation spanning multiple pages (delegated to research-agent)
+  - Persistent storage of the fetched content (if needed, the caller saves to docs/research/)
+
+safety_boundaries:
+  - Fetch only the single specified URL (never auto-crawl linked pages)
+  - Write only to temp files (under {TMPDIR}). Never write to the store / repo
+  - Confirm with the user before fetching authenticated / internal URLs (no external transmission)
+
+kill_switch_conditions:
+  - More than 5 URLs fetched consecutively in a single invocation (that is research-agent's job)
+
+approval_gates: []

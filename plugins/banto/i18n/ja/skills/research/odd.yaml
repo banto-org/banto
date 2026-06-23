@@ -1,0 +1,44 @@
+# ODD Spec for research
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: research
+autonomy_level: L3  # Autopilot（research-agent を 5-10 並列で autonomous 実行、例外時のみユーザー要求）
+
+in_scope:
+  - 外部情報源（Web / GitHub / arxiv / X / 公式ドキュメント）の新規調査
+  - research-agent サブエージェントの 5-10 並列起動
+  - 高リスク・要反証トピックでの deep-research（ビルトイン Workflow）起動と戻り値の store 保存（高検証パス）
+  - 結果の .ai-context/docs/research/{date}_{topic}.md への構造化保存
+  - 情報源 URL と取得時刻の必須記載
+
+out_of_scope:
+  - 内部の .ai-context/ 探索（search skill）
+  - 単純な事実確認 1 件（メインセッションで webread 1 回で十分）
+  - 既存リサーチ要約のみ（直接 Read）
+  - コード実装に関する調査（自走実装 / code-editing rule 側で実施）
+
+safety_boundaries:
+  - research-agent の並列数: 上限 10
+  - 各 agent のタイムアウト: 推奨 180s（webread + WebSearch 込み）
+  - 1 トピック調査あたりコスト上限: $2（research-agent パス）
+  - deep-research 高検証パスは $2 上限の例外（~4M トークン/~20分・~100 エージェント）。起動前 user 確認を必須とし、1 セッション 1 回まで
+  - deep-research の戻り値は必ず docs/research/ に保存（保存しないと統合の意味が無い）。環境に無ければ research-agent パスへ graceful fallback
+  - 出力ファイルは .ai-context/docs/research/ 配下のみ（他ディレクトリへの書き込み禁止）
+
+kill_switch_conditions:
+  - 同一クエリで WebSearch が 3 回連続レート制限
+  - research-agent が 10 並列中 5 件以上が同種エラー
+  - cost > $2
+  - 認証が必要な媒体（X / Twitter）で auth 失敗が 2 回連続
+
+approval_gates:
+  - 認証が必要な媒体（X / Twitter / 有料 DB）へアクセスする前
+  - 並列 agent 数 >= 8 で起動する前（コスト警告）
+  - deep-research（高検証 Workflow）を起動する前（高コスト: ~4M トークン/~20分。$2 上限の例外）
+  - 既存 research/ ファイルの上書きが発生する場合
+
+metrics:
+  cost_budget_usd: 2.0
+  time_budget_seconds: 600
+  parallel_agent_max: 10

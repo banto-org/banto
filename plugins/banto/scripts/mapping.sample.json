@@ -1,0 +1,22 @@
+{
+  "_comment": "cwd -> project mapping for the ai-context central store (single store, per-project layout). This file is per-machine local and must never be committed to the store (excluded via <store>/.gitignore). store_root matches LOCAL_DEFAULT in store-target.conf. Keys are absolute paths of working checkouts (list worktrees under worktree_siblings). Resolution result is <store>/<project>/.",
+  "version": 2,
+  "store_root": "~/ai-context-store",
+  "projects": {
+    "/Users/you/Documents/projects/banto": {
+      "project": "banto",
+      "worktree_siblings": [
+        "/Users/you/Documents/projects/banto-feature-x"
+      ]
+    },
+    "/Users/you/Documents/customer-A": {
+      "project": "customer-A",
+      "worktree_siblings": [
+        "/Users/you/Documents/customer-A-wt-feat1"
+      ]
+    },
+    "/Users/you/Documents/customer-B": {
+      "project": "customer-B"
+    }
+  }
+}
