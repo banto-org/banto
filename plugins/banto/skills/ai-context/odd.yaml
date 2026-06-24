@@ -3,34 +3,39 @@
 
 schema_version: 1
 skill: ai-context
-autonomy_level: L1  # Suggest (the init/sort/ignore subcommands write; interactive approval)
+autonomy_level: L1  # Suggest (the bootstrap/sort/ignore/memo/knowledge subcommands write, with interactive approval)
 
 in_scope:
-  - Subcommand router (init / status / doctor / sort / sort project / next / phase-done / ignore / tasks split)
-  - Decision log saving (.ai-context/decisions/)
-  - Checkpoint saving (.ai-context/sessions/)
+  - subcommand router (bootstrap / local / doctor / sort / sort project / next / phase-done / ignore / tasks split / memo / knowledge)
+  - decision-log storage ({base}/decisions/)
+  - checkpoint storage ({base}/sessions/)
   - active.md editing + per-Phase splitting
-  - Next-task navigation (next, merged from sdd-core in v5.16.0)
-  - Phase completion check + archive (phase-done, merged the phase-done skill in v5.16.0)
-  - Whole-project document organization (sort project, merged doc-sort in v5.16.0)
-  - scaffold suppression path management (~/.claude/banto-ignore)
+  - next-task navigation (next; merged into sdd-core in v5.16.0)
+  - Phase completion check + archiving (phase-done; merged the phase-done skill in v5.16.0)
+  - project-wide document organization (sort project; merged doc-sort in v5.16.0)
+  - memo creation (memo; absorbed the memo skill in 0.1.4. [Memo] documents under {base}/docs/)
+  - knowledge promotion (knowledge; absorbed the knowledge skill in 0.1.4. Listing drafts, promoting, and creating new entries under {base}/docs/knowledges/)
+  - store bootstrap / local pinning / health diagnostics (bootstrap / local / doctor. status is merged into doctor; init is absorbed into bootstrap; prune is automated by a hook)
+  - scaffold-suppression path management (~/.claude/banto-ignore)
 
 out_of_scope:
-  - Internal search (search skill)
+  - internal search (search skill)
   - workspace switching (ws skill)
+  - session-state saving (save-checkpoint skill)
 
 safety_boundaries:
-  - "Write destination: only under .ai-context/ (exception: ~/.claude/banto-ignore is limited to the ignore subcommand)"
-  - decisions/ files are append-only in principle (do not destroy existing ones)
-  - When no subcommand is specified, only display usage (no writes)
-  - combined.txt regeneration is left to the hook (do not run it manually)
+  - "Write targets: only under {base}/ (exceptions: ~/.claude/banto-ignore is limited to the ignore subcommand / the store-init CLI updates mapping and conf)"
+  - decisions/ files follow an append-only principle (existing files are never destroyed)
+  - with no subcommand specified, only usage is shown (no writes)
+  - combined.txt regeneration is left to the hook (never run it manually)
+  - bootstrap / local delegate to the store-init CLI (GitHub creation is fixed to private; locally pinned repos are never pushed to GitHub)
 
 kill_switch_conditions:
-  - When the sort subcommand attempts to bulk-move more than 50 files
-  - When attempting to overwrite 3 or more existing files in decisions/
-  - When adding the project root to ~/.claude/banto-ignore
+  - when the sort subcommand attempts to bulk-move more than 50 files at once
+  - when attempting to overwrite 3 or more existing files in decisions/
+  - when adding a project root to ~/.claude/banto-ignore
 
 approval_gates:
-  - The actual move operation of the sort subcommand
-  - Adding a path with the ignore subcommand
-  - Finalizing the per-Phase split of active.md
+  - the actual move operation of the sort subcommand
+  - adding a path via the ignore subcommand
+  - confirming a per-Phase split of active.md

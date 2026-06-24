@@ -23,6 +23,16 @@
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/i18n-reconcile.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/knowledge-draft-review.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/ai-context-prune-auto.sh",
+            "timeout": 10
           }
         ]
       }

@@ -3,27 +3,32 @@
 
 schema_version: 1
 skill: ai-context
-autonomy_level: L1  # Suggest（サブコマンド init/sort/ignore は書き込みあり、対話承認）
+autonomy_level: L1  # Suggest（サブコマンド bootstrap/sort/ignore/memo/knowledge は書き込みあり、対話承認）
 
 in_scope:
-  - サブコマンド router (init / status / doctor / sort / sort project / next / phase-done / ignore / tasks split)
-  - 決定ログ保存 (.ai-context/decisions/)
-  - チェックポイント保存 (.ai-context/sessions/)
+  - サブコマンド router (bootstrap / local / doctor / sort / sort project / next / phase-done / ignore / tasks split / memo / knowledge)
+  - 決定ログ保存 ({base}/decisions/)
+  - チェックポイント保存 ({base}/sessions/)
   - active.md 編集 + Phase 単位分割
   - 次タスクナビ（next、v5.16.0 で sdd-core 統合）
   - Phase 完了チェック + アーカイブ（phase-done、v5.16.0 で phase-done skill 統合）
   - プロジェクト全体ドキュメント整理（sort project、v5.16.0 で doc-sort 統合）
+  - メモ作成（memo、0.1.4 で memo skill 内包。{base}/docs/ の [Memo] ドキュメント）
+  - ナレッジ昇格（knowledge、0.1.4 で knowledge skill 内包。{base}/docs/knowledges/ の下書き一覧・昇格・新規作成）
+  - store ブートストラップ / ローカル固定 / 健全性診断（bootstrap / local / doctor。status は doctor へ統合・init は bootstrap へ吸収・prune は hook で自動化）
   - scaffold 抑止パス管理 (~/.claude/banto-ignore)
 
 out_of_scope:
   - 内部検索（search skill）
   - workspace 切替（ws skill）
+  - セッション状態の保存（save-checkpoint skill）
 
 safety_boundaries:
-  - "書き込み先: .ai-context/ 配下のみ（例外: ~/.claude/banto-ignore は ignore サブコマンド限定）"
+  - "書き込み先: {base}/ 配下のみ（例外: ~/.claude/banto-ignore は ignore サブコマンド限定 / store-init CLI は mapping・conf を更新）"
   - decisions/ ファイルは append-only 原則（既存は破壊しない）
   - サブコマンド未指定なら使い方表示のみ（書き込みなし）
   - combined.txt 再生成は hook 任せ（手動実行しない）
+  - bootstrap / local は store-init CLI に委譲（GitHub 作成は private 固定・ローカル固定 repo は GitHub へ送らない）
 
 kill_switch_conditions:
   - sort サブコマンドで 50 ファイル超を一括移動しようとする場合

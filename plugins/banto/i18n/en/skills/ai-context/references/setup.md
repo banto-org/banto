@@ -1,193 +1,93 @@
-# Setup / migrate / cleanup (init / migrate / prune / denylist)
+# Migration / fallback setup / denylist (migrate / denylist)
 
-<!-- merged from init.md -->
-## /ai-context init — initialization details
-
-## Purpose
-
-Register this project in the central store and create the standard bucket structure on the store side (store-first).
-**Create nothing in the repo** (no `.ai-context/`, no `.gitignore` additions).
-
-## Execution procedure
-
-1. Confirm the project root: `pwd` (must be the git work-tree root. For a new non-git project,
-   first lay the foundation with `git init` or `/init`)
-2. Run the scaffold (secure the store root + register mapping + generate the store-side skeleton. Idempotent):
-
-```bash
-sh "$CLAUDE_PLUGIN_ROOT/hooks/_ai-context-scaffold.sh" "$PWD"
-```
-
-3. Resolve and confirm the base:
-
-```bash
-BASE=$(sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD")
-ls "$BASE"
-```
-
-4. If `$BASE/tasks/active.md` is absent, create an empty template:
-
-```markdown
-## Active Tasks
-
-## Phase: (unset)
-
-### Tasks
-
-- [ ] write the first task here
-
-## Rules
-
-- on task completion: update `- [ ]` → `- [x]`
-- on Phase completion: archive that Phase section to tasks/old/YYYY-MM-DD_phase-name.md
-```
-
-5. Completion report:
-
-```
-✓ ai-context initialization complete (store-first)
-  base: {BASE}
-  created: decisions/, docs/research/, docs/knowledges/drafts/, sessions/,
-        tasks/old/, workspaces/
-  tasks/active.md: {created / existing}
-  repo side: no changes (knowledge goes to the store, code stays in the repo)
-
-What to do next:
-  /ai-context status   → check the current state
-  /ws new       → create a workspace
-```
-
-## grandfather (when there is an existing in-repo `.ai-context/`)
-
-The existing legacy base keeps being used as-is (the scaffold does not interfere and does not register in the store).
-To move it to the central store, `/ai-context migrate` (a human gate; after migration the repo becomes clean).
+> First-time setup (the old `init`) is now folded into `bootstrap` (SKILL.md, "store bootstrap").
+> Cleanup of empty / already-migrated legacy / mis-generated folders (the old `prune`) is now automated by a hook (the manual subcommand is retired.
+> If you need a manual cleanup, follow the `doctor` report). This file covers **migration (`migrate`)** and **fallback setup + denylist**.
 
 <!-- merged from migrate.md -->
-## migrate — migrate a project's ai-context to the central store
+## migrate — migrate a project's ai-context into the central store
 
-Copy-migrate the assets of `<project>/.ai-context/` to the central store (`~/ai-context-store/<project>/`).
-The engine is `scripts/migrate-to-store.sh` (copy mode, dry-run by default, does not delete the original `.ai-context/`).
+Copy-migrates the assets of an existing in-repo `.ai-context/` (a legacy project) into the central store (`~/ai-context-store/<project>/`).
+The engine is `scripts/migrate-to-store.sh` (copy mode, dry-run by default, never deletes the source `.ai-context/`).
 
-## Preconditions
+> Note: `.ai-context/` here refers to the **in-repo directory of a legacy repo** (the migration source).
+> The destination base is the absolute path on the store side. Under store-first, new generation happens only on the base (store) side; nothing is written to the relative `.ai-context/`.
 
-- The central store root (`~/ai-context-store/`, marker `.ai-context-store`) should already be
-  auto-created by the store-first scaffold. If absent, `mkdir -p ~/ai-context-store && touch ~/ai-context-store/.ai-context-store`
-  (if git-syncing as a team, `scripts/ai-context-store-init.sh`).
-- Register the target cwd → project in `.mapping.json` (`~/ai-context-store/.mapping.json`, local-only / gitignore) (step 1).
+## Prerequisites
+
+- The central store root (`~/ai-context-store/`, marker `.ai-context-store`) should already have been
+  created automatically by the store-first scaffold. If it is missing: `mkdir -p ~/ai-context-store && touch ~/ai-context-store/.ai-context-store`
+  (use `scripts/ai-context-store-init.sh` if you sync it with git across a team).
+- Register the target cwd → project mapping in `.mapping.json` (`~/ai-context-store/.mapping.json`, local-only / gitignored) (step 1).
 
 ## `migrate [path]` (default path = cwd)
 
-1. **mapping registration**: the project name is decided by derive (a deterministic suffix is appended on dirname collision):
+1. **Register the mapping**: the project name is decided by derive (a deterministic suffix is appended on a dirname collision):
    `PROJ=$(basename "$(sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --derive <abs-path>)")`
-   → `.mapping.json`'s `.projects[<abs-path>] = {"project": $PROJ}` (added only when unregistered).
-2. **dry-run**: confirm the migration targets with `sh "$CLAUDE_PLUGIN_ROOT/scripts/migrate-to-store.sh" <path>`.
-3. **apply**: `... --apply <path>` (copies **all files** under `.ai-context/` = decisions/docs/tasks/archive/audit/concept etc. + `WORKSPACE.md` / `config.json`. Regenerable artifacts (`*-combined.txt`), `.obsidian/`, `.git/`, `.DS_Store` are excluded. Existing ones are skipped. v5.21.7+).
-4. **search layer**: auto-regenerated by the hook (no manual step).
-5. **report**: number of migrated files / store path / the original legacy is kept (removal is `prune`).
+   → `.mapping.json`'s `.projects[<abs-path>] = {"project": $PROJ}` (added only if not already registered).
+2. **dry-run**: check what will be migrated with `sh "$CLAUDE_PLUGIN_ROOT/scripts/migrate-to-store.sh" <path>`.
+3. **apply**: `... --apply <path>` (copies **every file** under the in-repo `.ai-context/` = decisions/docs/tasks/archive/audit/concept etc. + `WORKSPACE.md` / `config.json`. Regenerated artifacts (`*-combined.txt`), `.obsidian/`, `.git/`, and `.DS_Store` are excluded. Existing files are skipped. v5.21.7+).
+4. **Search layer**: regenerated automatically by a hook (no manual step needed).
+5. **Report**: number of files migrated / store path / the source legacy is retained (its removal is automated by a hook).
 
 ## `migrate --all`
 
-Enumerate projects under `~/Documents/productCodes` that have a `.ai-context/`, and `migrate` each.
-**Excluded**: already migrated / worktrees (another checkout of the same repo) / denylist-registered paths.
+Enumerates the projects directly under `~/Documents/productCodes` that have an in-repo `.ai-context/`, and runs `migrate` on each.
+**Excluded**: already-migrated / worktrees (a separate checkout of the same repo) / paths registered in the denylist.
 
 ### Handling of scope (client / NDA)
-`--all` could consolidate and push knowledge of projects including other-company work / NDA targets into the shared org store (`<your-org>/ai-context-store`).
-This cross-client bulk move is designed to be **blocked by the safety classifier (deterministic hook)**, and the user lifts it via their own `!` execution.
-The migration eligibility of client projects (owner approval) is **assumed to be managed out-of-band by the operator**, and **the AI does not re-request approval** (does not emit redundant confirmations). Leaving client projects on legacy is the default and safe.
+`--all` can aggregate and push the knowledge of projects that include other companies' work or NDA-covered material into a shared org store (`<your-org>/ai-context-store`).
+This cross-client bulk move is designed to be **blocked by the safety classifier (a deterministic hook)**, and lifting the block requires the user's own `!` execution.
+Whether a client project may be migrated (owner approval) is **assumed to be managed out-of-band by the operator**, and **the AI does not re-request approval** (no redundant confirmations). Leaving client projects as legacy is the default and the safe choice.
 
-## Reflecting to the store (push)
+## Reflecting into the store (push)
 
-After the migration copy, commit + push the store to share / sync with other machines (optional, separate step):
+After the migration copy, commit + push the store to share it / sync to other machines (optional, separate step):
 
 ```
 git -C ~/ai-context-store add -A
 git -C ~/ai-context-store commit -m "feat: migrate <project> ai-context to central store"
-git -C ~/ai-context-store push origin main   # the store allows direct push to main via the marker
+git -C ~/ai-context-store push origin main   # the store allows direct push to main via its marker
 ```
 
-Search artifacts (`*-combined.txt`, etc.), `.mapping.json`, and `[Memo]*` are already excluded by the store's `.gitignore`.
-
-<!-- merged from prune.md -->
-## prune — detect and confirm-delete empty / unnecessary folders
-
-Detect "empty directories", "post-central-migration legacy", and "mis-generated in non-project locations" around ai-context, and
-**present a list → user confirmation → delete**. Deletion is a destructive operation, so **always confirm** first (self-driving principle: proposals are automatic, destruction is confirmed).
-
-## The 3 kinds detected
-
-### A. Empty directories
-Directories under the ai-context base with no contents (a directory containing only `.gitkeep` is also a candidate).
-```
-BASE=$(sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD")
-find "$BASE" -type d -empty 2>/dev/null
-## to also include directories containing only .gitkeep, judge separately
-```
-
-### B. Post-central-migration in-repo legacy `.ai-context/`
-When central mode (`.mapping.json` registered or `config.json: mode=central`) is in effect for a project and
-the old `.ai-context/` remains inside the repository. **Only propose removal after verifying that the store has equivalent content.**
-```
-mode=$(...) ; [ "$mode" = central ] || skip
-## confirm that decisions/docs exist in the store project dir
-## once a match is confirmed, ask "remove the in-repo legacy?"
-```
-- If the in-repo `.ai-context/` is **under git management**, the deletion becomes a git change in that repository. After deletion, prompt
-  the user to commit in that repo (do not commit on your own).
-
-### C. Mis-generation in non-project locations
-`.ai-context/` created directly under `$HOME` / outside a git work tree, etc. (a relic from before the `_ai-context-scaffold.sh` location guard).
-If it has contents (real files), **confirm the destination** first; if empty, confirm deletion.
-
-## Procedure
-
-1. Scan the above A/B/C, and **list by category** (path + file count + whether under git management).
-2. Confirm with the user whether each candidate may be deleted/removed (in bulk or one by one). For those with real data, guarantee that **no contents are lost** (B is store-verified, C has its destination confirmed).
-3. `rm -rf` only those confirmed (`$HOME` / FS root, etc. are out of scope).
-4. Report the result (count deleted / kept / repos with git changes).
-
-## Forbidden / safety
-
-- Do not delete without confirmation.
-- Do not delete other projects' `.ai-context/` that **hold real data** (unmigrated). Migration (`migrate`) comes first.
-- Destructive deletion of `$HOME` / `/`, etc. is doubly prevented with odd-kill-switch.
+Search artifacts (`*-combined.txt` etc.), `.mapping.json`, and `[Memo]*` are already excluded by the store's `.gitignore` (the canonical reference for the categories is [`directory-structure.md`](directory-structure.md)).
 
 <!-- merged from setup-and-denylist.md -->
-## First-time setup and denylist management
+## Fallback setup and denylist management
 
-## First-time setup (fallback for environments where hooks don't run)
+## Fallback setup (for environments where hooks don't run)
 
-In a CLI environment, the hook (`ai-context-auto.sh` / `ai-context-session-start.sh`) auto-generates the skeleton on the central-store side (store-first: nothing is created in the repo). **In Claude Desktop / IDE extensions / Web UI, hooks do not fire**, so when this skill fires and you detect the base is not generated, run the following with Bash as a fallback:
+In a CLI environment, hooks (`ai-context-auto.sh` / `ai-context-session-start.sh` / `_ai-context-scaffold.sh`) auto-generate the skeleton on the central store side (or, when not yet registered, on a temporary local `~/ai-context-local/<project>/`) (store-first: no in-repo `.ai-context/` is created). **In Claude Desktop / IDE extensions / the Web UI, hooks do not fire**, so when this skill fires and detects that the base has not been generated, run the following with Bash as a fallback:
 
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/hooks/_ai-context-scaffold.sh" "$PWD"
 ```
 
-`_ai-context-scaffold.sh` writes **only to the store side** (secure the store root + register mapping + generate the project skeleton). It does not touch the repo's `.gitignore` at all. For the standard buckets generated, see the store layout in [`directory-structure.md`](directory-structure.md).
+`_ai-context-scaffold.sh` writes **only on the store / temporary-local side** (ensures the store root + registers the mapping + generates the project skeleton). It never touches the repo's `.gitignore`. For the standard buckets that are generated, see the store layout in [`directory-structure.md`](directory-structure.md) (not repeated here).
 
-**Confirmation procedure**: right after the skill fires, resolve the base with `BASE=$(sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD")`, confirm `[ -d "$BASE/decisions" ]`, and run the above command if absent. Do nothing if it exists (idempotent).
+**Verification procedure**: immediately after the skill fires, resolve the base with `BASE=$(sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD")`, check `[ -d "$BASE/decisions" ]`, and run the command above if it is absent. Does nothing if it already exists (idempotent).
 
 ## Denylist management (excluding banto itself)
 
-To handle cases where you **don't want the hooks to run** in a specific project (prototypes, other people's repositories, temporary work directories, etc.), the SessionStart / UserPromptSubmit hooks exit early for paths (and their subtrees) listed in `~/.claude/banto-ignore`.
+For cases where you **don't want hooks to run** in a particular project (prototypes / someone else's repository / a temporary working directory, etc.), the SessionStart / UserPromptSubmit hooks early-exit on any path (and anything under it) listed in `~/.claude/banto-ignore`.
 
-When the user says things like "don't run ai-context in this project", "suppress scaffold", or "I want to exclude it", register it via the command:
+When the user says something like "don't run ai-context in this project," "suppress the scaffold," or "I want to exclude this," register it via the command:
 
 ```
 /ai-context ignore add            # exclude the current CWD
 /ai-context ignore add <path>     # exclude an arbitrary path
-/ai-context ignore list           # list registrations
-/ai-context ignore remove <N>     # delete line number N
+/ai-context ignore list           # list registered entries
+/ai-context ignore remove <N>     # remove line number N
 ```
 
 See `references/ignore.md` for the file spec.
 
-Note: a denylist addition **only suppresses new store scaffolding on that path (and its subtree) on a per-project basis**. A project dir already created on the store side must be deleted manually by the user (not automated because it is a destructive operation). Since nothing is created on the repo side to begin with, no repo cleanup is needed.
+Note: adding to the denylist **only suppresses new store scaffolding for that path (and anything under it), on a per-project basis**. A project dir that was already created on the store / temporary-local side must be deleted manually by the user (not automated, since it is a destructive operation). Nothing is created on the repo side in the first place, so no repo cleanup is needed.
 
-## Firing conditions of auto-scaffold (location guard)
+## Firing conditions for auto scaffold (location guard)
 
-Separately from the denylist, `_ai_context_should_skip` **deterministically prevents mis-generation into non-project locations**:
+Separate from the denylist, `_ai_context_should_skip` **deterministically prevents mis-generation in non-project locations**:
 
-- Auto-scaffold **only inside a git work tree**. Do not create a store project dir directly under `$HOME` / at the filesystem root / in a non-git-managed directory (so that opening a session from HOME does not register a wrong project in the store).
-- For a new non-git project, scaffold explicitly with `/init` + `harness-setup.sh --project` (self-driving harness principle: create only when there is explicit intent).
-- This guard does not depend on the presence of the denylist file (always in effect even without the file).
-
+- Auto scaffold runs **only inside a git work tree**. No store / temporary-local project dir is created directly under `$HOME`, at the filesystem root, or in a directory not under git management (so opening a session from HOME does not register a bogus project).
+- Scaffold a new non-git project explicitly with `/init` + `harness-setup.sh --project` (the self-driving harness principle: create only when there is explicit intent).
+- This guard does not depend on whether the denylist file exists (it is always in effect, even with no file).

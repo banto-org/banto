@@ -134,6 +134,44 @@ def rank(dirs: list[Path], groups, top: int, threshold: float) -> dict:
     return {"confident": confident, "results": results[:top]}
 
 
+# ------------------------------------------------------- 3-layer retrieval
+
+# leading YYYY-MM-DD (optionally -HHMMSS) in a decision/research filename
+DATE_PAT = re.compile(r"(\d{4}-\d{2}-\d{2})(?:-\d{6})?")
+
+
+def _extract_date(path: str) -> str:
+    """Pull the leading date out of a store filename (decisions/research convention); '' if none."""
+    m = DATE_PAT.search(Path(path).name)
+    return m.group(1) if m else ""
+
+
+def layered(ranked: dict, index_top: int) -> dict:
+    """Wrap rank() output into claude-mem's 3-layer retrieval shape (token-budget control).
+
+    The model reads layers progressively and only Read-opens full files when needed:
+      - layer1 index   : compact one-liner per hit (path + score + matched terms) — cheapest
+      - layer2 timeline: the same hits ordered by date (chronological context)
+      - layer3 full    : the existing detailed rows ({score, path, hits}) — last, before Read
+
+    Additive only: the underlying confident/results are preserved verbatim under layer3.
+    """
+    results = ranked["results"]
+    index = [
+        {"path": r["path"], "score": r["score"], "terms": list(r["hits"].keys())}
+        for r in results[:index_top]
+    ]
+    timeline = sorted(
+        ({"date": _extract_date(r["path"]), "path": r["path"], "score": r["score"]} for r in results),
+        key=lambda e: e["date"],
+        reverse=True,
+    )
+    return {
+        "confident": ranked["confident"],
+        "layers": {"index": index, "timeline": timeline, "full": results},
+    }
+
+
 # ---------------------------------------------------------------- self-test
 
 def self_test() -> int:
@@ -204,6 +242,26 @@ def self_test() -> int:
         check("rule1 tier weights: Tier2 volume does not beat the Tier1 hit",
               names.index("auth-design.md") < names.index("approval-flood.md"))
 
+        # 3-layer retrieval (claude-mem index→timeline→full): additive wrapper over rank()
+        (dec / "2026-01-10_auth-old.md").write_text("# 旧 認証\n認証 認証 認証 を採用。\n", encoding="utf-8")
+        (dec / "2026-06-20-091500_auth-new.md").write_text("# 新 認証\n認証 認証 認証 認証 へ移行。\n", encoding="utf-8")
+        raw = rank([dec, docs], AUTH, 8, 1.0)
+        lay = layered(raw, index_top=3)
+        check("3layer: layers has index/timeline/full",
+              set(lay["layers"].keys()) == {"index", "timeline", "full"})
+        check("3layer: full layer equals raw results (additive, no scoring change)",
+              lay["layers"]["full"] == raw["results"])
+        check("3layer: confident is carried through unchanged",
+              lay["confident"] == raw["confident"])
+        check("3layer: index is compact (path/score/terms only) and capped by index_top",
+              len(lay["layers"]["index"]) <= 3
+              and all(set(e.keys()) == {"path", "score", "terms"} for e in lay["layers"]["index"]))
+        tl_dates = [e["date"] for e in lay["layers"]["timeline"] if e["date"]]
+        check("3layer: timeline is newest-first by filename date",
+              tl_dates == sorted(tl_dates, reverse=True)
+              and "2026-06-20" in tl_dates and "2026-01-10" in tl_dates
+              and tl_dates.index("2026-06-20") < tl_dates.index("2026-01-10"))
+
     print(f"\n{'ALL PASS' if not failures else f'{len(failures)} FAILURES: ' + ', '.join(failures)}")
     return 0 if not failures else 1
 
@@ -216,6 +274,9 @@ def main() -> int:
     ap.add_argument("--project-root", default="")
     ap.add_argument("--top", type=int, default=8)
     ap.add_argument("--threshold", type=float, default=1.0)
+    ap.add_argument("--layered", action="store_true",
+                    help="emit claude-mem 3-layer retrieval (index/timeline/full) for token-budget control")
+    ap.add_argument("--index-top", type=int, default=5)
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
 
@@ -233,7 +294,9 @@ def main() -> int:
     if not dirs:
         print("--dirs or --base is required", file=sys.stderr)
         return 2
-    print(json.dumps(rank(dirs, groups, args.top, args.threshold), ensure_ascii=False, indent=1))
+    ranked = rank(dirs, groups, args.top, args.threshold)
+    out = layered(ranked, args.index_top) if args.layered else ranked
+    print(json.dumps(out, ensure_ascii=False, indent=1))
     return 0
 
 

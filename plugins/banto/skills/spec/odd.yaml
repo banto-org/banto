@@ -3,31 +3,31 @@
 
 schema_version: 1
 skill: spec
-autonomy_level: L1  # Suggest (spec generation, template selection + dialogue on goal forks)
+autonomy_level: L1  # Suggest (generates the spec, selects the template + dialogue at goal forks)
 
 in_scope:
-  - Dialogue-driven selection among the 6 industry-standard templates (Spec Kit / PRD / Design Doc / RFC / ADR / Scope Doc)
-  - Write the spec to .ai-context/specs/
+  - Interactive selection among 6 industry-standard templates (Spec Kit / PRD / Design Doc / RFC / ADR / Scope Doc)
+  - Write the spec to {base}/specs/
   - Disclose the adopted-interpretation report
-  - Delegation to the architect subagent (more than 5 files or spanning multiple modules)
+  - Delegate to the architect subagent (more than 5 files or spanning multiple modules)
 
 out_of_scope:
-  - Both design + implementation (self-driving implementation straight after spec)
-  - Minor fixes without a goal fork (proceed with adopted interpretations)
-  - Detailed editing of an existing spec (direct Edit)
+  - Both design and implementation (autonomously implementing right after the spec)
+  - Minor fixes with no goal fork (proceed with an adopted interpretation)
+  - Detailed edits to an existing spec (edit it directly)
 
 safety_boundaries:
-  - Write target: only under .ai-context/specs/
-  - No changes to implementation code (design only)
+  - "Write target: only under {base}/specs/"
+  - No changes to the code itself (design only)
   - Only readonly operations via Bash(git:*) are permitted
 
 kill_switch_conditions:
-  - Overwriting the same spec file 3 times in a row
-  - The architect subagent failing 3 times in a row
-  - Spec size exceeding 5000 lines (excessive bloat)
+  - The same spec file is overwritten 3 times in a row
+  - The architect subagent fails 3 times in a row
+  - The spec exceeds 5000 lines (excessive bloat)
 
 approval_gates:
-  - Finalizing the template type (1 of 6)
-  - When there is a goal fork (options that change acceptance criteria, impact surface, or security)
-  - Overwriting an existing .ai-context/specs/ file
+  - Confirming the template type (1 of the 6)
+  - When a goal fork exists (options that change the acceptance criteria, impact surface, or security)
+  - Overwriting an existing {base}/specs/ file
   - Before launching the architect subagent delegation

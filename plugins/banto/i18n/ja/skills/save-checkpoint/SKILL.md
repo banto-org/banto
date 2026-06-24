@@ -1,7 +1,7 @@
 ---
 name: save-checkpoint
 description: |
-  現在のセッション状態をチェックポイントとして .ai-context/sessions/ 配下に保存し、compact または clear を推奨する。
+  現在のセッション状態をチェックポイントとして {base}/sessions/ 配下に保存し、compact または clear を推奨する。
   トリガー: 「チェックポイント保存」「状態保存して」「clear前に保存」「compact前に保存」。/save-checkpoint でも起動可。
   使わない場面: ユーザーが状態保存を求めずに単に compact/clear に言及しただけのとき、または設計判断の記録（ai-context skill の decisions/）のとき。このスキルは /compact・/clear を決して自分で実行しない。
 user-invocable: true
@@ -18,15 +18,15 @@ compatibility: Claude Code (requires bash, git, jq)
 ## Step 1: 診断情報を収集
 
 以下を並列で確認する:
-- 決定ログ: `find .ai-context/decisions -name "*.md" | wc -l`（総数）
-- 今日の決定: `find .ai-context/decisions -name "$(date +%Y-%m-%d)_*.md" | wc -l`
-- 既存のチェックポイント: `find .ai-context/sessions -name "checkpoint-*.md" | wc -l`
-- リサーチ: `find .ai-context/docs/research -name "*.md" | wc -l`
+- 決定ログ: `find {base}/decisions -name "*.md" | wc -l`（総数）
+- 今日の決定: `find {base}/decisions -name "$(date +%Y-%m-%d)_*.md" | wc -l`
+- 既存のチェックポイント: `find {base}/sessions -name "checkpoint-*.md" | wc -l`
+- リサーチ: `find {base}/docs/research -name "*.md" | wc -l`
 - 仕様ドキュメント: `docs/requirements.md`, `docs/design.md`, `docs/tasks.md`
 
 ## Step 2: チェックポイントファイルを作成
 
-保存先: `.ai-context/sessions/checkpoint-{YYYY-MM-DD}-{HHMM}.md`
+保存先: `{base}/sessions/checkpoint-{YYYY-MM-DD}-{HHMM}.md`
 
 Write ツールで以下のフォーマットで保存する:
 

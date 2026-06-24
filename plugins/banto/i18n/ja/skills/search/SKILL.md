@@ -67,6 +67,24 @@ python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_search_rank.py" \
 - 出力 JSON の `confident: false`（top score < 1.0）は**ゼロヒット**として扱う → Step 4 へ
 - `confident: true` → Step 3 へ
 
+### Step 2.5: 3 層取得（トークン予算の制御。ヒット過多 / 全件俯瞰のとき）
+
+ヒットが多い、または「一覧で俯瞰したい」「経緯を時系列で」といったときは `--layered` を付け、**index → timeline → full** の 3 層で段階的に取得する（claude-mem の 3 層取得パターン。安い層から読み、必要なファイルだけ Read で開いてトークンを節約する）：
+
+```bash
+python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_search_rank.py" \
+  --base "{base}" --top 8 --layered --index-top 5 \
+  --groups '[[1.0,["認証","auth","OAuth"]],[0.6,["認可"]]]'
+```
+
+出力は `{confident, layers:{index, timeline, full}}`（`--layered` 無しの `{confident, results}` は従来どおり・互換）。各層の読み方と表示順：
+
+1. **index（最安・まず読む）**：上位 `--index-top` 件を `path / score / terms（一致語）` の 1 行に圧縮した索引。まずこれだけ提示し、開く候補を絞る
+2. **timeline（時系列の文脈）**：全ヒットをファイル名先頭の日付（`YYYY-MM-DD`）で **新しい順** に並べた列。経緯・supersede 関係の俯瞰に使う（日付の無いものは末尾）
+3. **full（最後・Read 直前）**：従来の `score / path / hits` 詳細行。index と timeline で開くと決めたファイルだけを Read する
+
+index だけで足りるなら full は開かない。経緯質問なら timeline を主に提示する。確信ヒットがあれば Step 3 へ（開くと決めたファイルだけ検証する）。
+
 ### Step 3: 検証（Read して判断）
 
 上位 3〜5 ファイルを Read し、**関連性を自分で判断**する：
@@ -125,7 +143,7 @@ deep パスが正解にたどり着いたら、効いた展開を 1 行として
 ### Notes
 - {supersede relations, explicit "not confident", etc.}
 
-### Search method: {fast (ranking vN) / deep (haiku xN parallel, wall time Xs) / cross-store: {store names,...}}
+### Search method: {fast (ranking vN) / fast+layered (index→timeline→full) / deep (haiku xN parallel, wall time Xs) / cross-store: {store names,...}}
 ```
 
 **確信がない**場合（しきい値を下回って終わった場合）は、推測で埋めず「確信なし」と明示する。

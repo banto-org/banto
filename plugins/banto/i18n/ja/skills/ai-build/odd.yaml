@@ -1,0 +1,40 @@
+# ODD Spec for ai-build
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: ai-build
+autonomy_level: L3  # Autopilot（継続実行＋例外時のみ owner 要求）。手法/モデル選定の goal fork は Stage4 で 1 度確認 / eval green-red は閾値で deterministic / push/PR/main は人間ゲート
+
+in_scope:
+  - AI 機能（LLM / RAG / agent / プロンプト）の要件定義 → 設計 → 実装 → eval → 反復の自走フロー
+  - 内部検索（search）→ 最新調査（research）の鮮度ゲート結線（evidence-first 準拠）
+  - 手法選定（prompt / RAG / fine-tune）とモデル選定（id・価格は claude-api skill に委譲）
+  - eval 計画（成功基準 → ケース集 + 採点軸）と LLM-as-judge の実行（ai-eval-judge.sh）
+  - 採用手法 / モデル / eval 結果の決定記録（provisional → accepted 昇格、ai-context skill）
+
+out_of_scope:
+  - AI 要素のない通常実装（dev-loop / 自走）／設計仕様だけの生成（spec）／思想形成（concept）
+  - 既存ストアの内部検索のみ（search skill）／純粋な外部調査のみ（research skill）
+  - Claude API の id・価格・パラメータ・キャッシュの参照（claude-api skill を直接読む）
+  - eval の本格基盤（promptfoo / RAGAS の同梱）— 最小 LLM-as-judge + 外部ツール案内に留める
+  - push / PR / main マージ／外部投稿（人間ゲート・safety rule）
+
+safety_boundaries:
+  - eval ケース集に本番 client データ / PII / 内部名を混ぜない（egress-guard が client パス流出を遮断）
+  - Claude の id・価格を SKILL.md / スクリプトに焼き込まない（claude-api skill が正本）
+  - ai-eval-judge.sh は claude / jq 不在で no-op（fail-open）— eval 不能で実装を止めない
+  - commit はブランチ止まり。push / PR / main / 削除 / 外部投稿は実行しない（人間ゲート）
+
+kill_switch_conditions:
+  - 手法 / モデル選定が goal fork（受け入れ基準・コスト桁・コンプラ意味が変わる）→ Stage4 で停止・owner へ
+  - eval が red のまま「完了」主張（verify-claim-guard.sh が Stop でブロック）
+  - 改善なし N 周（plateau）で成功基準に到達しない → 周回停止・owner へ
+  - 不可逆 / 外向き操作（push・PR・main・削除・外部投稿）の要求 → 停止・owner へ
+
+approval_gates:
+  - Stage 4: 手法（prompt / RAG / fine-tune）+ モデル選定の根拠を 1 度提示して確認
+  - eval ケース集に外部データを取り込む場合は出所を確認（PII / NDA）
+
+metrics:
+  eval_pass_threshold: 70
+  eval_plateau_rounds: 3

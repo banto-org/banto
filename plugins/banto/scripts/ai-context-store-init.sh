@@ -11,11 +11,21 @@
 #   sh ai-context-store-init.sh --register <org/name>  # register an EXISTING repo (clone + map, never create) (A4)
 #   sh ai-context-store-init.sh --org <org>        # remember <org> only (saved to the user-scope conf) (A3)
 #
+#   # ai-context-subsystem-redesign (spec 2026-06-24) — non-blocking local store + later GitHub backing:
+#   sh ai-context-store-init.sh bootstrap [<org/name>|<org>] [--cwd <dir>]
+#       # back this repo with a GitHub central store: register an existing <org/name>, or create one in
+#       # <org> (persisted to ~/.claude/banto-store-target.conf), then MIGRATE ~/ai-context-local/<project>
+#       # into the central store (additive rsync; never overwrites — conflicts are reported and skipped,
+#       # leaving both copies). With no arg, falls back to the persisted/bundled org. Idempotent.
+#   sh ai-context-store-init.sh local [--cwd <dir>]
+#       # pin this repo local-only (local store mapping local:true). Skips bootstrap/migration forever.
+#
 # A bare <org> argument (or --create <org> / --org <org>) is SAVED to the user-scope conf
 # ~/.claude/banto-store-target.conf so later projects reuse it and only confirm creation (A3).
 # The bundled config/store-target.conf stays the fallback default.
 #
 # Design: .ai-context/decisions/2026-05-30_002_ai-context-store-org-locked-target_*.md
+#         docs/specs/2026-06-24_ai-context-subsystem-redesign_spec.md (bootstrap / local / migration)
 set -u
 
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
@@ -23,6 +33,17 @@ CONF="$PLUGIN_ROOT/config/store-target.conf"
 [ -f "$CONF" ] || { printf 'Error: constants file not found: %s\n' "$CONF"; exit 1; }
 # shellcheck disable=SC1090
 . "$CONF"
+
+# paths helper provides local-store roots / derive / lookups (spec 2026-06-24).
+AI_PATHS="$PLUGIN_ROOT/scripts/_ai-context-paths.sh"
+# shellcheck disable=SC1090
+[ -f "$AI_PATHS" ] && . "$AI_PATHS"
+
+# Resolve the git toplevel of <dir> (or $PWD). Echoes nothing outside git.
+_aci_toplevel() { # [dir]
+    command -v git >/dev/null 2>&1 || return 1
+    git -C "${1:-$PWD}" rev-parse --show-toplevel 2>/dev/null
+}
 
 # user-scope override (survives `claude plugin update` — edits to the plugin-scope conf above
 # are reverted on every update for marketplace installs; 2026-06-12 audit H-15).
@@ -34,6 +55,119 @@ if [ -f "$USER_CONF" ]; then
 fi
 
 LOCAL="${AI_CONTEXT_STORE_LOCAL:-$AI_CONTEXT_STORE_LOCAL_DEFAULT}"
+
+# === spec 2026-06-24 subcommands: local / bootstrap ========================
+# These take a different argument shape ([<org>] [--cwd <dir>]) than the legacy flags,
+# so parse them up front and translate into the legacy flow (bootstrap) or exit (local).
+DO_MIGRATE=0
+SUBCMD=""
+BOOT_ORG_ARG=""
+BOOT_CWD="$PWD"
+case "${1:-}" in
+    local|bootstrap)
+        SUBCMD="$1"; shift
+        # remaining args: optional <org/name>|<org>, optional --cwd <dir>
+        while [ $# -gt 0 ]; do
+            case "$1" in
+                --cwd) BOOT_CWD="${2:-$PWD}"; shift 2 || shift ;;
+                -*)    printf 'Error: unknown option for %s: %s\n' "$SUBCMD" "$1"; exit 1 ;;
+                *)     BOOT_ORG_ARG="$1"; shift ;;
+            esac
+        done
+        ;;
+esac
+
+# Migrate ~/ai-context-local/<project> → central store/<project>. Additive only: NEVER overwrite.
+# Conflicting files (already present in dest) are reported and left in BOTH places (manual merge).
+# rsync --ignore-existing is the primary path; cp -n is the POSIX fallback. Returns 0 always.
+_aci_migrate_local() { # src_dir dest_dir
+    _aml_src="$1"; _aml_dest="$2"
+    [ -d "$_aml_src" ] || { printf 'No local store to migrate (%s absent) — nothing to do.\n' "$_aml_src"; return 0; }
+    mkdir -p "$_aml_dest" 2>/dev/null
+    # Report conflicts (files present in both) up front so the user can merge them by hand.
+    _aml_conflicts=0
+    while IFS= read -r _aml_f; do
+        [ -n "$_aml_f" ] || continue
+        _aml_rel="${_aml_f#"$_aml_src"/}"
+        if [ -e "$_aml_dest/$_aml_rel" ]; then
+            [ "$_aml_conflicts" = "0" ] && printf '⚠ conflicts — these exist in the central store already; left in BOTH (merge manually):\n'
+            printf '    %s\n' "$_aml_rel"
+            _aml_conflicts=$((_aml_conflicts + 1))
+        fi
+    done <<MIGRATE_CONFLICT_SCAN
+$(find "$_aml_src" -type f 2>/dev/null)
+MIGRATE_CONFLICT_SCAN
+    if command -v rsync >/dev/null 2>&1; then
+        rsync -a --ignore-existing "$_aml_src"/ "$_aml_dest"/ 2>/dev/null
+    else
+        # cp -n = no-clobber (BSD + GNU). Recreate the tree, then copy non-existing files.
+        ( cd "$_aml_src" 2>/dev/null || exit 0
+          find . -type d -exec mkdir -p "$_aml_dest/{}" \; 2>/dev/null
+          find . -type f | while IFS= read -r _cf; do
+              cp -n "$_cf" "$_aml_dest/$_cf" 2>/dev/null
+          done )
+    fi
+    if [ "$_aml_conflicts" = "0" ]; then
+        printf '✓ migrated local store → central (additive): %s → %s\n' "$_aml_src" "$_aml_dest"
+    else
+        printf '✓ migrated non-conflicting files; %s conflict(s) left in both (source kept at %s)\n' "$_aml_conflicts" "$_aml_src"
+    fi
+    return 0
+}
+
+# `local`: pin this repo local-only (local store mapping local:true). Skip bootstrap/migration.
+if [ "$SUBCMD" = "local" ]; then
+    command -v jq >/dev/null 2>&1 || { printf 'Error: jq is required\n'; exit 1; }
+    command -v _ai_context_local_mapping >/dev/null 2>&1 \
+        || { printf 'Error: paths helper not found (%s)\n' "$AI_PATHS"; exit 1; }
+    _ltop=$(_aci_toplevel "$BOOT_CWD")
+    [ -z "$_ltop" ] && { printf 'Error: not inside a git repo (%s)\n' "$BOOT_CWD"; exit 1; }
+    _lroot=$(_ai_context_local_root)
+    _lmap=$(_ai_context_local_mapping)
+    mkdir -p "$_lroot" 2>/dev/null
+    [ -f "$_lroot/.ai-context-local" ] || touch "$_lroot/.ai-context-local" 2>/dev/null
+    if [ ! -f "$_lmap" ]; then
+        printf '{\n  "version": 2,\n  "store_root": "%s",\n  "projects": {}\n}\n' "$_lroot" > "$_lmap"
+    fi
+    # derive a project slug if the repo is not registered yet (so `local` works before any session).
+    _lproj=$(jq -r --arg top "$_ltop" '.projects[$top].project // empty' "$_lmap" 2>/dev/null)
+    if [ -z "$_lproj" ]; then
+        _lproj=$(AI_CONTEXT_STORE_ROOT="$_lroot" AI_CONTEXT_MAPPING="$_lmap" _ai_context_derive_dir "$_ltop")
+        _lproj=$(basename "$_lproj")
+    fi
+    if jq --arg top "$_ltop" --arg p "$_lproj" \
+          '.projects[$top] = ((.projects[$top] // {}) + {"project": $p, "local": true})' \
+          "$_lmap" > "$_lmap.tmp" 2>/dev/null; then
+        mv "$_lmap.tmp" "$_lmap"
+    else
+        rm -f "$_lmap.tmp" 2>/dev/null
+        printf 'Error: failed to update local mapping (%s)\n' "$_lmap"; exit 1
+    fi
+    mkdir -p "$_lroot/$_lproj" 2>/dev/null
+    printf '✓ pinned local-only: %s → %s (local:true; bootstrap/migration will skip it)\n' "$_ltop" "$_lroot/$_lproj"
+    exit 0
+fi
+
+# `bootstrap`: translate into the legacy create/register flow + enable migration at the end.
+if [ "$SUBCMD" = "bootstrap" ]; then
+    command -v jq >/dev/null 2>&1 || { printf 'Error: jq is required\n'; exit 1; }
+    # local-pinned repos must not be auto-sent to GitHub (spec Never).
+    if command -v _ai_context_is_local_pinned >/dev/null 2>&1; then
+        _btop=$(_aci_toplevel "$BOOT_CWD")
+        if [ -n "$_btop" ] && _ai_context_is_local_pinned "$_btop"; then
+            printf 'This repo is pinned local-only (local:true). bootstrap is a no-op.\n'
+            printf '  Unpin by editing %s if you really want to back it with GitHub.\n' "$(_ai_context_local_mapping)"
+            exit 0
+        fi
+    fi
+    DO_MIGRATE=1
+    # An <org/name> arg → register an existing repo; a bare <org> → create in that org.
+    case "$BOOT_ORG_ARG" in
+        */*) set -- --register "$BOOT_ORG_ARG" ;;
+        ?*)  set -- --create "$BOOT_ORG_ARG" ;;
+        *)   set -- --create ;;   # no arg → create with the persisted/bundled org
+    esac
+fi
 
 # --- argument parsing -------------------------------------------------------
 # Modes:
@@ -214,6 +348,56 @@ mkdir -p "$(dirname "$STORES_LIST")"
 if ! grep -qxF "$LOCAL" "$STORES_LIST" 2>/dev/null; then
     printf '%s\n' "$LOCAL" >> "$STORES_LIST"
     printf '✓ registered for nightly push: %s\n' "$STORES_LIST"
+fi
+
+# 5. bootstrap migration (spec 2026-06-24): move ~/ai-context-local/<project> into the central store,
+#    register the repo in the central mapping, and drop its entry from the local mapping.
+if [ "$DO_MIGRATE" = "1" ] && command -v _ai_context_local_root >/dev/null 2>&1; then
+    B_TOP=$(_aci_toplevel "$BOOT_CWD")
+    if [ -n "$B_TOP" ]; then
+        L_ROOT=$(_ai_context_local_root)
+        L_MAP=$(_ai_context_local_mapping)
+        C_MAP="${AI_CONTEXT_MAPPING:-$LOCAL/.mapping.json}"
+        # derive the central project slug for this repo (deterministic, collision-safe)
+        if command -v _ai_context_derive_dir >/dev/null 2>&1; then
+            C_DIR=$(AI_CONTEXT_STORE_ROOT="$LOCAL" AI_CONTEXT_MAPPING="$C_MAP" _ai_context_derive_dir "$B_TOP")
+        else
+            C_DIR="$LOCAL/$(basename "$B_TOP")"
+        fi
+        C_PROJ=$(basename "$C_DIR")
+        # local project slug (where the temp store lives), if registered locally
+        L_PROJ=""
+        [ -f "$L_MAP" ] && L_PROJ=$(jq -r --arg top "$B_TOP" '.projects[$top].project // empty' "$L_MAP" 2>/dev/null)
+        if [ -n "$L_PROJ" ] && [ -d "$L_ROOT/$L_PROJ" ]; then
+            _aci_migrate_local "$L_ROOT/$L_PROJ" "$C_DIR"
+        else
+            printf 'No local store registered for this repo — central store ready, nothing to migrate.\n'
+        fi
+        # register in the central mapping (path-based; remotes still auto-connect clones elsewhere).
+        # Create the mapping if it does not exist yet (.mapping.json is per-PC, never committed).
+        if [ ! -f "$C_MAP" ]; then
+            printf '{\n  "version": 2,\n  "store_root": "%s",\n  "projects": {}\n}\n' "$LOCAL" > "$C_MAP" 2>/dev/null
+        fi
+        if [ -f "$C_MAP" ]; then
+            if jq --arg top "$B_TOP" --arg p "$C_PROJ" \
+                  '.projects[$top] = ((.projects[$top] // {}) + {"project": $p, "local": false})' \
+                  "$C_MAP" > "$C_MAP.tmp" 2>/dev/null; then
+                mv "$C_MAP.tmp" "$C_MAP"
+                printf '✓ registered in the central mapping: %s → %s\n' "$B_TOP" "$C_DIR"
+            else
+                rm -f "$C_MAP.tmp" 2>/dev/null
+            fi
+        fi
+        # drop the local mapping entry so the resolver now points at the central store
+        if [ -n "$L_PROJ" ] && [ -f "$L_MAP" ]; then
+            if jq --arg top "$B_TOP" 'del(.projects[$top])' "$L_MAP" > "$L_MAP.tmp" 2>/dev/null; then
+                mv "$L_MAP.tmp" "$L_MAP"
+                printf '✓ removed the local mapping entry (now backed by the central store)\n'
+            else
+                rm -f "$L_MAP.tmp" 2>/dev/null
+            fi
+        fi
+    fi
 fi
 
 printf '\nDone. store = %s (%s)\n' "$LOCAL" "$REMOTE"
