@@ -15,8 +15,8 @@ it.** (The concept → spec → autonomous-implementation pipeline is dogfooded 
 - Type: Claude Code plugin (marketplace distribution). Core: `plugins/banto/`.
 - Layout: 18 skills (15 in v1 public scope; 3 dev-only via PLUGIN_EXCLUDE: status [pending telemetry
   review] + harness-audit [meta self-audit] + banto-port [maintainer-only: ports banto's own dev tree
-  to public]) / 6 agents / 34 registered
-  hooks (40 script files — 6 unregistered helpers invoked indirectly: scaffold / dashboard /
+  to public]) / 6 agents / 36 registered
+  hooks (42 script files — 6 unregistered helpers invoked indirectly: scaffold / dashboard /
   pending-channel / egress-guard.py / verify-detect / verify-run) / 9 rules. No bundled MCP.
   Version: `plugins/banto/.claude-plugin/plugin.json`.
 - Languages: POSIX sh (hooks) + Markdown (skills / rules / docs). `jq` required.

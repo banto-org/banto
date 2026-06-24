@@ -2,11 +2,12 @@
 # test-store-first-session.sh — 合成 HOME での session 一連テスト（store-first 受け入れ基準）
 # 実 hook（session-start → auto(prompt) → stop）を合成 payload で通し、
 #   基準 1: 未登録 repo（subdir 含む）で一連を実行しても repo 内に .ai-context/ が生成されない
-#   基準 2: 初回 scaffold で store 登録、2 回目以降は resolver hit（冪等）
-#   基準 3: 既存 legacy repo は従来どおり + 移行提案 1 行
-#   基準 4: dirname 衝突する 2 repo が別の project dir に解決される
+#   基準 2: 未登録 repo は黙って作らず、対話ブートストラップを 1 回だけ促す（marker で 2 回目は静か）。
+#           store 側にも一切登録・生成しない（A1）。
+#   基準 3: 既存 legacy repo は読み取り互換のまま + 移行提案（/ai-context migrate）1 行（A2）
+#   基準 4: dirname 衝突する 2 repo もどちらも黙って作らずクリーンのまま（A1）
 #   基準 5: denylist / HOME / 非 git / subdir では store 側にも登録・生成されない
-# を検証する。spec: docs/specs/2026-06-11_store-first-architecture_spec.md
+# を検証する。spec: 2026-06-24 store-bootstrap-search-routing-catalog-locked-spec（A1–A4）
 set -u
 
 DIR=$(cd "$(dirname "$0")/.." && pwd)
@@ -43,31 +44,40 @@ repo_clean() { # repodir label
     if [ ! -e "$1/.ai-context" ] && [ ! -e "$1/.gitignore" ]; then ok "$2"; else bad "$2"; fi
 }
 
-# === 基準 1+2: 未登録 repo toplevel で session 一連 ===
+# === 基準 1+2: 未登録 repo toplevel で session 一連（黙って作らず対話を促す） ===
 R="$TMP/proj/myrepo"
 mkdir -p "$R"
 git -C "$R" init -q
 OUT=$(run_hook "$SS" "{\"cwd\":\"$R\",\"source\":\"startup\"}")
 case "$OUT" in
-    *"ai-context ベース: $STORE/myrepo"*) ok "session-start: absolute store base injected" ;;
+    *"ai-context ベース: $STORE/myrepo"*) ok "session-start: derive base injected (read path resolves into the store)" ;;
     *) bad "session-start: base injection missing" ;;
 esac
 case "$OUT" in
-    *"Registered this repo"*) ok "session-start: first-time registration notified" ;;
-    *) bad "session-start: registration notice missing" ;;
+    *"store 未セットアップ"*) ok "criterion 2: bootstrap prompt emitted (not silent auto-create)" ;;
+    *) bad "criterion 2: bootstrap prompt missing" ;;
 esac
-[ -d "$STORE/myrepo/decisions" ] && ok "session-start: store skeleton created" || bad "session-start: store skeleton missing"
+case "$OUT" in
+    *"Registered this repo"*) bad "criterion 2: repo was silently auto-registered (should not be)" ;;
+    *) ok "criterion 2: no silent registration notice" ;;
+esac
+[ ! -e "$STORE/myrepo" ] && ok "criterion 2: store dir NOT created for unregistered repo" || bad "criterion 2: store dir silently created"
+[ ! -f "$MAP" ] && ok "criterion 2: mapping NOT created (no silent registration)" || bad "criterion 2: mapping silently created"
 run_hook "$AUTO" "{\"cwd\":\"$R\",\"prompt\":\"design talk\",\"session_id\":\"s1\"}" >/dev/null
 run_hook "$STOP" "{\"cwd\":\"$R\",\"transcript_path\":\"$TRANSCRIPT\"}" >/dev/null
 repo_clean "$R" "criterion 1: repo stays clean after start->prompt->stop"
-# 冪等: 2 回目は再登録なし + 同じ base
+# marker gate: 2 回目はブートストラップ案内を出さない（毎回 nag しない）
 OUT2=$(run_hook "$SS" "{\"cwd\":\"$R\",\"source\":\"startup\"}")
 case "$OUT2" in
-    *"Registered this repo"*) bad "criterion 2: second session re-registered" ;;
-    *"ai-context ベース: $STORE/myrepo"*) ok "criterion 2: second session resolver hit (idempotent)" ;;
-    *) bad "criterion 2: second session lost the base" ;;
+    *"store 未セットアップ"*) bad "criterion 2: bootstrap prompt re-emitted (marker did not gate)" ;;
+    *) ok "criterion 2: second session does not re-prompt (marker gates)" ;;
 esac
-[ "$(jq '.projects | length' "$MAP")" = "1" ] && ok "criterion 2: single mapping entry" || bad "criterion 2: duplicate mapping entries"
+# marker は hook が解決する git toplevel（macOS では /private 実体パス）を slug 化する
+R_TOP=$(git -C "$R" rev-parse --show-toplevel 2>/dev/null)
+R_SLUG=$(printf '%s' "$R_TOP" | sed 's#[^A-Za-z0-9._-]#_#g')
+[ -f "$FAKE_HOME/.claude/banto-bootstrap-asked/$R_SLUG" ] \
+    && ok "criterion 2: bootstrap-asked marker written (user scope)" \
+    || bad "criterion 2: bootstrap-asked marker missing"
 
 # === 基準 1+5: 未登録 repo の subdir ===
 R2="$TMP/proj2/subrepo"
@@ -83,7 +93,6 @@ run_hook "$STOP" "{\"cwd\":\"$R2/deep/inside\",\"transcript_path\":\"$TRANSCRIPT
 repo_clean "$R2" "criterion 1: subdir session leaves repo clean"
 repo_clean "$R2/deep/inside" "criterion 1: subdir itself stays clean"
 [ ! -e "$STORE/subrepo" ] && ok "criterion 5: subdir does not register/create store side" || bad "criterion 5: subdir created store dir"
-[ "$(jq '.projects | length' "$MAP")" = "1" ] && ok "criterion 5: subdir did not touch mapping" || bad "criterion 5: subdir registered in mapping"
 
 # === 基準 3: 既存 legacy repo は grandfather + 移行提案 1 行 ===
 G="$TMP/leg"
@@ -100,15 +109,19 @@ case "$OUT" in
 esac
 [ ! -e "$STORE/leg" ] && ok "criterion 3: legacy repo not registered to store" || bad "criterion 3: legacy repo registered"
 
-# === 基準 4: dirname 衝突 ===
+# === 基準 4: dirname 衝突する 2 repo もどちらも黙って作らずクリーンのまま（A1） ===
 C1="$TMP/a/dup"; C2="$TMP/b/dup"
 mkdir -p "$C1" "$C2"
 git -C "$C1" init -q; git -C "$C2" init -q
-run_hook "$SS" "{\"cwd\":\"$C1\",\"source\":\"startup\"}" >/dev/null
-run_hook "$SS" "{\"cwd\":\"$C2\",\"source\":\"startup\"}" >/dev/null
-[ -d "$STORE/dup/decisions" ] && [ -d "$STORE/dup-2/decisions" ] \
-    && ok "criterion 4: colliding dirnames resolve to dup / dup-2" \
-    || bad "criterion 4: collision suffix not applied"
+OUTC1=$(run_hook "$SS" "{\"cwd\":\"$C1\",\"source\":\"startup\"}")
+OUTC2=$(run_hook "$SS" "{\"cwd\":\"$C2\",\"source\":\"startup\"}")
+case "$OUTC1$OUTC2" in
+    *"store 未セットアップ"*) ok "criterion 4: colliding repos each get a bootstrap prompt" ;;
+    *) bad "criterion 4: bootstrap prompt missing for colliding repos" ;;
+esac
+[ ! -e "$STORE/dup" ] && [ ! -e "$STORE/dup-2" ] \
+    && ok "criterion 4: no store dirs auto-created for colliding repos" \
+    || bad "criterion 4: store dirs silently created on collision"
 repo_clean "$C1" "criterion 4: first colliding repo stays clean"
 repo_clean "$C2" "criterion 4: second colliding repo stays clean"
 
@@ -126,5 +139,5 @@ mkdir -p "$P"
 run_hook "$SS" "{\"cwd\":\"$P\",\"source\":\"startup\"}" >/dev/null
 [ ! -e "$P/.ai-context" ] && [ ! -e "$STORE/plaindir" ] && ok "criterion 5: non-git dir creates nothing" || bad "criterion 5: non-git leaked"
 
-[ "$fail" -eq 0 ] && echo "ALL OK"
+[ "$fail" -eq 0 ] && echo "ALL GREEN"
 exit "$fail"

@@ -37,7 +37,9 @@ check "subdir(prefix) → store/project" "$TMP/store/customer-A" "$(sh "$RESOLVE
 check "worktree sibling → same project" "$TMP/store/customer-A" "$(sh "$RESOLVER" /work/customer-A-wt1)"
 check "relative path appended" "$TMP/store/customer-A/decisions/x.md" "$(sh "$RESOLVER" /work/customer-A decisions/x.md)"
 check "different project" "$TMP/store/proj-b" "$(sh "$RESOLVER" --store-dir /work/proj-b)"
-sh "$RESOLVER" /work/unknown >/dev/null 2>&1; check_rc "unregistered cwd → exit 3" 3 "$?"
+# exit 3 (unregistered) is the signal the scaffold relies on for A1: no resolver hit →
+# do NOT auto-create, emit the bootstrap prompt instead. Keep this contract stable.
+sh "$RESOLVER" /work/unknown >/dev/null 2>&1; check_rc "unregistered cwd → exit 3 (A1 bootstrap signal)" 3 "$?"
 
 echo "== path-helper (store-first resolution) =="
 # central (registered)

@@ -1,6 +1,6 @@
 # Banto（番頭）
 
-**Claude Code のための自走ハーネス。** あなたは方針を決めるだけ — 店は番頭が回します。
+**Claude Code のための自走ハーネス。** あなたは方針を決めるだけ — 開発は番頭が回します。
 
 番頭とは、商家の主人に代わって店のすべてを切り盛りし、例外だけを主人に上げる筆頭奉公人のこと。
 Banto はその契約を AI 駆動開発に持ち込みます — あなたの思想・決定・知識を保持して Claude に食わせ、
@@ -17,7 +17,7 @@ Banto はその契約を AI 駆動開発に持ち込みます — あなたの�
   `dev-loop` が自走ビルドループ（分解 → 実装 → 検証 → 修正を緑になるまで・例外だけ owner へ）を駆動。
   思想層は CLAUDE.md に注入され、全エージェントの判断フィルタになります
 - **セッションを跨いで生きる AI コンテキスト** — 決定ログ / リサーチ / タスク / checkpoint を
-  中央ナレッジ store（`~/.ai-context-store/<project>/`）に保存し、セッション開始時に再注入。
+  中央ナレッジ store（`~/ai-context-store/<project>/`）に保存し、セッション開始時に再注入。
   **repo は汚れません** — 知識は store へ、code は repo へ。蓄積した知識への Claude ネイティブ
   内部検索（クエリ展開 + ランキング）。store layout は外部ツール向けの安定した read 契約:
   [ディレクトリ構造](plugins/banto/i18n/ja/skills/ai-context/references/directory-structure.md)
@@ -38,7 +38,7 @@ Banto はその契約を AI 駆動開発に持ち込みます — あなたの�
 - **日本語が正本・言語は切り替え式** — スキルとエージェントは日本語で書き、英語版はそこから生成して
   ズレ検査で同期。`/set-language ja|en` で実際に動くセットを片方の言語に切り替える。選択はプラグイン更新をまたいで保持。公開既定は英語。
 
-15 skill / 6 agent / 34 hook / 9 rule。MCP 同梱なし。セキュリティレビュー・コードレビューは
+15 skill / 6 agent / 36 hook / 9 rule。MCP 同梱なし。セキュリティレビュー・コードレビューは
 **Anthropic 公式 plugin への完全委譲**（再実装しない方針）。
 
 ## 必要なもの
@@ -74,8 +74,10 @@ sh "$(ls -d ~/.claude/plugins/cache/*/banto/*/ | sort -V | tail -1)scripts/harne
 行います（`--plan` で適用せずプレビュー）。CLAUDE.md は**ネイティブ `/init`**
 が生成し、プロジェクト側 rules は `harness-setup.sh --project` で配置します。コードレビューと
 セキュリティレビューはネイティブの `/code-review` / `/security-review` に委譲します（banto は
-再実装も自動インストールもしません）。中央ナレッジ store はセットアップ不要で動きます（初回
-セッションで repo を自動登録。チーム運用時のみ store の git 同期を設定）。
+再実装も自動インストールもしません）。中央ナレッジ store は**初回に一度だけ対話で**ブートストラップ
+します（黙ってローカル store を作らず、repo の初回セッションで SessionStart hook が確認します。既存の
+GitHub `ai-context-store` を登録するか／どの org に新規作成するか／ローカルのみか。選んだ org は以降の
+プロジェクトに再利用されます）。チーム運用時のみ store の git 同期を設定します。
 
 ## 日本語で使う（公開既定は英語）
 
