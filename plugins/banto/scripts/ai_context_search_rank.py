@@ -28,6 +28,26 @@ import re
 import sys
 from pathlib import Path
 
+
+def base_dirs(base: Path, project_root: Path) -> list[Path]:
+    """{base}/decisions + {base}/docs + existing extra_docs_dirs from {base}/config.json.
+
+    Mirrors ai_context_combined.py: extra_docs_dirs are project-root-relative path strings
+    under the top-level "extra_docs_dirs" key; missing dirs are skipped.
+    """
+    dirs = [base / "decisions", base / "docs"]
+    config_path = base / "config.json"
+    if config_path.exists():
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            config = {}
+        for d in config.get("extra_docs_dirs", []):
+            p = (project_root / d).resolve()
+            if p.exists() and p.is_dir():
+                dirs.append(p)
+    return dirs
+
 # v3 rule 5: aggregate-style files subject to demotion
 AGG_PAT = re.compile(r"\[Index\]|complete-guide|map-2026|-overview|\[QA\]")
 
@@ -193,6 +213,7 @@ def main() -> int:
     ap.add_argument("--groups", default="")
     ap.add_argument("--dirs", nargs="*", default=[])
     ap.add_argument("--base", default="")
+    ap.add_argument("--project-root", default="")
     ap.add_argument("--top", type=int, default=8)
     ap.add_argument("--threshold", type=float, default=1.0)
     ap.add_argument("--self-test", action="store_true")
@@ -207,7 +228,8 @@ def main() -> int:
     groups = json.loads(args.groups)
     dirs = [Path(d) for d in args.dirs]
     if args.base:
-        dirs += [Path(args.base) / "decisions", Path(args.base) / "docs"]
+        project_root = Path(args.project_root).resolve() if args.project_root else Path.cwd()
+        dirs += base_dirs(Path(args.base), project_root)
     if not dirs:
         print("--dirs or --base is required", file=sys.stderr)
         return 2

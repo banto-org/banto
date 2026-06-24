@@ -6,8 +6,14 @@
 # (prevents silently re-pointing where knowledge leaks to).
 #
 # Usage:
-#   sh ai-context-store-init.sh            # clone if the remote exists, otherwise guidance (for members)
-#   sh ai-context-store-init.sh --create   # create a private repo if the remote is missing (admin first run)
+#   sh ai-context-store-init.sh                    # clone if the remote exists, otherwise guidance (for members)
+#   sh ai-context-store-init.sh --create [<org>]   # create a private repo if the remote is missing (admin first run)
+#   sh ai-context-store-init.sh --register <org/name>  # register an EXISTING repo (clone + map, never create) (A4)
+#   sh ai-context-store-init.sh --org <org>        # remember <org> only (saved to the user-scope conf) (A3)
+#
+# A bare <org> argument (or --create <org> / --org <org>) is SAVED to the user-scope conf
+# ~/.claude/banto-store-target.conf so later projects reuse it and only confirm creation (A3).
+# The bundled config/store-target.conf stays the fallback default.
 #
 # Design: .ai-context/decisions/2026-05-30_002_ai-context-store-org-locked-target_*.md
 set -u
@@ -28,10 +34,70 @@ if [ -f "$USER_CONF" ]; then
 fi
 
 LOCAL="${AI_CONTEXT_STORE_LOCAL:-$AI_CONTEXT_STORE_LOCAL_DEFAULT}"
+
+# --- argument parsing -------------------------------------------------------
+# Modes:
+#   --create [<org>]       create a private repo if the remote is missing
+#   --register <org/name>  register an EXISTING repo (clone + map), never create (A4)
+#   --org <org>            persist <org> to the user-scope conf only (A3) and exit
+#   <org>                  bare org → persist it (A3), then proceed like the default clone path
+DO_CREATE=0
+DO_REGISTER=0
+REGISTER_REPO=""
+ARG_ORG=""
+case "${1:-}" in
+    --create)   DO_CREATE=1; ARG_ORG="${2:-}" ;;
+    --register) DO_REGISTER=1; REGISTER_REPO="${2:-}"
+                [ -z "$REGISTER_REPO" ] && { printf 'Error: --register requires <org/name>\n'; exit 1; } ;;
+    --org)      ARG_ORG="${2:-}"
+                [ -z "$ARG_ORG" ] && { printf 'Error: --org requires <org>\n'; exit 1; } ;;
+    "")         : ;;
+    -*)         printf 'Error: unknown option: %s\n' "$1"; exit 1 ;;
+    *)          ARG_ORG="$1" ;;
+esac
+
+# A3: remember the chosen org in the user-scope conf so later projects reuse it.
+# --register implies an org from the repo path; a bare/--create/--org arg is the explicit org.
+persist_org() { # org
+    [ -z "$1" ] && return 0
+    mkdir -p "$(dirname "$USER_CONF")" 2>/dev/null
+    if [ -f "$USER_CONF" ] && grep -q '^AI_CONTEXT_STORE_ORG=' "$USER_CONF" 2>/dev/null; then
+        # replace the existing line in place (portable: rewrite via a temp file)
+        _po_tmp="$USER_CONF.tmp.$$"
+        sed "s|^AI_CONTEXT_STORE_ORG=.*|AI_CONTEXT_STORE_ORG=\"$1\"|" "$USER_CONF" > "$_po_tmp" 2>/dev/null \
+            && mv "$_po_tmp" "$USER_CONF" || rm -f "$_po_tmp" 2>/dev/null
+    else
+        printf 'AI_CONTEXT_STORE_ORG="%s"\n' "$1" >> "$USER_CONF"
+    fi
+    AI_CONTEXT_STORE_ORG="$1"
+    printf '✓ remembered org → %s (%s)\n' "$1" "$USER_CONF"
+}
+
+if [ -n "$ARG_ORG" ]; then
+    persist_org "$ARG_ORG"
+fi
+
+# --register: derive org/repo from the given org/name, persist the org, register only.
+if [ "$DO_REGISTER" = "1" ]; then
+    REG_ORG="${REGISTER_REPO%%/*}"
+    REG_REPO="${REGISTER_REPO#*/}"
+    if [ -z "$REG_ORG" ] || [ -z "$REG_REPO" ] || [ "$REG_ORG" = "$REGISTER_REPO" ]; then
+        printf 'Error: --register expects <org/name> (e.g. my-org/ai-context-store)\n'; exit 1
+    fi
+    persist_org "$REG_ORG"
+    AI_CONTEXT_STORE_REPO="$REG_REPO"
+fi
+
+# --org alone: persist and exit (no clone/create).
+if [ -n "$ARG_ORG" ] && [ "${1:-}" = "--org" ]; then
+    printf '\nDone. org saved. Re-run with --create or --register, or just start a session to bootstrap.\n'
+    exit 0
+fi
+
 if [ -z "${AI_CONTEXT_STORE_ORG:-}" ]; then
     printf 'Error: AI_CONTEXT_STORE_ORG is not set.\n'
-    printf '  Persistent (recommended): create %s with a line like\n' "$USER_CONF"
-    printf '    AI_CONTEXT_STORE_ORG="your-github-org-or-username"\n'
+    printf '  Persistent (recommended): pass the org once — it is saved to %s:\n' "$USER_CONF"
+    printf '    sh ai-context-store-init.sh --org <your-github-org-or-username>\n'
     printf '  (Editing %s also works but is reverted by `claude plugin update`.\n' "$CONF"
     printf '   Deliberately no env override — the locked value prevents silently re-pointing\n'
     printf '   where team knowledge gets pushed. Local-only store works without it.)\n'
@@ -39,8 +105,6 @@ if [ -z "${AI_CONTEXT_STORE_ORG:-}" ]; then
 fi
 REMOTE="$AI_CONTEXT_STORE_ORG/$AI_CONTEXT_STORE_REPO"
 STORES_LIST="${BANTO_STORES_LIST:-$HOME/.claude/banto-ai-context-stores}"
-DO_CREATE=0
-[ "${1:-}" = "--create" ] && DO_CREATE=1
 
 command -v git >/dev/null 2>&1 || { printf 'Error: git is required\n'; exit 1; }
 command -v gh  >/dev/null 2>&1 || { printf 'Error: gh CLI is required (brew install gh)\n'; exit 1; }
@@ -52,8 +116,14 @@ printf 'Local clone   : %s\n\n' "$LOCAL"
 if [ -d "$LOCAL/.git" ]; then
     printf '✓ already exists locally: %s\n' "$LOCAL"
 elif gh repo view "$REMOTE" >/dev/null 2>&1; then
+    # remote exists → clone it (this is also the --register path: register an existing repo, A4)
     printf 'remote exists → cloning...\n'
     git clone "https://github.com/$REMOTE.git" "$LOCAL" || { printf 'Error: clone failed\n'; exit 1; }
+elif [ "$DO_REGISTER" = "1" ]; then
+    # --register requires the repo to already exist; never create it (A4).
+    printf 'Error: --register target %s does not exist (register only clones an existing repo).\n' "$REMOTE"
+    printf '  Create it first (--create), or fix the org/name.\n'
+    exit 1
 elif [ "$DO_CREATE" = "1" ]; then
     printf 'remote missing → creating a private repo (--create)...\n'
     gh repo create "$REMOTE" --private --description "banto central ai-context store (must stay private)" || { printf 'Error: creation failed\n'; exit 1; }
@@ -63,7 +133,8 @@ elif [ "$DO_CREATE" = "1" ]; then
     fi
 else
     printf 'Error: remote %s does not exist.\n' "$REMOTE"
-    printf '  Ask an admin to create it, or run with --create if this is the first setup.\n'
+    printf '  Ask an admin to create it, run with --create if this is the first setup,\n'
+    printf '  or run with --register <org/name> to register an existing store repo.\n'
     exit 1
 fi
 

@@ -31,9 +31,9 @@
       "ja_sha256": "a9eefebe323747d0878ec137752b2f823efb382531a121963ab90329bccabef8"
     },
     "skills/ai-context/SKILL.md": {
-      "en_sha256": "c0bc53624783565e469dc98da61392ee50c3b6590fa51d2db080d9d288085916",
-      "generated_at": "2026-06-20T15:22:50Z",
-      "ja_sha256": "09558829b21e097a871eb1e4a4791fdfda695958fd89c662d3a23a75b018de87"
+      "en_sha256": "911e40868d9bdc03404e0eab27fd5a43e453d9cbf77dfdc38946cec5ab620543",
+      "generated_at": "2026-06-24T03:15:22Z",
+      "ja_sha256": "aa75445dcb066e8d9c8955db0cc81eebfcebb99d06d3311a6bde74b6af9855db"
     },
     "skills/ai-context/odd.yaml": {
       "en_sha256": "f675ba233329670b5e78e566a7879ba64402eedd0dcfcd330b433e96461d6efb",
@@ -126,9 +126,9 @@
       "ja_sha256": "cb1a3a0253b7a6dd7f351fe59b49991778337274f2e04f8b82495babd3997c92"
     },
     "skills/kit/SKILL.md": {
-      "en_sha256": "bb36085546af604d14855f31785769dcea6f99d105f766fb82709088379e5288",
-      "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "0efbea7987dfeddc7b903bb028a2efc9f96fcda07f46caa30543668a6f86074f"
+      "en_sha256": "8ae5bc0abd587b11996c53978bc3775c33df80258d0a1c168579dbfe5fb2b407",
+      "generated_at": "2026-06-24T03:16:07Z",
+      "ja_sha256": "ada6f25100f3ecde26af2f0f00995f332c5d36cd012398f34f5a8fc725252710"
     },
     "skills/kit/odd.yaml": {
       "en_sha256": "141a195a99b3367907d784ac9f7fbc219a1f130c2a8bdd4a2d7e5f0b614aaecc",
@@ -256,9 +256,9 @@
       "ja_sha256": "24f2d06565ab03861ad3e69cc3c4dcea60a1ff1a18f8d202be3758e82aa22985"
     },
     "skills/research/SKILL.md": {
-      "en_sha256": "20d5e60bd243e07b9921ee5a7c6c769e1daebe4286ea20a9c8c261f60a91007c",
-      "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "83bce6c42d54420603d4e167b060fdbe7756e8436ef10ef882b32ceb83cb376c"
+      "en_sha256": "3923062226721e4dd056227dd0f66cf639b0e1366f512ade42a25ee6efd924b8",
+      "generated_at": "2026-06-24T03:19:05Z",
+      "ja_sha256": "bcfb633b4bcaf309c27609b6026150bf1f453f8802e50b62f3eba605259969e7"
     },
     "skills/research/odd.yaml": {
       "en_sha256": "2f7f9332dba77a88533d38f3b4c6d414d93c9c6af34b293382d9b4571ff91cd3",
@@ -276,9 +276,9 @@
       "ja_sha256": "f8d3b10265aa7b11323111db443a3d0f39cb03bfbdff60b3cd9c348043f7c231"
     },
     "skills/research/references/output-format.md": {
-      "en_sha256": "74497cdf6d7273ea4351baa6dba720b8c0328b6c78df0d83466e547a8d8cdc9e",
-      "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "66019ddba1d2452ec2ee2145fad391b341584be3701a05a56c6df4ca5040666b"
+      "en_sha256": "98456e875d07af1f13e39938b9d955cc9bf40fe5b3f7accd7b13e3584791bdba",
+      "generated_at": "2026-06-24T03:19:34Z",
+      "ja_sha256": "a9134e72324598096623512d0fda8298430a56310b37b2250140e519f993b2b3"
     },
     "skills/save-checkpoint/SKILL.md": {
       "en_sha256": "5dd56de766fc08f4cf2e3051a47f646c00746e5c0d41595266d4ebfee9d66925",
@@ -291,9 +291,9 @@
       "ja_sha256": "7448ac59b6729c9c3fa412db2c3b6b99dcf8dd1c28a4f8ca93e6de279a938de1"
     },
     "skills/search/SKILL.md": {
-      "en_sha256": "12937983e48b6824f94caeafeb8283c2a0b24ec9e53608099951881490942b69",
-      "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "62c74cd462b9a5ab602787e007f11ca964a4db28a0d8010076f604706fd6bec6"
+      "en_sha256": "2f8289e82b672ca868250e354c09b60b947782d6dc28075c7a52fe76ff3935b0",
+      "generated_at": "2026-06-24T03:21:37Z",
+      "ja_sha256": "c5cdc096acd1194ce25e6d69094786bf1fd83a22685ef43e5d1c92dcf4527002"
     },
     "skills/search/odd.yaml": {
       "en_sha256": "fbdc9ace8c983d5e227f73acb0d232a4b7f912ca652931ebeb8a9237f0c89303",

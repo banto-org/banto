@@ -1,6 +1,6 @@
 # Banto
 
-**Self-driving harness for Claude Code.** You set the vision; Banto runs the shop.
+**Self-driving harness for Claude Code.** You set the vision; Banto runs the development.
 
 A *bantō* (番頭) is the head clerk of an Edo-period merchant house: the owner decides direction,
 the bantō runs everything end to end and brings only the exceptions back. Banto applies that
@@ -44,7 +44,7 @@ hooks, not promises.
   English set is generated from them and kept in sync by a deterministic gate. `/set-language ja|en`
   swaps the whole set to one language, and the choice survives plugin updates (public default: English).
 
-15 skills / 6 agents / 34 hooks / 9 behavioral rules. No bundled MCP servers. Security review and
+15 skills / 6 agents / 36 hooks / 9 behavioral rules. No bundled MCP servers. Security review and
 code review are deliberately **delegated to Anthropic's official plugins** rather than reimplemented.
 
 ## Requirements
@@ -80,8 +80,10 @@ This deterministic script deploys the behavioral rules, statusline, minimal perm
 central knowledge store; `--plan` previews without applying. CLAUDE.md is generated
 by **native `/init`**; per-project rules via `harness-setup.sh --project`. Code review and security
 review delegate to the native `/code-review` / `/security-review` (Banto does not reimplement or
-auto-install them). The store works out of the box (repos register automatically on first session;
-git-sync the store when working as a team).
+auto-install them). The store is **bootstrapped once, interactively**: on a repo's first session the
+SessionStart hook asks (instead of silently creating a local store) whether you already have a GitHub
+`ai-context-store` to register, want to create one (and in which org), or prefer local-only — the
+chosen org is remembered for later projects. git-sync the store when working as a team.
 
 ## Language (default is English)
 

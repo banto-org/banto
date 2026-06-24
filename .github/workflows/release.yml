@@ -1,0 +1,43 @@
+# Auto-tag + GitHub Release on version bump.
+#
+# Dev-canonical and exported to the public tree (.github is on the export allowlist),
+# but guarded to run ONLY in the public repo (banto-org/banto) — so a push to the
+# private dev repo's main never tags the internal 5.x line.
+#
+# Flow: owner merges a release PR → push to main → this reads the plugin version and,
+# if v<version> has no Release yet, creates the tag + a GitHub Release whose notes are
+# that version's CHANGELOG section. Owner's only action stays "merge".
+name: release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tag-release:
+    if: github.repository == 'banto-org/banto'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag + Release when the plugin version is new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          ver=$(jq -r '.version' plugins/banto/.claude-plugin/plugin.json)
+          tag="v$ver"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "release $tag already exists — nothing to do"
+            exit 0
+          fi
+          # Notes = this version's CHANGELOG section (between "## <ver>" and the next "## ").
+          notes=$(awk -v v="## $ver" '$0==v{f=1;next} /^## /{if(f)exit} f' CHANGELOG.md)
+          [ -n "$notes" ] || notes="Release $tag"
+          printf '%s\n' "$notes" > /tmp/relnotes.md
+          gh release create "$tag" --target "$GITHUB_SHA" --title "$tag" --notes-file /tmp/relnotes.md
+          echo "created release $tag"

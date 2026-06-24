@@ -5,7 +5,7 @@ description: |
   トリガー: 「決定」「設計判断」「保存」「チェックポイント」「compact」「clear」「タスク」「TODO」「Phase」「続き」「次のタスク」「続きやって」「ドキュメント整理」「散らかってる」「除外」「動かさないで」「無効化」
   使わない場面: 既に格納済みのコンテキスト検索（`search` skill を使う）や外部ソースの調査（`research` を使う）。実装中の素の「やって」「進めて」は自走（直接動く）を意味し、タスク修飾付きのフレーズ（「次のタスク」「続きやって」）のみが次タスクナビへルーティングされる。スコープ用に git worktree / ブランチを切り替えるのは `ws` であって本 skill ではない。
 allowed-tools: Read Write Edit Glob Grep Bash Agent
-argument-hint: "[init|status|doctor|sort|next|phase-done|ignore|tasks|migrate|prune]"
+argument-hint: "[bootstrap|init|status|doctor|sort|next|phase-done|ignore|tasks|migrate|prune]"
 compatibility: Claude Code (requires bash, git, jq)
 ---
 
@@ -25,6 +25,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 | サブコマンド | 役割 | 詳細 |
 |---|---|---|
+| `bootstrap` | store 未セットアップ時の対話セットアップ（既存登録／新規作成／ローカルのみ） | 下記「store ブートストラップ」 |
 | `init` | ゼロから作成（初回セットアップ） | `references/setup.md` |
 | `status` | 何があるか表示（書き込みなし） | `references/status.md` |
 | `doctor` | 破損 / 誤配置の検出（書き込みなし） | `references/doctor.md` |
@@ -39,9 +40,31 @@ compatibility: Claude Code (requires bash, git, jq)
 
 引数が空または不明な場合は使い方を表示する。
 
-**自然言語からの発火**: 明示サブコマンドに加えて、文脈から自動ルーティングする: 「続き」「次」「次のタスク」「進めて」 / "continue", "next", "next task", "go ahead" → `next`; 「ドキュメント整理」「散らかってる」 / "organize the docs", "it's a mess" → `sort project`; 「Phase 完了」 / "phase done" → `phase-done`。
+**自然言語からの発火**: 明示サブコマンドに加えて、文脈から自動ルーティングする: 「続き」「次」「次のタスク」「進めて」 / "continue", "next", "next task", "go ahead" → `next`; 「ドキュメント整理」「散らかってる」 / "organize the docs", "it's a mess" → `sort project`; 「Phase 完了」 / "phase done" → `phase-done`; SessionStart hook が「store 未セットアップ」案内を出した時・「store を作って」「ai-context-store をセットアップ」 → `bootstrap`。
 
 **中央 store 運用（チーム / 複数プロジェクト）**: repo 内 `.ai-context/` から `~/ai-context-store/<project>/` へ ai-context を集約する end-to-end 手順（セットアップ → 移行 `migrate` → 参照 → push → 撤去 `prune`）は [`references/central-store-guide.md`](references/central-store-guide.md) にある。
+
+## store ブートストラップ（`bootstrap`）
+
+SessionStart hook はこの repo が中央 ai-context-store に未登録のとき「store 未セットアップ」案内を 1 回だけ出す（黙ってローカル store を作らない）。hook は会話できないため、実際のセットアップ対話はここで進める。**3 択を 1 つの会話**で確認する（モーダルは使わず、普通の文章でひとつずつ聞く）:
+
+1. **既に GitHub に ai-context-store がある場合**: repo を `org/name` で確認 → 既存登録モードで取り込む（作成しない）:
+   ```bash
+   sh "$CLAUDE_PLUGIN_ROOT/scripts/ai-context-store-init.sh" --register <org>/<name>
+   ```
+   clone + mapping 登録のみ実行し、org を `~/.claude/banto-store-target.conf` に保存する。
+2. **無ければ新規作成する場合**: どの org（または GitHub ユーザー名）に置くか確認 → private 固定で作成:
+   ```bash
+   sh "$CLAUDE_PLUGIN_ROOT/scripts/ai-context-store-init.sh" --create <org>
+   ```
+   `gh repo create --private` で作成し、選んだ org を `~/.claude/banto-store-target.conf` に保存する。2 回目以降のプロジェクトは org が保存済みのため、作成の可否だけ確認すればよい（org は再入力不要）。
+3. **ローカルのみで使う場合（GitHub を使わない退避）**: store ルートと mapping だけローカルに用意し、この repo を登録する。**明示オプトインの env で実行**する（既定では黙って作らないため）:
+   ```bash
+   BANTO_BOOTSTRAP_LOCAL=1 sh "$CLAUDE_PLUGIN_ROOT/hooks/_ai-context-scaffold.sh" "$PWD"
+   ```
+   登録後は次回 SessionStart から store ベースが注入される（marker `~/.claude/banto-bootstrap-asked/<slug>` により `bootstrap` 案内は 2 回目以降出ない）。
+
+いずれの分岐でも、登録が済めば次回 SessionStart から「ai-context ベース: &lt;絶対パス&gt;」が注入され、decisions / docs / tasks を store 側へ書けるようになる。org を保存だけしたい時は `--org <org>`、既存の repo 内 `.ai-context/` を store へ移すなら `bootstrap` ではなく `migrate`（読み取り互換は維持されるため急がなくてよい）。
 
 ## 決定の保存（自動保存 / 形式 / シークレット）
 
@@ -110,9 +133,10 @@ compatibility: Claude Code (requires bash, git, jq)
 ## 引数なしで呼ばれた時のヘルプ
 
 ```
-Usage: /ai-context <init|status|doctor|sort|next|phase-done|ignore|tasks|migrate|prune>
+Usage: /ai-context <bootstrap|init|status|doctor|sort|next|phase-done|ignore|tasks|migrate|prune>
 
 Examples:
+  /ai-context bootstrap
   /ai-context init
   /ai-context tasks split --auto
 ```

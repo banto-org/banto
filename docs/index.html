@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Banto — Self-driving harness for Claude Code / Claude Code のための自走ハーネス</title>
+<meta name="description" content="Banto is a self-driving harness for Claude Code. You set the vision; Banto runs the development. AI context that survives sessions, workspace & fleet operations, and a JA-canonical i18n method backed by deterministic hooks." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="preconnect" href="https://github.com" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body data-lang="en">
+
+<!-- reading progress -->
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<!-- ===================== NAV ===================== -->
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="#top" aria-label="Banto">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="#why" class="lx" lang="en">The contract</a><a href="#why" class="lx" lang="ja">契約</a>
+    <a href="#flagships" class="lx" lang="en">Flagships</a><a href="#flagships" class="lx" lang="ja">目玉</a>
+    <a href="#pipeline" class="lx" lang="en">Pipeline</a><a href="#pipeline" class="lx" lang="ja">パイプライン</a>
+    <a href="#safety" class="lx" lang="en">Safety</a><a href="#safety" class="lx" lang="ja">安全</a>
+    <a href="#toolset" class="lx" lang="en">Toolset</a><a href="#toolset" class="lx" lang="ja">道具一式</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow reveal">
+        <span class="dot"></span>
+        <span class="lx" lang="en">A Claude Code plugin · beta</span><span class="lx" lang="ja">Claude Code プラグイン · beta</span>
+      </div>
+      <h1 class="reveal">
+        <span class="lx" lang="en">You set the vision.<br/><em>Banto runs the development.</em></span>
+        <span class="lx" lang="ja">方針はあなたが決める。<br/><em>開発は番頭が回す。</em></span>
+      </h1>
+      <p class="lede reveal lx" lang="en">
+        A <strong>self-driving harness for Claude Code</strong>. Banto holds your ideology, decisions,
+        and knowledge, feeds them to the agent, and self-drives — bringing back only the exceptions.
+        Safety is enforced by <strong>deterministic hooks</strong>, never by promises.
+      </p>
+      <p class="lede reveal lx" lang="ja">
+        <strong>Claude Code のための自走ハーネス</strong>。あなたの思想・決定・知識を保持して
+        エージェントに食わせ、自走する — 上がってくるのは例外だけ。安全は約束ではなく
+        <strong>決定論的な hook</strong> が守る。
+      </p>
+      <div class="hero-cta reveal">
+        <a class="btn btn-primary" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+          <span class="lx" lang="en">View on GitHub</span><span class="lx" lang="ja">GitHub で見る</span>
+        </a>
+        <a class="btn btn-ghost" href="#install">
+          <span class="lx" lang="en">Install</span><span class="lx" lang="ja">インストール</span>
+        </a>
+      </div>
+      <code class="hero-install reveal" data-copy="claude plugin marketplace add banto-org/banto">
+        <span class="prompt">$</span> claude plugin marketplace add banto-org/banto
+        <span class="copy-hint lx" lang="en">click to copy</span><span class="copy-hint lx" lang="ja">クリックでコピー</span>
+      </code>
+    </div>
+
+    <!-- hero diagram: owner → bantō → fleet, exceptions return -->
+    <div class="hero-art reveal" aria-hidden="true">
+      <svg viewBox="0 0 420 460" class="diagram diag-hero" role="img">
+        <defs>
+          <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 Z" fill="var(--accent)"/>
+          </marker>
+          <marker id="arrow-ink" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 Z" fill="var(--ink-soft)"/>
+          </marker>
+        </defs>
+
+        <!-- owner -->
+        <g class="node node-owner">
+          <circle cx="210" cy="58" r="34"/>
+          <text x="210" y="54" class="n-title">OWNER</text>
+          <text x="210" y="70" class="n-sub">vision</text>
+        </g>
+
+        <!-- vision down to bantō -->
+        <path class="flow flow-1" d="M210,92 L210,150" marker-end="url(#arrow)"/>
+        <text x="224" y="124" class="edge-label">vision ↓</text>
+
+        <!-- bantō (the seal) -->
+        <g class="node node-banto">
+          <rect x="150" y="150" width="120" height="92" rx="10"/>
+          <text x="210" y="186" class="n-title">BANTŌ</text>
+          <text x="210" y="206" class="n-sub">番頭</text>
+          <text x="210" y="226" class="n-sub2">runs the dev</text>
+        </g>
+
+        <!-- bantō to fleet -->
+        <path class="flow flow-2" d="M170,242 L100,300" marker-end="url(#arrow)"/>
+        <path class="flow flow-2" d="M210,242 L210,300" marker-end="url(#arrow)"/>
+        <path class="flow flow-2" d="M250,242 L320,300" marker-end="url(#arrow)"/>
+
+        <!-- fleet of agents -->
+        <g class="node node-agent a1"><rect x="58" y="300" width="84" height="58" rx="8"/><text x="100" y="326" class="n-title sm">agent</text><text x="100" y="344" class="n-sub">spec</text></g>
+        <g class="node node-agent a2"><rect x="168" y="300" width="84" height="58" rx="8"/><text x="210" y="326" class="n-title sm">agent</text><text x="210" y="344" class="n-sub">build</text></g>
+        <g class="node node-agent a3"><rect x="278" y="300" width="84" height="58" rx="8"/><text x="320" y="326" class="n-title sm">agent</text><text x="320" y="344" class="n-sub">verify</text></g>
+
+        <!-- exception floats back up to owner -->
+        <path class="flow flow-exc" d="M360,316 C405,250 405,120 246,66" marker-end="url(#arrow-ink)"/>
+        <g class="exc-badge">
+          <rect x="338" y="372" width="74" height="26" rx="13"/>
+          <text x="375" y="389" class="exc-text">exception</text>
+        </g>
+      </svg>
+      <div class="hero-art-caption">
+        <span class="lx" lang="en">vision flows down · only exceptions float back</span>
+        <span class="lx" lang="ja">方針は下りていく · 上がるのは例外だけ</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- stat strip -->
+  <div class="stat-strip reveal">
+    <div class="stat"><b class="count" data-to="15">0</b><span class="lx" lang="en">skills</span><span class="lx" lang="ja">スキル</span></div>
+    <div class="stat"><b class="count" data-to="6">0</b><span class="lx" lang="en">agents</span><span class="lx" lang="ja">エージェント</span></div>
+    <div class="stat"><b class="count" data-to="36">0</b><span class="lx" lang="en">hooks</span><span class="lx" lang="ja">フック</span></div>
+    <div class="stat"><b class="count" data-to="9">0</b><span class="lx" lang="en">rules</span><span class="lx" lang="ja">ルール</span></div>
+    <div class="stat"><b>0<span class="unit">MCP</span></b><span class="lx" lang="en">bundled</span><span class="lx" lang="ja">同梱なし</span></div>
+  </div>
+</section>
+
+<!-- ===================== WHY / THE CONTRACT ===================== -->
+<section class="band" id="why">
+  <div class="container narrow">
+    <p class="kicker reveal"><span class="lx" lang="en">The bantō contract</span><span class="lx" lang="ja">番頭の契約</span></p>
+    <h2 class="reveal">
+      <span class="lx" lang="en">A head clerk for your AI sessions</span>
+      <span class="lx" lang="ja">AI セッションの筆頭奉公人</span>
+    </h2>
+    <div class="prose">
+      <p class="reveal lx" lang="en">
+        A <em>bantō</em> (番頭) was the head clerk of an Edo-period merchant house. The owner set the
+        direction; the bantō ran everything end to end and brought only the <strong>exceptions</strong>
+        back to the owner. Banto applies that exact contract to software — the modern bantō doesn't
+        run a shop, it <strong>runs your development</strong>.
+      </p>
+      <p class="reveal lx" lang="ja">
+        番頭とは、商家の主人に代わって店のすべてを切り盛りし、<strong>例外</strong>だけを主人に上げる
+        筆頭奉公人のこと。Banto はその契約をそのまま持ち込む — 現代の番頭が回すのは店ではなく、
+        <strong>あなたの開発</strong>。
+      </p>
+      <p class="reveal lx" lang="en">
+        In an era where AI pushes the cost of building toward zero, the moat moves from execution to
+        <strong>vision + empathy</strong>. Banto is not a "dev workflow tool" — it is a harness that
+        maximizes the leverage of one human commanding N AI sessions.
+      </p>
+      <p class="reveal lx" lang="ja">
+        AI が「作るコスト」をゼロに近づける時代、堀は実行から<strong>ビジョンと共感</strong>へ移る。
+        Banto は「開発ワークフローツール」ではなく、一人の人間が N の AI セッションを率いる
+        レバレッジを最大化するハーネス。
+      </p>
+    </div>
+
+    <figure class="northstar reveal">
+      <blockquote>
+        <span class="lx" lang="en">"Humans never think about invocation; the harness self-drives; exceptions arrive only as checkpoints."</span>
+        <span class="lx" lang="ja">「人間は呼び出しを意識しない。ハーネスが自走する。例外だけが checkpoint として届く。」</span>
+      </blockquote>
+      <figcaption><span class="lx" lang="en">— the North Star</span><span class="lx" lang="ja">— 北極星</span></figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ===================== FLAGSHIPS ===================== -->
+<section class="band band-tint" id="flagships">
+  <div class="container">
+    <p class="kicker reveal center"><span class="lx" lang="en">The three flagships</span><span class="lx" lang="ja">3 つの目玉</span></p>
+    <h2 class="center reveal">
+      <span class="lx" lang="en">Where Banto earns its keep</span>
+      <span class="lx" lang="ja">Banto の真価が出るところ</span>
+    </h2>
+    <p class="section-lede center reveal lx" lang="en">
+      Everything below is real and shipping. These three are the ones to look at first.
+    </p>
+    <p class="section-lede center reveal lx" lang="ja">
+      下のすべては実装済み・出荷中。まず見るべきはこの 3 つ。
+    </p>
+
+    <div class="flag-index reveal">
+      <a href="#f-context"><b>01</b> ai-context-store</a>
+      <a href="#f-ws"><b>02</b> ws · <span class="lx" lang="en">workspace &amp; fleet</span><span class="lx" lang="ja">ワークスペース &amp; 艦隊</span></a>
+      <a href="#f-lang"><b>03</b> set-language · <span class="lx" lang="en">the i18n method</span><span class="lx" lang="ja">i18n 方式</span></a>
+    </div>
+
+    <!-- ---- Flagship 01: ai-context-store ---- -->
+    <article class="flagship reveal" id="f-context">
+      <div class="flag-head">
+        <span class="flag-num">01</span>
+        <div>
+          <h3>ai-context-store</h3>
+          <p class="flag-tag lx" lang="en">Knowledge that survives sessions. Your repo stays clean.</p>
+          <p class="flag-tag lx" lang="ja">セッションを跨いで生きる知識。repo は汚れない。</p>
+        </div>
+      </div>
+      <div class="flag-body">
+        <div class="flag-text">
+          <p class="lx" lang="en">
+            Decisions, research, tasks, and checkpoints live in a central knowledge store
+            (<code>~/ai-context-store/&lt;project&gt;/</code>), not in your repo. They are
+            <strong>re-injected at every session start</strong>, so context never dies with a
+            <code>/clear</code> or a compaction. Knowledge goes to the store; code stays in the repo.
+          </p>
+          <p class="lx" lang="ja">
+            決定ログ・リサーチ・タスク・checkpoint は repo ではなく中央ナレッジ store
+            (<code>~/ai-context-store/&lt;project&gt;/</code>) に置く。<strong>セッション開始ごとに
+            再注入</strong>されるので、<code>/clear</code> や compact でコンテキストが死なない。
+            知識は store へ、code は repo へ。
+          </p>
+          <ul class="ticks">
+            <li class="lx" lang="en">Claude-native internal search — query expansion + ranking over everything accumulated</li>
+            <li class="lx" lang="ja">Claude ネイティブの内部検索 — 蓄積した全てにクエリ展開 + ランキング</li>
+            <li class="lx" lang="en">A stable directory layout that external tools can read as a contract</li>
+            <li class="lx" lang="ja">外部ツールが契約として読める安定したディレクトリ構造</li>
+            <li class="lx" lang="en">decisions / docs / research / tasks / sessions / workspaces</li>
+            <li class="lx" lang="ja">decisions / docs / research / tasks / sessions / workspaces</li>
+          </ul>
+        </div>
+        <div class="flag-art" aria-hidden="true">
+          <svg viewBox="0 0 360 300" class="diagram diag-context" role="img">
+            <!-- store at center -->
+            <g class="ctx-store">
+              <rect x="120" y="116" width="120" height="78" rx="10"/>
+              <text x="180" y="146" class="n-title">store</text>
+              <text x="180" y="166" class="n-sub">decisions · docs</text>
+              <text x="180" y="182" class="n-sub">tasks · sessions</text>
+            </g>
+            <!-- session 1 -->
+            <g class="ctx-sess s1"><rect x="20" y="30" width="110" height="50" rx="8"/><text x="75" y="52" class="n-title sm">session 1</text><text x="75" y="68" class="n-sub">/clear</text></g>
+            <!-- session 2 -->
+            <g class="ctx-sess s2"><rect x="230" y="30" width="110" height="50" rx="8"/><text x="285" y="52" class="n-title sm">session 2</text><text x="285" y="68" class="n-sub">restored</text></g>
+            <!-- write down to store -->
+            <path class="ctx-flow w1" d="M75,80 L150,116" marker-end="url(#arrow)"/>
+            <text x="86" y="106" class="edge-label">save</text>
+            <!-- inject up to session 2 -->
+            <path class="ctx-flow w2" d="M236,140 C300,120 300,100 285,82" marker-end="url(#arrow)"/>
+            <text x="300" y="118" class="edge-label">inject</text>
+            <!-- repo stays clean -->
+            <g class="ctx-repo"><rect x="120" y="240" width="120" height="44" rx="8"/><text x="180" y="262" class="n-title sm">your repo</text><text x="180" y="278" class="n-sub">stays clean</text></g>
+            <path class="ctx-flow w3" d="M180,194 L180,240" marker-end="url(#arrow-ink)"/>
+          </svg>
+        </div>
+      </div>
+    </article>
+
+    <!-- ---- Flagship 02: ws ---- -->
+    <article class="flagship reveal" id="f-ws">
+      <div class="flag-head">
+        <span class="flag-num">02</span>
+        <div>
+          <h3>ws — <span class="lx" lang="en">workspace &amp; fleet</span><span class="lx" lang="ja">ワークスペース &amp; 艦隊運用</span></h3>
+          <p class="flag-tag lx" lang="en">A 3-tier branch model and parallel sessions, driven by intent.</p>
+          <p class="flag-tag lx" lang="ja">3 階層ブランチと並走セッションを、インテントで駆動。</p>
+        </div>
+      </div>
+      <div class="flag-body reverse">
+        <div class="flag-text">
+          <p class="lx" lang="en">
+            Topic-based workspaces sit on a 3-tier branch model —
+            <strong>main ← epic ← task worktree</strong> — orchestrated via git-town. You don't run
+            git commands; you state intent ("start the payment redesign", "this work is done",
+            "ship it") and Banto opens branches, isolates worktrees, merges, syncs, and cleans up.
+          </p>
+          <p class="lx" lang="ja">
+            トピック別ワークスペースが <strong>main ← epic ← task worktree</strong> の 3 階層ブランチ
+            （git-town 委譲）の上に乗る。git コマンドは打たない。インテント（「決済のリデザインを
+            始める」「この作業終わった」「main に入れて」）を述べると、Banto がブランチを開き、
+            worktree を分離し、マージ・sync・掃除まで回す。
+          </p>
+          <ul class="ticks">
+            <li class="lx" lang="en">Worktree isolation lets multiple agents run in parallel without colliding</li>
+            <li class="lx" lang="ja">worktree 分離で複数エージェントが衝突せず並走</li>
+            <li class="lx" lang="en">A session registry with collision detection for the fleet</li>
+            <li class="lx" lang="ja">艦隊向けの衝突検知付きセッション registry</li>
+            <li class="lx" lang="en">Irreversible / outward actions (ship, push, PR) always stop at a human gate</li>
+            <li class="lx" lang="ja">不可逆・外向き操作（ship / push / PR）は必ず人間ゲートで止まる</li>
+          </ul>
+        </div>
+        <div class="flag-art" aria-hidden="true">
+          <svg viewBox="0 0 360 300" class="diagram diag-ws" role="img">
+            <!-- main line -->
+            <line class="ws-line ws-main" x1="40" y1="60" x2="320" y2="60"/>
+            <text x="40" y="48" class="branch-label">main</text>
+            <!-- epic line -->
+            <line class="ws-line ws-epic" x1="110" y1="150" x2="300" y2="150"/>
+            <text x="110" y="138" class="branch-label">epic</text>
+            <!-- task worktrees -->
+            <line class="ws-line ws-task" x1="170" y1="240" x2="260" y2="240"/>
+            <text x="170" y="228" class="branch-label">task worktree</text>
+            <!-- branch arcs -->
+            <path class="ws-arc" d="M110,60 C110,105 110,105 110,150"/>
+            <path class="ws-arc" d="M170,150 C170,195 170,195 170,240"/>
+            <!-- merge arcs back -->
+            <path class="ws-arc merge" d="M260,240 C300,240 300,150 300,150"/>
+            <path class="ws-arc merge" d="M300,150 C320,150 320,60 320,60"/>
+            <!-- commit dots -->
+            <circle class="ws-dot d1" cx="110" cy="60" r="5"/>
+            <circle class="ws-dot d2" cx="110" cy="150" r="5"/>
+            <circle class="ws-dot d3" cx="170" cy="240" r="5"/>
+            <circle class="ws-dot d4" cx="260" cy="240" r="5"/>
+            <circle class="ws-dot d5" cx="300" cy="150" r="5"/>
+            <circle class="ws-dot d6 gate" cx="320" cy="60" r="6"/>
+            <text x="318" y="44" class="branch-label gate-lbl">ship ⛔ gate</text>
+          </svg>
+        </div>
+      </div>
+    </article>
+
+    <!-- ---- Flagship 03: set-language / the i18n method ---- -->
+    <article class="flagship flagship-star reveal" id="f-lang">
+      <div class="flag-head">
+        <span class="flag-num">03</span>
+        <div>
+          <h3>set-language — <span class="lx" lang="en">a reusable i18n method</span><span class="lx" lang="ja">再利用できる i18n 方式</span></h3>
+          <p class="flag-tag lx" lang="en">One canonical language, generated translations, a deterministic sync gate. Copy this pattern.</p>
+          <p class="flag-tag lx" lang="ja">正本は 1 言語、翻訳は生成、同期は決定論ゲート。この型をそのまま真似できる。</p>
+        </div>
+      </div>
+
+      <p class="star-intro reveal lx" lang="en">
+        Banto ships <strong>Japanese-canonical</strong> skills and <strong>auto-generated English</strong>
+        ones, kept in lock-step by a hash manifest. The trick is the
+        <strong>determinism split</strong>: translation is delegated to an LLM (non-deterministic),
+        but verifying that the translation is current is <strong>fully deterministic</strong>. That is
+        the whole method — and it is the one we most want others to adopt.
+      </p>
+      <p class="star-intro reveal lx" lang="ja">
+        Banto は <strong>日本語を正本</strong>、<strong>英語を自動生成</strong>とし、ハッシュ
+        マニフェストで歩調を合わせる。鍵は<strong>決定論の分離</strong> — 翻訳は LLM に委譲
+        （非決定論）するが、その翻訳が最新かの検証は<strong>完全に決定論</strong>。これが方式の
+        全てで、最も真似してほしい型。
+      </p>
+
+      <!-- the pipeline diagram -->
+      <div class="lang-pipeline reveal" aria-hidden="true">
+        <svg viewBox="0 0 920 230" class="diagram diag-lang" role="img">
+          <!-- canonical -->
+          <g class="lp-node lp-ja">
+            <rect x="10" y="70" width="150" height="90" rx="10"/>
+            <text x="85" y="100" class="n-title">i18n/ja</text>
+            <text x="85" y="122" class="n-sub">canonical</text>
+            <text x="85" y="140" class="n-sub2">正本 · hand-authored</text>
+          </g>
+          <path class="lp-flow f1" d="M160,115 L235,115" marker-end="url(#arrow)"/>
+          <text x="198" y="104" class="edge-label mid">translate</text>
+
+          <!-- LLM translate -->
+          <g class="lp-node lp-llm">
+            <rect x="235" y="60" width="160" height="110" rx="10"/>
+            <text x="315" y="92" class="n-title">i18n-gen.sh</text>
+            <text x="315" y="114" class="n-sub">LLM translator</text>
+            <text x="315" y="132" class="n-sub2 warn">non-deterministic</text>
+            <text x="315" y="150" class="n-sub2">structure-preserving</text>
+          </g>
+          <path class="lp-flow f2" d="M395,115 L470,115" marker-end="url(#arrow)"/>
+
+          <!-- EN generated -->
+          <g class="lp-node lp-en">
+            <rect x="470" y="70" width="150" height="90" rx="10"/>
+            <text x="545" y="100" class="n-title">i18n/en</text>
+            <text x="545" y="122" class="n-sub">generated</text>
+            <text x="545" y="140" class="n-sub2">生成物</text>
+          </g>
+
+          <!-- manifest under -->
+          <g class="lp-node lp-manifest">
+            <rect x="235" y="186" width="385" height="34" rx="8"/>
+            <text x="427" y="208" class="n-sub">.sync-manifest.json · sha256(ja) + sha256(en)</text>
+          </g>
+          <path class="lp-flow f-man" d="M315,170 L315,186"/>
+          <path class="lp-flow f-man" d="M545,160 L545,186"/>
+
+          <!-- deterministic gate -->
+          <path class="lp-flow f3" d="M620,115 L700,115" marker-end="url(#arrow)"/>
+          <g class="lp-node lp-gate">
+            <rect x="700" y="60" width="200" height="110" rx="10"/>
+            <text x="800" y="90" class="n-title">i18n-sync-check</text>
+            <text x="800" y="112" class="n-sub strong">deterministic gate</text>
+            <text x="800" y="132" class="n-sub2">STALE · MISSING</text>
+            <text x="800" y="150" class="n-sub2">TAMPERED · ORPHAN</text>
+          </g>
+          <text x="660" y="104" class="edge-label mid">verify</text>
+        </svg>
+      </div>
+
+      <!-- the four mechanisms -->
+      <div class="lang-steps">
+        <div class="lstep reveal">
+          <span class="lstep-n">A</span>
+          <h4 class="lx" lang="en">One canonical source</h4><h4 class="lx" lang="ja">正本は 1 つ</h4>
+          <p class="lx" lang="en">Skills and agents are authored once, in Japanese (<code>i18n/ja/</code>). It is the single source of truth — every other language is downstream of it.</p>
+          <p class="lx" lang="ja">スキルとエージェントは日本語で一度だけ書く（<code>i18n/ja/</code>）。これが唯一の正本で、他の言語はすべてその下流。</p>
+        </div>
+        <div class="lstep reveal">
+          <span class="lstep-n">B</span>
+          <h4 class="lx" lang="en">Generate, don't hand-maintain</h4><h4 class="lx" lang="ja">手で保守せず生成する</h4>
+          <p class="lx" lang="en"><code>i18n-gen.sh</code> hashes each canonical file; when a hash drifts it calls an LLM translator with a strict contract — never touch YAML keys, code fences, paths, or commands; <em>do</em> localize trigger phrases.</p>
+          <p class="lx" lang="ja"><code>i18n-gen.sh</code> が正本をハッシュし、ズレたファイルだけ LLM 翻訳を呼ぶ。契約は厳格 — YAML キー・コードフェンス・パス・コマンドは触らない。トリガー文だけは自然な言い回しへ localize。</p>
+        </div>
+        <div class="lstep reveal">
+          <span class="lstep-n">C</span>
+          <h4 class="lx" lang="en">Verify deterministically</h4><h4 class="lx" lang="ja">検証は決定論で</h4>
+          <p class="lx" lang="en">The translation is fuzzy, but <code>i18n-sync-check.sh</code> is exact: it compares sha256 hashes in <code>.sync-manifest.json</code> and fails CI on STALE / MISSING / TAMPERED / ORPHAN. No LLM in the gate.</p>
+          <p class="lx" lang="ja">翻訳は曖昧でも <code>i18n-sync-check.sh</code> は厳密 — <code>.sync-manifest.json</code> の sha256 を突き合わせ、STALE / MISSING / TAMPERED / ORPHAN で CI を落とす。ゲートに LLM はいない。</p>
+        </div>
+        <div class="lstep reveal">
+          <span class="lstep-n">D</span>
+          <h4 class="lx" lang="en">Swap, and make it stick</h4><h4 class="lx" lang="ja">切り替えて、固定する</h4>
+          <p class="lx" lang="en"><code>/set-language ja|en</code> materializes the chosen tree onto the active set and saves the choice in user scope. A SessionStart hook re-applies it after every plugin update — the choice survives.</p>
+          <p class="lx" lang="ja"><code>/set-language ja|en</code> が選んだ言語を active セットへ展開し、選択を user スコープに保存。SessionStart hook がプラグイン更新のたびに再適用する — 選択は生き残る。</p>
+        </div>
+      </div>
+
+      <div class="callout reveal">
+        <p class="lx" lang="en">
+          <strong>Why this is worth copying:</strong> most i18n either hand-maintains every locale
+          (drifts silently) or trusts an LLM to "keep them in sync" (unverifiable). Banto separates the
+          two — let the LLM translate, let a hash gate prove freshness. This very page runs on the same
+          idea: one set of content, a toggle, both languages always present.
+        </p>
+        <p class="lx" lang="ja">
+          <strong>真似する価値:</strong> 多くの i18n は各ロケールを手で保守して黙ってズレるか、
+          LLM に「同期しといて」と委ねて検証不能になる。Banto は両者を分ける — 翻訳は LLM に、
+          鮮度の証明はハッシュゲートに。このページ自身も同じ発想 — コンテンツは 1 組、トグル 1 つ、
+          両言語が常に在る。
+        </p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ===================== SDD PIPELINE ===================== -->
+<section class="band" id="pipeline">
+  <div class="container">
+    <p class="kicker reveal"><span class="lx" lang="en">The SDD pipeline</span><span class="lx" lang="ja">SDD パイプライン</span></p>
+    <h2 class="reveal">
+      <span class="lx" lang="en">Ideology → spec → autonomous build</span>
+      <span class="lx" lang="ja">思想 → 仕様 → 自走実装</span>
+    </h2>
+    <p class="section-lede reveal lx" lang="en">
+      The philosophy layer becomes a judgment filter injected into CLAUDE.md. From there the work
+      flows downhill — and <code>dev-loop</code> drives the build until the tests go green.
+    </p>
+    <p class="section-lede reveal lx" lang="ja">
+      思想層は CLAUDE.md に注入される判断フィルタになる。そこから仕事は下流へ流れ、
+      <code>dev-loop</code> がテストが緑になるまでビルドを駆動する。
+    </p>
+
+    <div class="pipe reveal" aria-hidden="true">
+      <div class="pipe-stage">
+        <span class="pipe-skill">concept</span>
+        <span class="pipe-desc lx" lang="en">ideology · the WHY</span><span class="pipe-desc lx" lang="ja">思想 · なぜ作るか</span>
+      </div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-stage">
+        <span class="pipe-skill">spec</span>
+        <span class="pipe-desc lx" lang="en">industry-standard design</span><span class="pipe-desc lx" lang="ja">業界標準の設計書</span>
+      </div>
+      <span class="pipe-arrow">→</span>
+      <div class="pipe-stage pipe-loop">
+        <span class="pipe-skill">dev-loop</span>
+        <span class="pipe-desc lx" lang="en">autonomous build</span><span class="pipe-desc lx" lang="ja">自走ビルド</span>
+      </div>
+    </div>
+
+    <!-- the autonomous loop -->
+    <div class="loop reveal">
+      <div class="loop-ring" aria-hidden="true">
+        <svg viewBox="0 0 260 260" class="diagram diag-loop">
+          <circle class="loop-track" cx="130" cy="130" r="96"/>
+          <circle class="loop-run" cx="130" cy="130" r="96"/>
+          <g class="loop-step ls1"><circle cx="130" cy="34" r="6"/></g>
+          <g class="loop-step ls2"><circle cx="226" cy="130" r="6"/></g>
+          <g class="loop-step ls3"><circle cx="130" cy="226" r="6"/></g>
+          <g class="loop-step ls4"><circle cx="34" cy="130" r="6"/></g>
+          <text x="130" y="126" class="loop-center-1">until</text>
+          <text x="130" y="150" class="loop-center-2">green</text>
+        </svg>
+      </div>
+      <ol class="loop-list">
+        <li class="reveal"><b class="lx" lang="en">Decompose</b><b class="lx" lang="ja">分解</b><span class="lx" lang="en">break a big spec into small tasks</span><span class="lx" lang="ja">大玉を小さなタスクへ</span></li>
+        <li class="reveal"><b class="lx" lang="en">Implement</b><b class="lx" lang="ja">実装</b><span class="lx" lang="en">write the change</span><span class="lx" lang="ja">変更を書く</span></li>
+        <li class="reveal"><b class="lx" lang="en">Verify</b><b class="lx" lang="ja">検証</b><span class="lx" lang="en">build &amp; run — no "done" without proof</span><span class="lx" lang="ja">build &amp; 実行 — 証拠なき「完了」なし</span></li>
+        <li class="reveal"><b class="lx" lang="en">Fix &amp; repeat</b><b class="lx" lang="ja">修正して反復</b><span class="lx" lang="en">escalate only the exceptions</span><span class="lx" lang="ja">上げるのは例外だけ</span></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== SAFETY ===================== -->
+<section class="band band-ink" id="safety">
+  <div class="container">
+    <p class="kicker reveal center light"><span class="lx" lang="en">Deterministic safety</span><span class="lx" lang="ja">決定論的な安全</span></p>
+    <h2 class="center reveal light">
+      <span class="lx" lang="en">Enforced by hooks, not by promises</span>
+      <span class="lx" lang="ja">約束ではなく hook が強制する</span>
+    </h2>
+    <p class="section-lede center reveal light lx" lang="en">
+      Anything that must never happen is blocked by a deterministic hook before it runs — not asked
+      about, not hoped for. Approvals stay minimal; the guard rails are mechanical.
+    </p>
+    <p class="section-lede center reveal light lx" lang="ja">
+      起きてはならないことは、実行前に決定論的な hook が block する — 訊くのでも祈るのでもなく。
+      承認は最小限、ガードレールは機械的。
+    </p>
+
+    <div class="gate-demo reveal" aria-hidden="true">
+      <div class="gate-action">git push origin main --no-verify</div>
+      <div class="gate-wall"><span class="gate-stamp">⛔</span></div>
+      <div class="gate-result lx" lang="en">blocked by kill-switch</div>
+      <div class="gate-result lx" lang="ja">kill-switch が block</div>
+    </div>
+
+    <div class="cards safety-cards">
+      <div class="card dark reveal">
+        <h4>kill-switch</h4>
+        <p class="lx" lang="en">No direct push to main, no <code>--no-verify</code>, no force-push. Full stop.</p>
+        <p class="lx" lang="ja">main 直 push なし、<code>--no-verify</code> なし、force-push なし。問答無用。</p>
+      </div>
+      <div class="card dark reveal">
+        <h4>egress guard</h4>
+        <p class="lx" lang="en">Blocks internal names / PII from leaking into client deliverables, driven by a private name registry.</p>
+        <p class="lx" lang="ja">内部名・PII の客先成果物への流出を、非公開の名前レジストリ駆動で block。</p>
+      </div>
+      <div class="card dark reveal">
+        <h4>verify-before-claim</h4>
+        <p class="lx" lang="en">No "done" without fully successful, verified output. The claim has to be earned.</p>
+        <p class="lx" lang="ja">完全に成功・検証された出力なしに「完了」と言えない。主張は勝ち取るもの。</p>
+      </div>
+      <div class="card dark reveal">
+        <h4><span class="lx" lang="en">OS sandbox · opt-in</span><span class="lx" lang="ja">OS サンドボックス · opt-in</span></h4>
+        <p class="lx" lang="en">A second layer: Claude's bash can run in an OS sandbox (Seatbelt / bubblewrap) blocking credential reads and off-allowlist network. Off by default.</p>
+        <p class="lx" lang="ja">もう一段の層 — Claude の bash を OS サンドボックス（Seatbelt / bubblewrap）で走らせ、秘匿情報の読取と許可外ネットワークを block。既定は off。</p>
+      </div>
+    </div>
+
+    <div class="audit-note reveal">
+      <div class="audit-badge">14<span>+</span>5</div>
+      <p class="lx" lang="en">
+        <strong>Self-auditing.</strong> A 14-axis plugin-quality audit (content-hygiene included) and a
+        5-axis whole-harness audit watch for drift between what the harness declares and what it
+        actually does — so the docs never lie.
+      </p>
+      <p class="lx" lang="ja">
+        <strong>自己監査。</strong> 14 軸の plugin 品質監査（content-hygiene 込み）と 5 軸のハーネス
+        監査が、宣言と実体の乖離を見張る — ドキュメントが嘘をつかない。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TOOLSET ===================== -->
+<section class="band" id="toolset">
+  <div class="container">
+    <p class="kicker reveal"><span class="lx" lang="en">The full toolset</span><span class="lx" lang="ja">道具一式（網羅）</span></p>
+    <h2 class="reveal">
+      <span class="lx" lang="en">Everything in the box</span>
+      <span class="lx" lang="ja">箱の中身、すべて</span>
+    </h2>
+    <p class="section-lede reveal lx" lang="en">
+      15 skills, 6 agents, 36 hooks, 9 behavioral rules — and no bundled MCP. Code review and security
+      review are deliberately delegated to Anthropic's official plugins rather than reimplemented.
+    </p>
+    <p class="section-lede reveal lx" lang="ja">
+      15 スキル・6 エージェント・36 フック・9 行動ルール — MCP 同梱なし。コードレビューと
+      セキュリティレビューは再実装せず、Anthropic 公式 plugin へ意図的に委譲。
+    </p>
+
+    <div class="tool-group reveal">
+      <h4 class="tg-head"><span class="lx" lang="en">Pipeline (SDD)</span><span class="lx" lang="ja">パイプライン（SDD）</span></h4>
+      <div class="chips">
+        <span class="chip"><b>concept</b><i class="lx" lang="en">forge the ideology</i><i class="lx" lang="ja">思想を鍛える</i></span>
+        <span class="chip"><b>spec</b><i class="lx" lang="en">interactive design docs</i><i class="lx" lang="ja">対話で設計書</i></span>
+        <span class="chip"><b>dev-loop</b><i class="lx" lang="en">self-driving build</i><i class="lx" lang="ja">自走ビルド</i></span>
+      </div>
+    </div>
+
+    <div class="tool-group reveal">
+      <h4 class="tg-head"><span class="lx" lang="en">Knowledge &amp; context</span><span class="lx" lang="ja">知識 &amp; コンテキスト</span></h4>
+      <div class="chips">
+        <span class="chip star"><b>ai-context</b><i class="lx" lang="en">decisions · tasks · store</i><i class="lx" lang="ja">決定 · タスク · store</i></span>
+        <span class="chip"><b>search</b><i class="lx" lang="en">internal search, no web</i><i class="lx" lang="ja">内部検索（web なし）</i></span>
+        <span class="chip"><b>research</b><i class="lx" lang="en">external, saved to store</i><i class="lx" lang="ja">外部調査 → store</i></span>
+        <span class="chip"><b>memo</b><i class="lx" lang="en">capture a note</i><i class="lx" lang="ja">メモを残す</i></span>
+        <span class="chip"><b>knowledge</b><i class="lx" lang="en">promote drafts</i><i class="lx" lang="ja">下書きを昇格</i></span>
+        <span class="chip"><b>save-checkpoint</b><i class="lx" lang="en">session snapshot</i><i class="lx" lang="ja">セッション保存</i></span>
+        <span class="chip"><b>webread</b><i class="lx" lang="en">full-text, no summary</i><i class="lx" lang="ja">要約なし全文取得</i></span>
+      </div>
+    </div>
+
+    <div class="tool-group reveal">
+      <h4 class="tg-head"><span class="lx" lang="en">Workspace &amp; meta</span><span class="lx" lang="ja">ワークスペース &amp; メタ</span></h4>
+      <div class="chips">
+        <span class="chip star"><b>ws</b><i class="lx" lang="en">workspace &amp; fleet</i><i class="lx" lang="ja">ワークスペース &amp; 艦隊</i></span>
+        <span class="chip star"><b>set-language</b><i class="lx" lang="en">JA ⇄ EN, sticky</i><i class="lx" lang="ja">日英切替（永続）</i></span>
+        <span class="chip"><b>plugin-dev</b><i class="lx" lang="en">scaffold &amp; refactor</i><i class="lx" lang="ja">生成 &amp; 改修</i></span>
+        <span class="chip"><b>plugin-audit</b><i class="lx" lang="en">14-axis quality audit</i><i class="lx" lang="ja">14 軸品質監査</i></span>
+        <span class="chip"><b>kit</b><i class="lx" lang="en">discover everything</i><i class="lx" lang="ja">全機能カタログ</i></span>
+      </div>
+    </div>
+
+    <div class="tool-group reveal">
+      <h4 class="tg-head"><span class="lx" lang="en">Agents (fan out in parallel)</span><span class="lx" lang="ja">エージェント（並列展開）</span></h4>
+      <div class="chips">
+        <span class="chip ag"><b>architect</b></span>
+        <span class="chip ag"><b>debugger</b></span>
+        <span class="chip ag"><b>qa-tester</b></span>
+        <span class="chip ag"><b>research-agent</b></span>
+        <span class="chip ag"><b>search-agent</b></span>
+        <span class="chip ag"><b>context-keeper</b></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW IT FEELS ===================== -->
+<section class="band band-tint" id="feel">
+  <div class="container narrow">
+    <p class="kicker reveal"><span class="lx" lang="en">How it feels</span><span class="lx" lang="ja">使い心地</span></p>
+    <h2 class="reveal">
+      <span class="lx" lang="en">You don't memorize commands</span>
+      <span class="lx" lang="ja">コマンドは覚えなくていい</span>
+    </h2>
+    <p class="section-lede reveal lx" lang="en">Natural language is the primary path; commands are just aliases. Say what you want.</p>
+    <p class="section-lede reveal lx" lang="ja">自然文が主経路で、コマンドはエイリアス。やりたいことを言うだけ。</p>
+
+    <div class="feel-table reveal">
+      <div class="feel-row feel-head">
+        <div class="lx" lang="en">You say</div><div class="lx" lang="ja">あなたの発話</div>
+        <div class="lx" lang="en">Banto does</div><div class="lx" lang="ja">Banto の動き</div>
+      </div>
+      <div class="feel-row">
+        <div class="fsay"><span class="lx" lang="en">"start the payment redesign"</span><span class="lx" lang="ja">「決済のリデザインを始める」</span></div>
+        <div class="fdo"><span class="lx" lang="en">opens an epic branch + workspace</span><span class="lx" lang="ja">epic ブランチ + ワークスペースを開く</span></div>
+      </div>
+      <div class="feel-row">
+        <div class="fsay"><span class="lx" lang="en">"investigate X"</span><span class="lx" lang="ja">「X を調べて」</span></div>
+        <div class="fdo"><span class="lx" lang="en">research agents fan out → saved to the store</span><span class="lx" lang="ja">research agent が並列調査 → store に保存</span></div>
+      </div>
+      <div class="feel-row">
+        <div class="fsay"><span class="lx" lang="en">"what did we decide about auth?"</span><span class="lx" lang="ja">「認証って前に決めたっけ」</span></div>
+        <div class="fdo"><span class="lx" lang="en">internal search over decisions &amp; history</span><span class="lx" lang="ja">決定ログ・履歴への内部検索</span></div>
+      </div>
+      <div class="feel-row">
+        <div class="fsay"><span class="lx" lang="en">"this work is done"</span><span class="lx" lang="ja">「この作業終わった」</span></div>
+        <div class="fdo"><span class="lx" lang="en">tests → merge to the epic → sync → cleanup</span><span class="lx" lang="ja">テスト → epic へマージ → sync → 掃除</span></div>
+      </div>
+      <div class="feel-row gate-row">
+        <div class="fsay"><span class="lx" lang="en">"ship it"</span><span class="lx" lang="ja">「main に入れて」</span></div>
+        <div class="fdo"><span class="lx" lang="en">opens a PR — irreversible actions stop at a human gate</span><span class="lx" lang="ja">PR 作成 — 不可逆操作は人間ゲートで止まる</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PHILOSOPHY ===================== -->
+<section class="band" id="philosophy">
+  <div class="container">
+    <p class="kicker reveal"><span class="lx" lang="en">Philosophy</span><span class="lx" lang="ja">思想</span></p>
+    <h2 class="reveal">
+      <span class="lx" lang="en">Four principles, and what we refuse to become</span>
+      <span class="lx" lang="ja">4 つの原則と、なるまいと決めたもの</span>
+    </h2>
+    <div class="phil-grid">
+      <div class="phil reveal"><b class="lx" lang="en">Self-driving, not approval-gated</b><b class="lx" lang="ja">承認ゲートではなく自走</b><span class="lx" lang="en">Enforcement belongs to hooks; approvals stay minimal.</span><span class="lx" lang="ja">強制は hook に、承認は最小限に。</span></div>
+      <div class="phil reveal"><b class="lx" lang="en">Deterministic over promised</b><b class="lx" lang="ja">約束より決定論</b><span class="lx" lang="en">What must never happen is blocked by a hook, not a prompt.</span><span class="lx" lang="ja">起きてはならないことは prompt でなく hook が block。</span></div>
+      <div class="phil reveal"><b class="lx" lang="en">Lean</b><b class="lx" lang="ja">lean</b><span class="lx" lang="en">Delegate to proven mechanisms (git-town, official plugins). Don't reinvent.</span><span class="lx" lang="ja">枯れた仕組み（git-town・公式 plugin）に委譲し、車輪を再発明しない。</span></div>
+      <div class="phil reveal"><b class="lx" lang="en">Measure, then fold</b><b class="lx" lang="ja">測って、畳む</b><span class="lx" lang="en">Telemetry tracks skill usage; dead features get removed.</span><span class="lx" lang="ja">telemetry が使用度を記録し、死蔵機能は削除。</span></div>
+    </div>
+
+    <div class="nda reveal">
+      <h4><span class="lx" lang="en">Built for teams under NDA</span><span class="lx" lang="ja">NDA 下のチームのために</span></h4>
+      <p class="lx" lang="en">
+        Banto was built inside a contract-development workflow where leaking one internal name into a
+        client deliverable is an incident. The egress guard blocks registry-listed names from client
+        paths; the name registry lives in user scope and is never committed; content-hygiene audits
+        catch proprietary references and pasted session debris in docs.
+      </p>
+      <p class="lx" lang="ja">
+        Banto は「内部名がひとつ客先成果物に漏れたらインシデント」という受託開発の現場で生まれた。
+        egress guard はレジストリ記載の名前を客先パスから block し、名前レジストリは user スコープに
+        置かれて決してコミットされず、content-hygiene 監査がドキュメント内の固有参照・貼り込み残骸を
+        検出する。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== INSTALL ===================== -->
+<section class="band band-tint" id="install">
+  <div class="container narrow">
+    <p class="kicker reveal"><span class="lx" lang="en">Get started</span><span class="lx" lang="ja">はじめる</span></p>
+    <h2 class="reveal">
+      <span class="lx" lang="en">Two commands, then restart</span>
+      <span class="lx" lang="ja">2 コマンド、そして再起動</span>
+    </h2>
+
+    <div class="install-block reveal">
+      <code class="cmd" data-copy="claude plugin marketplace add banto-org/banto"><span class="prompt">$</span> claude plugin marketplace add banto-org/banto</code>
+      <code class="cmd" data-copy="claude plugin install banto@banto-marketplace"><span class="prompt">$</span> claude plugin install banto@banto-marketplace</code>
+    </div>
+    <p class="install-note reveal lx" lang="en">
+      Restart Claude Code. On a project without a CLAUDE.md, the SessionStart hook prompts the
+      one-time setup with the exact command. <code>harness-setup.sh</code> deploys the behavioral
+      rules, statusline, minimal permissions, and the <strong>disabled</strong> OS-sandbox block, and
+      initializes the store. Default language is English — run <code>/set-language ja</code> once to
+      switch (it survives updates).
+    </p>
+    <p class="install-note reveal lx" lang="ja">
+      Claude Code を再起動。CLAUDE.md の無いプロジェクトでは SessionStart hook が正確なコマンド付きで
+      初回セットアップを提案する。<code>harness-setup.sh</code> が行動 rules・statusline・最小限の
+      permissions・<strong>無効状態</strong>の OS サンドボックスブロックを配置し、store を初期化する。
+      既定は英語 — 日本語にするには <code>/set-language ja</code> を一度だけ（更新をまたいで保持）。
+    </p>
+
+    <div class="req reveal">
+      <h4><span class="lx" lang="en">Requirements</span><span class="lx" lang="ja">必要なもの</span></h4>
+      <p class="lx" lang="en">
+        Claude Code (CLI or desktop), plus <code>git</code> and <code>jq</code> (required).
+        <code>gh</code> / <code>git-town</code> / <code>python3</code> unlock optional features and
+        degrade gracefully when absent. macOS / Linux supported; Windows runs on Git Bash.
+      </p>
+      <p class="lx" lang="ja">
+        Claude Code（CLI またはデスクトップ）と <code>git</code> / <code>jq</code>（必須）。
+        <code>gh</code> / <code>git-town</code> / <code>python3</code> があると追加機能が有効化し、
+        無くても graceful に縮退する。macOS / Linux 対応、Windows は Git Bash 上で動作。
+      </p>
+    </div>
+
+    <div class="final-cta reveal">
+      <a class="btn btn-primary lg" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+        <span class="lx" lang="en">Open the repo on GitHub</span><span class="lx" lang="ja">GitHub でリポジトリを開く</span>
+      </a>
+      <span class="repo-url">github.com/banto-org/banto</span>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="footer">
+  <div class="container foot-grid">
+    <div class="foot-brand">
+      <span class="seal small" aria-hidden="true">番</span>
+      <div>
+        <b>Banto <span class="brand-kanji">番頭</span></b>
+        <p class="lx" lang="en">Self-driving harness for Claude Code.</p>
+        <p class="lx" lang="ja">Claude Code のための自走ハーネス。</p>
+      </div>
+    </div>
+    <div class="foot-links">
+      <a href="https://github.com/banto-org/banto" target="_blank" rel="noopener">GitHub →</a>
+      <a href="https://github.com/banto-org/banto/blob/main/README.md" target="_blank" rel="noopener">README (EN)</a>
+      <a href="https://github.com/banto-org/banto/blob/main/README.ja.md" target="_blank" rel="noopener">README (日本語)</a>
+      <a href="https://github.com/banto-org/banto/blob/main/CONCEPT.md" target="_blank" rel="noopener">CONCEPT.md</a>
+      <a href="https://github.com/banto-org/banto/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+    </div>
+  </div>
+  <div class="container foot-base">
+    <span>© 2026 Banto · MIT</span>
+    <span class="lx" lang="en">You set the vision. Banto runs the development.</span>
+    <span class="lx" lang="ja">方針はあなたが。開発は番頭が。</span>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>

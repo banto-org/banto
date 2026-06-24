@@ -138,6 +138,10 @@ case "$MODE" in
   project)
     echo "[harness-setup --project] $PROJECT_DIR/.claude/rules/ に templates/rules/ を配置（言語=${LANG_NOW}）"
     deploy_rules "$PROJECT_DIR/.claude/rules" apply
+    # 永続タスクリスト id（CLAUDE_CODE_TASK_LIST_ID）を ensure（DRY: hook を直接呼ぶ）。
+    # hook は cwd を stdin payload か $PWD から取り fail-open。非 git なら no-op。
+    echo "  永続タスクリスト ensure:"
+    ( cd "$PROJECT_DIR" 2>/dev/null && sh "$PLUGIN_ROOT/hooks/task-list-id-ensure.sh" </dev/null ) || true
     echo "完了。CLAUDE.md のプロジェクト分析生成はネイティブ /init に委譲する。"
     ;;
   plan)

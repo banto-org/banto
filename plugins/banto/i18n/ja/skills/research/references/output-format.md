@@ -4,6 +4,19 @@
 
 結果を ai-context ベース配下の `{BASE}/docs/research/{YYYY-MM-DD}_{topic-slug}.md` に保存する（`{BASE}` は agent 本文の手順で解決した絶対パス。相対 `.ai-context/` には書かない）。
 
+## 必須: `## Sources` に URL を必ず残す（検証導線）
+
+保存するリサーチには**例外なく** `## Sources` セクションを設け、参照した一次ソースの URL を列挙する（出典の無い情報には価値がない）。各 Sources の冒頭に、人間/エージェントが本文を再検証できるよう一行の affordance を添える:
+
+```markdown
+## Sources
+
+> 検証: `/webread <url>`（trafilatura 全文取得・LLM 要約なし）で各ソースの本文を再確認できる。
+
+- [Source 1](URL)
+- [Source 2](URL)
+```
+
 ## テンプレート
 
 ```markdown
@@ -29,6 +42,7 @@
 {ログイン必須だったサイトから得た情報、キャプチャ要約等}
 
 ## Sources
+> 検証: `/webread <url>` で各ソースの本文を再確認できる。
 - [Source 1](URL)
 - [Source 2](URL)
 
@@ -65,6 +79,7 @@ deep-research（Workflow）は**保存しない**ため、戻り値オブジェ�
 - {refuted[].claim}（投票 {refuted[].vote} / {refuted[].source}）
 
 ## Sources
+> 検証: `/webread <url>` で各ソースの本文を再確認できる（特に deep-research は URL 幻覚の可能性があるため重要引用は webread で実体確認する）。
 - {sources を URL + 品質で列挙}
 
 ## 信頼度

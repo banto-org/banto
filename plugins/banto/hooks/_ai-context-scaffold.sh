@@ -71,11 +71,12 @@ _ai_context_should_skip() {
     return 1
 }
 
-# store root 確保 → project dir 解決（resolver hit / derive + mapping 登録）→ store 側 skeleton。
-# repo 側（local .ai-context / .gitignore）には一切書かない。
+# store 解決を検知し、未解決なら**黙って作らず**対話ブートストラップを 1 回だけ促す（A1）。
+# repo 側（local .ai-context / .gitignore）にも store 側にも一切書かない（resolver hit で
+# 登録済みなら skeleton を冪等確保するだけ。未登録なら prompt のみ・mkdir/登録はしない）。
 # Usage: _ai_context_scaffold <CWD>
-# 戻り値: 0=成功（登録済み or 新規登録 or ガードによるスキップ）、1=引数不正
-# stdout: 初回登録時のみメッセージを 1 行出力
+# 戻り値: 0=成功（登録済み skeleton 確保 or ブートストラップ案内 or ガードによるスキップ）、1=引数不正
+# stdout: ブートストラップ案内（marker で 1 回だけ）or なし
 _ai_context_scaffold() {
     _ais_cwd="$1"
     [ -z "$_ais_cwd" ] && return 1
@@ -102,13 +103,13 @@ _ai_context_scaffold() {
     unset _ais_phys
 
     # grandfather: 既存の repo 内 .ai-context/ はそのまま尊重（store 登録しない）。
-    # 移行は人間ゲート（migrate-to-store.sh / SessionStart の 1 行提案）。
+    # 移行は人間ゲート（/ai-context migrate / SessionStart の 1 行提案）。
     if [ -d "$_ais_top/.ai-context" ]; then
         unset _ais_cwd _ais_top
         return 0
     fi
 
-    # mapping 登録・derive には jq が必要（banto の必須要件。無ければ静かに何もしない）
+    # mapping 解決には jq が必要（banto の必須要件。無ければ静かに何もしない＝fail-open）
     command -v jq >/dev/null 2>&1 || { unset _ais_cwd _ais_top; return 0; }
 
     # paths helper（derive / store_root）を未 source なら取り込む
@@ -120,17 +121,40 @@ _ai_context_scaffold() {
     fi
     command -v _ai_context_derive_dir >/dev/null 2>&1 || { unset _ais_cwd _ais_top; return 0; }
 
-    # store root を確保（初回必要時に自動作成: marker + .mapping.json + store 用 .gitignore）
-    _ais_root=$(_ai_context_store_root)
-    _ais_map="${AI_CONTEXT_MAPPING:-$_ais_root/.mapping.json}"
-    mkdir -p "$_ais_root" 2>/dev/null || { unset _ais_cwd _ais_top _ais_root _ais_map; return 0; }
-    [ -f "$_ais_root/.ai-context-store" ] || touch "$_ais_root/.ai-context-store" 2>/dev/null
-    if [ ! -f "$_ais_map" ]; then
-        printf '{\n  "version": 2,\n  "store_root": "%s",\n  "projects": {}\n}\n' "$_ais_root" > "$_ais_map" 2>/dev/null
+    # 登録済み（mapping / worktree / remote のいずれかで resolver hit）なら store 側
+    # skeleton を冪等に確保するだけ。**未登録なら一切書かず**ブートストラップを促す（A1）。
+    _ais_dir=""
+    if [ -f "$_AIS_SCRIPTS_DIR/resolve-store-path.sh" ]; then
+        _ais_dir=$(sh "$_AIS_SCRIPTS_DIR/resolve-store-path.sh" --store-dir "$_ais_top" 2>/dev/null) || _ais_dir=""
     fi
-    # store 用 .gitignore（store-init と同一パターン。git 化は store-init の明示操作のまま）
-    if [ ! -f "$_ais_root/.gitignore" ]; then
-        cat > "$_ais_root/.gitignore" <<'AI_STORE_GITIGNORE'
+
+    if [ -n "$_ais_dir" ]; then
+        # 登録済み: store 側 skeleton（idempotent。バケットは従来と同一）
+        mkdir -p \
+            "$_ais_dir/decisions" \
+            "$_ais_dir/docs/research" \
+            "$_ais_dir/docs/knowledges/drafts" \
+            "$_ais_dir/sessions" \
+            "$_ais_dir/tasks/old" \
+            "$_ais_dir/workspaces" \
+            2>/dev/null
+        unset _ais_cwd _ais_top _ais_dir
+        return 0
+    fi
+
+    # === ローカルのみ退避（option c / BANTO_BOOTSTRAP_LOCAL=1）: GitHub を使わず
+    #     ローカル store だけ用意してこの repo を登録する（明示オプトインのみ。bootstrap
+    #     対話のローカル退避 = SKILL.md の「store ブートストラップ」option 3 から呼ばれる）。
+    if [ "${BANTO_BOOTSTRAP_LOCAL:-0}" = "1" ]; then
+        _ais_root=$(_ai_context_store_root)
+        _ais_map="${AI_CONTEXT_MAPPING:-$_ais_root/.mapping.json}"
+        mkdir -p "$_ais_root" 2>/dev/null || { unset _ais_cwd _ais_top _ais_dir _ais_root _ais_map; return 0; }
+        [ -f "$_ais_root/.ai-context-store" ] || touch "$_ais_root/.ai-context-store" 2>/dev/null
+        if [ ! -f "$_ais_map" ]; then
+            printf '{\n  "version": 2,\n  "store_root": "%s",\n  "projects": {}\n}\n' "$_ais_root" > "$_ais_map" 2>/dev/null
+        fi
+        if [ ! -f "$_ais_root/.gitignore" ]; then
+            cat > "$_ais_root/.gitignore" <<'AI_STORE_GITIGNORE'
 .mapping.json
 project-index/
 full-index/
@@ -146,54 +170,49 @@ WORKSPACE.md
 WORKSPACE-refs.md
 DASHBOARD.md
 AI_STORE_GITIGNORE
-    fi
-
-    # project dir 解決: 登録済みなら resolver hit、未登録なら derive + mapping 登録
-    _ais_dir=""
-    _ais_registered=1
-    if [ -f "$_AIS_SCRIPTS_DIR/resolve-store-path.sh" ]; then
-        _ais_dir=$(sh "$_AIS_SCRIPTS_DIR/resolve-store-path.sh" --store-dir "$_ais_top" 2>/dev/null) || _ais_dir=""
-    fi
-    if [ -z "$_ais_dir" ]; then
+        fi
         _ais_dir=$(_ai_context_derive_dir "$_ais_top")
         _ais_proj=$(basename "$_ais_dir")
-        # mapping 登録（scaffold 時のみ。derive と同じ衝突判定なので決定論的に一致する）
         if jq --arg top "$_ais_top" --arg p "$_ais_proj" \
               '.projects[$top] = {"project": $p}' "$_ais_map" > "$_ais_map.tmp" 2>/dev/null; then
             mv "$_ais_map.tmp" "$_ais_map"
         else
             rm -f "$_ais_map.tmp" 2>/dev/null
-            unset _ais_cwd _ais_top _ais_root _ais_map _ais_dir _ais_proj _ais_registered
-            return 0
+            unset _ais_cwd _ais_top _ais_dir _ais_root _ais_map _ais_proj; return 0
         fi
-        _ais_registered=0
-        unset _ais_proj
+        mkdir -p \
+            "$_ais_dir/decisions" \
+            "$_ais_dir/docs/research" \
+            "$_ais_dir/docs/knowledges/drafts" \
+            "$_ais_dir/sessions" \
+            "$_ais_dir/tasks/old" \
+            "$_ais_dir/workspaces" \
+            2>/dev/null
+        echo "[AI Context] Registered this repo in a LOCAL-only central store (no GitHub). Knowledge base: $_ais_dir (the repo itself stays clean)."
+        unset _ais_cwd _ais_top _ais_dir _ais_root _ais_map _ais_proj
+        return 0
     fi
 
-    # store 側 skeleton（idempotent。バケットは legacy scaffold と同一）
-    mkdir -p \
-        "$_ais_dir/decisions" \
-        "$_ais_dir/docs/research" \
-        "$_ais_dir/docs/knowledges/drafts" \
-        "$_ais_dir/sessions" \
-        "$_ais_dir/tasks/old" \
-        "$_ais_dir/workspaces" \
-        2>/dev/null
-
-    # 初回登録時のみ通知（1 行）
-    if [ "$_ais_registered" = "0" ]; then
-        echo "[AI Context] Registered this repo in the central store. Knowledge base: $_ais_dir (the repo itself stays clean)."
-        # 初回セットアップ確認（1 回だけ）。.setup-asked マーカーで二度と出さない。
-        # fail-open: マーカー書込み失敗でも処理を止めない。
-        if [ ! -f "$_ais_dir/.setup-asked" ]; then
-            printf '%s\n' "[AI Context - 初回セットアップ] このプロジェクトを ai-context-store ($_ais_dir) に登録しました。2点ご確認ください:"
-            printf '%s\n' "  (a) この store を git で commit/push しますか？（チーム共有/バックアップ用。不要なら「除外」と言えば ~/.claude/banto-ignore に登録し、以後このプロジェクトでは scaffold しません）"
-            printf '%s\n' "  (b) CONCEPT（北極星）を CLAUDE.md に @import で常駐させますか？ no なら store の concept/CONCEPT.md に置き、SessionStart 注入で参照します（CLAUDE.md は触りません）。"
-            touch "$_ais_dir/.setup-asked" 2>/dev/null || true
-        fi
+    # === 未登録（store 未解決）: 黙って作らず、対話ブートストラップを 1 回だけ促す（A1） ===
+    # marker は user-scope（store 側に project dir を作らないため）。toplevel を slug 化して
+    # ~/.claude/banto-bootstrap-asked/<slug> に置き、二度と nag しない。
+    # fail-open: marker 書込み失敗でも処理を止めない（毎回出ても害は告知のみ）。
+    _ais_asked_dir="$HOME/.claude/banto-bootstrap-asked"
+    _ais_slug=$(printf '%s' "$_ais_top" | sed 's#[^A-Za-z0-9._-]#_#g')
+    _ais_marker="$_ais_asked_dir/$_ais_slug"
+    if [ -f "$_ais_marker" ]; then
+        unset _ais_cwd _ais_top _ais_dir _ais_asked_dir _ais_slug _ais_marker
+        return 0
     fi
-
-    unset _ais_cwd _ais_top _ais_root _ais_map _ais_dir _ais_registered
+    mkdir -p "$_ais_asked_dir" 2>/dev/null
+    touch "$_ais_marker" 2>/dev/null || true
+    printf '%s\n' "[AI Context - store 未セットアップ] このプロジェクトはまだ中央 ai-context-store に登録されていません（黙って作りません）。次のブートストラップ対話を進めてください:"
+    printf '%s\n' "  (a) 既に GitHub に ai-context-store がありますか？ あれば repo（org/name）を教えてください → 登録します。"
+    printf '%s\n' "  (b) 無ければ作成しますか？ どの org（または GitHub ユーザー名）に置きますか？ → 作成します。"
+    printf '%s\n' "  (c) ローカルのみで使う退避も選べます（GitHub を使わない）。"
+    printf '%s\n' "  → 進め方は ai-context skill の「store ブートストラップ」に従う（/ai-context bootstrap でも開始可能）。"
+    printf '%s\n' ""
+    unset _ais_cwd _ais_top _ais_dir _ais_asked_dir _ais_slug _ais_marker
     return 0
 }
 
