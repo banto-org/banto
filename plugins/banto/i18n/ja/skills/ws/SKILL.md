@@ -124,7 +124,7 @@ epic に値しない単発作業に epic を提案しない（誤発火の官僚
 
 要点:
 - `/ws multi <ws1> <ws2> ...` は primary（書き込み対象）+ references（読み取り専用）を分離する
-- 参照情報を記録するため `.ai-context/WORKSPACE-refs.md` を作成
+- 参照情報を記録するため `{base}/WORKSPACE-refs.md` を作成
 - `/ws solo` は single モードに戻す（refs.md を削除）
 
 

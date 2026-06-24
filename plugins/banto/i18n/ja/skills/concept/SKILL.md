@@ -85,11 +85,11 @@ concept (ideology, this skill) → spec (design doc) → implementation (self-dr
 
 ## Light モード（実験向け）
 
-Phase 1（1 行 WHY）と「何の信念を試しているか」「成功とは何か」だけを問い、最小版を `.ai-context/concept/CONCEPT.md` に保存する。プロジェクトが本番化したら後で full モードに昇格する。
+Phase 1（1 行 WHY）と「何の信念を試しているか」「成功とは何か」だけを問い、最小版を `{base}/concept/CONCEPT.md` に保存する。プロジェクトが本番化したら後で full モードに昇格する。
 
 ## CONCEPT.md テンプレート（5 要素）
 
-保存先: `.ai-context/concept/CONCEPT.md`
+保存先: `{base}/concept/CONCEPT.md`
 
 ```markdown
 # Concept: {product/service name}
@@ -120,7 +120,7 @@ Dominant: {type} / Secondary: {type}
 
 CONCEPT.md を**すべてのエージェントの判断フィルター**にする。2 つの要素 — 1 つは不変、1 つは opt-in:
 
-**1. 常に保存（不変）**: CONCEPT.md は常にストアの `.ai-context/concept/CONCEPT.md`（store-first で解決した ai-context ベース）に保存される。下の選択に関わらずこれは変わらない。
+**1. 常に保存（不変）**: CONCEPT.md は常にストアの `{base}/concept/CONCEPT.md`（store-first で解決した ai-context ベース）に保存される。下の選択に関わらずこれは変わらない。
 
 **2. CLAUDE.md の `@import` — 先に確認（opt-in）**: CONCEPT.md を `@import` でリポジトリの CLAUDE.md にピン留めするのはチェックイン済みファイルを編集するので、実行前に確認する。プレーンテキストで問う:
 

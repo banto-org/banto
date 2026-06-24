@@ -3,7 +3,7 @@
 <!-- merged from auto-save-rules.md -->
 ## 自動保存ルール
 
-設計判断が発生したら**即座に**保存。コミット待ち禁止。`.ai-context/` がなければ自動作成。許可は求めない。
+設計判断が発生したら**即座に**保存。コミット待ち禁止。base（store / 仮ローカル側）が未生成なら scaffold が自動作成（相対 `.ai-context/` には書かない）。許可は求めない。
 
 ## 保存対象
 
@@ -19,7 +19,7 @@
 
 ## 保存先
 
-`.ai-context/decisions/YYYY-MM-DD-HHMMSS_{topic-slug}_{github-account}.md`
+`{base}/decisions/YYYY-MM-DD-HHMMSS_{topic-slug}_{github-account}.md`
 
 ## 命名規則 (秒精度タイムスタンプ, v5.21.4+)
 

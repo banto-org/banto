@@ -1,16 +1,16 @@
-# /ai-context status — state display details
+# /ai-context status — 状態表示詳細
 
-## Purpose
-Display what is stored in the current `.ai-context/` by **only reading**.
+## 目的
+現在の `.ai-context/` に何が格納されているかを**読むだけ**で表示。
 
-> store-first: resolve BASE as described at the top of SKILL.md. Read each `.ai-context/` below as the resolved `$BASE/`.
+> store-first: BASE 解決は SKILL.md 冒頭のとおり。以下の `.ai-context/` は解決した `$BASE/` に読み替える。
 
-## Execution procedure
+## 実行手順
 
-Get the various counts with Glob and `wc -l`, etc.:
+Glob と `wc -l` 等で各種カウントを取得:
 
 ```bash
-test -d .ai-context && echo "✓" || echo "✗ .ai-context/ does not exist"
+test -d .ai-context && echo "✓" || echo "✗ .ai-context/ が存在しません"
 
 find .ai-context/decisions -maxdepth 1 -name "*.md" 2>/dev/null | wc -l
 find .ai-context/decisions -maxdepth 1 -name "$(date +%Y-%m-%d)_*.md" 2>/dev/null | wc -l
@@ -27,37 +27,37 @@ test -f .ai-context/tasks/active.md && {
 test -f .ai-context/WORKSPACE.md && head -1 .ai-context/WORKSPACE.md
 find .ai-context/workspaces -maxdepth 1 -name "*.md" 2>/dev/null | wc -l
 
-ls .ai-context/*-combined.txt >/dev/null 2>&1 && echo "✓ generated" || echo "✗ not generated"
+ls .ai-context/*-combined.txt >/dev/null 2>&1 && echo "✓ 生成済み" || echo "✗ 未生成"
 ```
 
-## Output format
+## 出力フォーマット
 
 ```
-## .ai-context/ state
+## .ai-context/ の状態
 
-### Basics
-- root: {exists / missing}
-- .gitignore: {AI Context registered / unregistered}
+### 基本
+- ルート: {存在 / 欠損}
+- .gitignore: {AI Context 登録済み / 未登録}
 
-### Content
-| Area | Count | Notes |
+### コンテンツ
+| 領域 | 件数 | 備考 |
 |---|---|---|
-| decisions/ | N (today: M) | latest: YYYY-MM-DD_... |
-| docs/research/ | N | latest: ... |
-| sessions/ | N | (transient) |
-| tasks/active.md | open X / done Y | Phase: ... |
+| decisions/ | N件 (本日: M件) | 最新: YYYY-MM-DD_... |
+| docs/research/ | N件 | 最新: ... |
+| sessions/ | N件 | （一時的） |
+| tasks/active.md | 未完 X / 完了 Y | Phase: ... |
 
-### Workspaces
-- WORKSPACE.md: {present / absent} → {current WS name}
-- workspaces/: N
+### ワークスペース
+- WORKSPACE.md: {あり / なし} → {現在のWS名}
+- workspaces/: N件
 
-### Search text layer (combined.txt)
-- *-combined.txt: {generated / not generated. A hook auto-regenerates it on save}
+### 検索テキスト層（combined.txt）
+- *-combined.txt: {生成済み / 未生成。hook が保存時に自動再生成}
 
-### Recommended actions
-(show only the ones that apply)
-- not generated → recommend /ai-context init
-- no WS set → recommend /ws new
-- inconsistencies → recommend /ai-context doctor
-- active.md bloated (>200 lines) → recommend /ai-context tasks split
+### 推奨アクション
+（該当するものだけ表示）
+- 未生成 → /ai-context init を推奨
+- WS未設定 → /ws new を推奨
+- 不整合あり → /ai-context doctor を推奨
+- active.md が肥大（>200行）→ /ai-context tasks split を推奨
 ```

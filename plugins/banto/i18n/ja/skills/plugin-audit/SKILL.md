@@ -61,7 +61,7 @@ Phase 1-8.5 は「動くか」を見る公式準拠チェック。Phase 9 は **
 | 8 | 汎用性 / rule 外部化適性（`.claude/rules/` から読むべきハードコード基準）| agent 判定 |
 | 9 | Layer 3 ハーネスエンジニアリング整合性（path-scoping + hook-enforce 候補 + hook 整合）| static (`collect`/`report`) |
 | 10 | ODD 適用（odd.yaml 存在 + autonomy_level L0-L5 妥当性）| static (`collect`/`report`) |
-| 11 | 使用度（過去 N 日の commits + .ai-context 言及 → active/mentioned/dormant/likely-trim）| static (`usage`) |
+| 11 | 使用度（過去 N 日の commits + {base} 言及 → active/mentioned/dormant/likely-trim）| static (`usage`) |
 | 12 | 権限スコープ最小性 — **12a** 過剰付与（最小性）/ **12b** 宣言漏れ（runtime 正当性）| static (`permissions`) + agent |
 | 13 | 封じ込め（hook が実際に実行する危険コマンド / secret 生出力）| agent（block パターンと実実行を区別）|
 | 14 | Content hygiene（固有情報の漏れ / 貼り込まれた実行結果）— **skill サブツリー全体**（SKILL.md は collect、references/ + ネストは assets）| static regex (`collect`/`report`/`assets`) + agent semantic |
@@ -95,7 +95,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-shapeup.sh <plugin_dir>
 - `plugin-audit-collect.sh`: skills / agents / templates/rules / commands / hooks をスキャンし TSV を出力
 - `plugin-audit-report.sh`: TSV を Markdown の静的監査レポートに変換
 - `plugin-audit-matrix.sh`: cross-skill 計算（語彙重複 / 双方向参照 / 一方向参照 / 分類プレフィックス分布）を Markdown で出力
-- `plugin-audit-usage.sh`: 過去 N 日の git log + .ai-context 言及から使用度を分類（Axis 11）
+- `plugin-audit-usage.sh`: 過去 N 日の git log + {base} 言及から使用度を分類（Axis 11）
 - `plugin-audit-permissions.sh`: skill ごとの `allowed-tools` vs 実使用エビデンスを照合 — 過剰付与（宣言したが未使用）と宣言漏れ（idiom で使うが未宣言）を flag。Axis 12 の agent パス向けの idiom ベース候補（Axis 12）
 - `plugin-audit-assets.sh`: 各 skill のサブツリー（`references/` + ネスト）を走査し、目録 / 不要ファイル / orphan / 重複 / Axis 14 hygiene を出す（collect.sh が SKILL.md しか見ない穴を埋める Axis 14 + Axis 2 拡張。詳細は scoring.md Axis 14）
 - `plugin-audit-interface.sh`: argument-hint が skill の実サブコマンドと一致するかを検査（Axis 1 拡張。詳細は scoring.md Axis 1）

@@ -18,7 +18,7 @@ out_of_scope:
   - main への直接 push（odd-kill-switch が block）
   - sync conflict の自動解決（報告して人間判断）
   - workspace 内の個別ファイル編集（直接 Edit）
-  - .ai-context/decisions/ 管理（ai-context skill）
+  - "{base}/decisions/ 管理（ai-context skill）"
 
 safety_boundaries:
   - switch / epic / task は uncommitted changes があれば中止（既定）

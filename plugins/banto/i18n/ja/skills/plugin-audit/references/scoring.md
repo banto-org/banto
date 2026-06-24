@@ -273,9 +273,9 @@ skill 同士の境界が曖昧だと Claude のルーティング判断がブレ
 [skill 内のロジック、統一]
 
 1. .claude/rules/{topic}.md を Read（harness-setup.sh / プロジェクト側が配置した rule）
-2. なければ → .ai-context/refs/{topic}/ を探す:
+2. なければ → {base}/refs/{topic}/ を探す:
    2a. search skill（クエリ展開 + grep ランキング）で意味的に近い章を探す
-   2b. search で見つからなければ → .ai-context/refs/_index.md を Read → 章ごとに Read
+   2b. search で見つからなければ → {base}/refs/_index.md を Read → 章ごとに Read
 3. なければ → skill 内蔵の default を使う
 ```
 
@@ -345,7 +345,7 @@ skill 同士の境界が曖昧だと Claude のルーティング判断がブレ
 
 ## Axis 11: 使用度（`plugin-audit-usage.sh`）
 
-過去 N 日（既定 30）の git log 言及 + `.ai-context/{decisions,docs}` 内言及 + SKILL.md 最終更新日を集計し、各 skill を 4 分類する。
+過去 N 日（既定 30）の git log 言及 + `{base}/{decisions,docs}` 内言及 + SKILL.md 最終更新日を集計し、各 skill を 4 分類する。
 
 | カテゴリ | 条件 | アクション |
 |---|---|---|

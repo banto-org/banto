@@ -19,22 +19,22 @@ compatibility: Claude Code (requires bash, git, jq)
 ### 検索・リサーチ
 | Command | 内容 |
 |---------|------|
-| `/search {query}` | **内部検索**。search スキル（クエリ展開 + grep ランキング）が `.ai-context/`（+ config.json の `extra_docs_dirs` で追加したディレクトリ）を横断検索する。Web には一切触れない |
+| `/search {query}` | **内部検索**。search スキル（クエリ展開 + grep ランキング）が `{base}/`（+ config.json の `extra_docs_dirs` で追加したディレクトリ）を横断検索する。Web には一切触れない |
 | `/research {topic}` | **外部リサーチ**。Web / GitHub / arxiv / X / 公式ドキュメントを並列で調査し `docs/research/` に保存する。媒体に応じて Claude in Chrome を適宜使用 |
 
 ### コンテキスト管理
 | Command | 内容 |
 |---------|------|
 | `/save-checkpoint` | セッション状態をチェックポイントとして保存。compact/clear を推奨 |
-| `/ai-context [init/status/doctor/sort/ignore]` | `.ai-context/` の管理コマンド（`ignore` は scaffold 抑制パスを管理） |
+| `/ai-context [bootstrap/local/doctor/sort/ignore/migrate/memo/knowledge]` | `{base}/` の管理コマンド（store 作成・登録 / ローカル固定 / 健診 / 整理 / 抑制 / 移行 / メモ / ナレッジを内包。`init`・`status` は旧名エイリアス・1 リリース後方互換） |
 
 ### ドキュメント作成
 ドキュメント作成系スキル共通のパターン: `${CLAUDE_PLUGIN_ROOT}/templates/docs/_common-pattern.md`（パターン A: agent 起動型 / パターン B: 穴埋めテンプレート）
 
 | Command | 内容 | パターン |
 |---------|------|----------|
-| `/memo [content]` | 引数なし: 会話要約を保存。引数あり: 指定内容をメモ化 | B |
-| `/knowledge [promote]` | ナレッジ下書きのレビュー / 昇格 / 作成 | B（例外: プレフィックスなし） |
+| `/ai-context memo [content]` | 引数なし: 会話要約を保存。引数あり: 指定内容をメモ化（旧 `/memo` は 1 リリース後方互換） | B |
+| `/ai-context knowledge [list/promote]` | ナレッジ下書きのレビュー / 昇格 / 作成（旧 `/knowledge` は 1 リリース後方互換）| B（例外: プレフィックスなし） |
 
 > コードレビューとセキュリティ監査は**公式 Anthropic プラグインに委譲**（`code-review` / `security-guidance` / `/security-review`）。
 
@@ -68,8 +68,9 @@ compatibility: Claude Code (requires bash, git, jq)
 | `concept` | 「思想」「コンセプト」「世界観」「ビジョン」「哲学」「北極星」「なぜ作る」 |
 | `spec` | 「spec」「仕様書作って」「設計だけして」「plan」「実装しないで」 |
 | `dev-loop` | 「自走で開発」「大玉を分解して回して」「ループで開発」「dev loop」「学習ループ」（単発実装は self-driving で直接） |
-| `memo` | 「メモして」「書き留めて」「会話を要約して保存」（「決定」「保存」→ ai-context ではない） |
-| `knowledge` | 「ナレッジにして」「昇格して」「教訓として残して」 |
+| `ai-build` | 「RAG を作りたい」「エージェント作る」「eval 組む」「プロンプト改善」「どのモデルがいい」（AI 機能構築フロー。dev-loop の AI 特化版・eval まで） |
+| `ai-context` (memo) | 「メモして」「書き留めて」「会話を要約して保存」（ai-context に内包。旧 `memo` は後方互換） |
+| `ai-context` (knowledge) | 「ナレッジにして」「昇格して」「教訓として残して」（ai-context に内包） |
 | `plugin-audit` | 「この skill の品質チェック」「14軸で見て」「SKILL.md を best practice と突き合わせ」 |
 | `ws` | 「ワークスペース」「作業切り替え」「並走」「ブランチ分けて」「worktree」「epic」「この作業終わった」「マージして」「リリースして」 |
 | `set-language` | 「言語を日本語にして」「英語に切り替えて」「言語設定」「make banto japanese/english」（永続。再起動で反映） |

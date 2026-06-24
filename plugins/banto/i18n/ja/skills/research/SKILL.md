@@ -1,9 +1,9 @@
 ---
 name: research
 description: |
-  外部情報源（Web / GitHub / arxiv / X など）を新規に調査し、その結果をドキュメント化する（外部リサーチ / 新しい情報を取りに行く）。既存の .ai-context/ を眺めるだけなら search skill を使うこと。常にまず `search` skill でローカル store を調べ、確信ヒットが無いときだけ web へエスカレーションする（store-first）。
+  外部情報源（Web / GitHub / arxiv / X など）を新規に調査し、その結果をドキュメント化する（外部リサーチ / 新しい情報を取りに行く）。既存の store（`{base}/`）を眺めるだけなら search skill を使うこと。常にまず `search` skill でローカル store を調べ、確信ヒットが無いときだけ web へエスカレーションする（store-first）。
   トリガー: 「調べて」「最新の〜」「今どうなってる」「ベストプラクティス」「論文」「トレンド」「ライブラリ/技術を比較して」「どっちがいい」「リサーチ」。/research <topic> でも呼び出し可能。
-  使わない場面: 既存のローカル AI Context（.ai-context/ の decisions / docs / 過去の会話）を検索するだけの場合 — それは search skill（Web アクセスなし）。プロジェクト自身のコードに関する素の「教えて」は、直接か search skill で答える。
+  使わない場面: 既存のローカル AI Context（`{base}/` の decisions / docs / 過去の会話）を検索するだけの場合 — それは search skill（Web アクセスなし）。プロジェクト自身のコードに関する素の「教えて」は、直接か search skill で答える。
 user-invocable: true
 argument-hint: "[調査トピック]"
 model: opus
@@ -13,7 +13,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # Research — 外部リサーチスキル
 
-> **保存ベース（store-first）**: この skill が保存する `.ai-context/docs/research/...` パスは ai-context ベースを指す。SessionStart/PreCompact hook が「ai-context ベース: &lt;絶対パス&gt;」として注入する絶対パスの配下で Read/Write する — 相対 `.ai-context/` には絶対に書かない（旧来の legacy repo にしか存在しない。不明なときは `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決）。
+> **保存ベース（store-first）**: この skill が保存する `{base}/docs/research/...` パスは ai-context ベースを指す。SessionStart/PreCompact hook が「ai-context ベース: &lt;絶対パス&gt;」として注入する絶対パスの配下で Read/Write する — 相対 `.ai-context/` には絶対に書かない（旧来の legacy repo にしか存在しない。不明なときは `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決）。
 
 ユーザーの会話言語で記述する（ユーザーが日本語で会話していれば日本語）: これは応答、報告する発見事項、**そして保存するリサーチドキュメント**にも及ぶ。その言語を起動プロンプトで research-agent に渡すこと（サブエージェントは会話言語を継承しない）。
 
@@ -21,9 +21,9 @@ compatibility: Claude Code (requires bash, git, jq)
 
 | | `/search` | `/research`（この skill） |
 |---|---|---|
-| 対象 | **内部**: `.ai-context/`（decisions/ + docs/ + 過去の会話履歴） | **外部**: Web、GitHub、arxiv、X、公式ドキュメント |
+| 対象 | **内部**: `{base}/`（decisions/ + docs/ + 過去の会話履歴） | **外部**: Web、GitHub、arxiv、X、公式ドキュメント |
 | Web アクセス | **なし** | あり |
-| 結果 | 既存ファイルの参照 / 要約を返す | `.ai-context/docs/research/` に新規ファイルを保存 |
+| 結果 | 既存ファイルの参照 / 要約を返す | `{base}/docs/research/` に新規ファイルを保存 |
 | 所要時間 | 秒 | 分（research-agent を並列起動） |
 
 **覚え方**: 既に持っているか、いないか？ 持っていないなら `research` を使う。
@@ -35,7 +35,7 @@ compatibility: Claude Code (requires bash, git, jq)
 3. **適切な媒体を選ぶ**: トピックごとに最適なリサーチツールを選ぶ（下表）
 4. **ログイン必要なリサーチは事前確認**: 認証が必要な媒体（X/Twitter など）はユーザーの承認を先に得る
 5. **必ず情報源 URL を引用する**: 出典のない情報には価値がない
-6. **結果をドキュメント化する**: `.ai-context/docs/research/{YYYY-MM-DD}_{topic}.md` に保存する（会話だけで終わらせない）
+6. **結果をドキュメント化する**: `{base}/docs/research/{YYYY-MM-DD}_{topic}.md` に保存する（会話だけで終わらせない）
 
 ## リサーチ媒体の選択
 
@@ -138,7 +138,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 詳細テンプレート: [`references/output-format.md`](references/output-format.md)
 
-保存先: `.ai-context/docs/research/{YYYY-MM-DD}_{topic-slug}.md`
+保存先: `{base}/docs/research/{YYYY-MM-DD}_{topic-slug}.md`
 
 要素: TL;DR / 詳細 / Sources / 信頼度（高/中/低）。
 保存後、保存先パスと併せて **3〜5 点** の主要な発見事項をユーザーに報告する。

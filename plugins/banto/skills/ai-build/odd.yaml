@@ -1,0 +1,40 @@
+# ODD Spec for ai-build
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: ai-build
+autonomy_level: L3  # Autopilot (continuous execution + owner requested only on exceptions). The method/model-selection goal fork is confirmed once at Stage4 / eval green-red is deterministic by threshold / push/PR/main are human gates
+
+in_scope:
+  - Self-driving flow for AI features (LLM / RAG / agent / prompt): requirements → design → implementation → eval → iteration
+  - Wiring the freshness gate from internal search (search) → latest investigation (research) (per evidence-first)
+  - Method selection (prompt / RAG / fine-tune) and model selection (id and pricing delegated to the claude-api skill)
+  - eval planning (success criteria → case set + scoring axes) and running LLM-as-judge (ai-eval-judge.sh)
+  - Decision records for the adopted method / model / eval results (provisional → accepted promotion, ai-context skill)
+
+out_of_scope:
+  - Ordinary implementation with no AI element (dev-loop / self-driving) / generating the design spec only (spec) / ideology formation (concept)
+  - Internal search of the existing store only (search skill) / pure external investigation only (research skill)
+  - Looking up Claude API id / pricing / parameters / caching (read the claude-api skill directly)
+  - A full-blown eval platform (bundling promptfoo / RAGAS) — kept to a minimal LLM-as-judge + pointers to external tools
+  - push / PR / main merge / external posting (human gate, safety rule)
+
+safety_boundaries:
+  - Don't mix production client data / PII / internal names into the eval case set (egress-guard blocks leaks to client paths)
+  - Don't bake Claude's id / pricing into SKILL.md / scripts (the claude-api skill is canonical)
+  - ai-eval-judge.sh is a no-op when claude / jq are absent (fail-open) — never stop implementation just because eval can't run
+  - Commits stop at the branch. Don't execute push / PR / main / deletion / external posting (human gate)
+
+kill_switch_conditions:
+  - Method / model selection turns into a goal fork (acceptance criteria, cost order of magnitude, or compliance meaning changes) → stop at Stage4, escalate to owner
+  - Claiming "done" while eval is still red (verify-claim-guard.sh blocks at Stop)
+  - No improvement for N rounds (plateau) without reaching the success criteria → stop the loop, escalate to owner
+  - A request for irreversible / outward-facing operations (push / PR / main / deletion / external posting) → stop, escalate to owner
+
+approval_gates:
+  - Stage 4: present the rationale for the method (prompt / RAG / fine-tune) + model selection once for confirmation
+  - When importing external data into the eval case set, confirm its provenance (PII / NDA)
+
+metrics:
+  eval_pass_threshold: 70
+  eval_plateau_rounds: 3

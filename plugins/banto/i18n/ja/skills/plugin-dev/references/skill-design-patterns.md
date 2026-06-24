@@ -184,7 +184,7 @@ intent (skill description で明確化)
   ↓
 loose loop (research-agent を background で起動)
   ↓
-backpressure (`.ai-context/docs/research/` に保存先指定)
+backpressure (`{base}/docs/research/` に保存先指定)
   ↓
 evaluate (返却結果を strong scenarios で評価)
 ```

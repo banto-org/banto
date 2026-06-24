@@ -84,5 +84,26 @@ jq -c -n --arg p "$LONG" '{tool_name:"Agent", tool_input:{prompt:$p}}' | sh "$AG
 jq -c -n '{tool_name:"Agent", tool_input:{prompt:"tiny\nprompt"}}' | sh "$AG" >/dev/null 2>&1; [ $? -eq 2 ] \
     && ok "agent: multiline short prompt still blocked (H-08)" || bad "agent: H-08 regression (multiline fail-open)"
 
+# === SessionStart advisory hooks (knowledge-draft-review / ai-context-prune-auto) ===
+# これらは SessionStart の advisory フック（提示/掃除のみ）。合成 SessionStart payload で
+# 必ず exit 0（never block）であること、payload 不正でも fail-open することを確認する。
+ss_payload() { jq -c -n --arg cwd "$1" --arg sid "${2:-ss-test}" '{cwd:$cwd, session_id:$sid, source:"startup"}'; }
+for H in knowledge-draft-review.sh ai-context-prune-auto.sh; do
+    HK="$HOOKS/$H"
+    [ -f "$HK" ] || { bad "session-start: $H missing"; continue; }
+    # 正常 payload（存在する CWD）→ exit 0
+    ss_payload "$DIR/.." "ss-$H" | sh "$HK" >/dev/null 2>&1; [ $? -eq 0 ] \
+        && ok "session-start: $H exits 0 on valid payload (never blocks)" \
+        || bad "session-start: $H nonzero exit on valid payload"
+    # 空 payload → fail-open exit 0
+    printf '%s' '' | sh "$HK" >/dev/null 2>&1; [ $? -eq 0 ] \
+        && ok "session-start: $H fail-open exit 0 on empty payload" \
+        || bad "session-start: $H not fail-open on empty payload"
+    # 不正 JSON → fail-open exit 0
+    printf '%s' 'not json {{' | sh "$HK" >/dev/null 2>&1; [ $? -eq 0 ] \
+        && ok "session-start: $H fail-open exit 0 on garbage payload" \
+        || bad "session-start: $H not fail-open on garbage payload"
+done
+
 echo
 [ "$fail" = "0" ] && { echo "ALL OK (test-hook-payloads)"; exit 0; } || { echo "FAILURES (test-hook-payloads)"; exit 1; }

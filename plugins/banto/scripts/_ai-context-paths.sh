@@ -7,9 +7,14 @@
 # Provided functions:
 #   _ai_context_mode <cwd>       → echoes "central" | "legacy" (legacy = grandfathered in-repo base)
 #   _ai_context_base_dir <cwd>   → echoes the effective base dir (always exit 0)
-#       1. mapping hit               → <store>/<project> (e.g. ~/ai-context-store/customer-A)
+#       1. central mapping hit       → <store>/<project> (e.g. ~/ai-context-store/customer-A)
 #       2. existing in-repo base     → <toplevel>/.ai-context (grandfather; read/write as before)
-#       3. otherwise                 → derive: <store_root>/<toplevel dirname> (store-first default)
+#       3. local store mapping hit   → <local_root>/<project> (e.g. ~/ai-context-local/myrepo)
+#       4. otherwise                 → derive: <store_root>/<toplevel dirname> (store-first default)
+#   _ai_context_local_root       → echoes the local (GitHub-less) store root (env → ~/ai-context-local)
+#   _ai_context_local_lookup <top> → echoes the local store project dir if registered (else return 1)
+#   _ai_context_is_local <cwd>   → return 0 when cwd resolves into the local store
+#   _ai_context_is_local_pinned <top> → return 0 when <top> is pinned local-only (mapping local:true)
 #   _ai_context_store_root       → echoes the store root (mapping store_root → env → ~/ai-context-store)
 #   _ai_context_derive_dir <cwd> → echoes the derived store project dir (deterministic -2/-3 suffix
 #                                  when the dirname collides with another registered project)
@@ -43,6 +48,33 @@ fi
 if [ -z "$_AI_CONTEXT_SCRIPT_DIR" ]; then
     _AI_CONTEXT_SCRIPT_DIR=$(cd "$(dirname "$0")" 2>/dev/null && pwd)
 fi
+
+# Echoes the local (GitHub-less) store root: $AI_CONTEXT_LOCAL_ROOT → ~/ai-context-local.
+# Sibling of the central store. A repo lands here when it is unregistered and has no central
+# store yet (non-blocking bootstrap). `/ai-context bootstrap` migrates it into the central store;
+# `/ai-context local` pins it here (mapping local:true).
+_ai_context_local_root() {
+    echo "${AI_CONTEXT_LOCAL_ROOT:-$HOME/ai-context-local}"
+}
+
+# Echoes the local store's mapping.json path ($AI_CONTEXT_LOCAL_MAPPING → <local_root>/.mapping.json).
+_ai_context_local_mapping() {
+    echo "${AI_CONTEXT_LOCAL_MAPPING:-$(_ai_context_local_root)/.mapping.json}"
+}
+
+# Looks up <toplevel> in the local store mapping and echoes its project dir (<local_root>/<project>).
+# Resolution only — never writes. Return 1 if not registered locally.
+_ai_context_local_lookup() {
+    _all_top="$1"
+    [ -z "$_all_top" ] && return 1
+    _all_map=$(_ai_context_local_mapping)
+    [ -f "$_all_map" ] || return 1
+    command -v jq >/dev/null 2>&1 || return 1
+    _all_root=$(_ai_context_local_root)
+    _all_proj=$(jq -r --arg top "$_all_top" '.projects[$top].project // empty' "$_all_map" 2>/dev/null)
+    [ -z "$_all_proj" ] && return 1
+    echo "$_all_root/$_all_proj"
+}
 
 # Echoes the store root. Priority: mapping's store_root field (a team store registered there
 # keeps working for derive) → $AI_CONTEXT_STORE_ROOT → ~/ai-context-store.
@@ -116,6 +148,7 @@ _ai_context_base_dir() {
         echo "$_aicp_cwd/.ai-context"
         return 0
     fi
+    _aicp_top=""
     if command -v git >/dev/null 2>&1; then
         _aicp_top=$(git -C "$_aicp_cwd" rev-parse --show-toplevel 2>/dev/null)
         if [ -n "$_aicp_top" ] && [ "$_aicp_top" != "$_aicp_cwd" ] && [ -d "$_aicp_top/.ai-context" ]; then
@@ -123,8 +156,47 @@ _ai_context_base_dir() {
             return 0
         fi
     fi
-    # 3. derive (store-first default — even unregistered repos resolve into the store)
+    # 3. local store (GitHub-less). The scaffold registers an unregistered repo here when there is
+    #    no central store yet (non-blocking). Keyed by git toplevel; fall back to cwd outside git.
+    _aicp_key="$_aicp_top"
+    [ -z "$_aicp_key" ] && _aicp_key="$_aicp_cwd"
+    _aicp_local=$(_ai_context_local_lookup "$_aicp_key")
+    if [ -n "$_aicp_local" ]; then
+        echo "$_aicp_local"
+        return 0
+    fi
+    # 4. derive (store-first default — even unregistered repos resolve into the store)
     _ai_context_derive_dir "$_aicp_cwd"
+}
+
+# Predicate: does <cwd> resolve into the local (GitHub-less) store? (return 0 yes / 1 no)
+# Usage: _ai_context_is_local <cwd>
+_ai_context_is_local() {
+    _ail_root=$(_ai_context_local_root)
+    case "$(_ai_context_base_dir "$1")" in
+        "$_ail_root"/*) return 0 ;;
+        *)              return 1 ;;
+    esac
+}
+
+# Predicate: is <toplevel> pinned local-only (mapping local:true)? (return 0 yes / 1 no)
+# Checks the local store mapping first, then the central mapping (either may carry local:true).
+# Usage: _ai_context_is_local_pinned <toplevel>
+_ai_context_is_local_pinned() {
+    _alp_top="$1"
+    [ -z "$_alp_top" ] && return 1
+    command -v jq >/dev/null 2>&1 || return 1
+    _alp_lmap=$(_ai_context_local_mapping)
+    if [ -f "$_alp_lmap" ]; then
+        _alp_v=$(jq -r --arg top "$_alp_top" '.projects[$top].local // empty' "$_alp_lmap" 2>/dev/null)
+        [ "$_alp_v" = "true" ] && return 0
+    fi
+    _alp_cmap="${AI_CONTEXT_MAPPING:-${AI_CONTEXT_STORE_ROOT:-$HOME/ai-context-store}/.mapping.json}"
+    if [ -f "$_alp_cmap" ]; then
+        _alp_v=$(jq -r --arg top "$_alp_top" '.projects[$top].local // empty' "$_alp_cmap" 2>/dev/null)
+        [ "$_alp_v" = "true" ] && return 0
+    fi
+    return 1
 }
 
 # Echoes the author identifier (shared by the workspaces/<author>/ namespace and decisions naming).

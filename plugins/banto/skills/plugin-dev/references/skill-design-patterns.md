@@ -1,14 +1,14 @@
-# skill design patterns
+# Skill design patterns
 
-A collection of design patterns for creating a skill / agent.
+A collection of design patterns for creating skills / agents.
 
 ## 1. Invocation control patterns (from the table on the official Skills page)
 
-| Frontmatter | User invocation | Claude invocation | Context loading |
+| フロントマター | ユーザー呼出 | Claude 呼出 | コンテキスト読込 |
 |---|:---:|:---:|---|
-| (default) | ✓ | ✓ | description always, full on invocation |
-| `disable-model-invocation: true` | ✓ | ✗ | description not in context, full on invocation |
-| `user-invocable: false` | ✗ | ✓ | description always, full on invocation |
+| (default) | ✓ | ✓ | description always; full body on invocation |
+| `disable-model-invocation: true` | ✓ | ✗ | description not included in context; full body on invocation |
+| `user-invocable: false` | ✗ | ✓ | description always; full body on invocation |
 
 ### Bidirectional (default)
 
@@ -22,27 +22,27 @@ description: |
 ---
 ```
 
-The user can call it with `/search-codebase`. Claude can also auto-fire it.
-**Use**: general information retrieval, search, analysis.
+Users can invoke it with `/search-codebase`. Claude can also fire it automatically.
+**Use for**: general information retrieval, search, analysis.
 
-### User only (side-effect workflow)
+### User-only (side-effect workflows)
 
 ```yaml
 ---
 name: deploy
 description: |
   **WORKFLOW SKILL** — Deploy the application to production.
-  Explicit invocation only via /deploy.
+  /deploy で明示呼び出し専用。
   INVOKES: Bash(gcloud:*), Bash(kubectl:*).
 disable-model-invocation: true
 allowed-tools: Read Bash(gcloud:*) Bash(kubectl:*)
 ---
 ```
 
-Runs only when the user calls `/deploy`. Claude does not fire it on its own mid-conversation.
-**Use**: side-effect workflows such as commit / deploy / send.
+Runs only when the user invokes it with `/deploy`. Claude won't fire it on its own mid-conversation.
+**Use for**: side-effect workflows such as commit / deploy / send.
 
-### Claude only (background knowledge)
+### Claude-only (background knowledge)
 
 ```yaml
 ---
@@ -54,15 +54,15 @@ user-invocable: false
 ---
 ```
 
-Not shown in the `/` menu. Auto-referenced when Claude judges it necessary in the conversation context.
-**Use**: domain knowledge, legacy-system information, convention sets.
+Not shown in the `/` menu. Claude references it automatically when it judges it relevant to the conversation.
+**Use for**: domain knowledge, legacy system information, convention sets.
 
 ## 2. Skill types (official Skills page)
 
 ### Reference content
 
 Official definition:
-> "Knowledge Claude applies to current work. Conventions, patterns, style guides, domain knowledge. Used alongside conversation context"
+> "Knowledge Claude applies to the current work. Conventions, patterns, style guides, domain knowledge. Used together with conversation context."
 
 ```yaml
 ---
@@ -76,14 +76,14 @@ When writing API endpoints:
 ```
 
 Characteristics:
-- **Do not** attach `context: fork` (official Warning: meaningless since there is no executable prompt)
-- Usually the default invocation setting or `user-invocable: false`
-- Referenced in the normal conversation context
+- **Do not add** `context: fork` (official Warning: meaningless since there is no executable prompt)
+- Usually default invocation settings or `user-invocable: false`
+- Referenced in the normal flow of conversation
 
 ### Task content
 
 Official definition:
-> "Step-by-step instructions for a specific action (deploy, commit, etc.). Invoked directly via `/skill-name`"
+> "Step-by-step instructions for a specific action (deploy, commit, etc.). Invoked directly with `/skill-name`."
 
 ```yaml
 ---
@@ -101,57 +101,57 @@ allowed-tools: Bash(gcloud:*) Bash(kubectl:*)
 ```
 
 Characteristics:
-- `disable-model-invocation: true` is **an exceptional operation** (intent-first priority): only for truly irreversible/outward side effects, or when it inseparably collides with high-frequency vocabulary. A non-destructive workflow (read-only / requiring `--refresh` / built-in human gate / approval-based) is **published via narrow intrinsic NL triggers + safety boundaries**, with no DMI (the North Star "every feature is reachable in natural language" / decision `2026-06-10-114006`). When keeping it, write the explicit reason in the description
-- Subagent separation is possible with `context: fork`
+- `disable-model-invocation: true` is an **exceptional measure** (intent-first takes priority): only for truly irreversible, outward-facing side effects, or when it unavoidably collides with high-frequency vocabulary. Non-destructive workflows (read-only / `--refresh` required / built-in human gate / approval-gated) should be **exposed with a narrow, specific NL trigger + safety boundaries** and not given DMI (north star "every feature is reachable via natural language" / decision `2026-06-10-114006`). When you do keep it, state the explicit reason in the description.
+- `context: fork` allows subagent isolation
 - Has clear steps
 
-## 3. Loop design (from the Glaser Elastic Loop)
+## 3. Loop design (from Glaser's Elastic Loop)
 
 Applying Glaser's Elastic Loop concept to skill design:
 
 ### Tight Loop (synchronous co-driving)
 
-Characteristics: the user and Claude proceed while verifying behavior back and forth
+Characteristics: the user and Claude proceed while checking behavior in turns
 - User confirmation at each step
-- High control, also high cognitive load
-- Suited to complex spec branching, first-time attempts, uncertain requirements
+- High control, but also high cognitive load
+- Suited to complex spec branching, first attempts, uncertain requirements
 
 ```yaml
 ---
 name: spec
 description: |
-  **WORKFLOW SKILL** — Interactively generate a spec in an industry-standard format.
-  Triggers: "spec", "show me the design only", "write a spec" / 「設計だけ見せて」「仕様書作って」「spec」
-  Do not use when: going all the way to implementation in one shot — after spec, self-drive the implementation directly.
-  INVOKES: confirms requirements via a text dialogue.
+  **WORKFLOW SKILL** — 業界標準フォーマットで仕様書を対話生成する。
+  トリガー：「設計だけ見せて」「仕様書作って」「spec」
+  使ってはいけない場面：実装まで一気にやる場合は spec 後そのまま自走実装
+  依存：テキスト対話で要件確認
 ---
 ```
 
 ### Loose Loop (asynchronous delegation, Dark Factory)
 
-Characteristics: hand off intent and delegate in a loose loop, course-correct with backpressure, evaluate the result
-- Centered on subagent delegation (`context: fork` + `Agent` tool)
-- Suppresses the parent session's token consumption
-- Suited to established patterns, routine tasks, research / analysis
+Characteristics: hand off intent, delegate in a loose loop, course-correct via backpressure, evaluate results
+- Centered on subagent delegation (`context: fork` + the `Agent` tool)
+- Keeps the parent session's token consumption down
+- Suited to established patterns, routine tasks, investigation and analysis
 
 ```yaml
 ---
 name: research
 description: |
-  **WORKFLOW SKILL** — Newly investigate external information and document it.
-  Triggers: "research", "investigate", "what's the latest" / 「調べて」「最新の〜」「リサーチ」
-  Do not use when: only an internal search is needed — use search.
-  INVOKES: launches research-agent in parallel via Agent(subagent_type=research-agent).
-  For a simple fact check, a single webread is enough.
+  **WORKFLOW SKILL** — 外部情報を新たに調査してドキュメント化する。
+  トリガー：「調べて」「最新の〜」「リサーチ」
+  使ってはいけない場面：内部検索だけなら search を使う
+  依存：research-agent を Agent(subagent_type=research-agent) で並列起動。
+  単純な事実確認なら webread 1 回で十分。
 context: fork
 agent: general-purpose
 ---
 ```
 
 Design questions (Glaser):
-- Which loop size should this skill be used at?
+- What loop size should this skill be used at?
 - Where is backpressure (evaluation / course-correction points) needed?
-- Which artifacts should remain out of the loop?
+- Which artifacts should the loop leave behind?
 - How does learning propagate to the organization?
 
 ## 4. Subagent execution patterns
@@ -174,107 +174,106 @@ Research $ARGUMENTS thoroughly:
 
 Built-in agent types:
 - **Explore**: read-only, for codebase exploration
-- **Plan**: research agent for plan mode
-- **general-purpose**: complex tasks needing both exploration and modification
+- **Plan**: investigation agent for plan mode
+- **general-purpose**: complex tasks that need both exploration and modification
 
-### Dark-Factory-ized delegation (Glaser)
+### Dark-Factory-style delegation (Glaser)
 
 ```
-intent (clarified in the skill description)
+intent (skill description で明確化)
   ↓
-loose loop (launch research-agent in the background)
+loose loop (research-agent を background で起動)
   ↓
-backpressure (specify the save location `.ai-context/docs/research/`)
+backpressure (`{base}/docs/research/` に保存先指定)
   ↓
-evaluate (evaluate the returned result against strong scenarios)
+evaluate (返却結果を strong scenarios で評価)
 ```
 
-Use `run_in_background=true` to suppress the parent session's token consumption.
+Leverage `run_in_background=true` to keep the parent session's token consumption down.
 
 ## 5. Dynamic context injection
 
-Run a shell command before the skill loads with the `` !`command` `` syntax:
+Run shell commands before the skill loads with the `` !`command` `` syntax:
 
 ```yaml
 ---
 name: pr-summary
-description: Summarize the PR changes
+description: PR の変更を要約
 context: fork
 agent: Explore
 allowed-tools: Bash(gh *)
 ---
 
-## PR context
+## PR コンテキスト
 - PR diff: !`gh pr diff`
-- Changed files: !`gh pr diff --name-only`
+- 変更ファイル: !`gh pr diff --name-only`
 
-Summarize based on the above.
+上記を踏まえて要約してください。
 ```
 
-Multiple lines use a ``` ```! ``` block.
-Disable: `"disableSkillShellExecution": true`
+For multiple lines, use a ``` ```! ``` block.
+Disable with: `"disableSkillShellExecution": true`
 
 ## 6. Permission control examples
 
 ```
-# Allow specific skills only
+# 特定スキルのみ許可
 Skill(commit)
 Skill(review-pr *)
 
-# Deny a specific skill
+# 特定スキルを拒否
 Skill(deploy *)
 
-# Deny all skills
+# 全スキルを拒否
 Skill
 ```
 
 ## 7. HeavySkill 4-component (for complex workflow skills)
 
-Skills involving complex reasoning adopt the HeavySkill 4-component (Activation Conditions / Parallel Protocol / Deliberation / Output Constraints). See `references/heavyskill-template.md` for the canonical template and applicability criteria (a skill containing complex / decision / analysis / design / deliberation / comparison / trade-off, etc.).
+Skills that involve complex reasoning adopt the HeavySkill 4-component (Activation Conditions / Parallel Protocol / Deliberation / Output Constraints). For the canonical template and the criteria for applying it (skills that involve complex / judgment / analysis / design / discussion / comparison / trade-offs, etc.), see `references/heavyskill-template.md`.
 
 ## 8. Intent-first (the principle of command design)
 
-**Do not make the user decide "which command to use".** When giving a skill a command system (`/skill sub <args>`):
+**Don't make the user decide "which command to use."** When a skill has a command system (`/skill sub <args>`):
 
-1. **Start design from intent detection** — place a table of "which natural-language utterance triggers which operation" at the very top of SKILL.md. The command table comes after (as an alias list)
-2. **Reachability rule** — every command must have a path reachable via natural language even when the user does not know it exists. Include utterance examples in the description's trigger words
-3. **Split autonomy by intent type** — bookkeeping type (sync / cleanup / state update) = silent automatic (L3) / structure-building type (new branches / new file sets) = proposal with adopted interpretation (L2) → promote based on false-fire rate seen via telemetry / irreversible-outward (PR / publish / send) = human gate
-4. **Write false-fire guards** — clearly state in SKILL.md the "this utterance does not fire" boundaries (preventing bureaucratization)
-5. Keep commands — deterministic, callable from routine/CI, for power users. What is bad is "making it the main interface", not its existence
+1. **Start the design from intent detection** — put a table of "which operation fires when the user says what in natural language" at the very top of SKILL.md. The command table comes after (as an alias list).
+2. **Reachability rule** — every command must always have a path that is reachable via natural language even when the user doesn't know it exists. Include spoken examples in the trigger words of the description.
+3. **Split autonomy by intent type** — bookkeeping (syncing, cleanup, state updates) = silent and automatic (L3) / structure-creating (new branches, new file sets) = a proposal with an adopted interpretation (L2) → promote based on the misfire rate observed via telemetry / irreversible, outward-facing (PR, publish, send) = human gate.
+4. **Write misfire guards** — state the "does not fire on this utterance" boundary (to prevent bureaucratization) explicitly in SKILL.md.
+5. Keep the commands — deterministic, callable from routine/CI, and for power users. What's bad is "making them the primary interface," not their existence.
 
-Real example: `skills/ws/SKILL.md` (intent-detection table + epic/task/done/ship aliases).
+Example: `skills/ws/SKILL.md` (intent detection table + epic/task/done/ship aliases).
 
-## 9. Flowchart for design decisions
+## 9. Design-decision flowchart
 
 ```
-Create a new skill
+新しい skill を作る
     │
     ▼
-Has side effects? (commit / deploy / send / write)
+副作用がある？ (commit / deploy / send / write)
     ├─ Yes → disable-model-invocation: true
     └─ No
         │
         ▼
-    Background knowledge? (reference only)
+    バックグラウンド知識？（参照のみ）
         ├─ Yes → user-invocable: false
-        └─ No → default (bidirectional)
+        └─ No → デフォルト（双方向）
             │
             ▼
-        Involves complex reasoning?
+        複雑な推論を含む？
             ├─ Yes → HeavySkill 4-component
-            └─ No → standard template
+            └─ No → 通常テンプレ
                 │
                 ▼
-            tight loop or loose loop?
-                ├─ Tight → user dialogue, step-by-step confirmation
-                └─ Loose → subagent delegation (context: fork)
+            tight loop or loose loop？
+                ├─ Tight → ユーザー対話・段階確認
+                └─ Loose → サブエージェント委任 (context: fork)
 ```
 
-## 10. Bilingual triggers (EN canonical + Japanese triggers co-listed)
+## 10. Bilingual triggers (EN canonical + Japanese triggers alongside)
 
-A skill's auto-fire depends on matching the keywords in the description against natural language.
-To fire for both Japanese and English users, write the description by the following convention
-(source: banto-public-release spec T2.1. The Japanese trigger words are tuned in production, so **keep them unchanged**):
+A skill's automatic firing depends on matching keywords in the description against natural language.
+To make it fire for both Japanese and English users, write the description by the following convention (source: banto-public-release spec T2.1. The Japanese trigger words are already tuned in production, so **preserve them unchanged**):
 
 ```yaml
 description: |
@@ -284,13 +283,13 @@ description: |
 ```
 
 Rules:
-- **The body is canonically English** (Claude responds in the user's language even with EN instructions, so the JP user's experience does not degrade)
-- **Co-list EN and JP trigger words on the `Triggers:` line**. Move the JP words verbatim from the existing description (do not paraphrase)
-- Also state the exclusion conditions (responsibility boundary) in English to prevent false fires
-- If there is a command alias (`/xxx`), follow §8 intent-first to keep "the same place reachable in natural language"
+- **English is canonical for the body** (Claude responds in the user's language even with EN instructions, so the JP user's experience doesn't degrade)
+- **List both EN and JP trigger words on the `Triggers:` line**. Move the JP words verbatim from the existing description (do not paraphrase)
+- State the exclusion conditions (responsibility boundary) in English too, to prevent misfires
+- When there are command aliases (`/xxx`), follow §8 Intent-first to keep "the same place is reachable via natural language"
 
 ## Related
 
-- quality scoring → `references/quality-scoring.md`
+- Quality scoring → `references/quality-scoring.md`
 - HeavySkill 4-component → `references/heavyskill-template.md`
-- all frontmatter fields → `references/skill-md.md`
+- All frontmatter fields → `references/skill-md.md`

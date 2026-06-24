@@ -5,9 +5,9 @@
 ## /ws（引数なし）: 現在の WS を表示
 
 ```
-Read(".ai-context/WORKSPACE.md")
+Read("{base}/WORKSPACE.md")
 # in multi mode also read WORKSPACE-refs.md
-Read(".ai-context/WORKSPACE-refs.md")  # only when the file exists
+Read("{base}/WORKSPACE-refs.md")  # only when the file exists
 ```
 
 なければ: "No workspace is set up. You can create one with /ws new."
@@ -18,8 +18,8 @@ Read(".ai-context/WORKSPACE-refs.md")  # only when the file exists
 AUTHOR=$(sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --author)
 ```
 ```
-Glob(".ai-context/workspaces/<AUTHOR>/*/workspace.md")      # new layout (active)
-Glob(".ai-context/workspaces/<AUTHOR>/old/*/workspace.md")  # new layout (archived)
+Glob("{base}/workspaces/<AUTHOR>/*/workspace.md")      # new layout (active)
+Glob("{base}/workspaces/<AUTHOR>/old/*/workspace.md")  # new layout (archived)
 # legacy (unmigrated projects only): Glob(".ai-context/workspaces/*.md")
 ```
 

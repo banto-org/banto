@@ -60,4 +60,40 @@ check "grandfather → legacy" "legacy" "$m3"
 b3=$( . "$PATHS"; _ai_context_base_dir "$LEG" )
 check "grandfather base = cwd/.ai-context" "$LEG/.ai-context" "$b3"
 
+echo "== ai-context-local (non-blocking local store, spec 2026-06-24) =="
+# A repo registered ONLY in the local store mapping resolves into ~/ai-context-local/<project>,
+# NOT the central derive. Keyed by git toplevel; here we use a non-git dir so the key is the cwd.
+LROOT="$TMP/local"
+LMAP="$LROOT/.mapping.json"
+mkdir -p "$LROOT"
+LP="$TMP/localproj"                 # non-git: base_dir keys on the cwd path
+mkdir -p "$LP"
+cat > "$LMAP" <<JSON
+{
+  "version": 2,
+  "store_root": "$LROOT",
+  "projects": {
+    "$LP":        { "project": "localproj", "local": false },
+    "$TMP/pinned": { "project": "pinned",   "local": true  }
+  }
+}
+JSON
+export AI_CONTEXT_LOCAL_ROOT="$LROOT" AI_CONTEXT_LOCAL_MAPPING="$LMAP"
+
+bl=$( . "$PATHS"; _ai_context_base_dir "$LP" )
+check "local-registered → local store dir" "$LROOT/localproj" "$bl"
+( . "$PATHS"; _ai_context_is_local "$LP" ); check_rc "is_local true for local-registered repo" 0 "$?"
+# central registration still wins over the local store (resolution order: central first)
+bc=$( . "$PATHS"; _ai_context_base_dir /work/customer-A )
+check "central registration wins over local store" "$TMP/store/customer-A" "$bc"
+( . "$PATHS"; _ai_context_is_local /work/customer-A ); check_rc "is_local false for central repo" 1 "$?"
+# unregistered (neither central nor local) → central derive (store-first default), not local
+bu=$( . "$PATHS"; _ai_context_base_dir /work/unregistered-x )
+check "unregistered → central derive (not local)" "$TMP/store/unregistered-x" "$bu"
+
+echo "== local:true pin (mapping marker) =="
+( . "$PATHS"; _ai_context_is_local_pinned "$TMP/pinned" );   check_rc "pinned repo (local:true) → pinned" 0 "$?"
+( . "$PATHS"; _ai_context_is_local_pinned "$LP" );           check_rc "local:false repo → not pinned" 1 "$?"
+( . "$PATHS"; _ai_context_is_local_pinned "/work/proj-b" );  check_rc "central repo → not pinned" 1 "$?"
+
 if [ "$fail" = "0" ]; then echo "ALL GREEN"; exit 0; else echo "FAILED"; exit 1; fi
