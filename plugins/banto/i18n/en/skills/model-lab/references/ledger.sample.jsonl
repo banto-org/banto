@@ -1,0 +1,2 @@
+{"claim": "QLoRA fine-tune が baseline 比 +3.2pt (acc)", "run_id": "exp-0042", "config": "configs/qlora.yaml", "seeds": [0, 1, 2, 3, 4], "metric": "accuracy", "mean": 78.4, "ci95": [76.9, 79.8], "baseline_run": "exp-0001", "status": "verified"}
+{"claim": "蒸留 student が teacher 比 -0.8pt で 4x 高速", "run_id": "exp-0051", "config": "configs/distill.yaml", "seeds": [0, 1, 2], "metric": "accuracy", "mean": 74.1, "ci95": [73.2, 75.0], "baseline_run": "exp-0042", "status": "proposed"}

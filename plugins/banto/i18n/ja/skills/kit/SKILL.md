@@ -69,6 +69,7 @@ compatibility: Claude Code (requires bash, git, jq)
 | `spec` | 「spec」「仕様書作って」「設計だけして」「plan」「実装しないで」 |
 | `dev-loop` | 「自走で開発」「大玉を分解して回して」「ループで開発」「dev loop」「学習ループ」（単発実装は self-driving で直接） |
 | `ai-build` | 「RAG を作りたい」「エージェント作る」「eval 組む」「プロンプト改善」「どのモデルがいい」（AI 機能構築フロー。dev-loop の AI 特化版・eval まで） |
+| `model-lab` | 「モデルを学習」「事前学習」「fine-tune して」「蒸留」「pruning」「ablation 回す」「論文書く」「HF に公開」（モデル作成・学習の研究フロー。検証中心・論文/HF/GitHub 公開まで。ai-build がアプリ層なのに対し研究層） |
 | `ai-context` (memo) | 「メモして」「書き留めて」「会話を要約して保存」（ai-context に内包。旧 `memo` は後方互換） |
 | `ai-context` (knowledge) | 「ナレッジにして」「昇格して」「教訓として残して」（ai-context に内包） |
 | `plugin-audit` | 「この skill の品質チェック」「14軸で見て」「SKILL.md を best practice と突き合わせ」 |
