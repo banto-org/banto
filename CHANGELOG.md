@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.7
+
+- **Site: deeper Plugin-tools page.** Each of the 14 audit axes now shows what it concretely checks (with a static / fresh-agent badge), a "why the score is trustworthy" section (fresh-agent review · deterministic static axes · measured routing precision · model-tier sweep · boundary-case weighting), a **HeavySkill** explainer (the 4 required components; based on [arXiv 2605.02396](https://arxiv.org/abs/2605.02396)), and a sources list. Tagline reworded to "audit them rigorously". Fixed a CSS class collision that hid the `plugin-dev` flow nodes in a normal browser.
+
 ## 0.1.6
 
 - **Site: explainer pages** added under `docs/`. A deep-dive on the **AI-Context-Store** (what lives in the store, what the plugin does with it, and how it wires into Claude Code's hook lifecycle — with an animated diagram and a familiar folder tree), and a **Plugin tools** page covering `plugin-audit` (14-axis quality audit; static axes vs. a fresh-agent judgment pass) and `plugin-dev` (scaffold &amp; refactor). Reachable from the landing page's flagship and toolset sections.
