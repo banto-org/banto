@@ -54,7 +54,7 @@ plugins/banto
 #                          deterministic watchdog (harness-drift-check.sh + dead-skill-report.sh,
 #                          run at SessionStart / nightly) stays; only the manual model-judged skill
 #                          is held back from the public surface.
-PLUGIN_EXCLUDE="skills/status skills/harness-audit skills/banto-port scripts/migrate-store-layout.sh scripts/migrate-store-v2.sh scripts/migrate-to-store.sh"
+PLUGIN_EXCLUDE="skills/status skills/harness-audit skills/banto-port workflows/harness-audit.workflow.js scripts/migrate-store-layout.sh scripts/migrate-store-v2.sh scripts/migrate-to-store.sh"
 
 mkdir -p "$TARGET"
 for p in $ALLOW; do
@@ -89,6 +89,11 @@ done
 # Fresh public changelog (internal history is not carried over)
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
+
+## 0.1.5
+
+- **New skill `model-lab`**: a model-building research workflow (the research-layer sibling of `dev-loop` / `ai-build`) — pretraining, full fine-tune, PEFT/LoRA, distillation, pruning, and architecture search, driven verification-first through to publishing a paper (arXiv/LaTeX) + Hugging Face + GitHub. Nine stages (frame → survey → design → implement → run → verify → analyze → paper → iterate); `autonomy_level: L3` with hard human gates on paid compute, publishing, and method/architecture goal forks.
+- **Verification spine (deterministic hooks)**: `repro-gate` flags missing seed / determinism / std-CI in training scripts and result docs; `model-claim-guard` blocks a "paper/result done" claim that lacks a backing experiment (the research analog of `verify-claim-guard`); `compute-cost-gate` gates paid cloud / cluster compute behind owner confirmation (`BANTO_PAID_LAUNCH_RE` extends it per project). Helper scripts: `repro-check`, `eval-stats` (multi-seed BCa bootstrap 95% CI + permutation test), `claim-link` (claim ↔ verified-ledger check).
 
 ## 0.1.4
 
@@ -126,7 +131,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.1.4"
+PUB_VERSION="0.1.5"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"

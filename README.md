@@ -44,7 +44,7 @@ hooks, not promises.
   English set is generated from them and kept in sync by a deterministic gate. `/set-language ja|en`
   swaps the whole set to one language, and the choice survives plugin updates (public default: English).
 
-14 skills / 6 agents / 38 hooks / 9 behavioral rules. No bundled MCP servers. Security review and
+15 skills / 6 agents / 41 hooks / 9 behavioral rules. No bundled MCP servers. Security review and
 code review are deliberately **delegated to Anthropic's official plugins** rather than reimplemented.
 
 ## Requirements

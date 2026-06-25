@@ -69,6 +69,7 @@ Pattern shared by the document-creation skills: `${CLAUDE_PLUGIN_ROOT}/templates
 | `spec` | "spec", "write a spec", "just do the design", "plan", "don't implement it" |
 | `dev-loop` | "develop autonomously", "break the big item down and run it", "develop in a loop", "dev loop", "learning loop" (one-off implementation goes directly via self-driving) |
 | `ai-build` | "I want to build a RAG", "build an agent", "set up evals", "improve the prompt", "which model should I use" (AI-feature build flow; an AI-specialized version of dev-loop, through eval) |
+| `model-lab` | "train a model", "pretrain", "fine-tune this", "distill", "pruning", "run ablations", "write the paper", "publish to HF" (model-building research flow; verification-centered, through paper/HF/GitHub publishing — the research layer to ai-build's application layer) |
 | `ai-context` (memo) | "make a memo", "jot this down", "summarize and save the conversation" (subsumed into ai-context; the old `memo` kept for backward compatibility) |
 | `ai-context` (knowledge) | "turn this into knowledge", "promote it", "record this as a lesson" (subsumed into ai-context) |
 | `plugin-audit` | "check this skill's quality", "review it on the 14 axes", "compare SKILL.md against best practice" |

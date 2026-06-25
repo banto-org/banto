@@ -1,0 +1,46 @@
+# ODD Spec for model-lab
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: model-lab
+autonomy_level: L3  # Autopilot（継続実行＋例外時のみ owner 要求）。安価な内ループは自走 / 有料計算・公開・手法/アーキ goal fork は人間ゲート / eval green-red・再現性は閾値で deterministic / push/PR/main は人間ゲート
+
+in_scope:
+  - モデル作成・学習（事前学習 from scratch / フル fine-tune / PEFT・LoRA / 知識蒸留 / pruning / アーキ探索）の要件定義 → 設計 → 実装 → 学習 → eval → 反復の自走フロー
+  - 内部検索（search）→ 最新調査（research）→ 論文横断の技術流用探索（Connected Papers / Semantic Scholar / Papers with Code）
+  - 手法 / モデル / アーキ選定 + baseline・ablation 計画 + eval プロトコル + 計算計画（Mac→Nvidia→cloud）
+  - 検証: lm-evaluation-harness + lighteval、統計的厳密性（≥5 seed・BCa 95%CI・permutation）、汚染対策、圧縮の多軸評価
+  - 再現性の担保（seed 固定・Hydra config・DVC データ版・pixi/Docker 環境・ClearML run）
+  - claim 台帳（主張 ⇄ run_id ⇄ config/seed）と論文・HF・GitHub 公開（人間ゲート）
+
+out_of_scope:
+  - 既存モデルを使うアプリ層 AI 機能（ai-build）／AI 要素のない通常実装（dev-loop）／設計のみ（spec）／思想のみ（concept）
+  - 既存ストアの内部検索のみ（search）／純粋な外部調査のみ（research）／Claude API の id・価格参照（claude-api）
+  - 学習・追跡・eval 基盤の再実装（実績ツールへ委譲する。同梱は薄い検証スパイン + オーケストレーションのみ）
+
+safety_boundaries:
+  - 有料計算（クラウド / クラスタ）は cost ceiling 超過で停止 → owner（compute-cost-gate）。Spot / preemptible を既定
+  - eval / 学習データに client 本番データ・PII・内部名を混ぜない（egress-guard が client パス流出を遮断）
+  - Claude の id・価格を SKILL.md / スクリプトに焼き込まない（claude-api skill が正本）
+  - 同梱スクリプト（repro-check / eval-stats / claim-link）は依存不在で no-op（fail-open）— 検証不能で実装を止めない
+  - commit はブランチ止まり。push / PR / main / 削除 / 外部投稿（arxiv / HF / GitHub 公開）は実行しない（人間ゲート）
+
+kill_switch_conditions:
+  - 手法 / アーキ選定が goal fork（受け入れ基準・コスト桁・新規性が変わる）→ Design で停止・owner へ
+  - 有料計算の起動が cost ceiling を超過 → 停止・owner へ
+  - eval が red のまま「完了 / 論文化」主張（model-claim-guard が Stop でブロック）
+  - 裏づけ実験（run_id + config + seed）の無い主張を論文 / 報告に書こうとした（claim-link / model-claim-guard）
+  - 改善なし N 周（plateau）で成功基準に到達しない → 周回停止・owner へ
+  - 不可逆 / 外向き操作（push・PR・main・削除・外部投稿・公開）の要求 → 停止・owner へ
+
+approval_gates:
+  - Stage 3: 手法（pretrain / FT / PEFT / 蒸留 / pruning / アーキ）+ モデル + 計算コストの根拠を 1 度提示して確認
+  - Stage 5: 有料計算（クラウド / クラスタ）起動の前に予算とプランを確認
+  - Stage 8: 公開（arxiv / HF / GitHub / Zenodo）の前に内容と出所（ライセンス / PII / NDA）を確認
+  - eval / 学習データに外部・本番データを取り込む場合は出所を確認
+
+metrics:
+  eval_seed_min: 5
+  eval_ci_level: 95
+  eval_plateau_rounds: 3
+  compute_cost_ceiling_usd: null  # owner が Frame で案件ごとに設定。null のときクラウド / クラスタ起動は必ず確認

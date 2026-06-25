@@ -146,14 +146,59 @@
       "ja_sha256": "cb1a3a0253b7a6dd7f351fe59b49991778337274f2e04f8b82495babd3997c92"
     },
     "skills/kit/SKILL.md": {
-      "en_sha256": "74b4b1150d29154e19c103ffc1dcf7fe450a05d19f68af7ee78434de769967c9",
+      "en_sha256": "116ff12c736b5cf0db038ec7f0fbbfb4e4010521c29e672fcfa3478c29aeb9b8",
       "generated_at": "2026-06-24T08:53:28Z",
-      "ja_sha256": "993787b978ec57971458aa23bb92e473e3834746863e50d45edc7cc461718fc3"
+      "ja_sha256": "4b5d032433c1f079a1ca6a236bf269055dcf303c26c897ac3965a9af49706dac"
     },
     "skills/kit/odd.yaml": {
       "en_sha256": "141a195a99b3367907d784ac9f7fbc219a1f130c2a8bdd4a2d7e5f0b614aaecc",
       "generated_at": "2026-06-20T15:08:37Z",
       "ja_sha256": "e476c6199667a321bec3d3de448274083e34fbf30fc3d21000c8eba30394d341"
+    },
+    "skills/model-lab/SKILL.md": {
+      "en_sha256": "eddbaaf85915da9e4e9494494416ca85267372df965e97fd2a3cca09effda6c5",
+      "generated_at": "2026-06-24T21:59:56Z",
+      "ja_sha256": "ad79f106cae73927d3ecd94e96cd9166758679884c467336ca7e264b4ff12718"
+    },
+    "skills/model-lab/odd.yaml": {
+      "en_sha256": "c09d265a4935356c1c15eb20739a78a9e60d9950cd4b7f882f43ab649ba3e020",
+      "generated_at": "2026-06-24T21:59:56Z",
+      "ja_sha256": "f07a4a6495762d14d7cc1b4611ce4b130ee475c7eaebad6e20163568cc552d92"
+    },
+    "skills/model-lab/references/compute.md": {
+      "en_sha256": "ad22d270075c8ec3ddf90e6bba148c8c91908ad73b14e7f25925d6b25523e81d",
+      "generated_at": "2026-06-24T21:59:56Z",
+      "ja_sha256": "4f57a73a7faa6d80c122d32ddc77c654e63fead06fa9f88a4347b53e6a8819f6"
+    },
+    "skills/model-lab/references/eval-rigor.md": {
+      "en_sha256": "5b051f55b62a2d7d4d2cd654de1e130f9c733eec45b0c0244e1588a329c1aac8",
+      "generated_at": "2026-06-24T21:59:56Z",
+      "ja_sha256": "d97bf19012c71d96429a0fb611553eb128185ed83f9992e461bac1ea0c4cb6f9"
+    },
+    "skills/model-lab/references/ledger.sample.jsonl": {
+      "en_sha256": "1e084d4a8e8cd3c2dce5b20e6e0e0295332238a1b05e59a4b413eec22c3fffd0",
+      "generated_at": "2026-06-24T21:59:56Z",
+      "ja_sha256": "1e084d4a8e8cd3c2dce5b20e6e0e0295332238a1b05e59a4b413eec22c3fffd0"
+    },
+    "skills/model-lab/references/publishing.md": {
+      "en_sha256": "54718351015bbbe6c904464b5e6e9995710c5a6bda0642627d4cd0317d334d95",
+      "generated_at": "2026-06-24T21:59:56Z",
+      "ja_sha256": "0ca72f239a0f8872611d27facc39f6c69e43d98b096c4b82279654d9b0b0234e"
+    },
+    "skills/model-lab/references/reproducibility.md": {
+      "en_sha256": "f22455974ab8b3f427e1fc6ad1788d056ef33bd1fadc069b2731d7bb42408932",
+      "generated_at": "2026-06-24T21:59:56Z",
+      "ja_sha256": "316348ec860e41e92b78f3d6ba6c1dd8e3cce6579eddb9491a2fd5a59a80e6cf"
+    },
+    "skills/model-lab/references/stack.md": {
+      "en_sha256": "66065d53b16d278f8dd020cd3b536d58a0a04669dd2cbd51fb18aaf6452f061f",
+      "generated_at": "2026-06-24T21:59:56Z",
+      "ja_sha256": "b5b365f31c163c7d2ea616ae1c653483eacf332965ef59eac0499a169a893d96"
+    },
+    "skills/model-lab/references/stages.md": {
+      "en_sha256": "1d783288953c1a286235dfdc58f0475b1abc6382b5ef8c1e38da23c43f9ce641",
+      "generated_at": "2026-06-24T21:59:56Z",
+      "ja_sha256": "0544ed4b7dcf073913f94653ce27c9b3138011ff386ad2d1c770dcb83fa58084"
     },
     "skills/plugin-audit/SKILL.md": {
       "en_sha256": "3c40e2c44afef09ea044dd0ffd1bc4680c16ae13a627ab7e0b92cd888a1667e2",

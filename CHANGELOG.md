@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.5
+
+- **New skill `model-lab`**: a model-building research workflow (the research-layer sibling of `dev-loop` / `ai-build`) — pretraining, full fine-tune, PEFT/LoRA, distillation, pruning, and architecture search, driven verification-first through to publishing a paper (arXiv/LaTeX) + Hugging Face + GitHub. Nine stages (frame → survey → design → implement → run → verify → analyze → paper → iterate); `autonomy_level: L3` with hard human gates on paid compute, publishing, and method/architecture goal forks.
+- **Verification spine (deterministic hooks)**: `repro-gate` flags missing seed / determinism / std-CI in training scripts and result docs; `model-claim-guard` blocks a "paper/result done" claim that lacks a backing experiment (the research analog of `verify-claim-guard`); `compute-cost-gate` gates paid cloud / cluster compute behind owner confirmation (`BANTO_PAID_LAUNCH_RE` extends it per project). Helper scripts: `repro-check`, `eval-stats` (multi-seed BCa bootstrap 95% CI + permutation test), `claim-link` (claim ↔ verified-ledger check).
+
 ## 0.1.4
 
 - **ai-context store bootstrap (non-blocking)**: an unregistered project now lands immediately in a temporary local store (`~/ai-context-local/<project>/`, same layout) instead of waiting on a prompt — work is never blocked. `/ai-context bootstrap` later backs it with a GitHub store (register existing or create private in a chosen, remembered org) and migrates the local store in (additive, never overwrites). `/ai-context local` pins a project local-only.

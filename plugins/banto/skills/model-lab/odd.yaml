@@ -1,0 +1,46 @@
+# ODD Spec for model-lab
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: model-lab
+autonomy_level: L3  # Autopilot (continuous execution + owner requested only on exceptions). The cheap inner loop self-drives / paid compute, publishing, and the method/architecture goal fork are human gates / eval green-red and reproducibility are deterministic by threshold / push/PR/main are human gates
+
+in_scope:
+  - Self-driving flow for model creation / training (pretraining from scratch / full fine-tune / PEFT-LoRA / knowledge distillation / pruning / architecture search): requirements → design → implementation → training → eval → iteration
+  - Internal search (search) → latest research (research) → cross-paper technique-reuse exploration (Connected Papers / Semantic Scholar / Papers with Code)
+  - Method / model / architecture selection + baseline·ablation planning + eval protocol + compute plan (Mac→Nvidia→cloud)
+  - Verification: lm-evaluation-harness + lighteval, statistical rigor (≥5 seeds · BCa 95% CI · permutation), contamination defenses, multi-axis evaluation of compression
+  - Guaranteeing reproducibility (fixed seed · Hydra config · DVC data versioning · pixi/Docker environment · ClearML run)
+  - The claim ledger (claim ⇄ run_id ⇄ config/seed) and publishing the paper · HF · GitHub (human gate)
+
+out_of_scope:
+  - App-layer AI features that use an existing model (ai-build) / ordinary implementation with no AI element (dev-loop) / design only (spec) / ideology only (concept)
+  - Internal search of the existing store only (search) / pure external research only (research) / looking up Claude API ids · pricing (claude-api)
+  - Reimplementing the training / tracking / eval infrastructure (delegate to proven tools; the bundle is only a thin verification spine + orchestration)
+
+safety_boundaries:
+  - Paid compute (cloud / cluster) stops when over the cost ceiling → owner (compute-cost-gate). Spot / preemptible by default
+  - Don't mix client production data / PII / internal names into eval / training data (egress-guard blocks leaks to client paths)
+  - Don't bake Claude's ids · pricing into SKILL.md / scripts (the claude-api skill is canonical)
+  - The bundled scripts (repro-check / eval-stats / claim-link) are a no-op when dependencies are absent (fail-open) — never stop implementation just because verification can't run
+  - Commits stop at the branch. Don't execute push / PR / main / deletion / external posting (arxiv / HF / GitHub publishing) (human gate)
+
+kill_switch_conditions:
+  - Method / architecture selection turns into a goal fork (acceptance criteria, cost order of magnitude, or novelty changes) → stop at Design, escalate to owner
+  - Launching paid compute exceeds the cost ceiling → stop, escalate to owner
+  - Claiming "done / paper-ready" while eval is still red (model-claim-guard blocks at Stop)
+  - Trying to write a claim with no backing experiment (run_id + config + seed) into the paper / report (claim-link / model-claim-guard)
+  - No improvement for N rounds (plateau) without reaching the success criteria → stop the loop, escalate to owner
+  - A request for irreversible / outward-facing operations (push · PR · main · deletion · external posting · publishing) → stop, escalate to owner
+
+approval_gates:
+  - Stage 3: present the rationale for the method (pretrain / FT / PEFT / distillation / pruning / architecture) + model + compute cost once for confirmation
+  - Stage 5: confirm the budget and plan before launching paid compute (cloud / cluster)
+  - Stage 8: confirm the content and provenance (license / PII / NDA) before publishing (arxiv / HF / GitHub / Zenodo)
+  - When importing external / production data into eval / training data, confirm its provenance
+
+metrics:
+  eval_seed_min: 5
+  eval_ci_level: 95
+  eval_plateau_rounds: 3
+  compute_cost_ceiling_usd: null  # set per project by the owner at Frame. When null, launching cloud / cluster always requires confirmation
