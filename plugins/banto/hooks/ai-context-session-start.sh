@@ -8,6 +8,26 @@
 INPUT=$(cat)
 CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)
 SOURCE=$(printf '%s' "$INPUT" | jq -r '.source // .matcher // empty' 2>/dev/null)
+
+# --- コンテキスト上限警告（checkpoint-recommend.sh）の境界整合 ---
+# checkpoint-recommend は token-monitor statusline が tmp に書く context% を読み 70/80/90 で警告する。
+# compact / clear はコンテキストを解放する境界（多くの場合 session_id も切り替わる）。直後は
+#   1) stale な pct 値を除去し、2) warned ベースラインを 90 に上げて全抑止する。
+# statusline が解放後の実 % を書き直すと checkpoint-recommend が warned を現在地へ引き下げて再アーム
+# するため、直後の誤発火を消しつつ、再びコンテキストが埋まれば正しく再警告できる。
+# denylist より前・CWD 必須化より前に置く（token tmp は project 非依存の session ephemera のため）。
+_TOKDIR="${TMPDIR:-/tmp}"
+find "$_TOKDIR" -maxdepth 1 -name 'banto-token-*' -mtime +3 -delete 2>/dev/null  # 旧 session の無制限蓄積を掃除
+case "$SOURCE" in
+    compact|clear)
+        _SID=$(printf '%s' "$INPUT" | jq -r '.session_id // empty' 2>/dev/null)
+        if [ -n "$_SID" ]; then
+            rm -f "$_TOKDIR/banto-token-pct-$_SID" 2>/dev/null
+            echo 90 > "$_TOKDIR/banto-token-warned-$_SID" 2>/dev/null
+        fi
+        ;;
+esac
+
 [ -z "$CWD" ] && exit 0
 
 # scaffold 関数を source（denylist 判定にも使う）
