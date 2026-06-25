@@ -90,6 +90,10 @@ done
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
 
+## 0.1.6
+
+- **Site: explainer pages** added under `docs/`. A deep-dive on the **AI-Context-Store** (what lives in the store, what the plugin does with it, and how it wires into Claude Code's hook lifecycle — with an animated diagram and a familiar folder tree), and a **Plugin tools** page covering `plugin-audit` (14-axis quality audit; static axes vs. a fresh-agent judgment pass) and `plugin-dev` (scaffold &amp; refactor). Reachable from the landing page's flagship and toolset sections.
+
 ## 0.1.5
 
 - **New skill `model-lab`**: a model-building research workflow (the research-layer sibling of `dev-loop` / `ai-build`) — pretraining, full fine-tune, PEFT/LoRA, distillation, pruning, and architecture search, driven verification-first through to publishing a paper (arXiv/LaTeX) + Hugging Face + GitHub. Nine stages (frame → survey → design → implement → run → verify → analyze → paper → iterate); `autonomy_level: L3` with hard human gates on paid compute, publishing, and method/architecture goal forks.
@@ -131,7 +135,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.1.5"
+PUB_VERSION="0.1.6"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"
