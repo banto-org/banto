@@ -33,18 +33,31 @@ elif [ "$PCT_INT" -ge 70 ]; then
     TIER=70
 fi
 
-[ "$TIER" = "0" ] && exit 0
-
 # 直近の警告済みティアを確認（同ティアは再通知しない、ただし上位ティアには昇格通知）
 LAST_TIER=0
 [ -f "$WARNED_FILE" ] && LAST_TIER=$(cat "$WARNED_FILE" 2>/dev/null || echo 0)
 case "$LAST_TIER" in *[!0-9]*) LAST_TIER=0 ;; esac
 
+# コンテキストが下がった（compact / clear でコンテキストを解放した直後など）→ warned ティアを
+# 現在地まで引き下げて再アームし、通知はしない。TIER=0（しきい値未満）への下降も拾うため、
+# この再アーム判定は「TIER=0 なら即 exit」より前に置く。これが無いと ① 一度上位で警告した後に
+# 空けても warned が居座り再警告できない（取りこぼし）② SessionStart が貼る抑止ベースライン(90)が
+# TIER=0 の早期 exit に阻まれて永久に解けず、以降の全警告が死ぬ、の双方が起きる。compact 後の
+# 誤発火・取りこぼしの両方の根治点。
+if [ "$TIER" -lt "$LAST_TIER" ]; then
+    echo "$TIER" > "$WARNED_FILE" 2>/dev/null
+    exit 0
+fi
+
+# しきい値未満（かつ下降でもない）→ 警告対象なし
+[ "$TIER" = "0" ] && exit 0
+
+# 同ティア以下は既通知 → 抑止（ここまで来れば TIER == LAST_TIER）
 if [ "$TIER" -le "$LAST_TIER" ]; then
     exit 0
 fi
 
-# 警告済みティアを更新
+# 上方クロス → 通知して警告済みティアを更新
 echo "$TIER" > "$WARNED_FILE" 2>/dev/null
 
 # しきい値別メッセージ

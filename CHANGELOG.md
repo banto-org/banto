@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.8
+
+- **Fixed: the context-limit checkpoint reminder misfiring after a compact.** The "context is near the limit — save a checkpoint" reminder no longer re-fires right after a `/compact` or `/clear`. The warning state now re-arms when the context usage drops, instead of only tracking the highest threshold ever reached, and the compact/clear boundary resets the per-session baseline (and prunes stale temp state). The same fix also restores the reminder when the context legitimately fills up again later in the session — previously it could go permanently silent after the first warning.
+
 ## 0.1.7
 
 - **Site: deeper Plugin-tools page.** Each of the 14 audit axes now shows what it concretely checks (with a static / fresh-agent badge), a "why the score is trustworthy" section (fresh-agent review · deterministic static axes · measured routing precision · model-tier sweep · boundary-case weighting), a **HeavySkill** explainer (the 4 required components; based on [arXiv 2605.02396](https://arxiv.org/abs/2605.02396)), and a sources list. Tagline reworded to "audit them rigorously". Fixed a CSS class collision that hid the `plugin-dev` flow nodes in a normal browser.
