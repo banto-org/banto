@@ -35,7 +35,7 @@
 ### [日付欠落] decisions/
 | # | ファイル | 推奨アクション |
 |---|---------|--------------|
-| 4 | decisions/old-decision.md | YYYY-MM-DD_old-decision_<user>.md にリネーム |
+| 4 | decisions/old-decision.md | YYYY-MM-DD-HHMMSS_old-decision_<user>.md にリネーム |
 
 ### [古いセッション] sessions/
 | # | ファイル | 更新日 | 推奨アクション |
@@ -67,7 +67,7 @@
 - 削除: N件
 - スキップ: N件
 
-推奨: `/ai-context status` で最終状態を確認
+推奨: `/ai-context doctor` で最終状態を確認
 ```
 
 ## 安全ルール（内部モード）
@@ -113,6 +113,6 @@ vendor, target, .venv, venv
 
 **Step 5: 検索対象の登録提案** — `docs/` 等が `config.json` の `extra_docs_dirs` に未登録なら登録を提案 → yes で `extra_docs_dirs` に追加（次回の hook 再生成で `combined.txt` に反映される。手動再構築は不要）。
 
-**Step 6: 参照インデックス生成** — 全ドキュメントの索引を `<base>/docs/[Index] project-documents.md` に保存（docs/ / ルート（移動不可）/ サブパッケージ の 3 テーブル）。
+**Step 6: 参照インデックス生成** — 全ドキュメントの索引を `{base}/docs/[Index] project-documents.md` に保存（docs/ / ルート（移動不可）/ サブパッケージ の 3 テーブル）。
 
 **Step 7: 完了報告** — 移動 / スキップ / 削除 / 検索対象登録（`extra_docs_dirs` 追加）のサマリ。

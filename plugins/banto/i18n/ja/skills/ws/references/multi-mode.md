@@ -15,7 +15,7 @@ references="<ws2> <ws3> ..."
 
 `/ws switch <ws1>` と同じ手順（ポインタ Write + branch 自動切替）だが、**未コミット変更があっても警告のみ**（multi はドラフト中心なので許容）。
 
-### Step 3: 参照 WS の情報を `<base>/WORKSPACE-refs.md` に書き込み
+### Step 3: 参照 WS の情報を `{base}/WORKSPACE-refs.md` に書き込み
 
 ```markdown
 # Workspace References（multi モード）
@@ -53,7 +53,7 @@ single モードに戻すには /ws solo。
 ## /ws solo: multi モードを解除
 
 ```bash
-rm -f "<base>/WORKSPACE-refs.md"
+rm -f "{base}/WORKSPACE-refs.md"
 ```
 
 ポインタ WORKSPACE.md（primary）はそのまま、references だけ削除。報告: 「single モードに戻しました。primary: [scope] topic」。
@@ -61,7 +61,7 @@ rm -f "<base>/WORKSPACE-refs.md"
 ## multi モードの hook 連携（設計メモ）
 
 `ai-context-workspace-check.sh` hook は以下を判定する:
-- `<base>/WORKSPACE-refs.md` が存在する → multi モード
+- `{base}/WORKSPACE-refs.md` が存在する → multi モード
 - 新規ファイル作成時、primary / reference のどちらに紐付くか AI に問い合わせ
 - references 側に書き込む場合は「primary に紐付けるべきでは？」と確認
 

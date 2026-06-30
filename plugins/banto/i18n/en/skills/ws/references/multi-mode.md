@@ -15,7 +15,7 @@ references="<ws2> <ws3> ..."
 
 Same procedure as `/ws switch <ws1>` (pointer Write + branch auto-switch), but **only warn even if there are uncommitted changes** (multi is draft-centric, so it is allowed).
 
-### Step 3: write the reference WS info into `<base>/WORKSPACE-refs.md`
+### Step 3: write the reference WS info into `{base}/WORKSPACE-refs.md`
 
 ```markdown
 # Workspace References (multi mode)
@@ -53,7 +53,7 @@ To return to single mode, /ws solo.
 ## /ws solo: leave multi mode
 
 ```bash
-rm -f "<base>/WORKSPACE-refs.md"
+rm -f "{base}/WORKSPACE-refs.md"
 ```
 
 The pointer WORKSPACE.md (primary) stays as is, only references are deleted. Report: "Returned to single mode. primary: [scope] topic".
@@ -61,7 +61,7 @@ The pointer WORKSPACE.md (primary) stays as is, only references are deleted. Rep
 ## multi-mode hook integration (design note)
 
 The `ai-context-workspace-check.sh` hook decides the following:
-- `<base>/WORKSPACE-refs.md` exists → multi mode
+- `{base}/WORKSPACE-refs.md` exists → multi mode
 - On new file creation, asks the AI whether it ties to primary or reference
 - When writing to the reference side, confirms "shouldn't this be tied to primary?"
 

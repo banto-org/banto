@@ -1,15 +1,15 @@
 # /ws new / /ws archive / /ws import の詳細
 
-> `<base>` = ai-context ベース（store-first、`--resolve` で解決）。
+> `{base}` = ai-context ベース（store-first、`--resolve` で解決）。
 > `<author>` = `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --author` で導出。
 
 ## /ws new: 新規作成
 
-1. プロジェクトの `<base>/config.json` を Read
+1. プロジェクトの `{base}/config.json` を Read
 2. スコープタイプを確認（default_scope 設定があればそれ、なければ対話）
 3. トピック名を確認（英語、ハイフン区切り推奨）
 4. 現在 WS がある場合: keep（保存して切替）or archive（`workspaces/<author>/old/` に移動）を選択
-5. 実体 dir `<base>/workspaces/<author>/[scope] topic-name/` を作成し、`workspace.md` と `tasks.md`（雛形）を書く:
+5. 実体 dir `{base}/workspaces/<author>/[scope] topic-name/` を作成し、`workspace.md` と `tasks.md`（雛形）を書く:
 
 ```markdown
 <!-- workspace.md -->
@@ -49,7 +49,7 @@
 
 ## /ws archive: アーカイブ
 
-1. 現在の WS 名を特定: `head -1 <base>/WORKSPACE.md` の `# Workspace: [scope] name` から抽出（ポインタはプレーンファイル。readlink は不要＝symlink 廃止）
+1. 現在の WS 名を特定: `head -1 {base}/WORKSPACE.md` の `# Workspace: [scope] name` から抽出（ポインタはプレーンファイル。readlink は不要＝symlink 廃止）
 2. 実体 dir `workspaces/<author>/[scope] name/` を `workspaces/<author>/old/[scope] name/` へ移動（store 内なので `mv`。tasks.md / tasks-old/ ごと移る）
 3. `WORKSPACE.md` および `WORKSPACE-refs.md`（あれば）を削除
 4. 「アーカイブしました。/ws new で新規作成できます」

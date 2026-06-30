@@ -1,4 +1,4 @@
-# 品質評価基準（14 軸）
+# 品質評価基準（15 軸）
 
 banto 全資産（skill / agent / rule / hook）の品質評価軸。本書を `plugin-audit` の **single source of truth** とする。
 
@@ -334,6 +334,20 @@ skill 同士の境界が曖昧だと Claude のルーティング判断がブレ
 - **Critical**: autonomy_level が L4 / L5 の skill 一覧
 - **Info**: autonomy_level 抽出失敗一覧（フォーマットエラー）
 
+### schema lint（`plugin-audit-odd.sh` — deterministic）
+
+presence / autonomy 抽出だけでなく **odd.yaml の構造妥当性**を `templates/odd/odd.schema.yaml` で検証する。並走セッションの revert や貼り戻しで odd が pre-schema 形（`domain:` ラッパ・`human_oversight` の混入・`.ai-context/` パス等）へ崩れるのは diff 目視では見落とすため、CI / SessionStart で deterministic に弾く:
+
+| 検査 | 重大度 |
+|---|---|
+| required キー欠落（`schema_version` / `skill` / `autonomy_level` / `in_scope` / `out_of_scope`）| ❌ FAIL |
+| 未定義キー（schema `additionalProperties:false`。例: `domain` / `guardrails` / `human_oversight`）| ❌ FAIL |
+| `autonomy_level` が L4/L5（banto 範囲外）または非 Lx | ❌ FAIL |
+| `skill:` 値がディレクトリ名と不一致 | ❌ FAIL |
+| `schema_version` ≠ 1 / `in_scope` が空 | ❌ FAIL |
+
+`--strict` で違反時 exit 1。パス綴りの skill 間ドリフト（`{base}` / `<base>` / `.ai-context`）は Axis 15（`plugin-audit-consistency.sh`）が担当（役割分担）。
+
 ### 想定される False Positive
 
 - L0 (Manual) skill は ODD spec が trivial（in_scope / out_of_scope の数行で済む）ため、適用しない判断もあり得る
@@ -409,6 +423,7 @@ skill / agent / rule の文章中に「ドキュメントに居てはいけな�
 | 1 目録 | skill ごとの files / bytes / lines（重い順）— どこに重量が集中するか | Axis 2 | ℹ Info |
 | 2 不要ファイル | `.DS_Store` / `Thumbs.db` / `*.bak\|.old\|.tmp\|.orig\|.rej\|.swp` / `*~` / `*.pyc` / `__pycache__` / `*.log` + 空ファイル | Axis 2 | ❌ 除去 |
 | 3 orphan reference | SKILL.md からも兄弟 reference からも basename が参照されない = 到達不能な死に荷 | Axis 2 | ⚠ 確認後に除去/リンク |
+| 3b dangling 参照 | サブツリーの任意ファイルが指す `references/X.md` の実体が無い（markdown リンク / コードスパン / 散文。orphan の逆向き。クロス参照 `skills/<other>/...` とプレースホルダ名は除外）| Axis 2 | ❌ 壊れたポインタ — 修正/除去 |
 | 4 軽量化候補 | 500 行超の reference（Runtime 層は無制限だが、重い順に分割/削減の好標的） | Axis 2 | ℹ Info |
 | 5 重複ファイル | cksum 一致 = 内容同一（0 バイトは除外）→ 共通化候補 | Axis 2 | ℹ Info |
 | 6 hygiene | 上記 3 パターン（runlog / 絶対パス / email / registry 名）を **非 SKILL.md ファイル**にも適用 | Axis 14 | ⚠ Warn |
@@ -433,6 +448,22 @@ subagent に渡し、次の 3 問で判定させる:
 
 
 ---
+
+## Axis 15: Cross-skill 参照整合 / 相関（`plugin-audit-consistency.sh`）
+
+**問い**: 全 skill が「同じ場所」を**同じ綴り**で参照しているか。store-map-lint がマニフェスト（`store-layout.json`）対照で「誤ったパス」を検出するのに対し、本軸は**マニフェスト無しで**「同一 store サブパスが複数の接頭辞で綴られている乖離」をクラスタリングで炙り出す。
+
+検査（`plugin-audit-consistency.sh <plugin_dir>`）:
+- **Check 1（綴り不一致）**: 全 `*.md` / `odd.yaml` から `(\{base\}|\{BASE\}|<base>|.ai-context)/<subpath>` を抽出。同一 `<subpath>` が 2 つ以上の接頭辞で綴られていれば乖離として file:line 付きで報告（例: `docs/research` が `{base}` と `{BASE}` の両方で参照）。
+- **Check 2（接頭辞分布）**: 接頭辞の出現数を集計。正準は `{base}`。`{BASE}` / `<base>` / `.ai-context`（非 legacy 行）は非正準として件数提示。
+- **Check 3（命名形式）**: decisions / checkpoint / research の日付形式が複数併存していれば指摘（decisions の `YYYY-MM-DD` ↔ `YYYY-MM-DD-HHMMSS` 併記は grandfather 仕様として info 扱い・是正不要）。
+
+判定:
+- 綴り不一致 / 非 legacy の命名不一致があれば Critical 寄り（宣言の腐敗源・revert やコピペで増殖する）。`{base}` への正準化を提案。
+- legacy 対比行（「legacy は…」「旧来」）と bare-path のスキャン除外リスト（`.ai-context/sessions,` 等）は意図的として除外済み（誤検知を出さない）。
+- 既定監査（static パス）で常時実行。`--strict` は乖離時 exit 1。
+
+> 関連: store の**構造**整合（フォルダ↔skill↔実体）は store-map-lint（harness-audit Axis 3）が、skill 間の**綴り**整合は本軸が担う。両者で「宣言の腐敗」を二面から塞ぐ。
 
 ## 参照
 

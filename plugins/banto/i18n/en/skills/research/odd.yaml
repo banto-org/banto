@@ -9,11 +9,11 @@ in_scope:
   - New investigation of external sources (Web / GitHub / arxiv / X / official docs)
   - Launching 5-10 research-agent subagents in parallel
   - For high-risk / refutation-required topics, launching deep-research (the built-in Workflow) and saving its return value to the store (high-verification path)
-  - Structured saving of results to .ai-context/docs/research/{date}_{topic}.md
+  - Structured saving of results to {base}/docs/research/{date}_{topic}.md
   - Mandatory recording of source URLs and fetch timestamps
 
 out_of_scope:
-  - Searching the internal .ai-context/ (search skill)
+  - Searching the internal {base}/ (search skill)
   - A single simple fact check (one webread in the main session is enough)
   - Summarizing existing research only (direct Read)
   - Investigation about code implementation (done on the self-driving implementation / code-editing rule side)
@@ -24,7 +24,7 @@ safety_boundaries:
   - Cost cap per topic investigation: $2 (research-agent path)
   - The deep-research high-verification path is an exception to the $2 cap (~4M tokens / ~20 min / ~100 agents). User confirmation before launch is mandatory, up to once per session
   - The deep-research return value must always be saved to docs/research/ (without saving, the integration is meaningless). If unavailable in the environment, graceful fallback to the research-agent path
-  - Output files only under .ai-context/docs/research/ (writing to other directories is forbidden)
+  - Output files only under {base}/docs/research/ (writing to other directories is forbidden)
 
 kill_switch_conditions:
   - WebSearch rate-limited 3 times in a row for the same query

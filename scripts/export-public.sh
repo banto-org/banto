@@ -90,6 +90,11 @@ done
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
 
+## 0.1.9
+
+- **macOS / POSIX robustness.** Fixed a `harness-setup.sh` crash on macOS under `set -u`, and audited & fixed dash/GNU portability across the hook and script set so the harness runs cleanly on both macOS and Linux CI.
+- **plugin-audit is a 15-axis quality audit.** Axis 15 (cross-skill reference consistency) is now reflected consistently across the skill copy and the project site.
+
 ## 0.1.8
 
 - **Fixed: the context-limit checkpoint reminder misfiring after a compact.** The "context is near the limit — save a checkpoint" reminder no longer re-fires right after a `/compact` or `/clear`. The warning state now re-arms when the context usage drops, instead of only tracking the highest threshold ever reached, and the compact/clear boundary resets the per-session baseline (and prunes stale temp state). The same fix also restores the reminder when the context legitimately fills up again later in the session — previously it could go permanently silent after the first warning.
@@ -143,7 +148,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.1.8"
+PUB_VERSION="0.1.9"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"

@@ -7,7 +7,7 @@ autonomy_level: L1  # Suggest (generates the spec, selects the template + dialog
 
 in_scope:
   - Interactive selection among 6 industry-standard templates (Spec Kit / PRD / Design Doc / RFC / ADR / Scope Doc)
-  - Write the spec to {base}/specs/
+  - Write the spec to {base}/docs/specs/
   - Disclose the adopted-interpretation report
   - Delegate to the architect subagent (more than 5 files or spanning multiple modules)
 
@@ -17,7 +17,7 @@ out_of_scope:
   - Detailed edits to an existing spec (edit it directly)
 
 safety_boundaries:
-  - "Write target: only under {base}/specs/"
+  - "Write target: only under {base}/docs/specs/"
   - No changes to the code itself (design only)
   - Only readonly operations via Bash(git:*) are permitted
 
@@ -29,5 +29,5 @@ kill_switch_conditions:
 approval_gates:
   - Confirming the template type (1 of the 6)
   - When a goal fork exists (options that change the acceptance criteria, impact surface, or security)
-  - Overwriting an existing {base}/specs/ file
+  - Overwriting an existing {base}/docs/specs/ file
   - Before launching the architect subagent delegation

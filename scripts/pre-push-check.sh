@@ -22,6 +22,12 @@ done
 # 2b. i18n: EN 生成物が JA canonical と同期しているか（ドリフトを push しない）
 sh "$DIR/plugins/banto/scripts/i18n-sync-check.sh" || fail=1
 
+# 2b'. i18n: active な skills/ + agents/ が i18n 正本と一致するか（materialized copy 直編集の検知）
+sh "$DIR/plugins/banto/scripts/i18n-materialize-check.sh" || fail=1
+
+# 2b''. i18n: EN が翻訳でなく漏れたノート/スタブに破損していないか（hash では見えない内容 sanity）
+sh "$DIR/plugins/banto/scripts/i18n-en-sanity.sh" "$DIR" --strict || fail=1
+
 # 2c. markdown リンクが解決するか（壊れた相対リンク / README の言語フリップを push しない）
 sh "$DIR/scripts/check-md-links.sh" || fail=1
 

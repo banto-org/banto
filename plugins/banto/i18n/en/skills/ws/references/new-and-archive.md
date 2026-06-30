@@ -1,15 +1,15 @@
 # Details of /ws new / /ws archive / /ws import
 
-> `<base>` = the ai-context base (store-first, resolved with `--resolve`).
+> `{base}` = the ai-context base (store-first, resolved with `--resolve`).
 > `<author>` = derived with `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --author`.
 
 ## /ws new: create a new one
 
-1. Read the project's `<base>/config.json`
+1. Read the project's `{base}/config.json`
 2. Confirm the scope type (use default_scope if set, otherwise dialogue)
 3. Confirm the topic name (English, hyphen-separated recommended)
 4. If a current WS exists: choose keep (save and switch) or archive (move to `workspaces/<author>/old/`)
-5. Create the entity dir `<base>/workspaces/<author>/[scope] topic-name/` and write `workspace.md` and `tasks.md` (scaffold):
+5. Create the entity dir `{base}/workspaces/<author>/[scope] topic-name/` and write `workspace.md` and `tasks.md` (scaffold):
 
 ```markdown
 <!-- workspace.md -->
@@ -49,7 +49,7 @@ If `WORKSPACE-refs.md` remains, delete it (back to single mode).
 
 ## /ws archive: archive
 
-1. Identify the current WS name: extract from `# Workspace: [scope] name` of `head -1 <base>/WORKSPACE.md` (the pointer is a plain file. readlink is unneeded = symlink abolished)
+1. Identify the current WS name: extract from `# Workspace: [scope] name` of `head -1 {base}/WORKSPACE.md` (the pointer is a plain file. readlink is unneeded = symlink abolished)
 2. Move the entity dir `workspaces/<author>/[scope] name/` to `workspaces/<author>/old/[scope] name/` (within the store, so `mv`. moves along with tasks.md / tasks-old/)
 3. Delete `WORKSPACE.md` and `WORKSPACE-refs.md` (if any)
 4. "Archived. You can create a new one with /ws new"

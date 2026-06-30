@@ -335,6 +335,19 @@ if [ -f "$SCRIPT_DIR/ai-context-dashboard.sh" ]; then
     sh "$SCRIPT_DIR/ai-context-dashboard.sh" "$CWD" 2>/dev/null
 fi
 
+# --- store-map: meta/store-map.md 再生成 + リンク腐敗チェック（日次・冪等） ---
+# 正本マニフェスト templates/store-layout.json と「skill 宣言 / 実体 / directory-structure.md」の
+# 四者一致を検証。ドリフト時だけ警告（クリーン時は静音）。地図は meta/store-map.md に冪等出力。
+MAP_MARKER="${TMPDIR:-/tmp}/banto-store-map-$(date +%Y%m%d)"
+if [ ! -f "$MAP_MARKER" ] && [ -f "$PATHS_DIR/store-map-gen.sh" ] && [ -n "$AI_BASE" ]; then
+    touch "$MAP_MARKER"
+    sh "$PATHS_DIR/store-map-gen.sh" --base "$AI_BASE" >/dev/null 2>&1
+    if [ -f "$PATHS_DIR/store-map-lint.sh" ]; then
+        MAP_DRIFT=$(sh "$PATHS_DIR/store-map-lint.sh" --base "$AI_BASE" --quiet 2>/dev/null)
+        [ -n "$MAP_DRIFT" ] && { printf '%s\n\n' "$MAP_DRIFT"; }
+    fi
+fi
+
 # --- plugin cache GC（日次・非同期。update が旧版を掃除しない構造問題への自走対処） ---
 # 決定論ルール: installed_plugins 参照版 + 直近2版を保持して削除（scripts/plugin-cache-gc.sh）
 GC_MARKER="${TMPDIR:-/tmp}/banto-plugin-gc-$(date +%Y%m%d)"

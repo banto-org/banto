@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Plugin tools — Banto / プラグイン監査・開発の道具</title>
-<meta name="description" content="Banto's meta-tooling for Claude Code plugins: plugin-audit (14-axis quality audit + official-compliance checks) and plugin-dev (scaffold & refactor skills, hooks, and plugins against best practices)." />
+<meta name="description" content="Banto's meta-tooling for Claude Code plugins: plugin-audit (15-axis quality audit + official-compliance checks) and plugin-dev (scaffold & refactor skills, hooks, and plugins against best practices)." />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
 <link rel="stylesheet" href="styles.css" />
 <style>
@@ -119,12 +119,12 @@
       <p class="lede reveal lx" lang="en">
         Banto is built with the same discipline it sells. Two skills keep its own surface — and yours — in shape:
         <strong>plugin-dev</strong> scaffolds and refactors skills, hooks, and plugins against official best practices;
-        <strong>plugin-audit</strong> scores them on 14 quality axes, with the judgment calls delegated to a fresh agent so a skill never grades its own homework.
+        <strong>plugin-audit</strong> scores them on 15 quality axes, with the judgment calls delegated to a fresh agent so a skill never grades its own homework.
       </p>
       <p class="lede reveal lx" lang="ja">
         Banto は、売っているのと同じ規律で作られている。2 つの skill が、自分の — そしてあなたの — 表面を整える：
         <strong>plugin-dev</strong> は skill / hook / plugin を公式ベストプラクティスに沿って scaffold・改修し、
-        <strong>plugin-audit</strong> は 14 の品質軸で採点する。判定は fresh agent に委ねるため、skill が自分の答案を自分で採点しない。
+        <strong>plugin-audit</strong> は 15 の品質軸で採点する。判定は fresh agent に委ねるため、skill が自分の答案を自分で採点しない。
       </p>
     </div>
     <!-- animated diagram: the build <-> audit loop -->
@@ -140,7 +140,7 @@
         <!-- plugin-dev (top-left) -->
         <g class="ctx-sess s1"><rect x="8" y="40" width="150" height="54" rx="9"/><text x="83" y="62" class="n-title sm">plugin-dev</text><text x="83" y="79" class="n-sub">scaffold · refactor</text></g>
         <!-- plugin-audit (top-right) -->
-        <g class="ctx-sess s2"><rect x="242" y="40" width="150" height="54" rx="9"/><text x="317" y="62" class="n-title sm">plugin-audit</text><text x="317" y="79" class="n-sub">14 axes · fresh agent</text></g>
+        <g class="ctx-sess s2"><rect x="242" y="40" width="150" height="54" rx="9"/><text x="317" y="62" class="n-title sm">plugin-audit</text><text x="317" y="79" class="n-sub">15 axes · fresh agent</text></g>
         <!-- center: the skill -->
         <g class="ctx-store"><rect x="130" y="152" width="140" height="86" rx="13"/>
           <text x="200" y="180" class="n-title">skill / plugin</text>
@@ -167,8 +167,8 @@
   <div class="sec-head reveal">
     <span class="ghost">A</span>
     <div class="sub">/plugin-audit</div>
-    <h2><span class="lx" lang="en">plugin-audit — 14-axis quality audit</span><span class="lx" lang="ja">plugin-audit — 14 軸品質監査</span></h2>
-    <p><span class="lx" lang="en">First an official-compliance pass (does it even work?), then a 14-axis quality audit. Read-only by design — fixes always need your approval.</span><span class="lx" lang="ja">まず公式準拠チェック（そもそも動くか）、次に 14 軸の品質監査。設計上 read-only — 修正は必ず承認を要する。</span></p>
+    <h2><span class="lx" lang="en">plugin-audit — 15-axis quality audit</span><span class="lx" lang="ja">plugin-audit — 15 軸品質監査</span></h2>
+    <p><span class="lx" lang="en">First an official-compliance pass (does it even work?), then a 15-axis quality audit. Read-only by design — fixes always need your approval.</span><span class="lx" lang="ja">まず公式準拠チェック（そもそも動くか）、次に 15 軸の品質監査。設計上 read-only — 修正は必ず承認を要する。</span></p>
   </div>
 
   <div class="axes reveal">
@@ -178,6 +178,7 @@
     <div class="ax"><span class="bdg st">static</span><div class="n">Axis 9–10</div><div class="t"><span class="lx" lang="en">Harness fit</span><span class="lx" lang="ja">ハーネス整合</span></div><div class="d"><span class="lx" lang="en">Rules should be path-scoped; hard constraints should be deterministically hook-enforced (not just suggested); unregistered hooks = dead code. Plus <code>odd.yaml</code> present + autonomy_level within L0–L3 (L4+ is Critical).</span><span class="lx" lang="ja">rule は path-scope 化／hard constraint は hook で deterministic に強制（提案で済ませない）／未登録 hook は dead code。加えて <code>odd.yaml</code> 有 + autonomy_level が L0–L3（L4+ は Critical）。</span></div></div>
     <div class="ax"><span class="bdg st">static + agent</span><div class="n">Axis 11–12</div><div class="t"><span class="lx" lang="en">Use &amp; scope</span><span class="lx" lang="ja">使用度 &amp; 権限</span></div><div class="d"><span class="lx" lang="en">Invocation usage over N days → active / dormant / likely-trim (telemetry, not opinion); and least-privilege: over-granted <code>allowed-tools</code> (12a) and the heavier undeclared-but-used → runtime block (12b).</span><span class="lx" lang="ja">過去 N 日の使用実態 → active / dormant / likely-trim（テレメトリ・主観でない）／権限最小性：過剰付与（12a）と、より重い「使うのに未宣言＝runtime block」（12b）。</span></div></div>
     <div class="ax"><span class="bdg ag">agent + static</span><div class="n">Axis 13–14</div><div class="t"><span class="lx" lang="en">Containment &amp; hygiene</span><span class="lx" lang="ja">封じ込め &amp; 衛生</span></div><div class="d"><span class="lx" lang="en">Does a hook contain <code>rm -rf</code> / <code>curl | sh</code> / unmasked secret output? Internal &amp; client names (registry-driven), personal paths, emails, and pasted run-output are swept across the body <em>and</em> the references subtree.</span><span class="lx" lang="ja">hook に <code>rm -rf</code> / <code>curl | sh</code> / secret 生出力が無いか。内部名・client 名（registry 駆動）・個人パス・email・実行ログ残骸を、本体<em>と</em> references サブツリー全体で走査。</span></div></div>
+    <div class="ax"><span class="bdg st">static</span><div class="n">Axis 15</div><div class="t"><span class="lx" lang="en">Cross-skill consistency</span><span class="lx" lang="ja">参照整合</span></div><div class="d"><span class="lx" lang="en">Do all skills reference the same store path with the same spelling? Manifest-free, it clusters divergent spellings (<code>{base}</code> / <code>&lt;base&gt;</code> / <code>.ai-context</code>) across every skill, so the surface stays internally coherent.</span><span class="lx" lang="ja">全 skill が同じ store パスを同じ綴りで参照しているか。マニフェスト無しで綴りの乖離（<code>{base}</code> / <code>&lt;base&gt;</code> / <code>.ai-context</code>）を横断クラスタリングで炙り出し、表面の内部整合を保つ。</span></div></div>
   </div>
 
   <div class="why reveal">

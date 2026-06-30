@@ -22,7 +22,7 @@ compatibility: Claude Code (requires bash, git, jq)
 - 今日の決定: `find {base}/decisions -name "$(date +%Y-%m-%d)_*.md" | wc -l`
 - 既存のチェックポイント: `find {base}/sessions -name "checkpoint-*.md" | wc -l`
 - リサーチ: `find {base}/docs/research -name "*.md" | wc -l`
-- 仕様ドキュメント: `docs/requirements.md`, `docs/design.md`, `docs/tasks.md`
+- 仕様ドキュメント: `find {base}/docs/specs -name "*_spec.md"`（SDD 三点 `{date}_{slug}_{spec,plan,tasks}.md`）
 
 ## Step 2: チェックポイントファイルを作成
 

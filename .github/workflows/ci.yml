@@ -56,6 +56,34 @@ jobs:
         run: |
           sh plugins/banto/scripts/i18n-sync-check.sh
 
+      - name: i18n materialize (active skills/ + agents/ match their i18n canonical)
+        run: |
+          # Catches editing the materialized copy (skills/) directly while forgetting the
+          # canonical (i18n/ja) — a later materialize would silently revert the edit.
+          sh plugins/banto/scripts/i18n-materialize-check.sh
+
+      - name: i18n EN sanity (no corrupted / leaked-note EN files)
+        run: |
+          # Detects EN files that are a leaked agent / Stop-hook note or a collapsed stub instead
+          # of a faithful translation — corruption that hash-based i18n-sync-check cannot see.
+          sh plugins/banto/scripts/i18n-en-sanity.sh plugins/banto --strict
+
+      - name: Runtime i18n guard (user-facing hook output respects banto-language)
+        run: |
+          # hook の実行時 echo 文字列は i18n materialize の対象外。ユーザーが見る生成物
+          # （DASHBOARD.md 等）は言語非ハードコードであること＝banto-language を参照すること。
+          grep -q 'banto-language' plugins/banto/hooks/ai-context-dashboard.sh \
+            || { echo "FAIL: ai-context-dashboard.sh hardcodes labels (not i18n-aware)"; exit 1; }
+
+      - name: Plugin audit (deterministic gates — runs on every PR = feature additions)
+        run: |
+          # 機能追加で必ず走る plugin-audit の機械化可能コア（綴り整合 + store layout 整合 + odd schema + dangling 参照）。
+          # LLM 判定軸（routing 等）は headless CI 不可のため /plugin-audit を手動で別途回す。
+          sh plugins/banto/scripts/plugin-audit-consistency.sh --strict
+          sh plugins/banto/scripts/store-map-lint.sh --strict
+          sh plugins/banto/scripts/plugin-audit-odd.sh plugins/banto --strict
+          sh plugins/banto/scripts/plugin-audit-assets.sh plugins/banto --strict >/dev/null
+
       - name: Markdown links (relative targets resolve; README language-flip lint)
         run: |
           sh scripts/check-md-links.sh

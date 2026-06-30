@@ -58,7 +58,7 @@ deploy_rules() {  # $1 = dest dir, $2 = plan|apply
         fi
         if [ ! -e "$target" ]; then
             printf '    + %s\n' "$base"
-            [ "$act" = apply ] && cp "$f" "$target"
+            if [ "$act" = apply ]; then cp "$f" "$target"; fi
         elif cmp -s "$f" "$target"; then
             printf '    = %s (同一・skip)\n' "$base"
         else
@@ -129,8 +129,8 @@ init_store() {  # $1 = plan|apply
     if [ -e "$root/.ai-context-store" ]; then
         echo "    = ストア既存: $root"
     else
-        echo "    + ストア init: $root（+ .ai-context-store マーカー）"
-        [ "$act" = apply ] && { mkdir -p "$root" && touch "$root/.ai-context-store"; }
+        echo "    + ストア init: ${root}（+ .ai-context-store マーカー）"
+        if [ "$act" = apply ]; then mkdir -p "$root" && touch "$root/.ai-context-store"; fi
     fi
 }
 

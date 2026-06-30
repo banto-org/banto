@@ -2,7 +2,7 @@
 name: plugin-audit
 description: |
   既存の Claude Code プラグイン、または単一スキルを、公式ベストプラクティスと突き合わせて監査し、不整合を検出して修正を提案する。引数にプラグインパスまたはスキルパスを渡せる（スキル単位監査）。
-  トリガー: 「プラグイン監査して」「この skill の品質チェック」「SKILL.md をベストプラクティスと突き合わせて」「14 軸で見て」。/plugin-audit でも呼び出し可能。監査自体は read-only であり、修正の適用にはユーザー承認が必要。
+  トリガー: 「プラグイン監査して」「この skill の品質チェック」「SKILL.md をベストプラクティスと突き合わせて」「15 軸で見て」。/plugin-audit でも呼び出し可能。監査自体は read-only であり、修正の適用にはユーザー承認が必要。
   使わない場面: ハーネス全体をシステムとして監査する場合（harness-audit）、プラグインを生成 / リファクタする場合（plugin-dev）。
 user-invocable: true
 argument-hint: "[eval|verify|fix|global] [プラグインパス または skills/<name>（省略時はカレントディレクトリ）]"
@@ -15,7 +15,7 @@ compatibility: Claude Code (requires bash, git, jq)
 ユーザーが日本語で会話している場合は、日本語で応答する。
 
 > **メタ監査の責務分担**:
-> - **plugin-audit（この skill）** = プラグイン / 単一スキルの**品質**監査（公式準拠 + 14 軸構造評価）。引数に `skills/<name>` を渡すと**スキル単位監査（= skill-audit）** になる — 別 skill ではなく、この skill のモードとして提供する。
+> - **plugin-audit（この skill）** = プラグイン / 単一スキルの**品質**監査（公式準拠 + 15 軸構造評価）。引数に `skills/<name>` を渡すと**スキル単位監査（= skill-audit）** になる — 別 skill ではなく、この skill のモードとして提供する。
 > - **harness-audit** = ハーネスの**全体システム**監査（思想整合 / 死蔵機能 / 鮮度 / インストールポリシー / Claude 機能整合）。「スキル品質は完璧だが機能が死蔵 or ドリフトしている = それでも壊れている」を拾う別レイヤー。
 > - **plugin-dev** = 生成とリファクタ（監査は plugin-audit に委譲）。
 
@@ -39,15 +39,15 @@ compatibility: Claude Code (requires bash, git, jq)
 - **Phase 8**: 非公式 / 実験的コンポーネント
 - **Phase 8.5**: Plugin agent の制限（hooks / mcpServers / permissionMode は無視される）
 
-### Phase 9: 14 軸品質監査
+### Phase 9: 15 軸品質監査
 
-Phase 1-8.5 は「動くか」を見る公式準拠チェック。Phase 9 は **14 軸品質監査**: 静的構造軸（監査スクリプトが計算）＋判定軸（独立サブエージェントで実行 — Reviewer = Fresh Agent）。
+Phase 1-8.5 は「動くか」を見る公式準拠チェック。Phase 9 は **15 軸品質監査**: 静的構造軸（監査スクリプトが計算）＋判定軸（独立サブエージェントで実行 — Reviewer = Fresh Agent）。
 
 詳細:
-- 評価基準（14 軸の定義）: [`references/scoring.md`](references/scoring.md)
+- 評価基準（15 軸の定義）: [`references/scoring.md`](references/scoring.md)
 - 機能検証（`verify` サブコマンド — skill が発火したあと、claim 通りに実際に生成するか）: [`references/verify.md`](references/verify.md)
 
-**14 軸**（static = 監査スクリプトが計算 / agent = 独立サブエージェントが判定）:
+**15 軸**（static = 監査スクリプトが計算 / agent = 独立サブエージェントが判定）:
 
 | Axis | 内容 | 実行方法 |
 |------|------|---------|
@@ -65,8 +65,9 @@ Phase 1-8.5 は「動くか」を見る公式準拠チェック。Phase 9 は **
 | 12 | 権限スコープ最小性 — **12a** 過剰付与（最小性）/ **12b** 宣言漏れ（runtime 正当性）| static (`permissions`) + agent |
 | 13 | 封じ込め（hook が実際に実行する危険コマンド / secret 生出力）| agent（block パターンと実実行を区別）|
 | 14 | Content hygiene（固有情報の漏れ / 貼り込まれた実行結果）— **skill サブツリー全体**（SKILL.md は collect、references/ + ネストは assets）| static regex (`collect`/`report`/`assets`) + agent semantic |
+| 15 | Cross-skill 参照整合（相関）— 同一 store パスを複数の綴り（`{base}`/`{BASE}`/`<base>`/`.ai-context`）で参照する乖離、接頭辞の非正準混在、命名形式の不一致 | static (`consistency`) |
 
-**静的軸 — スクリプトを実行**（Axis 1 / 2 / 3 / 7 / 9 / 10 / 11 / 12 / 14、加えて 5 / 6 の検出材料）:
+**静的軸 — スクリプトを実行**（Axis 1 / 2 / 3 / 7 / 9 / 10 / 11 / 12 / 14 / 15、加えて 5 / 6 の検出材料）:
 
 ```bash
 # Static structural audit (Axes 1/2/3/5-detect/7/9/10/14 + material for 6)
@@ -90,6 +91,12 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-interface.sh <plugin_dir>
 
 # Shape-up triggers (Axis 2 weight + cross-skill near-dup; thresholds = review triggers, not gates)
 ${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-shapeup.sh <plugin_dir>
+
+# Cross-skill reference consistency (Axis 15: same store path referenced with divergent spellings)
+${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-consistency.sh <plugin_dir>
+
+# ODD schema lint (Axis 10 extension: odd.yaml structural validity — required / unknown keys / autonomy range / skill match)
+${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-odd.sh <plugin_dir>
 ```
 
 - `plugin-audit-collect.sh`: skills / agents / templates/rules / commands / hooks をスキャンし TSV を出力
@@ -97,9 +104,11 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-shapeup.sh <plugin_dir>
 - `plugin-audit-matrix.sh`: cross-skill 計算（語彙重複 / 双方向参照 / 一方向参照 / 分類プレフィックス分布）を Markdown で出力
 - `plugin-audit-usage.sh`: 過去 N 日の git log + {base} 言及から使用度を分類（Axis 11）
 - `plugin-audit-permissions.sh`: skill ごとの `allowed-tools` vs 実使用エビデンスを照合 — 過剰付与（宣言したが未使用）と宣言漏れ（idiom で使うが未宣言）を flag。Axis 12 の agent パス向けの idiom ベース候補（Axis 12）
-- `plugin-audit-assets.sh`: 各 skill のサブツリー（`references/` + ネスト）を走査し、目録 / 不要ファイル / orphan / 重複 / Axis 14 hygiene を出す（collect.sh が SKILL.md しか見ない穴を埋める Axis 14 + Axis 2 拡張。詳細は scoring.md Axis 14）
+- `plugin-audit-assets.sh`: 各 skill のサブツリー（`references/` + ネスト）を走査し、目録 / 不要ファイル / orphan / **3b dangling 参照（存在しない `references/X.md` を指すポインタ — markdown リンクだけでなくコードスパン/散文も対象。クロス参照とプレースホルダは除外）** / 重複 / Axis 14 hygiene を出す（collect.sh が SKILL.md しか見ない穴を埋める Axis 14 + Axis 2 拡張。詳細は scoring.md Axis 14）
 - `plugin-audit-interface.sh`: argument-hint が skill の実サブコマンドと一致するかを検査（Axis 1 拡張。詳細は scoring.md Axis 1）
 - `plugin-audit-shapeup.sh`: 軽量化トリガー（重量 + 死蔵 + 近似重複）を出す。閾値はゲートではなくレビュー対象（Axis 2 拡張。詳細は scoring.md Axis 2）
+- `plugin-audit-consistency.sh`: 全 skill 横断で「同一 store パスを別の綴りで参照する乖離」をクラスタリング検出（Axis 15）。store-map-lint がマニフェスト対照なのに対し、こちらは**マニフェスト無しで綴り不一致そのものを炙り出す**（接頭辞 `{base}` への正準化を推奨）。`--strict` で乖離時 exit 1
+- `plugin-audit-odd.sh`: 全 skill の `odd.yaml` を `templates/odd/odd.schema.yaml` で検証（Axis 10 拡張）— required キー欠落 / 未定義キー（`additionalProperties:false`）/ autonomy 範囲外（L4/L5）/ skill 名↔ディレクトリ不一致 / `schema_version` を deterministic に検出。**並走セッションの revert や貼り戻しで odd が pre-schema 形へ崩れるのを CI/SessionStart で弾く**（diff 目視では見落とす構造崩れを機械検知）。`--strict` で違反時 exit 1。パス綴りの skill 間ドリフトは Axis 15 が担当（役割分担）
 
 **判定軸 — サブエージェントで実行**（Reviewer = Fresh Agent: 判定はメインセッションの self-evaluation bias を避けるため独立した `general-purpose` サブエージェントに委譲）:
 

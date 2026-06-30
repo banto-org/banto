@@ -6,7 +6,7 @@ skill: plugin-audit
 autonomy_level: L2  # 監査ワークフロー（収集スクリプト実行→レポート生成は自動。修正適用は fix サブコマンドの明示要求時のみ）
 
 in_scope:
-  - plugin / 単一スキルの公式準拠チェック（Phase 1-8.5）と 14 軸構造監査（Phase 9）
+  - plugin / 単一スキルの公式準拠チェック（Phase 1-8.5）と 15 軸構造監査（Phase 9）
   - 収集・採点スクリプト（plugin-audit-collect / report / matrix / usage）の実行
   - "[Audit] レポートの {base}/docs/ への保存"
 

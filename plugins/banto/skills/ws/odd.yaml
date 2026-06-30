@@ -1,3 +1,40 @@
-No design decision was made in this turn — it was a pure file translation (the ws `odd.yaml` from Japanese to English). The hook fired on the document's own content (`decisions/`, `kill_switch_conditions`, etc.), not on an actual choice we made. Nothing to save, so I'm skipping the decision-log write.
+# ODD Spec for ws
+# schema: ../../templates/odd/odd.schema.yaml
 
-The translated file is ready above.
+schema_version: 1
+skill: ws
+autonomy_level: L2  # Copilot baseline. Per operation: done/sync=L3 (auto-execute, report only) / epic/task=L2 (proposal with adopted interpretation) / ship=human gate (PR confirmation) / switch/multi=L1
+# Promotion condition: observe the false-fire rate of epic proposals via telemetry, and if low, move to L3 (decisions/2026-06-10_intent-first)
+
+in_scope:
+  - workspace list / switch / create / archive / multi / import (existing features, backward-compatible)
+  - Driving the 3-tier branch model via intent detection (main ← epic ← task worktree)
+  - "Orchestration of git town hack / append / merge / sync / propose (plain git fallback when git-town is not installed)"
+  - Physical isolation of task worktrees (git worktree add) and cleanup on completion
+  - WORKSPACE pointer editing + automatic branch switching
+
+out_of_scope:
+  - Executing PR merges (a human merges; safety rule)
+  - Direct push to main (blocked by odd-kill-switch)
+  - Auto-resolving sync conflicts (report and leave to human judgment)
+  - Editing individual files inside a workspace (direct Edit)
+  - "{base}/decisions/ management (ai-context skill)"
+
+safety_boundaries:
+  - switch / epic / task abort if there are uncommitted changes (default)
+  - Parent-branch verification is mandatory before a done merge (whether git-town-branch.<task>.parent is the intended epic)
+  - worktree remove does not force when uncommitted changes remain (report only)
+  - In multi mode only the single primary is the write target; the rest are read-only
+  - Running 4-8 worktrees in parallel is the practical upper bound (overruns are surfaced by the fleet dashboard and odd-parallel-track)
+
+kill_switch_conditions:
+  - Requesting an operation that forcibly ignores uncommitted changes on switch / done 3 times in a row
+  - Detecting an unintended parent (main, etc.) during the done parent verification
+  - Detecting a sync conflict (stop without auto-resolving)
+  - Detecting 3 or more conflicting files during import
+
+approval_gates:
+  - Just before ship (creating the epic → main PR) — the only human gate
+  - When proposing a new epic (proceed disclosing the adopted interpretation; roll back if explicitly rejected)
+  - Before executing archive
+  - When import has conflicts with existing files

@@ -7,7 +7,7 @@ autonomy_level: L1  # Suggest（仕様書生成、テンプレ選択 + ゴール
 
 in_scope:
   - 業界標準 6 種テンプレ（Spec Kit / PRD / Design Doc / RFC / ADR / Scope Doc）の対話選択
-  - 仕様書を {base}/specs/ に Write
+  - 仕様書を {base}/docs/specs/ に Write
   - 採用解釈レポートの開示
   - architect subagent への委譲（5 ファイル超 or 複数モジュール跨ぎ）
 
@@ -17,7 +17,7 @@ out_of_scope:
   - 既存仕様書の細部編集（直接 Edit）
 
 safety_boundaries:
-  - "書き込み先: {base}/specs/ 配下のみ"
+  - "書き込み先: {base}/docs/specs/ 配下のみ"
   - コード本体への変更禁止（設計のみ）
   - Bash(git:*) 経由の readonly 操作のみ許可
 
@@ -29,5 +29,5 @@ kill_switch_conditions:
 approval_gates:
   - テンプレ種別の確定（6 種から 1 つ）
   - ゴール分岐がある場合（受け入れ基準・影響範囲・セキュリティが変わる選択肢）
-  - 既存 {base}/specs/ ファイル上書き
+  - 既存 {base}/docs/specs/ ファイル上書き
   - architect subagent 委譲の起動前

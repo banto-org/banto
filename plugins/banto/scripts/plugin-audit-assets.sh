@@ -8,6 +8,7 @@
 #   1. Subtree inventory   — files / bytes / lines per skill (where weight concentrates)
 #   2. Unnecessary files   — junk that must never be committed (.DS_Store / *.bak / *.tmp / empty / ...)
 #   3. Orphan references   — a references/*.md not linked from SKILL.md nor any sibling reference
+#   3b. Dangling refs      — a references/X.md pointer (link / code-span / prose) whose target is missing
 #   4. Slimming candidates — oversized reference files (Info: references may be long, but flag the heaviest)
 #   5. Duplicate files     — identical content across the tree (by cksum) → dedupe candidate
 #   6. Axis 14 hygiene     — per non-SKILL.md file: pasted run output / abs paths / emails / registry names
@@ -20,7 +21,15 @@
 
 set -u
 
-PLUGIN_DIR="${1:-.}"
+PLUGIN_DIR="."
+STRICT=0
+for a in "$@"; do
+    case "$a" in
+        --strict) STRICT=1 ;;
+        *) PLUGIN_DIR="$a" ;;
+    esac
+done
+HARD_FAIL=0
 SKILLS_DIR="$PLUGIN_DIR/skills"
 
 if [ ! -d "$SKILLS_DIR" ]; then
@@ -174,6 +183,43 @@ else
 fi
 echo ""
 
+# ---- 3b. Dangling references (pointer to a references/*.md that does not exist) -----
+echo "### 3b. Dangling references (pointer to a non-existent references/*.md)"
+echo ""
+echo "A token \`references/X.md\` in any subtree file (markdown link OR code-span OR prose) whose target"
+echo "does not exist in that skill's \`references/\`. Inverse of orphan (orphan = file nobody points to;"
+echo "dangling = pointer to a missing file). Cross-skill paths (\`skills/<other>/references/...\`) and"
+echo "placeholder names are excluded. ❌ broken pointer — fix the link or remove it."
+echo ""
+DANGLING_PLACEHOLDER='^([XxYyZzNn]|foo|bar|baz|qux|example|name|topic|slug|path|sub|ext1|ext2)$'
+for d in "$SKILLS_DIR"/*/; do
+    [ -d "$d" ] || continue
+    skill=$(basename "$d")
+    find "$d" -type f -name '*.md' 2>/dev/null | sort | while read -r f; do
+        rel=${f#"$SKILLS_DIR"/}
+        # strip cross-skill full paths first (skills/<other>/references/...), then grab bare references/X.md
+        sed -E 's#skills/[A-Za-z0-9_-]+/references/[A-Za-z0-9_.-]+\.md##g' "$f" 2>/dev/null \
+          | grep -oE 'references/[A-Za-z0-9_-]+\.md' 2>/dev/null | sort -u | while read -r ref; do
+            rbase=$(basename "$ref" .md)
+            printf '%s\n' "$rbase" | grep -qE "$DANGLING_PLACEHOLDER" && continue
+            [ -e "$d/$ref" ] && continue
+            printf '%s\t%s\t%s\n' "$skill" "$rel" "$ref"
+        done
+    done
+done > /tmp/.banto-assets-dangling.$$ 2>/dev/null || true
+if [ -s /tmp/.banto-assets-dangling.$$ ]; then
+    HARD_FAIL=1
+    echo "| Skill | In file | Dangling ref (missing target) |"
+    echo "|-------|---------|-------------------------------|"
+    sort -u /tmp/.banto-assets-dangling.$$ | while IFS="$(printf '\t')" read -r s rel ref; do
+        printf "| %s | %s | %s |\n" "$s" "${rel#"$s"/}" "$ref"
+    done
+else
+    echo "(none — every \`references/X.md\` pointer resolves)"
+fi
+rm -f /tmp/.banto-assets-dangling.$$ 2>/dev/null || true
+echo ""
+
 # ---- 4. Slimming candidates (oversized references) ---------------------------------
 echo "### 4. Slimming candidates (oversized references, over ${SLIM_LINE_THRESHOLD} lines)"
 echo ""
@@ -242,3 +288,9 @@ rm -f /tmp/.banto-assets-hyg.$$ 2>/dev/null || true
 echo ""
 echo "---"
 echo "_Source of truth for patterns: \`plugin-audit-collect.sh\`. This script is the subtree extension of Axis 14 + Axis 2._"
+
+# --strict: hard-fail (exit 1) if dangling references (section 3b) were found. Other sections are
+# informational review triggers (Info/Warn), so they never gate; only the broken-pointer ❌ does.
+if [ "$STRICT" -eq 1 ] && [ "$HARD_FAIL" -eq 1 ]; then
+    exit 1
+fi
