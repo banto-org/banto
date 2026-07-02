@@ -59,12 +59,20 @@ done
 
 # --- L2: endpoint resolution (dangling detection) --------------------------
 IDS=$(jq -r '.entities[].id' "$ABOX" | sort -u)
+# Public export: templates/ontology-public-absent.json lists ids that are intentionally
+# absent (PLUGIN_EXCLUDE'd dev-only assets referenced by shipped prose). Absent in the dev
+# tree -> L2 stays fully strict there.
+ABSENT_OK=""
+PUB_ABSENT="$PLUGIN_ROOT/templates/ontology-public-absent.json"
+[ -f "$PUB_ABSENT" ] && ABSENT_OK=$(jq -r '.absent_ok[]?' "$PUB_ABSENT" 2>/dev/null)
 # endpoints that must resolve: everything except synthetic event: targets
 DANGLING=$(jq -r '.relations[] | .from, .to' "$ABOX" \
     | grep -vE '^event:' | sort -u \
     | while IFS= read -r ref; do
         [ -n "$ref" ] || continue
-        printf '%s\n' "$IDS" | grep -qxF "$ref" || printf '%s\n' "$ref"
+        printf '%s\n' "$IDS" | grep -qxF "$ref" && continue
+        [ -n "$ABSENT_OK" ] && printf '%s\n' "$ABSENT_OK" | grep -qxF "$ref" && continue
+        printf '%s\n' "$ref"
       done)
 if [ -n "$DANGLING" ]; then
     printf '%s\n' "$DANGLING" | while IFS= read -r d; do
