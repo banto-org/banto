@@ -204,7 +204,7 @@
     <p><span class="lx" lang="en">Prototype benchmark, 2026-07-02: same fixed 10 questions as prior rounds, two models, against the existing search.</span><span class="lx" lang="ja">プロトタイプ実測（2026-07-02）。先行ラウンドと同一の固定 10 問・2 モデルで、既存検索と突き合わせた。</span></p>
   </div>
   <p class="prose-p reveal lx" lang="en">Conditions: "FTS5" = section search + reading only the returned line ranges (whole-file reads forbidden). "Existing" = grep over the per-project combined text, whole-file reads allowed. Census questions (5) used filesystem scans in both conditions; the difference loads entirely onto the 5 content-investigation questions. Answer keys were fixed immediately before the runs.</p>
-  <p class="prose-p reveal lx" lang="ja">条件：「FTS5」= セクション検索 + 返された行範囲のみ Read(全文 Read 禁止)。「既存」= プロジェクト別結合テキストの grep + 全文 Read 可。census 5 問は両条件ともファイル走査のため、条件差は内容調査 5 問にのみ載る。正解キーは走行直前に固定。</p>
+  <p class="prose-p reveal lx" lang="ja">条件：「FTS5」= セクション検索 + 返された行範囲だけを読む（全文は読まない）。「既存」= プロジェクト別結合テキストの grep + 全文 Read 可。census 5 問は両条件ともファイル走査のため、条件差は内容調査 5 問にのみ載る。正解キーは走行直前に固定。</p>
 
   <div class="store-table-wrap reveal">
     <table class="store-table">
@@ -251,7 +251,7 @@
     </div>
     <div class="card reveal">
       <h3><span class="step-n">c</span><span class="lx" lang="en">One artifact, both jobs</span><span class="lx" lang="ja">1 生成物で 2 役</span></h3>
-      <p><span class="lx" lang="en">Counting and content search share the same file — and the same metadata enables deterministic consistency gates (e.g., "an accepted spec has a newer contradicting decision") in one SQL statement.</span><span class="lx" lang="ja">数える仕事と内容検索が同じファイルで済む。同じメタデータで「accepted の spec より新しい矛盾する決定がある」といった一貫性ゲートを SQL 1 本で建てられる。</span></p>
+      <p><span class="lx" lang="en">Counting and content search share the same file — and the same metadata enables deterministic consistency gates (e.g., "an accepted spec has a newer contradicting decision") in one SQL statement.</span><span class="lx" lang="ja">数える仕事と内容検索が同じファイルで済む。同じメタデータで「accepted の spec より新しい矛盾する決定がある」といった一貫性ゲートを SQL 1 本で張れる。</span></p>
     </div>
   </div>
 </section>

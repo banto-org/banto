@@ -295,7 +295,7 @@
   <div class="sec-head reveal">
     <span class="ghost">03</span>
     <h2><span class="lx" lang="en">What accumulates</span><span class="lx" lang="ja">何が貯まるか</span></h2>
-    <p><span class="lx" lang="en">One folder per project, a fixed layout — a fixed home that any tool can read. Shared knowledge is flat and author-tagged; personal state is namespaced per author.</span><span class="lx" lang="ja">プロジェクトごとに 1 フォルダ・決まった構成 — どのツールからも読める、決まった置き場所。共有知識はフラットでファイル名に作成者を持ち、個人状態は作成者ごとの名前空間で分離。</span></p>
+    <p><span class="lx" lang="en">One folder per project, a fixed layout — a fixed home that any tool can read. Shared knowledge is flat and author-tagged; personal state is namespaced per author.</span><span class="lx" lang="ja">プロジェクトごとに 1 フォルダ・決まった構成 — どのツールからも読める、決まった置き場所。共有知識はフラットでファイル名に作成者名が入り、個人状態は作成者ごとの名前空間で分離。</span></p>
   </div>
   <div class="store-table-wrap reveal">
     <table class="store-table">
@@ -347,7 +347,7 @@
         <tr>
           <td class="fd">sessions/</td>
           <td><span class="lx" lang="en">checkpoints (session-state snapshots)</span><span class="lx" lang="ja">チェックポイント（セッション状態の要約）</span></td>
-          <td><span class="lx" lang="en">saved before <code>/clear</code> or compaction, read at the next start</span><span class="lx" lang="ja"><code>/clear</code>・圧縮の前に保存し、次の開始時に取込</span></td>
+          <td><span class="lx" lang="en">saved before <code>/clear</code> or compaction, read at the next start</span><span class="lx" lang="ja"><code>/clear</code>・圧縮の前に保存し、次の開始時に取り込む</span></td>
           <td><b class="tag ep"><span class="lx" lang="en">ephemeral</span><span class="lx" lang="ja">一時</span></b></td>
         </tr>
         <tr>
@@ -362,7 +362,7 @@
   <div class="legend reveal">
     <span><b class="sh"><span class="lx" lang="en">shared</span><span class="lx" lang="ja">共有</span></b><span class="lx" lang="en">flat, author-tagged (<code>…_&lt;github&gt;.md</code>) — the team shares it</span><span class="lx" lang="ja">フラット・ファイル名に作成者（<code>…_&lt;github&gt;.md</code>）— チームで共有</span></span>
     <span><b class="pe"><span class="lx" lang="en">personal</span><span class="lx" lang="ja">個人</span></b><span class="lx" lang="en">under <code>&lt;author&gt;/</code> — working state never collides</span><span class="lx" lang="ja"><code>&lt;author&gt;/</code> 配下 — 作業状態が衝突しない</span></span>
-    <span><b class="ep"><span class="lx" lang="en">ephemeral</span><span class="lx" lang="ja">一時</span></b><span class="lx" lang="en">gitignored, never committed — this machine, this moment only</span><span class="lx" lang="ja">gitignore・コミットされない — この機械・その時だけ</span></span>
+    <span><b class="ep"><span class="lx" lang="en">ephemeral</span><span class="lx" lang="ja">一時</span></b><span class="lx" lang="en">gitignored, never committed — this machine, this moment only</span><span class="lx" lang="ja">gitignore・コミットされない — このマシンのその場限り</span></span>
   </div>
 
   <!-- how Banto uses the store -->
@@ -476,7 +476,7 @@
     <h2><span class="lx" lang="en">The harness holds the knowledge. You hold the vision.</span><span class="lx" lang="ja">知識はハーネスが持つ。方針はあなたが持つ。</span></h2>
     <p><span class="lx" lang="en">AI-Context-Store is one of Banto's three flagships, alongside workspace &amp; fleet operations and the JA-canonical i18n method.</span><span class="lx" lang="ja">AI-Context-Store は Banto の 3 つの目玉の 1 つ。ワークスペース &amp; 艦隊運用、JA 正本 i18n 手法と並ぶ。</span></p>
     <div style="display:flex;gap:14px;flex-wrap:wrap">
-      <a class="btn btn-primary" href="evidence.html"><span class="lx" lang="en">See the evidence — 4 benchmarks, 36 cells →</span><span class="lx" lang="ja">実測を見る — 4 ベンチマーク・36 セル →</span></a>
+      <a class="btn btn-primary" href="evidence.html"><span class="lx" lang="en">See the evidence — 5 benchmarks, 42 cells →</span><span class="lx" lang="ja">実測を見る — 5 ベンチマーク・42 セル →</span></a>
       <a class="btn btn-ghost" href="index.html#flagships" style="color:var(--paper);border-color:rgba(245,240,230,.4)"><span class="lx" lang="en">See the other flagships</span><span class="lx" lang="ja">他の目玉を見る</span></a>
       <a class="btn btn-ghost" href="plugin-tools.html" style="color:var(--paper);border-color:rgba(245,240,230,.4)"><span class="lx" lang="en">Plugin audit &amp; dev tools →</span><span class="lx" lang="ja">プラグイン監査 &amp; 開発の道具 →</span></a>
     </div>

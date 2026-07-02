@@ -63,7 +63,7 @@
       </p>
       <p class="lede reveal lx" lang="ja">
         <strong>Claude Code のための自走ハーネス</strong>。あなたの思想・決定・知識を保持して
-        エージェントに食わせ、自走する — 上がってくるのは例外だけ。安全は約束ではなく
+        エージェントへ供給して自走する — 上がってくるのは例外だけ。安全は約束ではなく
         <strong>決定論的な hook</strong> が守る。
       </p>
       <div class="hero-cta reveal">
@@ -171,7 +171,7 @@
         maximizes the leverage of one human commanding N AI sessions.
       </p>
       <p class="reveal lx" lang="ja">
-        AI が「作るコスト」をゼロに近づける時代、堀は実行から<strong>ビジョンと共感</strong>へ移る。
+        AI が「作るコスト」をゼロに近づける時代、競争優位（moat）は実行から<strong>ビジョンと共感</strong>へ移る。
         Banto は「開発ワークフローツール」ではなく、一人の人間が N の AI セッションを率いる
         レバレッジを最大化するハーネス。
       </p>
@@ -227,10 +227,10 @@
             <code>/clear</code> or a compaction. Knowledge goes to the store; code stays in the repo.
           </p>
           <p class="lx" lang="ja">
-            決定ログ・調査・チェックポイントは repo ではなく中央ナレッジ store
+            決定ログ・調査・チェックポイントは repo ではなく中央ナレッジストア
             (<code>~/ai-context-store/&lt;project&gt;/</code>) に置く。<strong>セッション開始ごとに
             再注入</strong>されるため、<code>/clear</code> や自動圧縮で文脈を失わない。
-            知識は store へ、code は repo へ。
+            知識はストアへ、コードは repo へ。
           </p>
           <ul class="ticks">
             <li class="lx" lang="en">Claude-native internal search — query expansion + ranking over everything accumulated</li>
@@ -241,8 +241,8 @@
             <li class="lx" lang="ja">decisions / docs / research / sessions / workspaces</li>
           </ul>
           <a class="flag-more" href="ai-context-store.html"><span class="lx" lang="en">Read the deep-dive — what's inside &amp; how it wires into Claude Code →</span><span class="lx" lang="ja">詳しい解説 — 中身と Claude Code 連携の仕組み →</span></a>
-          <a class="flag-more" href="evidence.html" style="display:block;margin-top:8px"><span class="lx" lang="en">See the evidence — 4 benchmarks, 36 cells →</span><span class="lx" lang="ja">実測を見る — 4 ベンチマーク・36 セル →</span></a>
-          <a class="flag-more" href="store-search.html" style="display:block;margin-top:8px"><span class="lx" lang="en">Store Search — every store, one query, no server →</span><span class="lx" lang="ja">Store Search — 全 store をクエリ 1 本で、サーバなし →</span></a>
+          <a class="flag-more" href="evidence.html" style="display:block;margin-top:8px"><span class="lx" lang="en">See the evidence — 5 benchmarks, 42 cells →</span><span class="lx" lang="ja">実測を見る — 5 ベンチマーク・42 セル →</span></a>
+          <a class="flag-more" href="store-search.html" style="display:block;margin-top:8px"><span class="lx" lang="en">Store Search — every store, one query, no server →</span><span class="lx" lang="ja">Store Search — 全ストアをクエリ 1 本で、サーバなし →</span></a>
         </div>
         <div class="flag-art" aria-hidden="true">
           <!-- mini timeline: the same 3-panel strip as the deep-dive page, scaled down -->
@@ -365,7 +365,7 @@
       </p>
       <p class="star-intro reveal lx" lang="ja">
         Banto は <strong>日本語を正本</strong>、<strong>英語を自動生成</strong>とし、ハッシュ
-        マニフェストで歩調を合わせる。鍵は<strong>決定論の分離</strong> — 翻訳は LLM に委譲
+        マニフェストで同期を取る。鍵は<strong>決定論の分離</strong> — 翻訳は LLM に委譲
         （非決定論）するが、その翻訳が最新かの検証は<strong>完全に決定論</strong>。これが方式の
         全てで、最も真似してほしい型。
       </p>
@@ -573,7 +573,7 @@
       <div class="card dark reveal">
         <h4><span class="lx" lang="en">OS sandbox · opt-in</span><span class="lx" lang="ja">OS サンドボックス · opt-in</span></h4>
         <p class="lx" lang="en">A second layer: Claude's bash can run in an OS sandbox (Seatbelt / bubblewrap) blocking credential reads and off-allowlist network. Off by default.</p>
-        <p class="lx" lang="ja">もう一段の層 — Claude の bash を OS サンドボックス（Seatbelt / bubblewrap）で走らせ、秘匿情報の読取と許可外ネットワークを遮断。既定は off。</p>
+        <p class="lx" lang="ja">もう一段の層 — Claude の bash を OS サンドボックス（Seatbelt / bubblewrap）で走らせ、秘匿情報の読取と許可外のネットワーク接続を遮断。既定は off。</p>
       </div>
     </div>
 
@@ -623,9 +623,9 @@
     <div class="tool-group reveal">
       <h4 class="tg-head"><span class="lx" lang="en">Knowledge &amp; context</span><span class="lx" lang="ja">知識 &amp; コンテキスト</span></h4>
       <div class="chips">
-        <span class="chip star"><b>ai-context</b><i class="lx" lang="en">decisions · memo · knowledge · store</i><i class="lx" lang="ja">決定 · メモ · ナレッジ · store</i></span>
+        <span class="chip star"><b>ai-context</b><i class="lx" lang="en">decisions · memo · knowledge · store</i><i class="lx" lang="ja">決定 · メモ · ナレッジ · ストア</i></span>
         <span class="chip"><b>search</b><i class="lx" lang="en">internal search, no web</i><i class="lx" lang="ja">内部検索（web なし）</i></span>
-        <span class="chip"><b>research</b><i class="lx" lang="en">external, saved to store</i><i class="lx" lang="ja">外部調査 → store</i></span>
+        <span class="chip"><b>research</b><i class="lx" lang="en">external, saved to store</i><i class="lx" lang="ja">外部調査 → ストア</i></span>
         <span class="chip"><b>save-checkpoint</b><i class="lx" lang="en">session snapshot</i><i class="lx" lang="ja">セッション保存</i></span>
         <span class="chip"><b>webread</b><i class="lx" lang="en">full-text, no summary</i><i class="lx" lang="ja">要約なし全文取得</i></span>
       </div>
@@ -679,7 +679,7 @@
       </div>
       <div class="feel-row">
         <div class="fsay"><span class="lx" lang="en">"investigate X"</span><span class="lx" lang="ja">「X を調べて」</span></div>
-        <div class="fdo"><span class="lx" lang="en">research agents fan out → saved to the store</span><span class="lx" lang="ja">research agent が並列調査 → store に保存</span></div>
+        <div class="fdo"><span class="lx" lang="en">research agents fan out → saved to the store</span><span class="lx" lang="ja">research agent が並列調査 → ストアに保存</span></div>
       </div>
       <div class="feel-row">
         <div class="fsay"><span class="lx" lang="en">"what did we decide about auth?"</span><span class="lx" lang="ja">「認証って前に決めたっけ」</span></div>
@@ -703,7 +703,7 @@
     <p class="kicker reveal"><span class="lx" lang="en">Philosophy</span><span class="lx" lang="ja">思想</span></p>
     <h2 class="reveal">
       <span class="lx" lang="en">Four principles, and what we refuse to become</span>
-      <span class="lx" lang="ja">4 つの原則と、なるまいと決めたもの</span>
+      <span class="lx" lang="ja">4 つの原則と、ならないと決めたもの</span>
     </h2>
     <div class="phil-grid">
       <div class="phil reveal"><b class="lx" lang="en">Self-driving, not approval-gated</b><b class="lx" lang="ja">承認ゲートではなく自走</b><span class="lx" lang="en">Enforcement belongs to hooks; approvals stay minimal.</span><span class="lx" lang="ja">強制は hook に、承認は最小限に。</span></div>
@@ -752,8 +752,8 @@
     </p>
     <p class="install-note reveal lx" lang="ja">
       Claude Code を再起動。CLAUDE.md の無いプロジェクトでは SessionStart hook が正確なコマンド付きで
-      初回セットアップを提案する。<code>harness-setup.sh</code> が行動 rules・statusline・最小限の
-      permissions・<strong>無効状態</strong>の OS サンドボックスブロックを配置し、store を初期化する。
+      初回セットアップを提案する。<code>harness-setup.sh</code> が行動ルール・statusline・最小限の
+      権限設定・<strong>既定で無効</strong>の OS サンドボックス設定を配置し、store を初期化する。
       既定は英語 — 日本語にするには <code>/set-language ja</code> を一度だけ（更新をまたいで保持）。
     </p>
     <p class="install-note reveal lx" lang="en">
@@ -774,7 +774,7 @@
       </p>
       <p class="lx" lang="ja">
         Claude Code（CLI またはデスクトップ）と <code>git</code> / <code>jq</code>（必須）。
-        <code>gh</code> / <code>git-town</code> / <code>python3</code> があると追加機能が有効化し、
+        <code>gh</code> / <code>git-town</code> / <code>python3</code> があると追加機能が有効になり、
         無くても graceful に縮退する。macOS / Linux 対応、Windows は Git Bash 上で動作。
       </p>
     </div>
