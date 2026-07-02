@@ -9,11 +9,11 @@ in_scope:
   - 外部情報源（Web / GitHub / arxiv / X / 公式ドキュメント）の新規調査
   - research-agent サブエージェントの 5-10 並列起動
   - 高リスク・要反証トピックでの deep-research（ビルトイン Workflow）起動と戻り値の store 保存（高検証パス）
-  - 結果の .ai-context/docs/research/{date}_{topic}.md への構造化保存
+  - 結果の {base}/docs/research/{date}_{topic}.md への構造化保存
   - 情報源 URL と取得時刻の必須記載
 
 out_of_scope:
-  - 内部の .ai-context/ 探索（search skill）
+  - 内部の {base}/ 探索（search skill）
   - 単純な事実確認 1 件（メインセッションで webread 1 回で十分）
   - 既存リサーチ要約のみ（直接 Read）
   - コード実装に関する調査（自走実装 / code-editing rule 側で実施）
@@ -24,7 +24,7 @@ safety_boundaries:
   - 1 トピック調査あたりコスト上限: $2（research-agent パス）
   - deep-research 高検証パスは $2 上限の例外（~4M トークン/~20分・~100 エージェント）。起動前 user 確認を必須とし、1 セッション 1 回まで
   - deep-research の戻り値は必ず docs/research/ に保存（保存しないと統合の意味が無い）。環境に無ければ research-agent パスへ graceful fallback
-  - 出力ファイルは .ai-context/docs/research/ 配下のみ（他ディレクトリへの書き込み禁止）
+  - 出力ファイルは {base}/docs/research/ 配下のみ（他ディレクトリへの書き込み禁止）
 
 kill_switch_conditions:
   - 同一クエリで WebSearch が 3 回連続レート制限

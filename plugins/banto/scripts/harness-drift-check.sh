@@ -136,6 +136,10 @@ if [ -d "$SK_DIR" ]; then
         [ -f "$smd" ] || continue
         sdir=$(dirname "$smd")
         for ref in $(grep -oE 'references/[A-Za-z0-9_.-]+\.md' "$smd" 2>/dev/null | sort -u); do
+            # placeholder/example names are prose, not links (same exclusion as plugin-audit-assets.sh 3b)
+            case "$(basename "$ref" .md)" in
+                [XxYyZzNn]|foo|bar|baz|qux|example|name|topic|slug|path|sub|ext1|ext2) continue ;;
+            esac
             rp="$sdir/$ref"
             if [ ! -f "$rp" ]; then
                 REF_PROBLEMS="$REF_PROBLEMS

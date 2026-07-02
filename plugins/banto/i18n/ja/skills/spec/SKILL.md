@@ -115,6 +115,10 @@ Agent(
 
 Spec Kit を選んだ場合は、**3 ファイルを順番に生成する**（spec → plan → tasks）。
 
+> **台帳の役割分担**: `_tasks.md` は**計画台帳**（Phase 構成・依存・受け入れ条件）。実行のライブ台帳は
+> WS の `tasks.md`（`workspaces/<author>/<topic>/tasks.md`）であり、`_tasks.md` は節目（Phase 完了・
+> 設計変更）にのみ同期する。この一文を生成する `_tasks.md` の冒頭にも必ず含める（二重台帳ドリフト防止）。
+
 ### Step 6: AI の境界を明示（**必須**）
 
 生成するすべての spec に、3 段階の ✅ Always / ⚠️ Ask first / 🚫 Never セクションを含める:
@@ -163,7 +167,7 @@ spec 生成が完了したら、以下を提示する:
 
 ユーザーが「実装して進めて」/「続けて」と言ったら、**別の skill を起動せずにそのまま自走実装へ進む**（Claude が設計 → 実装 → テスト → レビューを駆動する）:
 - `/ai-context next` → tasks.md の最初の未完了タスクから順に実装する
-- 独立したタスクが複数あれば、1 メッセージで複数の Agent を起動する（自走 fan-out）
+- 独立したタスクが複数あれば、1 メッセージで複数の Agent を起動する（自走 fan-out）。実装 Agent は `model: "sonnet"`（`templates/model-policy.json` の `implement` 既定）
 
 ## 組み合わせフォーマット
 

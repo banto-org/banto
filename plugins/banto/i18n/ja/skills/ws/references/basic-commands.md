@@ -5,7 +5,7 @@
 ## /ws（引数なし）: 現在の WS を表示
 
 ```
-Read("{base}/WORKSPACE.md")
+Read("<git-dir>/banto-ws-pointer.md")   # 実効ポインタ（非 git 環境は {base}/WORKSPACE.md に fallback）
 # in multi mode also read WORKSPACE-refs.md
 Read("{base}/WORKSPACE-refs.md")  # only when the file exists
 ```

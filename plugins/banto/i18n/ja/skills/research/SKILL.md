@@ -92,7 +92,7 @@ compatibility: Claude Code (requires bash, git, jq)
    Workflow({ name: "deep-research", args: "<精緻化した問い>" })
    ```
 4. **graceful フォールバック**: 環境に `deep-research` が無い場合（古い Claude Code）、Workflow 呼び出しが名前解決で失敗する → 通常の並列 `research-agent` パスにフォールバックする。決してハードフェイルしない。
-5. **永続化ラッパー（これが統合の本体 — 必須）**: deep-research は**何も保存しない**。`{ summary, findings[], caveats, sources, stats }` を返す。そのオブジェクトを標準のリサーチドキュメントに整形し、`{BASE}/docs/research/{YYYY-MM-DD}_{slug}.md` に保存**しなければならない**（deep-research テンプレは [`references/output-format.md`](references/output-format.md)）。finding ごとの確信度 + 投票と、棄却された主張のリストを保持する（透明性）。
+5. **永続化ラッパー（これが統合の本体 — 必須）**: deep-research は**何も保存しない**。`{ summary, findings[], caveats, sources, stats }` を返す。そのオブジェクトを標準のリサーチドキュメントに整形し、`{base}/docs/research/{YYYY-MM-DD}_{slug}.md` に保存**しなければならない**（deep-research テンプレは [`references/output-format.md`](references/output-format.md)）。finding ごとの確信度 + 投票と、棄却された主張のリストを保持する（透明性）。
 6. **store-first 統合**: 保存後、過去の `decisions/` と既存リサーチに対する整合を確認し、報告する（通常パスと同じ）。これが一回限りのレポートを蓄積された知識に変える。
 
 ## 事前コンテキストチェック（外部リサーチの前に必ず実行）
@@ -107,7 +107,7 @@ compatibility: Claude Code (requires bash, git, jq)
 4. `search` が**ゼロ確信**（confident: false）で返す → 外部リサーチへ進む（Step 1 以降）
 
 補助確認（`search` が拾いきれないコンテキスト用 — 任意・並列でよい）:
-- **WS 関連ドキュメント**: `{base}/WORKSPACE.md` の `## 関連ドキュメント` に、トピックの一次ソースになる URL があるか確認（あれば Step 1 でそのサブトピックの一次ソースに使う）
+- **WS 関連ドキュメント**: 現在 WS の実体 `workspaces/<author>/<topic>/workspace.md`（ポインタは `<git-dir>/banto-ws-pointer.md`、非 git は `{base}/WORKSPACE.md`）の `## 関連ドキュメント` に、トピックの一次ソースになる URL があるか確認（あれば Step 1 でそのサブトピックの一次ソースに使う）
 - **active.md**: 現在のタスクファイルを Read し、リサーチトピックが現在のタスクとどう関連するか把握する
 
 **判断ルール**:

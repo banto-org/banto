@@ -12,7 +12,7 @@
 探索順・プロジェクト本筋ファイル尊重ルール・新規作成判断は SKILL.md「タスク管理ルール」に準ずる（single source of truth）。要約:
 
 1. プロジェクト既存の `tasks.md` / `TODO.md` / `ROADMAP.md` があれば尊重
-2. なければ `<base>/tasks/active.md` を使用・新規作成（`<base>` は central/legacy で解決）
+2. なければ `{base}/tasks/active.md` を使用・新規作成（`{base}` は central/legacy で解決）
 
 ## ナビゲーションフロー
 
@@ -56,7 +56,7 @@
 
 ### 6. Phase 完了時のアーカイブ
 
-命名規則・退避手順は SKILL.md「全タスク完了時の自動アーカイブ」+ `references/auto-archive.md` に準拠。`/ai-context phase-done`（`references/phase-done.md`）が検証込みで実施する。
+命名規則・退避手順は SKILL.md「全タスク完了時の自動アーカイブ」+ 本書「全タスク完了時の自動アーカイブ」節に準拠。`/ai-context phase-done` は本書「phase-done」節が検証込みで実施する。
 
 ## タスク形式
 
@@ -93,8 +93,8 @@ subject: Task ID を含める
 ### 1. 完了確認
 
 現在 Phase の全タスクが `- [x]` か確認。タスクファイルの場所:
-- 新 layout: `<base>/workspaces/<author>/<topic>/tasks.md`（SessionStart の「進行中タスク」見出しのパス）
-- legacy: `<base>/tasks/active.md`（`<base>` は central/legacy で解決）
+- 新 layout: `{base}/workspaces/<author>/<topic>/tasks.md`（SessionStart の「進行中タスク」見出しのパス）
+- legacy: `{base}/tasks/active.md`（`{base}` は central/legacy で解決）
 - `tasks.md` / `TODO.md` / `ROADMAP.md`（プロジェクト固有）
 
 未完了タスクがあれば一覧表示してユーザーに確認。
@@ -118,19 +118,19 @@ qa-tester agent（`Agent(subagent_type="qa-tester", ...)` で直接起動）で 
 
 ### 5. 完了 Phase のアーカイブ（実効 tasks ファイル使用時）
 
-完了 Phase を `YYYY-MM-DD_phase{N}-{name}.md` として退避（新 layout → 同 WS の `tasks-old/`、legacy → `<base>/tasks/old/`）:
+完了 Phase を `YYYY-MM-DD_phase{N}-{name}.md` として退避（新 layout → 同 WS の `tasks-old/`、legacy → `{base}/tasks/old/`）:
 
 1. 完了した Phase 部分を抽出
 2. 退避先ディレクトリに保存
 3. tasks ファイルから該当 Phase 部分を削除
 
-（`references/auto-archive.md` の命名規則に準拠。hook が全完了を検知してこの手順を誘導する場合もある）
+（本書「全タスク完了時の自動アーカイブ」節の命名規則に準拠。hook が全完了を検知してこの手順を誘導する場合もある）
 
 なお検索層は hook が自動再生成（手動不要）。
 
 ## 関連
 
-- 次タスクの実行は `/ai-context next`（`references/next.md`）
+- 次タスクの実行は `/ai-context next`（本書「next」節）
 - 通常の完了マークは単に `- [x]` をマーク（このサブコマンド不要）
 - E2E テストは qa-tester agent（直接起動）
 

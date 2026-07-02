@@ -9,7 +9,7 @@ When a subtopic is high-risk / refutation-required and gets routed to **deep-res
 
 > "{topic} is a critical topic that needs refutation verification, so I'll investigate it with deep-research (high-verification, high-cost: ~4M tokens / ~20 min). Is that OK? If the normal research-agent parallel path is fine, I'll go with that instead."
 
-- **Yes** → launch `Workflow({ name: "deep-research", args: "<refined question>" })` **from the parent (main loop)** → save the return value with the deep-research template in output-format.md to `{BASE}/docs/research/`
+- **Yes** → launch `Workflow({ name: "deep-research", args: "<refined question>" })` **from the parent (main loop)** → save the return value with the deep-research template in output-format.md to `{base}/docs/research/`
 - **No** → switch to the research-agent parallel path (Step 3)
 - deep-research not present in the environment → the Workflow fails to resolve → automatic fallback to the research-agent path (report that)
 
@@ -54,9 +54,9 @@ the parent (research skill) resolves `BASE` (the ai-context base. The SessionSta
 // Always call them all simultaneously in a single message (sequential execution is forbidden)
 // Each prompt must include the "save destination" and the "webread path"
 Agent(subagent_type="research-agent", run_in_background=true,
-  prompt="Research subtopic 1, centered on official docs. Save to: {BASE}/docs/research/{YYYY-MM-DD}_{slug1}.md. webread: sh {WEBREAD} <URL>")
+  prompt="Research subtopic 1, centered on official docs. Save to: {base}/docs/research/{YYYY-MM-DD}_{slug1}.md. webread: sh {WEBREAD} <URL>")
 Agent(subagent_type="research-agent", run_in_background=true,
-  prompt="Research subtopic 2 via GitHub Issues. Save to: {BASE}/docs/research/{YYYY-MM-DD}_{slug2}.md. webread: sh {WEBREAD} <URL>")
+  prompt="Research subtopic 2 via GitHub Issues. Save to: {base}/docs/research/{YYYY-MM-DD}_{slug2}.md. webread: sh {WEBREAD} <URL>")
 // launch 5-10 simultaneously
 ```
 

@@ -3,6 +3,12 @@
 > This file is the **canonical source for the store layout**. Skills / hooks don't restate paths; they
 > link here. Bucket names, prefixes, and gitignore divisions also double as a read contract for external
 > tools, so any change must be spelled out in the CHANGELOG.
+>
+> **Machine-readable version (single source)**: `templates/store-layout.json`. `scripts/store-map-lint.sh`
+> verifies on every run the four-way agreement of "the skill/odd declarations ↔ this manifest ↔ the actual
+> filesystem ↔ this table", and `scripts/store-map-gen.sh` emits a live map (folder↔skill↔hook↔actual counts)
+> to `meta/store-map.md`. When adding or removing a bucket, edit **this file and store-layout.json together**
+> (the linter rejects any divergence).
 
 `{base}` is the absolute base path that the SessionStart / PreCompact hook injects as
 "ai-context base: &lt;absolute-path&gt;" (= `<store_root>/<project>/`). Every `{base}/...` in this file
@@ -46,15 +52,19 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
 │   ├── active.md
 │   └── old/             #   完了済み（YYYY-MM-DD_phase-name.md）
 ├── sessions/            # チェックポイント（個人状態）                          ← store .gitignore
-│   ├── pending/<author>.md       #   未取込チェックポイント
-│   └── consumed/<author>/        #   取込済みチェックポイント（per-author）
+│   ├── pending/<author>.md       #   未取込チェックポイント + 例外チャネル
+│   ├── consumed/<author>/        #   取込済みチェックポイント（per-author）
+│   └── registry/<id>.json        #   Fleet セッション台帳（衝突検知・7日 GC）   ← store .gitignore
+├── sessions-cache/<id>.txt       # full-combined 用の会話キャッシュ             ← store .gitignore
+├── telemetry/usage-YYYY-MM.jsonl # 月次テレメトリ（skill 起動 / artifact・PII ゼロ）← store 共有
+├── config.json          # per-project 検索設定（extra_docs_dirs）              ← store 共有
 ├── workspaces/          # WS 単位の作業状態（新 layout・個人状態）              ← store 共有
 │   └── <author>/        #   メンバー名前空間
 │       └── [scope] topic/
 │           ├── workspace.md      #   WS 定義（ブランチ / 依存 / 関連 doc）
 │           ├── tasks.md          #   この WS の active タスク（旧 active.md 相当）
 │           └── tasks-old/        #   Phase 退避（旧 tasks/old 相当）
-├── WORKSPACE.md         # 軽量ポインタ（per-checkout）                          ← store .gitignore
+├── WORKSPACE.md         # pointer fallback for non-git checkouts (primary: <git-dir>/banto-ws-pointer.md) ← store .gitignore
 ├── DASHBOARD.md         # hook 管理の鳥瞰図（per-checkout）                     ← store .gitignore
 └── *-combined.txt       # 検索用テキスト層（hook が自動再生成）                 ← store .gitignore
 ```
@@ -68,7 +78,12 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
 - **Learnings scope `learnings/`**: lessons and learnings. The Stop hook self-improvement loop (`ai-context-stop-self-improve.sh`)
   writes to `learnings/<author>/`, and SessionStart reads it. Include it in the skeleton too (making the previously implicit directory explicit).
 - **New scope `meta/`**: meta information about the store itself (folder↔skill mapping, indexes, health-lint reports).
-  A space for operating the store, not project knowledge.
+  A space for operating the store, not project knowledge. `store-map-gen.sh` generates `meta/store-map.md`.
+- **Lazy-generated buckets**: a specific skill digs them only on its first run, so if it hasn't run there is no actual entry (the linter tolerates the absence).
+  `docs/specs/` (spec) / `concept/CONCEPT.md` (concept) / `experiments/<project>/ledger.jsonl` (model-lab) /
+  `tmp/search/` (search's temporary output, gitignore) / `search-lexicon.md` (search appends on a successful deep run) /
+  `tasks/` (legacy read-fallback only, never auto-created) / `WORKSPACE.md` (pointer fallback for non-git checkouts;
+  the primary pointer lives at `<git-dir>/banto-ws-pointer.md`). The old `refs/` bucket (doc-import) was retired in 5.75.10.
 
 - **grandfather (legacy)**: projects that already have an in-repo `.ai-context/` keep using the same bucket structure
   on the in-repo base until they migrate (`/ai-context migrate`) — read/write stays as before. Nothing new is generated.
@@ -94,7 +109,15 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
 | `sessions/pending/<author>.md` | `save-checkpoint` (save) / SessionStart (ingest) | Equivalent to `checkpoint-{YYYY-MM-DD}-{HHMM}.md`. Transitions pending → consumed |
 | `sessions/consumed/<author>/` | SessionStart (moves to ingested) | Ingested checkpoints (per-author) |
 | `workspaces/<author>/[scope] topic/` | `ws` (WS definition, active tasks) | `workspace.md` / `tasks.md` / `tasks-old/` (new layout) |
-| `WORKSPACE.md`・`DASHBOARD.md` | `ws` / management hook (per-checkout pointer) | Lightweight pointer / overview (gitignore) |
+| `WORKSPACE.md`・`DASHBOARD.md` | `ws` (non-git fallback / multi read-refs) / management hook | Pointer fallback / overview (gitignore). The primary pointer lives at `<git-dir>/banto-ws-pointer.md` |
+| `sessions/registry/` | `session-registry.sh` (Fleet ledger) | `<session_id>.json`. Collision detection in a 12h window, 7-day GC (gitignore) |
+| `sessions-cache/` | `ai_context_combined.py` (cache for full-combined) | `<session_id>.txt` (gitignore) |
+| `telemetry/` | `telemetry-log.sh` (records skill launches / artifacts) | `usage-YYYY-MM.jsonl`. basename / prefix only, zero PII |
+| `config.json` | `ai-context` / `search` (per-project search settings) | `extra_docs_dirs` etc. Read by `ai_context_combined.py` / `ai_context_search_rank.py` |
+| `docs/specs/` | `spec` (the SDD trio) | `YYYY-MM-DD_<slug>_(spec\|plan\|tasks).md` (lazy) |
+| `concept/` | `concept` (North Star) | `CONCEPT.md` (lazy, fixed name) |
+| `experiments/<project>/` | `model-lab` (claim ledger) | `ledger.jsonl` (lazy) |
+| `meta/` | `store-map-gen.sh` (folder↔skill map) | `store-map.md` (+ index / health report) |
 
 ## Fixed prefixes directly under docs/
 

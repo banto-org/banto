@@ -88,12 +88,9 @@ If not running on git, preserve the whole directory with Time Machine / rsync, e
 
 ## Migrating and removing legacy repos
 
-- **in-repo `.ai-context/` → store**: `/ai-context migrate` in the target repo
-  (= register mapping with `--derive` → `migrate-to-store.sh --apply` → regenerate combined. `references/migrate.md`).
-  Migration is a **copy** (the original stays). Bulk is `/ai-context migrate --all`
-- **Removal**: `/ai-context prune` after confirming migration completeness (`references/prune.md`).
-  Precondition: the store has been pushed (backed up)
-- old layout → new layout inside the store (workspace bundling): `sh "$CLAUDE_PLUGIN_ROOT/scripts/migrate-store-layout.sh" --all` → `--apply`
+The canonical migration doc (migrate / old-layout conversion / removal) is `references/setup.md`. Essentials only:
+`/ai-context migrate` is a copy (the original stays); cleanup is automated by a hook (if a manual step is needed,
+follow the `doctor` report; precondition: the store has been pushed).
 
 ## Daily usage (reference / save)
 
@@ -104,5 +101,5 @@ If not running on git, preserve the whole directory with Time Machine / rsync, e
 
 ## Related
 
-- `references/migrate.md` / `references/prune.md` / `references/directory-structure.md` (read contract for external tools)
+- `references/setup.md` (migrate / fallback / denylist) / `references/directory-structure.md` (read contract for external tools)
 - `~/ai-context-store/README.md` (store layout)

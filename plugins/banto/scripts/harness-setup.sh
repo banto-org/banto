@@ -58,7 +58,7 @@ deploy_rules() {  # $1 = dest dir, $2 = plan|apply
         fi
         if [ ! -e "$target" ]; then
             printf '    + %s\n' "$base"
-            [ "$act" = apply ] && cp "$f" "$target"
+            if [ "$act" = apply ]; then cp "$f" "$target"; fi
         elif cmp -s "$f" "$target"; then
             printf '    = %s (同一・skip)\n' "$base"
         else
@@ -90,9 +90,20 @@ merge_settings() {  # $1 = plan|apply
     else
         echo "    statusLine = token-monitor.sh"
     fi
+    # autoUpdate: サードパーティ marketplace は既定 off のため、banto-marketplace に autoUpdate=true を
+    # 設定してリリース追従を自動化（source は known_marketplaces.json の実登録を優先して保持）
+    km="$HOME/.claude/plugins/known_marketplaces.json"
+    km_src='{"source":"github","repo":"banto-org/banto"}'
+    if [ -f "$km" ]; then
+        found=$(jq -c '.["banto-marketplace"].source // empty' "$km" 2>/dev/null)
+        [ -n "$found" ] && km_src=$found
+    fi
+    echo "    extraKnownMarketplaces.banto-marketplace.autoUpdate = true（リリース自動追従）"
     [ "$act" = apply ] || return 0
     tmp=$(mktemp)
-    jq '
+    jq --argjson kmsrc "$km_src" '
+      .extraKnownMarketplaces["banto-marketplace"] =
+        ((.extraKnownMarketplaces["banto-marketplace"] // {source: $kmsrc}) + {autoUpdate: true}) |
       .permissions.allow = ((.permissions.allow // []) + [
         "mcp__playwright__*", "mcp__ide__*",
         "Bash(git -C ~/ai-context-store:*)"
@@ -129,8 +140,8 @@ init_store() {  # $1 = plan|apply
     if [ -e "$root/.ai-context-store" ]; then
         echo "    = ストア既存: $root"
     else
-        echo "    + ストア init: $root（+ .ai-context-store マーカー）"
-        [ "$act" = apply ] && { mkdir -p "$root" && touch "$root/.ai-context-store"; }
+        echo "    + ストア init: ${root}（+ .ai-context-store マーカー）"
+        if [ "$act" = apply ]; then mkdir -p "$root" && touch "$root/.ai-context-store"; fi
     fi
 }
 

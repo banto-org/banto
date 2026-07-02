@@ -335,6 +335,38 @@ if [ -f "$SCRIPT_DIR/ai-context-dashboard.sh" ]; then
     sh "$SCRIPT_DIR/ai-context-dashboard.sh" "$CWD" 2>/dev/null
 fi
 
+# --- store-map: meta/store-map.md 再生成 + リンク腐敗チェック（日次・冪等） ---
+# 正本マニフェスト templates/store-layout.json と「skill 宣言 / 実体 / directory-structure.md」の
+# 四者一致を検証。ドリフト時だけ警告（クリーン時は静音）。地図は meta/store-map.md に冪等出力。
+MAP_MARKER="${TMPDIR:-/tmp}/banto-store-map-$(date +%Y%m%d)"
+if [ ! -f "$MAP_MARKER" ] && [ -f "$PATHS_DIR/store-map-gen.sh" ] && [ -n "$AI_BASE" ]; then
+    touch "$MAP_MARKER"
+    sh "$PATHS_DIR/store-map-gen.sh" --base "$AI_BASE" >/dev/null 2>&1
+    if [ -f "$PATHS_DIR/store-map-lint.sh" ]; then
+        MAP_DRIFT=$(sh "$PATHS_DIR/store-map-lint.sh" --base "$AI_BASE" --quiet 2>/dev/null)
+        [ -n "$MAP_DRIFT" ] && { printf '%s\n\n' "$MAP_DRIFT"; }
+    fi
+fi
+
+# --- repo-ontology: meta/ontology.{json,md} 再生成 + TBox 整合検証（生成/検証=日次・冪等） ---
+# 層 0 ルーター（decision 2026-07-02-083746）: 注入は「質問タイプ → 手段」の小案内のみ・毎セッション。
+# 台帳は query（jq）専用で wholesale read 禁止。生成 + lint は日次スロットル。
+ONTO_MARKER="${TMPDIR:-/tmp}/banto-ontology-$(date +%Y%m%d)"
+if [ ! -f "$ONTO_MARKER" ] && [ -f "$PATHS_DIR/ontology-gen.sh" ] && [ -n "$AI_BASE" ]; then
+    touch "$ONTO_MARKER"
+    sh "$PATHS_DIR/ontology-gen.sh" --base "$AI_BASE" >/dev/null 2>&1
+    if [ -f "$PATHS_DIR/ontology-lint.sh" ]; then
+        ONTO_DRIFT=$(sh "$PATHS_DIR/ontology-lint.sh" --base "$AI_BASE" 2>/dev/null | grep '^FAIL')
+        [ -n "$ONTO_DRIFT" ] && printf '=== ⚠ Repo ontology drift (ontology-lint) ===\n%s\n\n' "$ONTO_DRIFT"
+    fi
+fi
+ONTO_JSON="$AI_BASE/meta/ontology.json"
+if [ -n "$AI_BASE" ] && [ -f "$ONTO_JSON" ] && command -v jq >/dev/null 2>&1; then
+    ONTO_NE=$(jq '.entities|length' "$ONTO_JSON" 2>/dev/null)
+    ONTO_NR=$(jq '.relations|length' "$ONTO_JSON" 2>/dev/null)
+    printf '[Repo Ontology router] %s entities / %s relations at %s/meta/ontology.json (schema + jq examples in ontology.md).\nRoute by question type: counting / enumeration / existence / audit -> query the ledger with jq (never read it wholesale). Content investigation (why / how / root cause) -> search skill (full-text). Cold file-walking without an index loses recall on weaker models -- go through the ledger or search first.\n\n' "$ONTO_NE" "$ONTO_NR" "$AI_BASE"
+fi
+
 # --- plugin cache GC（日次・非同期。update が旧版を掃除しない構造問題への自走対処） ---
 # 決定論ルール: installed_plugins 参照版 + 直近2版を保持して削除（scripts/plugin-cache-gc.sh）
 GC_MARKER="${TMPDIR:-/tmp}/banto-plugin-gc-$(date +%Y%m%d)"

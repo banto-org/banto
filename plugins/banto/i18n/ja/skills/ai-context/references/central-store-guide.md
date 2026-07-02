@@ -88,12 +88,8 @@ git にしない運用なら Time Machine / rsync 等でディレクトリごと
 
 ## legacy repo の移行と撤去
 
-- **repo 内 `.ai-context/` → store**: 対象 repo で `/ai-context migrate`
-  （= `--derive` で mapping 登録 → `migrate-to-store.sh --apply` → combined 再生成。`references/migrate.md`）。
-  移行は **copy**（元は残る）。一括は `/ai-context migrate --all`
-- **撤去**: 移行完全性を確認してから `/ai-context prune`（`references/prune.md`）。
-  前提: store が push 済み（バックアップ）であること
-- store 内の旧 layout → 新 layout（workspace 束ね）: `sh "$CLAUDE_PLUGIN_ROOT/scripts/migrate-store-layout.sh" --all` → `--apply`
+移行（migrate / 旧 layout 変換 / 撤去）の正本は `references/setup.md`。要点のみ：
+`/ai-context migrate` は copy（元は残る）、掃除は hook が自動化（手動が要れば `doctor` の報告に従う。前提: store push 済み）。
 
 ## 日常の使い方（参照・保存）
 
@@ -104,5 +100,5 @@ git にしない運用なら Time Machine / rsync 等でディレクトリごと
 
 ## 関連
 
-- `references/migrate.md` / `references/prune.md` / `references/directory-structure.md`（外部ツール向け read 契約）
+- `references/setup.md`（移行 migrate / fallback / denylist）/ `references/directory-structure.md`（外部ツール向け read 契約）
 - `~/ai-context-store/README.md`（store レイアウト）

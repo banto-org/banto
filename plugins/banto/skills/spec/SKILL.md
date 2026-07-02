@@ -115,6 +115,11 @@ Read the selected format's template from `templates/specs/`, fill in the `{{vari
 
 When Spec Kit is selected, **generate the 3 files in order** (spec → plan → tasks).
 
+> **Ledger roles**: `_tasks.md` is the **planning ledger** (phase structure, dependencies, acceptance criteria).
+> The live execution ledger is the WS `tasks.md` (`workspaces/<author>/<topic>/tasks.md`); sync `_tasks.md`
+> only at milestones (phase completion, design changes). Always include this one-liner at the top of the
+> generated `_tasks.md` as well (prevents double-ledger drift).
+
 ### Step 6: Explicit AI boundaries (**mandatory**)
 
 Every generated spec must include the three-level ✅ Always / ⚠️ Ask first / 🚫 Never section:
@@ -163,7 +168,7 @@ When spec generation completes, present:
 
 If the user says "go ahead and implement" / "continue", **proceed straight into self-driving implementation without invoking another skill** (Claude drives design → implementation → tests → review):
 - `/ai-context next` → implement from the first incomplete task in tasks.md, in order
-- If multiple independent tasks exist, launch multiple Agents in a single message (self-driving fan-out)
+- If multiple independent tasks exist, launch multiple Agents in a single message (self-driving fan-out). Implementation Agents use `model: "sonnet"` (the `implement` default in `templates/model-policy.json`)
 
 ## Combined formats
 

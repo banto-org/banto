@@ -1,23 +1,33 @@
 # ODD (Operational Design Domain) — concept skill
+# schema: ../../templates/odd/odd.schema.yaml
 # Ideology formation is a "proposal": the AI does not generate ideology — it elicits and sharpens it, and the user decides whether to adopt.
+schema_version: 1
+skill: concept
 autonomy_level: L1  # Suggest — propose the ideology doc through dialogue, the user finalizes. No fabrication, empathy gate mandatory
 
-domain:
-  in_scope:
-    - Dialogic formation of a product/service/feature ideology (WHY, worldview, Tribe, anti-goals, aesthetic signal, North Star)
-    - Sharpening an existing ideology, verbalizing retroactive consistency
-    - Generating CONCEPT.md and proposing @import injection into CLAUDE.md
-    - Light mode (one-line ideology for experiments)
-  out_of_scope:
-    - Generating specifications / requirements (spec skill)
-    - Implementation / code generation (self-driving implementation after spec)
-    - Fabricating an ideology the user does not hold (forbidden)
-    - Designing dark patterns disguised as empathy (forbidden)
+in_scope:
+  - Dialogic formation of a product/service/feature ideology (WHY, worldview, Tribe, anti-goals, aesthetic signal, North Star)
+  - Sharpening an existing ideology, verbalizing retroactive consistency
+  - Generating CONCEPT.md and proposing @import injection into CLAUDE.md
+  - Light mode (one-line ideology for experiments)
 
-guardrails:
+out_of_scope:
+  - Generating specifications / requirements (spec skill)
+  - Implementation / code generation (self-driving implementation after spec)
+  - Fabricating an ideology the user does not hold (forbidden)
+  - Designing dark patterns disguised as empathy (forbidden)
+
+safety_boundaries:
   - The ideology originates from the human. The AI only elicits/sharpens (never fabricates)
   - Do not finalize CONCEPT.md until it passes the 7-item empathy gate + ethics (TARES)
   - Run the dialogue as text without using AskUserQuestion
   - Do not leave the 5 elements blank or as "later" (fill with an adopted interpretation and disclose)
 
-human_oversight: The user reviews and revises each Phase's output. The final CONCEPT.md is disclosed as an adopted-interpretation report and the user finalizes it.
+kill_switch_conditions:
+  - When asked to fabricate an ideology the user does not hold
+  - When asked to design dark patterns disguised as empathy
+
+approval_gates:
+  - The user reviews and revises each Phase's output
+  - Finalizing the final CONCEPT.md (disclosed as an adopted-interpretation report)
+  - "@import injection into CLAUDE.md"

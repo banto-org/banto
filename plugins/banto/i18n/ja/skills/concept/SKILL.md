@@ -127,7 +127,7 @@ CONCEPT.md を**すべてのエージェントの判断フィルター**にす�
 > 「CONCEPT を CLAUDE.md に @import で常駐させますか？（リポジトリの CLAUDE.md に 1 行入ります）」
 
 - **yes** → プロジェクトルートの CLAUDE.md の先頭付近に 1 行追加（Claude Code は `@import` を 5 ホップまで解決する）:
-  `@<base>/concept/CONCEPT.md`（または旧来のレガシーリポジトリでは相対の `@.ai-context/concept/CONCEPT.md`）。CLAUDE.md が無ければ作成を提案（ネイティブ /init 連携）。
+  `@{base}/concept/CONCEPT.md`（または旧来のレガシーリポジトリでは相対の `@.ai-context/concept/CONCEPT.md`）。CLAUDE.md が無ければ作成を提案（ネイティブ /init 連携）。
 - **no** → **CLAUDE.md には触らない**。CONCEPT は毎セッション効く: SessionStart hook がストアの `concept/CONCEPT.md` を自動注入し、エージェントが North Star として参照する — リポジトリには何も書き込まない。
 
 つまりリポジトリに触りたくないユーザーは **no** を選べ、CONCEPT は hook 注入で毎セッション自走する。**yes** を選べば加えて CLAUDE.md にピン留めされ、明示的でバージョン管理された記録になる。いずれにせよエージェントは常に「この実装は WHY に沿っているか / 反NG に触れていないか」を自己チェックする。

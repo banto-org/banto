@@ -2,7 +2,7 @@
 
 > テンプレ見出しは構造の雛形。対象ドキュメントは会話言語で記述する（英語見出しは対象言語に翻訳してよい）。
 
-結果を ai-context ベース配下の `{BASE}/docs/research/{YYYY-MM-DD}_{topic-slug}.md` に保存する（`{BASE}` は agent 本文の手順で解決した絶対パス。相対 `.ai-context/` には書かない）。
+結果を ai-context ベース配下の `{base}/docs/research/{YYYY-MM-DD}_{topic-slug}.md` に保存する（`{base}` は agent 本文の手順で解決した絶対パス。相対 `.ai-context/` には書かない）。
 
 ## 必須: `## Sources` に URL を必ず残す（検証導線）
 
@@ -54,7 +54,7 @@
 
 ## deep-research（高検証パス）の戻り値を保存するテンプレート
 
-deep-research（Workflow）は**保存しない**ため、戻り値オブジェクト（`summary` / `findings[]` / `caveats` / `sources` / `refuted[]` / `stats`）を下記に整形して `{BASE}/docs/research/{YYYY-MM-DD}_{slug}.md` に保存する（これが banto 統合の本体 = 永続化）。
+deep-research（Workflow）は**保存しない**ため、戻り値オブジェクト（`summary` / `findings[]` / `caveats` / `sources` / `refuted[]` / `stats`）を下記に整形して `{base}/docs/research/{YYYY-MM-DD}_{slug}.md` に保存する（これが banto 統合の本体 = 永続化）。
 
 ```markdown
 # {トピック} 調査結果（deep-research 高検証）

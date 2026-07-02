@@ -25,13 +25,13 @@ Always save research results to `docs/research/` **under the ai-context base**. 
    If it is unset and resolution fails, do not write to a relative path; instead **treat the save target as unknown, return the full text in the result, and report that fact**
 
 ```
-{BASE}/docs/research/{YYYY-MM-DD}_{topic-slug}.md
+{base}/docs/research/{YYYY-MM-DD}_{topic-slug}.md
 ```
 
 - **Important**: Do not Write directly to a relative `.ai-context/` (a subagent does not receive the SessionStart injection, so in an unregistered repo it would be mistakenly created inside the repo. Always use the absolute path resolved above)
 - **Important**: Use only paths under `docs/research/`. The top level of `docs/` is for a different purpose (general project documents), so do not use it
 - File name: `{YYYY-MM-DD}_{topic-slug}.md` format (e.g. `2026-06-12_react-19-features.md`) — same convention as the research skill / odd.yaml
-- Detect existing files with `Glob("{BASE}/docs/research/*_{topic-slug}.md")` (matching across the date prefix). If one exists, review its content and update it; otherwise create a new file
+- Detect existing files with `Glob("{base}/docs/research/*_{topic-slug}.md")` (matching across the date prefix). If one exists, review its content and update it; otherwise create a new file
 - After saving, report the Write result path to the user
 
 ## Leveraging existing context

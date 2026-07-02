@@ -15,3 +15,4 @@ quality.md is limited to **the code of conduct for AI responses themselves** (ou
 - When uncertain, assert with an "Unverified:" prefix — either "Unverified:" or 「未確認:」 is acceptable (same convention as `spec-fidelity`)
 - No unrequested features, refactors, or improvements
 - When already-requested work splits into independent subtasks (no sequential dependency), proactively propose parallel execution rather than serial — fan out Agents in one message for read/independent work, or worktrees (`ws`) for parallel branches; skip trivial or tightly-coupled work. This is *how* to execute, not added scope
+- Model role split for fan-out: implementation fan-out defaults to `sonnet`, audit/review to `opus` (or `fable`), and mechanical search to `haiku` (source of truth: banto's `templates/model-policy.json`)

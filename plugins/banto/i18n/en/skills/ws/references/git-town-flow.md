@@ -37,7 +37,7 @@ Utterance examples: "do the API in parallel", "put this in a separate worktree"
    git worktree add "../$(basename "$PWD")-wt-<task-name>" <task-name>
    ```
    - fallback: `git checkout -b <task-name> <epic>` + the same worktree add (no parent tracking = no sync, manual rebase)
-2. Guidance: "Physically separated to `../<repo>-wt-<task>`. To run in parallel in a separate session, start `claude` there (or `claude -w`)"
+2. Guidance: "Physically separated to `../<repo>-wt-<task>`. To run in parallel in a separate session, start `claude` there (or `claude -w`)". For an implementation WS, use `claude --model sonnet` (the `implement` default in `templates/model-policy.json`); for a design WS, no flag (keep the session's own model)
 3. When running in parallel it is automatically listed in the session-registry / fleet dashboard (P4 core). Same-branch collisions are warned as pending
 
 ## sync — drift propagation (bookkeeping: silently automatic)

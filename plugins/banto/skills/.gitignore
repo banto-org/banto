@@ -16,8 +16,6 @@
 #   .ai-context/docs/[Review]*.md           ← コードレビュー結果
 #   .ai-context/docs/[QA]*.md               ← QA テストレポート
 #   .ai-context/docs/[Status]*.md           ← ステータス報告
-#   .ai-context/docs/[Postmortem]*.md       ← 障害事後検証
-#   .ai-context/docs/[Benchmark]*.md        ← ベンチマーク結果
 #   .ai-context/docs/research/              ← リサーチ
 #   .ai-context/docs/knowledges/*.md        ← ナレッジ（drafts/ 除く）
 #   .ai-context/tasks/active.md             ← 進行中タスク

@@ -30,7 +30,7 @@ it.** (The concept → spec → autonomous-implementation pipeline is dogfooded 
 - **Keep the edit repo = the live plugin in sync**: after editing skills/hooks, bump the version and run
   `claude plugin marketplace update banto-marketplace && claude plugin update banto@banto-marketplace`,
   then restart Claude Code. Never leave same-version different-content drift.
-- Meta tools: `/plugin-audit` (14-axis skill quality) / `/harness-audit` (5-axis whole-harness system
+- Meta tools: `/plugin-audit` (15-axis skill quality) / `/harness-audit` (5-axis whole-harness system
   audit) / `/plugin-dev` (generate & refactor). Self-check consistency with harness-audit after changes.
 - Install: `claude plugin marketplace add <marketplace>` + `claude plugin install banto@<marketplace>`,
   then run `scripts/harness-setup.sh` (deterministic user-level setup; CLAUDE.md via native `/init`).

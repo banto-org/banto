@@ -33,7 +33,7 @@ echo ""
 case "$AI_BASE" in
     */.ai-context) ;;
     *)
-        echo "[AI Context - 中央 store 運用] ai-context ベース: $AI_BASE（decisions/docs/tasks 等はここ配下を Read/Write）"
+        echo "[AI Context - 中央 store 運用] ai-context ベース: ${AI_BASE}（decisions/docs/tasks 等はここ配下を Read/Write）"
         echo ""
         ;;
 esac

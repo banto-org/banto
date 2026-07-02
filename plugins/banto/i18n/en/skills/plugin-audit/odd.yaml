@@ -6,7 +6,7 @@ skill: plugin-audit
 autonomy_level: L2  # Audit workflow (running the collection scripts → generating the report is automatic; applying fixes happens only on an explicit request to the fix subcommand)
 
 in_scope:
-  - Official compliance checks (Phase 1-8.5) and the 14-axis structural audit (Phase 9) for a plugin / single skill
+  - Official compliance checks (Phase 1-8.5) and the 15-axis structural audit (Phase 9) for a plugin / single skill
   - Running the collection and scoring scripts (plugin-audit-collect / report / matrix / usage)
   - "Saving the [Audit] report to {base}/docs/"
 

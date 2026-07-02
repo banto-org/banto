@@ -9,7 +9,7 @@
 
 > 「{トピック} は反証検証が要る重大トピックなので deep-research（高検証・高コスト: 約4Mトークン/約20分）で調べます。よろしいですか？ 通常の research-agent 並列でよければそちらにします。」
 
-- **Yes** → `Workflow({ name: "deep-research", args: "<精緻化した問い>" })` を**親（メインループ）から**起動 → 戻り値を output-format.md の deep-research テンプレで `{BASE}/docs/research/` に保存
+- **Yes** → `Workflow({ name: "deep-research", args: "<精緻化した問い>" })` を**親（メインループ）から**起動 → 戻り値を output-format.md の deep-research テンプレで `{base}/docs/research/` に保存
 - **No** → research-agent 並列パス（Step 3）に切り替え
 - 環境に deep-research が無い → Workflow が解決失敗 → research-agent パスへ自動フォールバック（その旨を報告）
 
@@ -54,9 +54,9 @@ Step 0 の結果を踏まえて、`$ARGUMENTS` を 3〜10 個のサブトピッ�
 // 必ず 1 つのメッセージで全て同時に呼び出すこと（逐次実行は禁止）
 // 各 prompt に「保存先」と「webread パス」を必ず含める
 Agent(subagent_type="research-agent", run_in_background=true,
-  prompt="サブトピック1を公式ドキュメント中心に調査。保存先: {BASE}/docs/research/{YYYY-MM-DD}_{slug1}.md。webread: sh {WEBREAD} <URL>")
+  prompt="サブトピック1を公式ドキュメント中心に調査。保存先: {base}/docs/research/{YYYY-MM-DD}_{slug1}.md。webread: sh {WEBREAD} <URL>")
 Agent(subagent_type="research-agent", run_in_background=true,
-  prompt="サブトピック2を GitHub Issues で調査。保存先: {BASE}/docs/research/{YYYY-MM-DD}_{slug2}.md。webread: sh {WEBREAD} <URL>")
+  prompt="サブトピック2を GitHub Issues で調査。保存先: {base}/docs/research/{YYYY-MM-DD}_{slug2}.md。webread: sh {WEBREAD} <URL>")
 // 5〜10個を同時起動
 ```
 

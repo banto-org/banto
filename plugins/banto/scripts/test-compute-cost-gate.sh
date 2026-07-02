@@ -29,6 +29,27 @@ gate() { printf '{"tool_name":"Bash","tool_input":{"command":%s}}' "$(printf '%s
 [ "$(printf '{"tool_name":"Bash","tool_input":{"command":"./run_on_cluster.sh"}}' | BANTO_PAID_LAUNCH_RE='run_on_cluster' sh "$GATE" >/dev/null 2>&1; echo $?)" = "2" ] \
     && ok "gate: BANTO_PAID_LAUNCH_RE override -> block" || no "project override should block"
 
+# ---- false-positive fixes: connect/inspect is not a launch (ssh / read-only cloud CLI) ----
+[ "$(gate "ssh ubuntu@1.2.3.4 nvidia-smi")" = "0" ]    && ok "gate: ssh to box -> pass" || no "ssh should pass (not a launch)"
+[ "$(gate "scp model.bin ubuntu@1.2.3.4:/data/")" = "0" ] && ok "gate: scp -> pass" || no "scp should pass"
+[ "$(gate "aws ec2 describe-instances --filters Name=instance-state-name,Values=running")" = "0" ] \
+    && ok "gate: aws describe-instances (read-only) -> pass" || no "aws describe should pass"
+[ "$(gate "gcloud compute instances list")" = "0" ]    && ok "gate: gcloud instances list -> pass" || no "gcloud list should pass"
+
+# ---- real cloud launch verbs still block ----
+[ "$(gate "aws ec2 run-instances --image-id ami-123 --instance-type p4d.24xlarge")" = "2" ] \
+    && ok "gate: aws ec2 run-instances -> block" || no "aws run-instances should block"
+[ "$(gate "aws ec2 start-instances --instance-ids i-abc")" = "2" ] && ok "gate: aws ec2 start-instances -> block" || no "aws start-instances should block"
+[ "$(gate "gcloud compute instances create gpu-vm --accelerator type=nvidia-tesla-a100")" = "2" ] \
+    && ok "gate: gcloud instances create -> block" || no "gcloud create should block"
+
+# ---- inline authorization prefix in the command string bypasses (the documented escape) ----
+[ "$(gate "BANTO_ALLOW_COMPUTE=1 sky launch task.yaml")" = "0" ] \
+    && ok "gate: inline BANTO_ALLOW_COMPUTE=1 prefix bypasses" || no "inline prefix should bypass"
+[ "$(gate "cd /repo && BANTO_ALLOW_COMPUTE=1 aws ec2 run-instances --image-id ami-1")" = "0" ] \
+    && ok "gate: inline prefix after && bypasses" || no "inline prefix mid-command should bypass"
+[ "$(gate "echo BANTO_ALLOW_COMPUTE=10")" = "0" ]      && ok "gate: harmless echo -> pass (no launch)" || no "plain echo should pass"
+
 # ---- eval-stats.sh ----
 if command -v python3 >/dev/null 2>&1; then
     export ODD_STATE_DIR="$FIX/state"; mkdir -p "$FIX/state"

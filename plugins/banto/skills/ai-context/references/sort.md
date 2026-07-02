@@ -35,7 +35,7 @@ Natural language such as "tidy up the docs", "things are a mess", or "move the d
 ### [Missing date] decisions/
 | # | File | Recommended action |
 |---|---------|--------------|
-| 4 | decisions/old-decision.md | rename to YYYY-MM-DD_old-decision_<user>.md |
+| 4 | decisions/old-decision.md | rename to YYYY-MM-DD-HHMMSS_old-decision_<user>.md |
 
 ### [Stale session] sessions/
 | # | File | Updated | Recommended action |
@@ -67,7 +67,7 @@ Specify by number:
 - Deleted: N
 - Skipped: N
 
-Recommended: check the final state with `/ai-context status`
+Recommended: check the final state with `/ai-context doctor`
 ```
 
 ## Safety rules (internal mode)
@@ -113,6 +113,6 @@ vendor, target, .venv, venv
 
 **Step 5: Propose search registration** — if `docs/` etc. is not yet registered in `config.json`'s `extra_docs_dirs`, propose registering it → on yes, add it to `extra_docs_dirs` (it gets reflected into `combined.txt` on the next hook regeneration; no manual rebuild needed).
 
-**Step 6: Generate the reference index** — save an index of all documents to `<base>/docs/[Index] project-documents.md` (3 tables: docs/ / root (non-movable) / sub-packages).
+**Step 6: Generate the reference index** — save an index of all documents to `{base}/docs/[Index] project-documents.md` (3 tables: docs/ / root (non-movable) / sub-packages).
 
 **Step 7: Completion report** — a summary of moved / skipped / deleted / search-registered (`extra_docs_dirs` added).

@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "_note": "Machine-readable twin of skills/ai-context/references/directory-structure.md. Single source of truth for the store layout: every bucket, its owner skill/hook, file naming (POSIX ERE), gitignore class, and scope. store-map-lint.sh validates (a) skill/odd path declarations against this, (b) this against filesystem reality, (c) the directory-structure.md table against this. store-map-gen.sh renders the live map into meta/store-map.md. When you add/rename a bucket, edit THIS file + directory-structure.md together and bump CHANGELOG.",
+  "scopes": {
+    "shared": "committed to the store git (team knowledge)",
+    "personal": "namespaced by <author>/ but committed",
+    "ephemeral": "gitignored — per-machine / regenerable / per-checkout"
+  },
+  "buckets": [
+    { "path": "decisions", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": false,
+      "owners": ["ai-context", "spec", "dev-loop", "ai-context-auto.sh", "ai-context-decisions-numbering.sh"],
+      "naming": "^[0-9]{4}-[0-9]{2}-[0-9]{2}(-[0-9]{6}|_[0-9]{3})_.+_.+\\.md$",
+      "note": "Design decisions, flat. New: YYYY-MM-DD-HHMMSS_slug_author. Old NNN form grandfathered." },
+
+    { "path": "docs", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": false,
+      "owners": ["ai-context", "status", "harness-audit", "plugin-audit", "spec", "qa-tester"],
+      "naming": "^\\[(Status|Design|Guide|Audit|Review|QA|Memo|Index)\\] .+\\.md$",
+      "note": "Reports, flat. Top-level files must carry one of the 8 fixed prefixes (prefix-check.sh enforces). Subdirs research/specs/knowledges are exempt." },
+
+    { "path": "docs/research", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": false,
+      "owners": ["research", "research-agent"],
+      "naming": null,
+      "note": "research-agent output. YYYY-MM-DD_topic.md preferred; un-timestamped evergreen notes allowed. No prefix." },
+
+    { "path": "docs/specs", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": true,
+      "owners": ["spec"],
+      "naming": "^[0-9]{4}-[0-9]{2}-[0-9]{2}_.+_(spec|plan|tasks)\\.md$",
+      "note": "SDD triples. Lazy: created on first spec write." },
+
+    { "path": "docs/knowledges", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": false,
+      "owners": ["ai-context"],
+      "naming": null,
+      "note": "Promoted knowledge. No prefix (exception); title == filename." },
+
+    { "path": "docs/knowledges/drafts", "kind": "dir", "scope": "ephemeral", "gitignore": true, "lazy": false,
+      "owners": ["ai-context-auto.sh", "ai-context", "knowledge-draft-review.sh"],
+      "naming": null,
+      "note": "Knowledge drafts (gitignored). Threshold BANTO_DRAFT_REVIEW_MIN surfaces them at SessionStart." },
+
+    { "path": "learnings", "kind": "dir", "scope": "personal", "gitignore": false, "lazy": false,
+      "owners": ["ai-context-stop-self-improve.sh"],
+      "naming": null,
+      "note": "Per-author lesson drafts under learnings/<author>/." },
+
+    { "path": "sessions", "kind": "dir", "scope": "ephemeral", "gitignore": true, "lazy": false,
+      "owners": ["save-checkpoint", "ai-context-session-start.sh", "ai-context-precompact.sh"],
+      "naming": "^checkpoint-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{4}\\.md$",
+      "note": "Checkpoint bodies. pending/ + consumed/ + registry/ underneath." },
+
+    { "path": "sessions/pending", "kind": "dir", "scope": "ephemeral", "gitignore": true, "lazy": true,
+      "owners": ["pending-channel.sh", "session-registry.sh"],
+      "naming": "^.+\\.md$",
+      "note": "Exception channel: <author>.md, idempotent named sections." },
+
+    { "path": "sessions/consumed", "kind": "dir", "scope": "ephemeral", "gitignore": true, "lazy": true,
+      "owners": ["ai-context-session-start.sh", "ai-context-precompact.sh"],
+      "naming": null,
+      "note": "Injected checkpoints moved here under <author>/. 14-day GC." },
+
+    { "path": "sessions/registry", "kind": "dir", "scope": "ephemeral", "gitignore": true, "lazy": true,
+      "owners": ["session-registry.sh"],
+      "naming": "^.+\\.json$",
+      "note": "Fleet layer: <session_id>.json. 7-day GC, 12h collision window." },
+
+    { "path": "sessions-cache", "kind": "dir", "scope": "ephemeral", "gitignore": true, "lazy": true,
+      "owners": ["ai_context_combined.py"],
+      "naming": "^.+\\.txt$",
+      "note": "full-combined session cache: <session_id>.txt. SHOULD be gitignored (see lint drift check)." },
+
+    { "path": "workspaces", "kind": "dir", "scope": "personal", "gitignore": false, "lazy": false,
+      "owners": ["ws", "migrate-store-layout.sh"],
+      "naming": null,
+      "note": "WS state under workspaces/<author>/[scope] topic/{workspace.md,tasks.md,tasks-old/}; archived under old/." },
+
+    { "path": "tasks", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": true,
+      "owners": ["ai-context"],
+      "naming": null,
+      "note": "Legacy task ledger (active.md + old/). Read-fallback only, never auto-created; superseded by workspaces/<author>/<topic>/tasks.md." },
+
+    { "path": "meta", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": false,
+      "owners": ["store-map-gen.sh", "store-map-lint.sh", "ai-context-lint.sh", "ontology-gen.sh", "ontology-lint.sh"],
+      "naming": null,
+      "note": "Store-own metadata: store-map.md (folder<->skill map), indexes, health-lint reports, repo ontology (ontology.md committed; ontology.json + ontology-cache/ gitignored per Q3)." },
+
+    { "path": "tmp", "kind": "dir", "scope": "ephemeral", "gitignore": true, "lazy": true,
+      "owners": ["search", "search-agent"],
+      "naming": null,
+      "note": "Scratch working dir (e.g. tmp/search/<run-id>-<role>.txt). Gitignored, deletable." },
+
+    { "path": "telemetry", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": true,
+      "owners": ["telemetry-log.sh"],
+      "naming": "^usage-[0-9]{4}-[0-9]{2}\\.jsonl$",
+      "note": "Monthly usage JSONL (basenames/prefixes only, PII-free). Drives dormant-skill judgment." },
+
+    { "path": "concept", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": true,
+      "owners": ["concept"],
+      "naming": "^CONCEPT\\.md$",
+      "note": "North-star CONCEPT.md written by the concept skill. Lazy: only when concept skill runs." },
+
+    { "path": "experiments", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": true,
+      "owners": ["model-lab"],
+      "naming": null,
+      "note": "model-lab claim ledger under experiments/<project>/ledger.jsonl. Lazy: only when model-lab runs." },
+
+    { "path": "config.json", "kind": "file", "scope": "shared", "gitignore": false, "lazy": true,
+      "owners": ["ai-context", "search"],
+      "naming": "^config\\.json$",
+      "note": "Per-project search config (extra_docs_dirs). Read by ai_context_combined.py / ai_context_search_rank.py." },
+
+    { "path": "search-lexicon.md", "kind": "file", "scope": "shared", "gitignore": false, "lazy": true,
+      "owners": ["search", "lexicon-distill.sh"],
+      "naming": "^search-lexicon\\.md$",
+      "note": "Search lexicon (concept<->synonym). Lazy: appended on deep-path success." },
+
+    { "path": "DASHBOARD.md", "kind": "file", "scope": "ephemeral", "gitignore": true, "lazy": false,
+      "owners": ["ai-context-dashboard.sh"],
+      "naming": "^DASHBOARD\\.md$",
+      "note": "Hook-managed cross-WS overview (per-checkout)." },
+
+    { "path": "WORKSPACE.md", "kind": "file", "scope": "ephemeral", "gitignore": true, "lazy": true,
+      "owners": ["ws"],
+      "naming": "^WORKSPACE(-refs)?\\.md$",
+      "note": "Pointer fallback for non-git checkouts (primary pointer: <git-dir>/banto-ws-pointer.md) + WORKSPACE-refs.md (ws multi read-refs)." },
+
+    { "path": "project-combined.txt", "kind": "file", "scope": "ephemeral", "gitignore": true, "lazy": true,
+      "owners": ["ai_context_combined.py"],
+      "naming": "^(project|full)-combined\\.txt$",
+      "note": "Search text layer (project + full). Regenerated by the combined-rebuild hook." }
+  ]
+}

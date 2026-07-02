@@ -1,4 +1,4 @@
-# Quality evaluation criteria (14 axes)
+# Quality evaluation criteria (15 axes)
 
 Quality evaluation axes for every Banto asset (skill / agent / rule / hook). This document is the **single source of truth** for `plugin-audit`.
 
@@ -33,11 +33,13 @@ Quality evaluation axes for every Banto asset (skill / agent / rule / hook). Thi
 
 The judgment-type skills (`plugin-audit eval` / `plugin-audit fix` / `harness-audit`) **must always render their judgment in a subagent**. The main session carries work-history context contamination, which produces self-evaluation bias.
 
-| skill | Reviewer |
-|-------|---------|
-| `plugin-audit eval` | Judge each case independently with an Agent (general-purpose); vote across multiple Agents |
-| `plugin-audit fix` | An Agent (general-purpose) proposes fixes; interactive approval happens in the main session |
-| `harness-audit` | Delegate subjective axes such as dead-skill judgment to an Agent (general-purpose) |
+The default model for judge / reviewer Agents is `model: "opus"` (the `audit` default in `templates/model-policy.json`; `audit_alt: "fable"` is an optional upgrade).
+
+| skill | Reviewer | model |
+|-------|---------|-------|
+| `plugin-audit eval` | Judge each case independently with an Agent (general-purpose); vote across multiple Agents | opus |
+| `plugin-audit fix` | An Agent (general-purpose) proposes fixes; interactive approval happens in the main session | opus |
+| `harness-audit` | Delegate subjective axes such as dead-skill judgment to an Agent (general-purpose) | opus |
 
 ---
 
@@ -273,9 +275,7 @@ Judges whether standards that **can vary per company / project / team** — "cod
 [logic inside the skill, unified]
 
 1. Read .claude/rules/{topic}.md (a rule placed by harness-setup.sh / the project side)
-2. If absent → look under {base}/refs/{topic}/:
-   2a. use the search skill (query expansion + grep ranking) to find the semantically closest section
-   2b. if search finds nothing → Read {base}/refs/_index.md → Read section by section
+2. If absent → use the search skill (query expansion + grep ranking) to find the semantically closest passage in the store's decisions / docs
 3. If absent → use the skill's built-in default
 ```
 
@@ -333,6 +333,20 @@ These are recommendations, not enforcement. The final call is a human's.
 - **Warning**: list of skills without ODD (all, including L0; a human judges the L0 optionality)
 - **Critical**: list of skills whose autonomy_level is L4 / L5
 - **Info**: list of autonomy_level extraction failures (format errors)
+
+### schema lint (`plugin-audit-odd.sh` — deterministic)
+
+Beyond presence / autonomy extraction, validate the **structural validity of odd.yaml** against `templates/odd/odd.schema.yaml`. When a parallel session's revert or paste-back decays an odd into the pre-schema shape (a `domain:` wrapper, a stray `human_oversight`, an `.ai-context/` path, etc.), a visual diff misses it, so reject it deterministically at CI / SessionStart:
+
+| Inspection | Severity |
+|---|---|
+| missing required key (`schema_version` / `skill` / `autonomy_level` / `in_scope` / `out_of_scope`) | ❌ FAIL |
+| unknown key (schema `additionalProperties:false`; e.g. `domain` / `guardrails` / `human_oversight`) | ❌ FAIL |
+| `autonomy_level` is L4/L5 (outside Banto's range) or non-Lx | ❌ FAIL |
+| `skill:` value mismatches the directory name | ❌ FAIL |
+| `schema_version` ≠ 1 / `in_scope` is empty | ❌ FAIL |
+
+`--strict` exits 1 on violation. Cross-skill drift in path spelling (`{base}` / `<base>` / `.ai-context`) is owned by Axis 15 (`plugin-audit-consistency.sh`) (division of labor).
 
 ### Expected false positives
 
@@ -409,6 +423,7 @@ Inspect whether "content that shouldn't live in documentation" has crept into th
 | 1 Inventory | per-skill files / bytes / lines (heaviest first) — where weight concentrates | Axis 2 | ℹ Info |
 | 2 Junk files | `.DS_Store` / `Thumbs.db` / `*.bak\|.old\|.tmp\|.orig\|.rej\|.swp` / `*~` / `*.pyc` / `__pycache__` / `*.log` + empty files | Axis 2 | ❌ remove |
 | 3 Orphan references | a basename referenced by neither SKILL.md nor a sibling reference = unreachable dead weight | Axis 2 | ⚠ remove/link after confirming |
+| 3b Dangling references | a file anywhere in the subtree points at a `references/X.md` that has no actual file (markdown link / code span / prose; the reverse of orphan; cross-references `skills/<other>/...` and placeholder names are excluded) | Axis 2 | ❌ broken pointer — fix/remove |
 | 4 Lightening candidates | references over 500 lines (the Runtime tier is unlimited, but heaviest-first they're prime split/trim targets) | Axis 2 | ℹ Info |
 | 5 Duplicate files | matching cksum = identical content (0-byte excluded) → consolidation candidates | Axis 2 | ℹ Info |
 | 6 hygiene | apply the 3 patterns above (runlog / absolute path / email / registry names) to **non-SKILL.md files** too | Axis 14 | ⚠ Warn |
@@ -433,6 +448,22 @@ subagent, and have it judge against these 3 questions:
 
 
 ---
+
+## Axis 15: Cross-skill reference consistency / correlation (`plugin-audit-consistency.sh`)
+
+**Question**: do all skills reference "the same place" with **the same spelling**? Whereas store-map-lint detects "wrong paths" by comparing against a manifest (`store-layout.json`), this axis **surfaces, without a manifest**, the "divergence where the same store subpath is spelled with multiple prefixes" via clustering.
+
+Inspections (`plugin-audit-consistency.sh <plugin_dir>`):
+- **Check 1 (spelling mismatch)**: extract `(\{base\}|\{BASE\}|<base>|.ai-context)/<subpath>` from every `*.md` / `odd.yaml`. If the same `<subpath>` is spelled with two or more prefixes, report it as divergence with file:line (e.g. `docs/research` referenced via both `{base}` and `{BASE}`).
+- **Check 2 (prefix distribution)**: tally each prefix's occurrences. The canonical one is `{base}`. `{BASE}` / `<base>` / `.ai-context` (non-legacy lines) are presented as non-canonical with counts.
+- **Check 3 (naming format)**: flag if multiple date formats coexist across decisions / checkpoint / research (decisions' `YYYY-MM-DD` ↔ `YYYY-MM-DD-HHMMSS` coexistence is treated as info under the grandfather spec — no correction needed).
+
+Judgment:
+- A spelling mismatch / non-legacy naming mismatch leans Critical (a source of declaration rot that multiplies via reverts and copy-paste). Propose canonicalizing to `{base}`.
+- Legacy-contrast lines ("legacy is...", "formerly") and the bare-path scan-exclusion list (`.ai-context/sessions,` etc.) are already excluded as intentional (no false positives).
+- Runs always in the default audit (static path). `--strict` exits 1 on divergence.
+
+> Related: store **structural** consistency (folder ↔ skill ↔ actual) is owned by store-map-lint (harness-audit Axis 3), while **spelling** consistency across skills is owned by this axis. Together they close off "declaration rot" from two sides.
 
 ## References
 

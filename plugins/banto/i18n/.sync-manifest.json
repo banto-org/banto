@@ -21,9 +21,9 @@
       "ja_sha256": "25fa31198377a2b075e06d1cb5c4e462e3cd8506eff943892695023f9e6157ec"
     },
     "agents/research-agent.md": {
-      "en_sha256": "6b22f01c00e92ac0b3f5a565acfd99e7eb4fcfff4ab2fb9ab5dd42d45173eaa6",
+      "en_sha256": "0292a2fd6667e7ac216c046d0984b538f15d3cb5aa8a3987389bbf98ab8d8f1e",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "8ee246e0146dcea6ecfea47801db91b7205c44ec8de77f26d6d67161e2b3c8ff"
+      "ja_sha256": "ed824194688abae83c23aa5ebc3d100902746d849f811c48c26633ddd9b3dd47"
     },
     "agents/search-agent.md": {
       "en_sha256": "89c30340ae05f4c87e723f9c53d952461be32c921fd6cef68d4350da3d3c0dfa",
@@ -66,9 +66,9 @@
       "ja_sha256": "f79d9e120389d0412367cde8723895453ddd560b01dd4de336358d3d532bf34d"
     },
     "skills/ai-context/references/central-store-guide.md": {
-      "en_sha256": "be632a9e52f9e966dff58d90804b2ab669aecb5b494fca8bbd8fdacdaeb314e0",
+      "en_sha256": "0276b5dff187b9d733fb6026bf59a49d3107012d1d808bc86f417de340622242",
       "generated_at": "2026-06-20T15:22:50Z",
-      "ja_sha256": "850429c1488b32b8e8e01c96b45f80adac695d3046da79ec0902dc8f8a9ca3d1"
+      "ja_sha256": "5f045f7369d044bb1b3dde450a22d7bf5497b5f683ffb4c3f7a491f19c217a8d"
     },
     "skills/ai-context/references/decisions.md": {
       "en_sha256": "8fba2c6e41dc6641a99d42a4f67ff1db482414c55902bd5c8683b496409cfe44",
@@ -76,12 +76,12 @@
       "ja_sha256": "8eafb8ce5693ac1003ed8aa8f2a2e80961d03c39f60fb005242f086be45263b6"
     },
     "skills/ai-context/references/directory-structure.md": {
-      "en_sha256": "05feee55a72940985f339ce22c6b4dbbd98385e3a96d0efedef060448b6854b1",
+      "en_sha256": "4a5428445f31b6ba927735b54356e426f6e05487fd1f3076231b6d710858fb69",
       "generated_at": "2026-06-24T08:24:57Z",
-      "ja_sha256": "07779e9fbc604ba2acdbabc193c49ff01e693c17b368d73765f116f748e031ef"
+      "ja_sha256": "37ad41d4a4a40ce8b551bc9df9f164eef25cd8fb982c1f33f4ee0b05055cc3f0"
     },
     "skills/ai-context/references/doctor.md": {
-      "en_sha256": "41191fad8b579875547863afc817de0ee7784488d3016938e50ea977bd92452e",
+      "en_sha256": "3838616d914593f338cc88c8073bbe05d5bb6868670a7dcc03c2a4ad32388795",
       "generated_at": "2026-06-24T08:26:33Z",
       "ja_sha256": "6a1f9785366d7a302057b5674588d80f4f1521b9323ac41c62ccbc7e7e4a0685"
     },
@@ -96,24 +96,24 @@
       "ja_sha256": "229b708482bb55e6b2ac83dab850881aba49a146276e1ed929e58d2db0dd8ae5"
     },
     "skills/ai-context/references/sort.md": {
-      "en_sha256": "2561ebe4792685c502823c15317c9bbc645781fbbfbbb191f19457a3d29ddc70",
+      "en_sha256": "1a514ae05b49a5e65ed3e881638b93f28962da83a914764a0899441ddbf45cde",
       "generated_at": "2026-06-24T08:27:35Z",
-      "ja_sha256": "1f9437fd9513c3a87cd0437e81c226bd953603432bea5a8f50d4c5890ab00b88"
+      "ja_sha256": "7d4bdb1662103c2fac1853a51a910977537ded1b250ab245565ddf79a81b3a2a"
     },
     "skills/ai-context/references/task-lifecycle.md": {
-      "en_sha256": "9e404a21c1e16893511c4f7be8944e071e8fc9c23401c040225a94f3c887edc1",
+      "en_sha256": "9a6cd2db00232be903af7d0f959d5488be0578c48f4307b5073eec483ad0537e",
       "generated_at": "2026-06-22T23:51:58Z",
-      "ja_sha256": "7dec7f6f5f6635b4f6cbd35fdaaab4eb0549b12f8f579ac7d250d6003d0e65cb"
+      "ja_sha256": "64668c4f1d4c64070b0934c8658d16b224bfc165705b5f38ec720b3ff0a0feed"
     },
     "skills/concept/SKILL.md": {
-      "en_sha256": "d404642aed73fad0fc59de943f0e3ce9cf884a5c31b2df5e6a937ca74f742443",
+      "en_sha256": "12a4fd0f1e37d8726f19a20d44031802208eff561112a2088392b58c6fce5c3b",
       "generated_at": "2026-06-24T08:28:52Z",
-      "ja_sha256": "060ea6fa2c6d7954d5311d68ae9bb0a1cb5aafe3262ebfdb683ba9fb1de1f601"
+      "ja_sha256": "3e8ab2de319486207b622685ad7067a01bbe7c2bbe2172be3780fafbe5d25e24"
     },
     "skills/concept/odd.yaml": {
-      "en_sha256": "c2fbfb458861220963c0761bf798318d72cf911cbb253a3f086e694c0b1f857e",
+      "en_sha256": "e03f9fc11e9da231d8346bfb9235c70719798e954548f2c58baa4c678301f88b",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "2c1c7b727b8efe0824e60315ce50ef1130700dfa90a2ab7f7b71d6ff873a71d4"
+      "ja_sha256": "1729a89b450a36f9a6df1fc2ee4902871e529b6d315d82a6c6b1e652d222a352"
     },
     "skills/concept/references/archetypes.md": {
       "en_sha256": "1dae8610dec7c2ea617b663715b3cb3df5e323175a552f4ed315ca8918166bcd",
@@ -131,9 +131,9 @@
       "ja_sha256": "cb01e80f662fc19f93d51fa3e5495ef54e508fb2f59a30d0766905654e87fb57"
     },
     "skills/dev-loop/SKILL.md": {
-      "en_sha256": "9bf1b38af7ca03664bd481edc68ff4683b8b370d816a52b0949f245db658760a",
+      "en_sha256": "27ddfa95751884fae2e068a93aaabee073ef4fb7abe71f6aaaca5591dbc2d957",
       "generated_at": "2026-06-22T14:04:29Z",
-      "ja_sha256": "dc3f54e0b8261c76bc8127330e91b1af3de253b405e12515801354e34909fdf1"
+      "ja_sha256": "d88da4fc7d4fbad7e1177ce2df74e15c4694b82863fdb0e4ef6783502e8f85ca"
     },
     "skills/dev-loop/odd.yaml": {
       "en_sha256": "725c43e20601a70dd8e4298e2563cbed1fc31ea8b0c2e199e9a79969e5c53d6a",
@@ -201,9 +201,9 @@
       "ja_sha256": "0544ed4b7dcf073913f94653ce27c9b3138011ff386ad2d1c770dcb83fa58084"
     },
     "skills/plugin-audit/SKILL.md": {
-      "en_sha256": "3c40e2c44afef09ea044dd0ffd1bc4680c16ae13a627ab7e0b92cd888a1667e2",
+      "en_sha256": "4ee2a39002c8b29798e66c8411e491834d0c0f06f9ce4d741bab54550186c6a1",
       "generated_at": "2026-06-24T08:35:34Z",
-      "ja_sha256": "d0edf097af1a999fb9840f22c31df8a912d04a5e46752efc639e380d37837b93"
+      "ja_sha256": "e65ffa800818902e0a2dd0918a85be4fe9dcc8cac87af16c961526a5882dc7bf"
     },
     "skills/plugin-audit/eval-cases.yaml": {
       "en_sha256": "2918b4ac0949bdd073e712ffd58775d47eb7aefea940f3401e4e05f36bb9ae3e",
@@ -211,9 +211,9 @@
       "ja_sha256": "ff1d3b88c1eeb811dd5d3b051196356da94bf65972efa89844da0ae7dcb147ea"
     },
     "skills/plugin-audit/odd.yaml": {
-      "en_sha256": "91303c56566881bf7f52c0c74fcd51bc8613cbe28b3230bf5f0bfdfda43d083b",
+      "en_sha256": "b0580ac97e521d9f70df581c22d52d506146adf2761cba302b2cbb698f4a4f8d",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "c56d322cd126ec104b559f3a6df8b965192bec3db16ec54df50e0c6197c64b48"
+      "ja_sha256": "5b658f30df587e2b492f3a9dd107ed39a1140b83f879eeb2723262b2870e9493"
     },
     "skills/plugin-audit/references/audit-phases.md": {
       "en_sha256": "2fcafc11ec45cbe78dfdaed59716934ee8647267f2e51ad9148e473c545eccaf",
@@ -221,9 +221,9 @@
       "ja_sha256": "4272d0f4e8e53d285d7c721ffd70890a794cb293f2be42c188a8fff5b5eaf279"
     },
     "skills/plugin-audit/references/scoring.md": {
-      "en_sha256": "6524e6ca58ca8d959be58d8ca8ff4b7b25b2bfba02ae2842851ac19402705aa9",
+      "en_sha256": "117e3dcf9c6795ce185ce6fd766bae9a26ca9a3241c07e290f2403190f1e91e3",
       "generated_at": "2026-06-24T08:37:36Z",
-      "ja_sha256": "aef7f0a274f18a5f041da30557fa34ce4aa06b45cc5b90b13297735ef96abc5a"
+      "ja_sha256": "1fe9b4b81241fb64055f4a336da990cdc60c53e4de50dc924b73a88cabcde698"
     },
     "skills/plugin-audit/references/verify.md": {
       "en_sha256": "6f5dd3d106ed348a9f77831717a91b8031de9680deaa2a41c6ff0a7a13be4313",
@@ -296,14 +296,14 @@
       "ja_sha256": "24f2d06565ab03861ad3e69cc3c4dcea60a1ff1a18f8d202be3758e82aa22985"
     },
     "skills/research/SKILL.md": {
-      "en_sha256": "94f0c1b9dc8745d05148d2e329bb30fe3456a1cd157d03c178329233cede3400",
+      "en_sha256": "221bf3aaf645f04ad8fe5447d09b135f03ab3b90b94837fa063188ed44982146",
       "generated_at": "2026-06-24T08:41:10Z",
-      "ja_sha256": "7800b7b611623d169be02d9c117d5c813507e5066aae58ddfbfe4e344f4ccdf3"
+      "ja_sha256": "5592466759f123a7b401ef5d5934ba7207f46f31bd086a8c7fa9a5f6c4feb2c8"
     },
     "skills/research/odd.yaml": {
-      "en_sha256": "2f7f9332dba77a88533d38f3b4c6d414d93c9c6af34b293382d9b4571ff91cd3",
+      "en_sha256": "cbc7f6e6349655af286478b5431bdde562f3c3cd7816d7730e2c01c423e5a83c",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "3b082d1ed22aa2e4c0896b07aff6eeb3532594beb44c7d1939021c1785f1cb60"
+      "ja_sha256": "62c5331d9785f9de64aae04173604a06c0a145d365b95379ac7f9626532d9e28"
     },
     "skills/research/references/academic-sources.md": {
       "en_sha256": "e74a41a576b8215241212675d187d00fbc37208942f707b1fb251cc6bce42354",
@@ -311,19 +311,19 @@
       "ja_sha256": "f36e581a5fc270d7b25f38379da7aa8761edf3d99d39272c49e3709fa75c0de1"
     },
     "skills/research/references/approval-flow.md": {
-      "en_sha256": "439394bec499c572705464aa29e04b0b9e07e42759a5d8503602c7dbd0ff74ea",
+      "en_sha256": "bc2020f4d5aa2547eed622b4edf2e863b6470ae64d84e777e1f17bb8b2cde569",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "f8d3b10265aa7b11323111db443a3d0f39cb03bfbdff60b3cd9c348043f7c231"
+      "ja_sha256": "c15e80a36b3cf7f5765d4a05efe651b1362de01cf45d62c7cebbe7bd9f796407"
     },
     "skills/research/references/output-format.md": {
-      "en_sha256": "98456e875d07af1f13e39938b9d955cc9bf40fe5b3f7accd7b13e3584791bdba",
+      "en_sha256": "068de9e971be676a6d3a50f0fcdd3ab96fddc6d7e2d60310f98bd6bd44109aaa",
       "generated_at": "2026-06-24T03:19:34Z",
-      "ja_sha256": "a9134e72324598096623512d0fda8298430a56310b37b2250140e519f993b2b3"
+      "ja_sha256": "387efde7ac0d995ac976e9c4f815b73c0f0e561c8de7afb7c039f2259e157bf6"
     },
     "skills/save-checkpoint/SKILL.md": {
-      "en_sha256": "af8c103f13f5e7fa57b73d80dd60a87079be1bc2a9457f55e1b401fb73742c6d",
+      "en_sha256": "e1b06ecd2eea479a41bb0051dd4d8effc1a5717314ed59854ec640eb5392deef",
       "generated_at": "2026-06-24T08:41:48Z",
-      "ja_sha256": "04ccffbac3212b924e5e28da388a8a39c27fc8f1a5131048c4fc608fe33cbf02"
+      "ja_sha256": "bdc5454c4cdb05f557de31ab4ba9ccc3fe1d1a9fa479670281b0d72b966bf5b6"
     },
     "skills/save-checkpoint/odd.yaml": {
       "en_sha256": "d8173d02b79329948b6d8767e15abd939e244dc1a17040bcbec3e47c50326834",
@@ -341,14 +341,14 @@
       "ja_sha256": "ca1712c293a2f1f6ec116cbbe4ee4c59553a070ec0f2ad53319f54b28f198ad4"
     },
     "skills/spec/SKILL.md": {
-      "en_sha256": "c39d927706077cb5b55c39bc1aba460d96aa27d345715e452b194e59b42c7087",
+      "en_sha256": "faed4cc6bf75691fe7b665ca482d82228de991e353396c9862f53990c60d9b00",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "efae0a82eec34ff35f4e0158786f62f284fd562f207d9b48f26308fb07ce884a"
+      "ja_sha256": "ce2642a94dcab5044330cd52942ffaf5dbb72cc243a973544964de772beec6fb"
     },
     "skills/spec/odd.yaml": {
-      "en_sha256": "579c298253f16e16c9ae4c0c06567f42d93bd9df2c57a1d92d7a91aa88e96b54",
+      "en_sha256": "664c61e5cd9a9e834119f3d3d1d98b6909a144f352643801ea522bcf7a5b5e3c",
       "generated_at": "2026-06-24T08:44:35Z",
-      "ja_sha256": "8fdace7f9a0fd8b4e1ec19234711d7a773224819a161a79ec9bd07869b6cda5f"
+      "ja_sha256": "8998dacc192e758b2301b3b77cbac420bf8aa43718e4a3703fa2347ab10269ce"
     },
     "skills/spec/references/claude-design-handoff.md": {
       "en_sha256": "1f4d3a6b4d4ea5a2d48ea06fc8365089123cc1f28e7b97f9887d3a2cff0c02d4",
@@ -371,24 +371,24 @@
       "ja_sha256": "f212511793f66ff9c62ff7001efd29686247c86a01b6295b54588adb0ca69f4f"
     },
     "skills/ws/SKILL.md": {
-      "en_sha256": "a723989e873a3dc1ed238b367544be78e5a87baa41c7c26d79d1302a639429f9",
+      "en_sha256": "416d9c0d8452ff9b698601b7ffdd18398df06d16d6d617c4ccac3839c32cd33e",
       "generated_at": "2026-06-24T08:46:01Z",
-      "ja_sha256": "a26f0da83a42cec92cc128c7c6e1d1e8a1c7319347439f17a8d79cfe6da8c29c"
+      "ja_sha256": "fc025ecc82427353338ae7ea6fb5f97f0c1ea1c4fa7130f7cb52b088a4df5300"
     },
     "skills/ws/odd.yaml": {
-      "en_sha256": "971481aa393159659581520c833a89e3793ab49d4b5d4583fcac60ba8d45b0b3",
+      "en_sha256": "a5ab3656c4b9d3680f9bb98975b25e85271b5c87ce130ee82c208096b44c5627",
       "generated_at": "2026-06-24T08:46:44Z",
       "ja_sha256": "896db0668ba98214bfd145b014d9d0b0cb6c6c71a4922b323349ea68b9a02ba0"
     },
     "skills/ws/references/architecture.md": {
-      "en_sha256": "e54ff5633969c1e752aee0245b200bb4fd3ee55417c17390b0f873c60c1f1beb",
+      "en_sha256": "1d6882ea0cc5b97632c869467d95be126b4a6235dd26831ec16e1b5381e30138",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "5f872dbdb9b4062883192510214e1ae815b57a53b1b5da10214dd85ccfe7ccab"
+      "ja_sha256": "b8f38d6163028acecdcd5816a6a5720e2be6e74d79431238f9dfd93b62c13d02"
     },
     "skills/ws/references/basic-commands.md": {
-      "en_sha256": "c4b33cb6bcc80cbcba3b399d3b0442a510ac726d1f0e92a9d8229c3ec81b5107",
+      "en_sha256": "284b542fe31c4bd45234685049a71b8de82fd94d05b20bdfefcc303ad1c5a463",
       "generated_at": "2026-06-24T08:46:55Z",
-      "ja_sha256": "995c1bff5e2f5201b7642579083708cde9e7b79952cc42df1899099e5cddd0a0"
+      "ja_sha256": "4fba9845446f06dd23e3ee827ecbdcf27604df5660a18e63165ac84c859ad747"
     },
     "skills/ws/references/formats.md": {
       "en_sha256": "130ab7a8aff04eade6e7bc53f2bea81e30090c7211632710cea42fdc9e4ce05f",
@@ -396,19 +396,19 @@
       "ja_sha256": "d6a163550c6a5666a4dba819eaf0aaa336bee718b7126442a52072258b4b5af5"
     },
     "skills/ws/references/git-town-flow.md": {
-      "en_sha256": "eca88c5059a1b6e7337ffa1155f404139f0856c0f665a6ecd6c143289776b7f5",
+      "en_sha256": "8a5d3c684a757a8117487775f253a7aa2fcec238e771dc97b12d0f397f27b8ff",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "6d6cb13b3e52f15e54a77fdf450ba759d3138f64ac2272437162863df1d6d1d0"
+      "ja_sha256": "944d41ce073b7902e2cb1fde43793db84fe5b6376df61ce7a423af30b510acab"
     },
     "skills/ws/references/multi-mode.md": {
-      "en_sha256": "e85ea40709e685358c0402bf61d2ea801d9fe773b3651a8fc10e29aa6a8dde81",
+      "en_sha256": "eed0c114bf0eaa7ea91072ebffac11b41491b2d18c50922353fc05b1183b9ac3",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "fed57c7b466ca8cb0646a3ca6ebf8a7a3b906cdc9304a96d5d8bc876b2a7630a"
+      "ja_sha256": "162b6038b12929a3f738f8a64b7f73343311a80f63c07b65173bc43af142b7cf"
     },
     "skills/ws/references/new-and-archive.md": {
-      "en_sha256": "c8b194631f4af61773c399525c34e76d5f656f159a4f1b57dc3dff12daffe7c1",
+      "en_sha256": "488388e4ff81eb3c528111bde48adbab1fd0fcd51854a7a06e27376da15da9e8",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "99813eac7d79403622552f21e6d17db8f44a00c036ade1838881d4300367ab38"
+      "ja_sha256": "932e75abbbf04ca43184a0234f8e695b1894cd369042e3ab1a5fc5ae97db9e26"
     },
     "skills/ws/references/parallel-proposal.md": {
       "en_sha256": "47f28b97200598f5051f1ec59e2c5b2644963b96ad8bad4b7c8dc9d2f6a19250",
@@ -420,5 +420,7 @@
       "generated_at": "2026-06-20T15:22:51Z",
       "ja_sha256": "bf9f0a8b0293210ffdd4cc44b2885c15968ab316bf454e0d7dd60ae6bd54de12"
     }
-  }
+  },
+  "generated_at": "2026-07-02T03:18:23Z",
+  "source_commit": "7941c78"
 }

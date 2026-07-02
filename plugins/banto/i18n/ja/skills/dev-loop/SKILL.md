@@ -39,11 +39,11 @@ odd.yaml = **L3（Autopilot＝継続実行＋例外時のみ owner 要求）**�
 
 ### Phase 1: 周回（tasks.md が尽きるまで）
 各タスクで:
-1. `ai-context` の next で次の `[ ]`（依存が解けたもの）を取得。並列フラグ群は 1 メッセージ複数 Agent で fan-out、それ以外は直列。
+1. `ai-context` の next で次の `[ ]`（依存が解けたもの）を取得。並列フラグ群は 1 メッセージ複数 Agent（実装 Agent は `model: "sonnet"` — `templates/model-policy.json` の `implement` 既定）で fan-out、それ以外は直列。
 2. **実装**（Edit / Write）。編集ごとに PostToolUse `auto-test.sh` が関連テストを回す。3 連続失敗で `odd-gate.sh` が edit を自動停止（churn 防止＝既存の retry cap）。
 3. **フル検証**: `sh "$CLAUDE_PLUGIN_ROOT/hooks/verify-run.sh" <project>`（build → test → api を集約。exit 0=green / 2=red。結果は `$HOME/.cache/banto/verify-last-<session>` に `green` か `red:<steps>`）。
 4. **red** → `debugger` agent で root cause 修正 → 3 へ戻る。`odd-gate` の 3 連続失敗ガードに当たったら **周回を止めて owner に上げる**（churn しない）。
-5. **green** → `tasks.md` を `[x]`、ブランチへ commit（push / PR / main は人間ゲート＝既存 safety）。
+5. **green** → 監査 Agent（`model: "opus"`、fresh・実装と別コンテキストで diff + spec を検証。`templates/model-policy.json` の `audit` 既定、`audit_alt: fable` は任意アップグレード）で spec 適合を確認 → `tasks.md` を `[x]`、ブランチへ commit（push / PR / main は人間ゲート＝既存 safety）。
 
 ### Phase 2: 収束 / 例外
 - tasks.md が尽きた → 完了報告（実装・検証・採用解釈の要約）。Phase 完了なら `ai-context` の phase-done で `tasks-old/` へアーカイブ。

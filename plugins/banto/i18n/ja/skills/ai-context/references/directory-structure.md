@@ -3,6 +3,11 @@
 > このファイルは **store layout の正本（canonical）**。各 skill / hook はパスを再掲せず、ここへ
 > リンクする。バケット名・プレフィックス・gitignore 区分は外部ツール向けの read 契約も兼ねるため、
 > 変更時は CHANGELOG に明記する。
+>
+> **機械可読版（単一ソース）**: `templates/store-layout.json`。`scripts/store-map-lint.sh` が
+> 「skill/odd の宣言 ↔ 本マニフェスト ↔ 実体ファイルシステム ↔ 本表」の四者一致を毎回検証し、
+> `scripts/store-map-gen.sh` が `meta/store-map.md` に生きた地図（フォルダ↔skill↔hook↔実体件数）を出力する。
+> バケットを増減するときは **本ファイルと store-layout.json を同時に**編集する（リンターが乖離を弾く）。
 
 `{base}` は SessionStart / PreCompact hook が「ai-context ベース: &lt;絶対パス&gt;」として注入する
 ベース絶対パス（= `<store_root>/<project>/`）。本ファイル内の `{base}/...` はすべてこのベース配下を指す。
@@ -45,15 +50,19 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
 │   ├── active.md
 │   └── old/             #   完了済み（YYYY-MM-DD_phase-name.md）
 ├── sessions/            # チェックポイント（個人状態）                          ← store .gitignore
-│   ├── pending/<author>.md       #   未取込チェックポイント
-│   └── consumed/<author>/        #   取込済みチェックポイント（per-author）
+│   ├── pending/<author>.md       #   未取込チェックポイント + 例外チャネル
+│   ├── consumed/<author>/        #   取込済みチェックポイント（per-author）
+│   └── registry/<id>.json        #   Fleet セッション台帳（衝突検知・7日 GC）   ← store .gitignore
+├── sessions-cache/<id>.txt       # full-combined 用の会話キャッシュ             ← store .gitignore
+├── telemetry/usage-YYYY-MM.jsonl # 月次テレメトリ（skill 起動 / artifact・PII ゼロ）← store 共有
+├── config.json          # per-project 検索設定（extra_docs_dirs）              ← store 共有
 ├── workspaces/          # WS 単位の作業状態（新 layout・個人状態）              ← store 共有
 │   └── <author>/        #   メンバー名前空間
 │       └── [scope] topic/
 │           ├── workspace.md      #   WS 定義（ブランチ / 依存 / 関連 doc）
 │           ├── tasks.md          #   この WS の active タスク（旧 active.md 相当）
 │           └── tasks-old/        #   Phase 退避（旧 tasks/old 相当）
-├── WORKSPACE.md         # 軽量ポインタ（per-checkout）                          ← store .gitignore
+├── WORKSPACE.md         # 非 git 環境のポインタ fallback（本体は <git-dir>/banto-ws-pointer.md）← store .gitignore
 ├── DASHBOARD.md         # hook 管理の鳥瞰図（per-checkout）                     ← store .gitignore
 └── *-combined.txt       # 検索用テキスト層（hook が自動再生成）                 ← store .gitignore
 ```
@@ -67,7 +76,12 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
 - **教訓 scope `learnings/`**: 教訓・学び。Stop hook 自己改善ループ（`ai-context-stop-self-improve.sh`）が
   `learnings/<author>/` に書き、SessionStart が読む。skeleton にも含める（従来の暗黙ディレクトリを明示化）。
 - **新 scope `meta/`**: store 自身のメタ情報（フォルダ↔skill マッピング・索引・health lint レポート）。
-  プロジェクトの知識ではなく store 運用のための領域。
+  プロジェクトの知識ではなく store 運用のための領域。`store-map-gen.sh` が `meta/store-map.md` を生成する。
+- **遅延生成（lazy）バケット**: 特定 skill が初回実行時にだけ掘るため、未起動なら実体は無い（リンターは欠落を許容）。
+  `docs/specs/`（spec）/ `concept/CONCEPT.md`（concept）/ `experiments/<project>/ledger.jsonl`（model-lab）/
+  `tmp/search/`（search の一時出力・gitignore）/ `search-lexicon.md`（search が deep 成功時に追記）/
+  `tasks/`（legacy 読取フォールバックのみ・新規生成なし）/ `WORKSPACE.md`（非 git 環境のポインタ fallback。
+  本体は `<git-dir>/banto-ws-pointer.md`）。旧 `refs/`（doc-import）は 5.75.10 で廃止。
 
 - **grandfather（legacy）**: 既存の repo 内 `.ai-context/` を持つ案件は、移行（`/ai-context migrate`）
   まで同じバケット構造を repo 内 base で使い続ける（読み書き従来どおり）。新規生成はされない。
@@ -93,7 +107,15 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
 | `sessions/pending/<author>.md` | `save-checkpoint`（保存）/ SessionStart（取込）| `checkpoint-{YYYY-MM-DD}-{HHMM}.md` 相当。pending → consumed へ遷移 |
 | `sessions/consumed/<author>/` | SessionStart（取込済みへ移動）| 取込済みチェックポイント（per-author）|
 | `workspaces/<author>/[scope] topic/` | `ws`（WS 定義・active タスク）| `workspace.md` / `tasks.md` / `tasks-old/`（新 layout）|
-| `WORKSPACE.md`・`DASHBOARD.md` | `ws` / 管理 hook（per-checkout ポインタ）| 軽量ポインタ・鳥瞰図（gitignore）|
+| `WORKSPACE.md`・`DASHBOARD.md` | `ws`（非 git fallback / multi 参照）/ 管理 hook | ポインタ fallback・鳥瞰図（gitignore）。ポインタ本体は `<git-dir>/banto-ws-pointer.md` |
+| `sessions/registry/` | `session-registry.sh`（Fleet 台帳）| `<session_id>.json`。衝突検知 12h 窓・7日 GC（gitignore）|
+| `sessions-cache/` | `ai_context_combined.py`（full-combined 用キャッシュ）| `<session_id>.txt`（gitignore）|
+| `telemetry/` | `telemetry-log.sh`（skill 起動 / artifact 記録）| `usage-YYYY-MM.jsonl`。basename / prefix のみ・PII ゼロ |
+| `config.json` | `ai-context` / `search`（per-project 検索設定）| `extra_docs_dirs` 等。`ai_context_combined.py` / `ai_context_search_rank.py` が読む |
+| `docs/specs/` | `spec`（SDD 三点）| `YYYY-MM-DD_<slug>_(spec\|plan\|tasks).md`（lazy）|
+| `concept/` | `concept`（North Star）| `CONCEPT.md`（lazy・固定名）|
+| `experiments/<project>/` | `model-lab`（claim 台帳）| `ledger.jsonl`（lazy）|
+| `meta/` | `store-map-gen.sh`（フォルダ↔skill 地図）| `store-map.md`（+ 索引 / health レポート）|
 
 ## docs/ 直下の固定プレフィックス
 

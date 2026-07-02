@@ -37,7 +37,7 @@ git-town **なし**の場合: 各操作の「fallback」を使い、初回のみ
    git worktree add "../$(basename "$PWD")-wt-<task-name>" <task-name>
    ```
    - fallback: `git checkout -b <task-name> <epic>` + 同 worktree add（parent 追跡なし＝sync 不可、rebase 手動）
-2. 案内: 「`../<repo>-wt-<task>` に物理分離しました。別セッションで並走するなら there で `claude` を起動（または `claude -w`）」
+2. 案内: 「`../<repo>-wt-<task>` に物理分離しました。別セッションで並走するなら there で `claude` を起動（または `claude -w`）」。実装 WS なら `claude --model sonnet`（`templates/model-policy.json` の `implement` 既定）、設計 WS はフラグなし（セッション本体のモデルを維持）
 3. 並走時は session-registry / 艦隊 dashboard に自動で載る（P4 core）。同一ブランチ衝突は pending で警告される
 
 ## sync — drift 伝播（帳簿系: 黙って自動）
