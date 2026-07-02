@@ -85,6 +85,14 @@ SessionStart hook asks (instead of silently creating a local store) whether you 
 `ai-context-store` to register, want to create one (and in which org), or prefer local-only — the
 chosen org is remembered for later projects. git-sync the store when working as a team.
 
+### Staying up to date
+
+`harness-setup.sh` also sets `autoUpdate: true` for the Banto marketplace in your `settings.json`
+(third-party marketplaces default to off), so new releases are picked up automatically at session
+start. To apply an update mid-session, run the interactive `/reload-plugins` command (hooks and MCP
+servers reload; a full restart is only needed for monitors). Manual update, if you prefer:
+`claude plugin marketplace update banto-marketplace && claude plugin update banto@banto-marketplace`.
+
 ## Language (default is English)
 
 To switch the skill / agent set to Japanese, run this **once**:

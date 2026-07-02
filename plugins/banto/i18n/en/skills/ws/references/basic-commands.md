@@ -5,7 +5,7 @@ User-facing output (messages and lists): if the user is speaking Japanese, respo
 ## /ws (no arguments): show the current WS
 
 ```
-Read("{base}/WORKSPACE.md")
+Read("<git-dir>/banto-ws-pointer.md")   # effective pointer (falls back to {base}/WORKSPACE.md outside git)
 # in multi mode also read WORKSPACE-refs.md
 Read("{base}/WORKSPACE-refs.md")  # only when the file exists
 ```

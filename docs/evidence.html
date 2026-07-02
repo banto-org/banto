@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Evidence — Banto / 実測レポート：ai-context の正しさ</title>
+<meta name="description" content="Banto's ai-context store, measured directly: 4 benchmarks, 38 cells (42 independent runs) across sonnet / haiku / opus / fable. Bare vs. harness accuracy, cost, and the boundary judgment that decides what never gets exposed." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  .doc-hero{ padding:clamp(36px,6vw,68px) var(--pad) 6px; max-width:var(--maxw); margin:0 auto; }
+  .doc-hero .kicker{ display:inline-flex; align-items:center; gap:9px; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-d); }
+  .doc-hero .kicker::before{ content:""; width:30px; height:3px; background:var(--accent); border-radius:2px; }
+  .doc-hero h1{ font-size:clamp(30px,4.6vw,48px); margin:16px 0 0; letter-spacing:-.02em; }
+  .doc-hero .lede{ max-width:56em; }
+  .sec{ max-width:var(--maxw); margin:0 auto; padding:clamp(40px,6vw,72px) var(--pad) 0; position:relative; }
+  .sec-head{ position:relative; margin:0 0 26px; }
+  .sec-head .ghost{ position:absolute; left:-4px; top:-.55em; font-family:var(--serif); font-weight:700; font-size:clamp(70px,11vw,128px); color:var(--accent); opacity:.07; line-height:1; pointer-events:none; z-index:0; }
+  .sec-head .sub{ font-family:var(--mono); font-size:13px; color:var(--accent-d); position:relative; z-index:1; }
+  .sec-head h2{ position:relative; z-index:1; font-size:clamp(22px,3.2vw,32px); }
+  .sec-head p{ position:relative; z-index:1; color:var(--ink-2); max-width:52em; margin:10px 0 0; font-size:16.5px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:22px 24px; }
+  .prose-p{ font-size:15.5px; color:var(--ink-2); max-width:60em; margin:0 0 8px; line-height:1.65; }
+
+  /* ---- executive summary: 4 cards ---- */
+  .mini-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:6px; }
+  .mini-grid .card h3{ font-size:16.5px; display:flex; align-items:center; gap:9px; }
+  .mini-grid .card h3 .step-n{ width:26px; height:26px; display:grid; place-items:center; border-radius:8px; background:var(--ink); color:var(--paper); font-family:var(--serif); font-size:14px; flex:none; }
+  .mini-grid .card p{ font-size:14px; color:var(--ink-2); margin:10px 0 0; line-height:1.6; }
+
+  /* ---- method box ---- */
+  .method{ background:var(--card); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:var(--r); box-shadow:var(--shadow); padding:22px 26px; }
+  .method ol{ margin:0; padding-left:20px; }
+  .method li{ font-size:14.5px; color:var(--ink-2); padding:7px 0; line-height:1.6; }
+  .method li b{ color:var(--ink); }
+
+  /* ---- tables (shared shape across R1–R4) ---- */
+  .store-table-wrap{ background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow-l); overflow-x:auto; margin-top:18px; }
+  .store-table{ width:100%; border-collapse:collapse; font-size:14px; min-width:520px; }
+  .store-table th{ text-align:left; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); background:var(--paper-2); padding:11px 16px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  .store-table td{ padding:11px 16px; border-bottom:1px solid var(--line); color:var(--ink-2); vertical-align:top; line-height:1.5; }
+  .store-table tr:last-child td{ border-bottom:0; }
+  .store-table td.mono{ font-family:var(--mono); font-size:13px; }
+  .store-table tr.hl-row td{ font-weight:700; background:var(--accent-t); color:var(--ink); }
+  .fine{ font-size:13px; color:var(--ink-soft); margin-top:10px; line-height:1.55; }
+
+  /* ---- observations ---- */
+  .obs-list{ list-style:none; padding:0; margin:16px 0 0; }
+  .obs-list li{ position:relative; padding:7px 0 7px 22px; font-size:14.5px; color:var(--ink-2); border-top:1px solid var(--line); line-height:1.6; }
+  .obs-list li:first-child{ border-top:0; }
+  .obs-list li::before{ content:"—"; position:absolute; left:0; color:var(--accent-d); font-weight:700; }
+
+  /* ---- R3-A: bare vs harness highlight ---- */
+  .ev-highlight{ display:flex; align-items:center; justify-content:center; gap:clamp(20px,4vw,44px); margin:22px auto 0; padding:clamp(22px,4vw,32px); background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow-l); flex-wrap:wrap; }
+  .ev-stat{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .ev-num{ font-family:var(--serif); font-weight:700; font-size:clamp(36px,6vw,56px); line-height:1; }
+  .ev-num.bad{ color:var(--ink-soft); }
+  .ev-num.good{ color:var(--accent); }
+  .ev-unit{ font-size:.42em; color:var(--ink-soft); margin-left:2px; }
+  .ev-cap{ font-size:13px; color:var(--ink-soft); text-align:center; max-width:16em; }
+  .ev-arrow{ font-size:26px; color:var(--line-2); }
+
+  /* ---- R4: cost bars ---- */
+  .ev-bars{ margin:22px auto 0; max-width:640px; display:flex; flex-direction:column; gap:14px; }
+  .ev-bar-row{ display:grid; grid-template-columns:96px 1fr 84px; align-items:center; gap:14px; }
+  .ev-bar-label{ font-size:13.5px; font-weight:600; color:var(--ink-2); }
+  .ev-bar-track{ height:22px; background:var(--paper-2); border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+  .ev-bar-fill{ height:100%; border-radius:6px 0 0 6px; }
+  .ev-bar-fill.store{ background:var(--green); }
+  .ev-bar-fill.web{ background:var(--accent); }
+  .ev-bar-val{ font-family:var(--mono); font-size:13px; color:var(--ink-soft); text-align:right; }
+
+  /* ---- conclusion ---- */
+  .concl-list{ list-style:none; padding:0; margin:6px 0 0; counter-reset:cl; }
+  .concl-list li{ position:relative; padding:16px 0 16px 50px; border-bottom:1px solid var(--line); counter-increment:cl; }
+  .concl-list li:last-child{ border-bottom:0; }
+  .concl-list li::before{ content:counter(cl); position:absolute; left:0; top:14px; width:32px; height:32px; display:grid; place-items:center; border-radius:9px; background:var(--ink); color:var(--paper); font-family:var(--serif); font-weight:700; }
+  .concl-list b{ display:block; font-size:16.5px; font-family:var(--serif); }
+  .concl-list span{ display:block; font-size:14.5px; color:var(--ink-soft); margin-top:4px; }
+
+  /* ---- limitations ---- */
+  .lim-box{ background:var(--paper-2); border:1px dashed var(--line-2); border-radius:var(--r); padding:22px 26px; }
+  .lim-box ul{ margin:0; padding-left:20px; }
+  .lim-box li{ font-size:14.5px; color:var(--ink-2); padding:6px 0; line-height:1.6; }
+
+  .cta-band{ max-width:var(--maxw); margin:clamp(48px,7vw,80px) auto 0; padding:0 var(--pad); }
+  .cta-inner{ background:var(--ink); color:var(--paper); border-radius:18px; padding:clamp(28px,5vw,46px); box-shadow:var(--shadow-l); }
+  .cta-inner h2{ color:var(--paper); font-size:clamp(22px,3vw,30px); }
+  .cta-inner p{ color:#D8CDB9; margin:12px 0 22px; max-width:42em; }
+  .doc-foot{ max-width:var(--maxw); margin:40px auto 0; padding:26px var(--pad) 48px; border-top:1px solid var(--line); color:var(--ink-soft); font-size:14px; display:flex; gap:18px; flex-wrap:wrap; justify-content:space-between; }
+  .crumb{ font-size:13.5px; color:var(--ink-soft); }
+  .crumb a{ color:var(--accent-d); }
+</style>
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="#summary" class="lx" lang="en">Summary</a><a href="#summary" class="lx" lang="ja">要旨</a>
+    <a href="#method" class="lx" lang="en">Method</a><a href="#method" class="lx" lang="ja">方法</a>
+    <a href="#r1" class="lx" lang="en">R1–R4</a><a href="#r1" class="lx" lang="ja">R1–R4</a>
+    <a href="#conclusion" class="lx" lang="en">Conclusion</a><a href="#conclusion" class="lx" lang="ja">結論</a>
+    <a href="ai-context-store.html" class="lx" lang="en">AI-Context-Store</a><a href="ai-context-store.html" class="lx" lang="ja">コンテキストストア</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<!-- HERO -->
+<section class="doc-hero">
+  <div class="crumb reveal"><a href="index.html" class="lx" lang="en">← Home</a><a href="index.html" class="lx" lang="ja">← ホーム</a><span> / </span><span class="lx" lang="en">Evidence</span><span class="lx" lang="ja">実測</span></div>
+  <div style="margin-top:14px; max-width:60em">
+    <div class="kicker reveal"><span class="lx" lang="en">Evidence</span><span class="lx" lang="ja">実測レポート</span></div>
+    <h1 class="reveal">
+      <span class="lx" lang="en">What the measurements say about ai-context.</span>
+      <span class="lx" lang="ja">実測からわかる ai-context の正しさ。</span>
+    </h1>
+    <p class="lede reveal lx" lang="en">
+      Does giving AI a project's memory — the ai-context store — actually work? We measured it directly:
+      4 benchmarks, 38 cells in total (42 independent runs of model × condition). Every number on this page
+      is a measured value, not a rounded estimate.
+    </p>
+    <p class="lede reveal lx" lang="ja">
+      「AI にプロジェクトの記憶（ai-context store）を持たせることは本当に効くのか」を、4 つのベンチマーク・
+      38 セル・延べ 42 走行（モデル × 条件の独立試行）で実測した。このページの数値はすべて実測値であり、丸めた
+      概算ではない。
+    </p>
+  </div>
+  <div class="stat-strip reveal">
+    <div class="stat"><b class="count" data-to="4">0</b><span class="lx" lang="en">benchmarks</span><span class="lx" lang="ja">ベンチマーク</span></div>
+    <div class="stat"><b class="count" data-to="42">0</b><span class="lx" lang="en">runs</span><span class="lx" lang="ja">走行</span></div>
+    <div class="stat"><b class="count" data-to="4">0</b><span class="lx" lang="en">models</span><span class="lx" lang="ja">モデル</span></div>
+    <div class="stat"><b>2026-07-02</b><span class="lx" lang="en">measured</span><span class="lx" lang="ja">実測日</span></div>
+  </div>
+</section>
+
+<!-- 00. SUMMARY -->
+<section class="sec" id="summary">
+  <div class="sec-head reveal">
+    <span class="ghost">00</span>
+    <h2><span class="lx" lang="en">Executive summary</span><span class="lx" lang="ja">要旨</span></h2>
+    <p><span class="lx" lang="en">Four conclusions follow from the 38 cells.</span><span class="lx" lang="ja">38 セルの実測から、結論は 4 つ導かれる。</span></p>
+  </div>
+  <div class="mini-grid">
+    <div class="card reveal">
+      <h3><span class="step-n">1</span><span class="lx" lang="en">The store is the only source</span><span class="lx" lang="ja">store が唯一の供給源</span></h3>
+      <p><span class="lx" lang="en">The store is the only source of project-specific knowledge: the correct-answer rate without it, 1.9/8, becomes 7.9/8 with it.</span><span class="lx" lang="ja">プロジェクト固有知識は store が唯一の供給源であり、store なしの正答 1.9/8 が store ありで 7.9/8 になる。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">2</span><span class="lx" lang="en">Coding skill has saturated</span><span class="lx" lang="ja">コード力は飽和</span></h3>
+      <p><span class="lx" lang="en">In development tasks, coding skill is already saturated; the difference shows up in the judgment of "what not to expose." Only the group given the store's structural canonical reference achieved zero exposure of confidential-grade data.</span><span class="lx" lang="ja">開発タスクではコード力はすでに飽和しており、差が出るのは「何を公開しないか」という安全境界の判断。store の構造正本を渡した群だけが機密相当データの露出をゼロにした。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">3</span><span class="lx" lang="en">The store is cheaper to re-reference</span><span class="lx" lang="ja">再参照は store が安い</span></h3>
+      <p><span class="lx" lang="en">Re-referencing an already-researched topic is about 33% cheaper via the store than web search, with fewer turns. Web wins only on freshness.</span><span class="lx" lang="ja">研究済みトピックの再参照は、web 検索より store 参照が約 33% 安く、ターン数も少ない。鮮度だけは web が勝つ。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">4</span><span class="lx" lang="en">Weak models get armed, not self-verification</span><span class="lx" lang="ja">弱モデルは武装できるが自己検証は別</span></h3>
+      <p><span class="lx" lang="en">A weak model is lifted by index / router guidance (0 → 7.5/8), but the lack of self-verification cannot be substituted by tooling.</span><span class="lx" lang="ja">弱いモデルは索引・ルーター案内で底上げされるが（0→7.5/8）、自己検証の欠如は道具では代替できない。</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- 01. METHOD -->
+<section class="sec" id="method">
+  <div class="sec-head reveal">
+    <span class="ghost">01</span>
+    <h2><span class="lx" lang="en">Method (common to every round)</span><span class="lx" lang="ja">方法（共通）</span></h2>
+  </div>
+  <div class="method reveal">
+    <ol>
+      <li><b><span class="lx" lang="en">Subjects.</span><span class="lx" lang="ja">被験。</span></b> <span class="lx" lang="en">Claude 4 models (sonnet / haiku / opus / fable). Each cell is run by an independent, mutually isolated fresh agent.</span><span class="lx" lang="ja">Claude 4 モデル（sonnet / haiku / opus / fable）。セルごとに独立・相互隔離の fresh エージェント。</span></li>
+      <li><b><span class="lx" lang="en">Conditions.</span><span class="lx" lang="ja">条件。</span></b> <span class="lx" lang="en">"bare" = store / index access forbidden (the model's prior knowledge + plain file exploration only) / "harness" = banto's layer-0 router guidance + the ledger (jq queries against ontology.json) + full-text search + store access.</span><span class="lx" lang="ja">「素」= store・索引の参照禁止（モデルの事前知識 + 素のファイル探索のみ）/「ハーネス」= banto の層 0 ルーター案内 + 台帳（ontology.json への jq クエリ）+ 全文検索 + store 参照。</span></li>
+      <li><b><span class="lx" lang="en">Question / scoring separation.</span><span class="lx" lang="ja">出題と採点の分離。</span></b> <span class="lx" lang="en">Questions and answer keys (a 3–5-point checklist per question) were authored by an independent instance that closely read the primary documents. Development-task scoring used a fresh scoring agent doing mechanical inspection (re-execution, real-value cross-check, link resolution).</span><span class="lx" lang="ja">問題と正解キー（要点チェックリスト 3〜5 項目/問）は独立インスタンスが一次文書を精読して作成。開発タスクの採点は fresh な採点エージェントが機械検査（再実行・実数照合・リンク解決）。</span></li>
+      <li><b><span class="lx" lang="en">Tokens.</span><span class="lx" lang="ja">トークン。</span></b> <span class="lx" lang="en">Measured values, summed from assistant usage in each cell's transcript.</span><span class="lx" lang="ja">各セルの transcript から assistant usage を合算した実測値。</span></li>
+      <li><b><span class="lx" lang="en">Disclosed constraints.</span><span class="lx" lang="ja">制約の開示。</span></b> <span class="lx" lang="en">Descriptive statistics from 1 run per cell (haiku only, partially, at 3 runs) — no variance or confidence intervals. Known weaknesses regarding condition uniformity and scoring independence are listed under "Limitations" at the end.</span><span class="lx" lang="ja">各セル 1 走行（haiku の一部のみ 3 走行）の記述統計であり、分散・信頼区間はない。条件の完全均一性・採点独立性に関する既知の弱点は本文末尾「Limitations」に列挙。</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 02. R1 -->
+<section class="sec" id="r1">
+  <div class="sec-head reveal">
+    <span class="ghost">02</span>
+    <div class="sub">R1</div>
+    <h2><span class="lx" lang="en">What the ledger (ontology index) is good for</span><span class="lx" lang="ja">台帳（ontology 索引）は何に効くか</span></h2>
+    <p><span class="lx" lang="en">3 conditions × 4 models (10 questions × 12 cells)</span><span class="lx" lang="ja">3 条件 × 4 モデル（10 問 × 12 セル）</span></p>
+  </div>
+  <p class="prose-p reveal lx" lang="en">Questions: 5 census-type questions against the store (counting, enumerating) + 5 find-type questions (content investigation). Conditions: cold (no index) / full-text search (combined text) / ledger (jq query).</p>
+  <p class="prose-p reveal lx" lang="ja">質問：store に対する census 型 5 問（数える・列挙する）+ find 型 5 問（内容調査）。条件：cold（索引なし）/ 全文検索（combined テキスト）/ 台帳（jq クエリ）。</p>
+
+  <div class="store-table-wrap reveal">
+    <table class="store-table">
+      <thead>
+        <tr>
+          <th><span class="lx" lang="en">model</span><span class="lx" lang="ja">モデル</span></th>
+          <th><span class="lx" lang="en">cold (no index)</span><span class="lx" lang="ja">cold（索引なし）</span></th>
+          <th><span class="lx" lang="en">full-text search</span><span class="lx" lang="ja">全文検索</span></th>
+          <th><span class="lx" lang="en">ledger</span><span class="lx" lang="ja">台帳</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">sonnet</td><td>10/10</td><td>10/10</td><td>10/10</td></tr>
+        <tr><td class="mono">haiku</td><td>9/10</td><td>9/10</td><td>9/10</td></tr>
+        <tr><td class="mono">opus</td><td>10/10</td><td>10/10</td><td>10/10</td></tr>
+        <tr><td class="mono">fable</td><td>10/10</td><td>10/10</td><td>10/10</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="obs-list reveal">
+    <li class="lx" lang="en">Total: 117/120. All 3 lost points were haiku, across three distinct failure modes (landing on an adjacent document by mistake / a search miss from multilingual notation / stopping at a derived record instead of the primary source).</li>
+    <li class="lx" lang="ja">総計 117/120。失点 3 はすべて haiku で、型が三様（隣接文書への誤着地 / 多言語表記の検索漏れ / 一次資料でなく派生記録で停止）。</li>
+    <li class="lx" lang="en">In a prior measurement (2026-07-01), the ledger cut tokens by −30% and gave a 13x speedup on census-type questions; for content-investigation questions, the gap between indexes disappears — correctly scoping the ledger's role to "counting, auditing, complete enumeration."</li>
+    <li class="lx" lang="ja">先行実測（2026-07-01）では census 型で台帳がトークン −30%・速度 13 倍、内容調査型では索引間の差は消える——台帳の役割は「数える・監査する・完全に列挙する」に限定するのが正しい。</li>
+  </ul>
+</section>
+
+<!-- 03. R2 -->
+<section class="sec" id="r2">
+  <div class="sec-head reveal">
+    <span class="ghost">03</span>
+    <div class="sub">R2</div>
+    <h2><span class="lx" lang="en">Bare vs. harness</span><span class="lx" lang="ja">素 vs ハーネス</span></h2>
+    <p><span class="lx" lang="en">Accuracy; haiku run 3 times per condition</span><span class="lx" lang="ja">精度・haiku は各条件 3 走行</span></p>
+  </div>
+
+  <div class="store-table-wrap reveal">
+    <table class="store-table">
+      <thead>
+        <tr>
+          <th><span class="lx" lang="en">model</span><span class="lx" lang="ja">モデル</span></th>
+          <th><span class="lx" lang="en">bare</span><span class="lx" lang="ja">素</span></th>
+          <th><span class="lx" lang="en">harness</span><span class="lx" lang="ja">ハーネス</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">sonnet</td><td>10/10</td><td>10/10</td></tr>
+        <tr><td class="mono">opus</td><td>10/10</td><td>10/10</td></tr>
+        <tr><td class="mono">fable</td><td>10/10</td><td>10/10</td></tr>
+        <tr>
+          <td class="mono">haiku <span class="lx" lang="en">(3-run average)</span><span class="lx" lang="ja">（3 走行平均）</span></td>
+          <td>9.0 (8.5 / 8.5 / 10)</td>
+          <td>9.5 (9.5 / 9.0 / 10)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="obs-list reveal">
+    <li class="lx" lang="en">Finding: at this scale (roughly 400 documents), strong-model accuracy doesn't depend on the condition. Haiku's errors trace to one root cause — "lack of self-verification": a trap where square brackets in a filename get misread by glob as a character class and return 0 hits caught haiku in 3 of 6 runs, and it accepted the 0 without verifying.</li>
+    <li class="lx" lang="ja">発見: 強モデルの精度はこの規模（400 文書級）では条件に依存しない。haiku の誤りの正体は「自己検証の欠如」——ファイル名の角括弧が glob で文字クラス誤解釈され 0 件になる罠に 6 走行中 3 回落ち、0 を無検証で受理した。</li>
+    <li class="lx" lang="en">Sonnet hit the same trap but caught it on its own and recounted. Whether that self-correction is present is the threshold for whether implementation can be entrusted to a model.</li>
+    <li class="lx" lang="ja">sonnet は同じ罠を踏んだ後、自力で気づき数え直した。この self-correction の有無が実装を任せられる下限線。</li>
+  </ul>
+</section>
+
+<!-- 04. R3-A -->
+<section class="sec" id="r3a">
+  <div class="sec-head reveal">
+    <span class="ghost">04</span>
+    <div class="sub">R3-A</div>
+    <h2><span class="lx" lang="en">Knowledge benchmark</span><span class="lx" lang="ja">知識ベンチ</span></h2>
+    <p><span class="lx" lang="en">8 questions answerable only by reading the document content</span><span class="lx" lang="ja">文書の中身を読まないと答えられない 8 問</span></p>
+  </div>
+  <p class="prose-p reveal lx" lang="en">Subject: the store of a different project (development of a MoE inference / training engine on Apple Silicon). 8 questions on measured values, design decisions, and reasons for discarded approaches (example: "explain, at the level of GPU buffer generation, why one implementation's 14.5 tok/s was a fake benchmark").</p>
+  <p class="prose-p reveal lx" lang="ja">題材: 別プロジェクト（Apple Silicon 上の MoE 推論・学習エンジン開発）の store。実測値・設計判断・捨てた案の理由を問う 8 問（例:「ある実装の 14.5 tok/s がなぜ偽ベンチだったか、GPU バッファ生成レベルで説明せよ」）。</p>
+
+  <div class="store-table-wrap reveal">
+    <table class="store-table">
+      <thead>
+        <tr>
+          <th><span class="lx" lang="en">model</span><span class="lx" lang="ja">モデル</span></th>
+          <th><span class="lx" lang="en">bare (store forbidden)</span><span class="lx" lang="ja">素（store 禁止）</span></th>
+          <th><span class="lx" lang="en">harness (store allowed)</span><span class="lx" lang="ja">ハーネス（store 可）</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">sonnet</td><td>0.5/8</td><td>8/8</td></tr>
+        <tr><td class="mono">haiku</td><td>0/8</td><td>7.5/8</td></tr>
+        <tr><td class="mono">opus</td><td><span class="lx" lang="en">approx. 4/8</span><span class="lx" lang="ja">約 4/8</span></td><td>8/8</td></tr>
+        <tr><td class="mono">fable</td><td><span class="lx" lang="en">approx. 3/8</span><span class="lx" lang="ja">約 3/8</span></td><td>8/8</td></tr>
+        <tr class="hl-row">
+          <td><strong><span class="lx" lang="en">average</span><span class="lx" lang="ja">平均</span></strong></td>
+          <td><strong>1.9/8</strong></td>
+          <td><strong>7.9/8</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="ev-highlight reveal">
+    <div class="ev-stat">
+      <span class="ev-num bad">1.9<span class="ev-unit">/8</span></span>
+      <span class="ev-cap lx" lang="en">bare — average correct</span><span class="ev-cap lx" lang="ja">素 — 平均正答</span>
+    </div>
+    <span class="ev-arrow" aria-hidden="true">→</span>
+    <div class="ev-stat">
+      <span class="ev-num good">7.9<span class="ev-unit">/8</span></span>
+      <span class="ev-cap lx" lang="en">harness — average correct</span><span class="ev-cap lx" lang="ja">ハーネス — 平均正答</span>
+    </div>
+  </div>
+
+  <ul class="obs-list reveal">
+    <li class="lx" lang="en">In the bare condition, every model reported project-specific measured values as "unknown" (zero fabrication = honest). Only opus and fable partially reconstructed the mechanism from general knowledge (example: deriving from first principles that 8 blocks ÷ 32 threads = 25% SIMD utilization).</li>
+    <li class="lx" lang="ja">素条件では全モデルが固有の実測値を「不明」と申告（捏造ゼロ＝誠実）。opus / fable のみ、一般知識から機構を部分再構成（例: 8 ブロック ÷ 32 スレッド = SIMD 稼働 25% を第一原理で導出）。</li>
+    <li class="lx" lang="en">In the harness condition, 3 models scored full marks, and in 3 of those cells the model independently detected a contradiction between primary sources (an earlier document recording the same figure as valid, and a later document that determined it to be a fake benchmark) and adjudicated it by chronology.</li>
+    <li class="lx" lang="ja">ハーネス条件では 3 モデルが満点、うち 3 セルが一次資料同士の矛盾（同じ数値を有効と記録した先行文書と偽ベンチと確定した後発文書）を自力検出し時系列で裁定した。</li>
+    <li class="lx" lang="en">Haiku went from bare 0 to harness 7.5. The store arms even a weak model with an expert's memory.</li>
+    <li class="lx" lang="ja">haiku は素 0 → ハーネス 7.5。store は弱いモデルさえ専門家の記憶で武装させる。</li>
+  </ul>
+
+  <p class="prose-p reveal lx" lang="en" style="margin-top:26px">Measured tokens (out = generated / in = cumulative input, cache included):</p>
+  <p class="prose-p reveal lx" lang="ja" style="margin-top:26px">トークン実測（out = 生成 / in = 入力累積・cache 込み）:</p>
+
+  <div class="store-table-wrap reveal">
+    <table class="store-table">
+      <thead>
+        <tr>
+          <th><span class="lx" lang="en">cell</span><span class="lx" lang="ja">セル</span></th>
+          <th>out</th>
+          <th>in</th>
+          <th><span class="lx" lang="en">turns</span><span class="lx" lang="ja">ターン</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="lx" lang="en">bare</span><span class="lx" lang="ja">素</span>×sonnet</td><td>8.9k</td><td>335k</td><td>7</td></tr>
+        <tr><td><span class="lx" lang="en">harness</span><span class="lx" lang="ja">ハ</span>×sonnet</td><td>11.3k</td><td>2,044k</td><td>32</td></tr>
+        <tr><td><span class="lx" lang="en">bare</span><span class="lx" lang="ja">素</span>×haiku</td><td>0.6k</td><td>305k</td><td>10</td></tr>
+        <tr><td><span class="lx" lang="en">harness</span><span class="lx" lang="ja">ハ</span>×haiku</td><td>9.7k</td><td>1,291k</td><td>32</td></tr>
+        <tr><td><span class="lx" lang="en">bare</span><span class="lx" lang="ja">素</span>×opus</td><td>9.9k</td><td>487k</td><td>11</td></tr>
+        <tr><td><span class="lx" lang="en">harness</span><span class="lx" lang="ja">ハ</span>×opus</td><td>10.7k</td><td>1,678k</td><td>30</td></tr>
+        <tr><td><span class="lx" lang="en">bare</span><span class="lx" lang="ja">素</span>×fable</td><td>9.8k</td><td>385k</td><td>9</td></tr>
+        <tr><td><span class="lx" lang="en">harness</span><span class="lx" lang="ja">ハ</span>×fable</td><td>16.1k</td><td>1,556k</td><td>29</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="fine reveal lx" lang="en">The harness buys a jump from 1.9 to 7.9 correct by spending 3–6x the input (mostly cache reads). Cheap and unable to answer means nothing.</p>
+  <p class="fine reveal lx" lang="ja">ハーネスは入力 3〜6 倍（大半は cache read）で正答 1.9 → 7.9 を買う。答えられない安さに意味はない。</p>
+</section>
+
+<!-- 05. R3-B -->
+<section class="sec" id="r3b">
+  <div class="sec-head reveal">
+    <span class="ghost">05</span>
+    <div class="sub">R3-B</div>
+    <h2><span class="lx" lang="en">Development benchmark</span><span class="lx" lang="ja">開発ベンチ</span></h2>
+    <p><span class="lx" lang="en">Implementing a store-browsing site generator</span><span class="lx" lang="ja">store 閲覧サイト生成器を実装させる</span></p>
+  </div>
+  <p class="prose-p reveal lx" lang="en">Task: write a CLI tool that scans the real store (577 files, 9 buckets) and generates a static site (language: Python, standard library only). Bare = the canonical structure spec is off-limits (infer from raw files) / harness = the canonical structure reference (buckets, scope, naming rules) and the ledger are available. Scoring: mechanical inspection by a fresh scoring agent, out of 10 points (execution 2 / coverage 2 / classification 2 / confidentiality boundary 2 / metadata extraction 1 / links 1).</p>
+  <p class="prose-p reveal lx" lang="ja">課題: 実 store（577 ファイル・9 バケット）を走査して静的サイトを生成する CLI ツールを書く（言語は Python・標準ライブラリのみ）。素 = 構造仕様の参照禁止（生ファイルから推定）/ ハーネス = 構造の正本（バケット・scope・命名規則）と台帳を参照可。採点は fresh エージェントの機械検査 10 点満点（実行 2 / カバレッジ 2 / 分類 2 / 機密境界 2 / メタ抽出 1 / リンク 1）。</p>
+
+  <div class="store-table-wrap reveal">
+    <table class="store-table">
+      <thead>
+        <tr>
+          <th><span class="lx" lang="en">rank</span><span class="lx" lang="ja">順位</span></th>
+          <th><span class="lx" lang="en">cell</span><span class="lx" lang="ja">セル</span></th>
+          <th><span class="lx" lang="en">score</span><span class="lx" lang="ja">点</span></th>
+          <th><span class="lx" lang="en">notes</span><span class="lx" lang="ja">特記</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td><td><span class="lx" lang="en">harness</span><span class="lx" lang="ja">ハ</span>×opus</td><td>9.9</td>
+          <td><span class="lx" lang="en">longest-match classification against the canonical reference + detection of files outside the canonical reference + idempotency verified two ways</span><span class="lx" lang="ja">正本の最長一致分類 + 正本外ファイル検出 + 冪等 2 方式検証</span></td>
+        </tr>
+        <tr>
+          <td>2</td><td><span class="lx" lang="en">harness</span><span class="lx" lang="ja">ハ</span>×fable</td><td>9.8</td>
+          <td><span class="lx" lang="en">3-way scope split (shared / personal / ephemeral); ephemeral data kept unpublished</span><span class="lx" lang="ja">scope 3 区分・一時データ非公開</span></td>
+        </tr>
+        <tr>
+          <td>2</td><td><span class="lx" lang="en">harness</span><span class="lx" lang="ja">ハ</span>×sonnet</td><td>9.8</td>
+          <td><span class="lx" lang="en">auto-generates a slot for unknown buckets</span><span class="lx" lang="ja">未知バケット枠を自動生成</span></td>
+        </tr>
+        <tr>
+          <td>4</td><td><span class="lx" lang="en">bare</span><span class="lx" lang="ja">素</span>×fable</td><td>9.4</td>
+          <td><span class="lx" lang="en">minor exposure of 56 internal-state items</span><span class="lx" lang="ja">内部状態 56 件を軽微露出</span></td>
+        </tr>
+        <tr>
+          <td>5</td><td><span class="lx" lang="en">bare</span><span class="lx" lang="ja">素</span>×opus</td><td>9.1</td>
+          <td><span class="lx" lang="en">collapses sub-classification</span><span class="lx" lang="ja">サブ分類を潰す</span></td>
+        </tr>
+        <tr>
+          <td>6</td><td><span class="lx" lang="en">bare</span><span class="lx" lang="ja">素</span>×haiku</td><td>8.9</td>
+          <td><span class="lx" lang="en">misses 39 non-md files</span><span class="lx" lang="ja">非 md 39 件を取りこぼし</span></td>
+        </tr>
+        <tr>
+          <td>7</td><td><span class="lx" lang="en">harness</span><span class="lx" lang="ja">ハ</span>×haiku</td><td>8.8</td>
+          <td><span class="lx" lang="en">double-generates 141 items</span><span class="lx" lang="ja">141 件を二重生成</span></td>
+        </tr>
+        <tr>
+          <td>8</td><td><span class="lx" lang="en">bare</span><span class="lx" lang="ja">素</span>×sonnet</td><td>8.0</td>
+          <td><strong><span class="lx" lang="en">publishes all 228 session-derived conversation logs as pages (confidential-grade exposure)</span><span class="lx" lang="ja">セッション由来の会話記録 228 本を全ページ化（機密相当の露出）</span></strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="obs-list reveal">
+    <li class="lx" lang="en">On functional criteria (successful execution, metadata extraction, link health, determinism), all 8 cells scored full marks. Coding skill is no longer where the difference shows up.</li>
+    <li class="lx" lang="ja">機能面（実行成功・メタ抽出・リンク健全性・決定性）は 8 セル全て満点。コード力ではもう差がつかない。</li>
+    <li class="lx" lang="en">The difference came from boundary judgment. The harness group derived "don't publish the conversation cache" from the canonical reference's scope (shared / personal / ephemeral). Bare×sonnet didn't know this and published the plaintext of a security-review conversation in full (no real harm — inside a test environment; in production this would be an NDA / personal-data incident).</li>
+    <li class="lx" lang="ja">差が出たのは境界の判断。ハーネス群は正本の scope（共有 / 個人 / 一時）から「会話キャッシュは公開しない」を導いた。素×sonnet はそれを知らず、セキュリティレビュー会話の平文を全公開した（検証環境内のため実害なし。実運用なら NDA / 個人情報事故）。</li>
+    <li class="lx" lang="en">Tokens: bare×sonnet out 37.5k → harness×sonnet out 19.7k. Having the canonical reference means "not building what doesn't need building" — it raised the score from 8.0 to 9.8 while halving the output.</li>
+    <li class="lx" lang="ja">トークン: 素×sonnet out 37.5k → ハ×sonnet out 19.7k。正本があると「作らなくてよいものを作らない」——スコアを 8.0 → 9.8 に上げながら出力を半減した。</li>
+  </ul>
+</section>
+
+<!-- 06. R4 -->
+<section class="sec" id="r4">
+  <div class="sec-head reveal">
+    <span class="ghost">06</span>
+    <div class="sub">R4</div>
+    <h2><span class="lx" lang="en">Web search vs. the store</span><span class="lx" lang="ja">web 検索 vs store</span></h2>
+    <p><span class="lx" lang="en">Which cuts cost more?</span><span class="lx" lang="ja">どちらがコストダウンか</span></p>
+  </div>
+  <p class="prose-p reveal lx" lang="en">Subject: information about a recent model that also exists on the web (NVIDIA Nemotron-3 Ultra 550B). The store holds a research document fetched 26 days earlier. Same model (sonnet), same 6 questions, comparing web-only vs. store-only.</p>
+  <p class="prose-p reveal lx" lang="ja">題材: web にも存在する最新モデル情報（NVIDIA Nemotron-3 Ultra 550B）。store には 26 日前に取得した research 文書がある。同一モデル（sonnet）・同一 6 問で、web のみ vs store のみを比較。</p>
+
+  <div class="store-table-wrap reveal">
+    <table class="store-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>store</th>
+          <th><span class="lx" lang="en">web search</span><span class="lx" lang="ja">web 検索</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="lx" lang="en">correct</span><span class="lx" lang="ja">正答</span></td><td>6/6</td><td>6/6</td></tr>
+        <tr><td><span class="lx" lang="en">output tokens</span><span class="lx" lang="ja">出力トークン</span></td><td><strong>1,238</strong></td><td>6,374</td></tr>
+        <tr><td><span class="lx" lang="en">input (fresh)</span><span class="lx" lang="ja">入力 fresh</span></td><td>77.8k</td><td>53.8k</td></tr>
+        <tr><td><span class="lx" lang="en">cache write</span><span class="lx" lang="ja">cache 書込</span></td><td>159k</td><td>254k</td></tr>
+        <tr><td><span class="lx" lang="en">cache read</span><span class="lx" lang="ja">cache 読出</span></td><td>335k</td><td>723k</td></tr>
+        <tr><td><span class="lx" lang="en">turns</span><span class="lx" lang="ja">ターン数</span></td><td><strong>12</strong></td><td>19</td></tr>
+        <tr class="hl-row"><td><span class="lx" lang="en">input-equivalent cost*</span><span class="lx" lang="ja">入力等価コスト*</span></td><td><strong><span class="lx" lang="en">approx. 317k</span><span class="lx" lang="ja">約 317k</span></strong></td><td><span class="lx" lang="en">approx. 476k</span><span class="lx" lang="ja">約 476k</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="fine reveal lx" lang="en">*Normalized using standard pricing ratios (output = 5x the input unit price / cache write = 1.25x / cache read = 0.1x).</p>
+  <p class="fine reveal lx" lang="ja">*標準料金比率（出力 = 入力単価の 5 倍・cache 書込 = 1.25 倍・cache 読出 = 0.1 倍）で正規化。</p>
+
+  <div class="ev-bars reveal">
+    <div class="ev-bar-row">
+      <span class="ev-bar-label">store</span>
+      <div class="ev-bar-track"><div class="ev-bar-fill store" style="width:66.6%"></div></div>
+      <span class="ev-bar-val lx" lang="en">~317k</span><span class="ev-bar-val lx" lang="ja">約 317k</span>
+    </div>
+    <div class="ev-bar-row">
+      <span class="ev-bar-label lx" lang="en">web search</span><span class="ev-bar-label lx" lang="ja">web 検索</span>
+      <div class="ev-bar-track"><div class="ev-bar-fill web" style="width:100%"></div></div>
+      <span class="ev-bar-val lx" lang="en">~476k</span><span class="ev-bar-val lx" lang="ja">約 476k</span>
+    </div>
+  </div>
+
+  <ul class="obs-list reveal">
+    <li class="lx" lang="en">The store is about 33% cheaper (web costs about 1.5x). The answer is fully contained in one 150-line file in the store, while web search pulls in a long model-card body on top of the search itself, inflating both input and output.</li>
+    <li class="lx" lang="ja">store が約 33% 安い（web は約 1.5 倍）。正解は store 内の 150 行 1 ファイルで完結し、web は検索 + 長大なモデルカード本文の取り込みで入出力とも膨らむ。</li>
+    <li class="lx" lang="en">Secondary finding: some numbers in the answers disagreed between conditions — the public page had been updated since the store fetched it, so the store is cheap but can go stale. The correct operating rule is to go to the web only for freshness-sensitive questions — exactly the ordering in banto's evidence-first rule.</li>
+    <li class="lx" lang="ja">副次発見: 回答の一部数値が条件間で不一致——公開ページが store 取得後に更新されており、store は安いが古くなり得る。鮮度が効く問いだけ web へ、が正しい運用（banto の evidence-first ルールの順序そのもの）。</li>
+  </ul>
+</section>
+
+<!-- 07. CONCLUSION -->
+<section class="sec" id="conclusion">
+  <div class="sec-head reveal">
+    <span class="ghost">07</span>
+    <h2><span class="lx" lang="en">Overall conclusion</span><span class="lx" lang="ja">総合結論</span></h2>
+  </div>
+  <ol class="concl-list reveal">
+    <li>
+      <b><span class="lx" lang="en">The existence-value of the ai-context store was directly measured.</span><span class="lx" lang="ja">ai-context store の存在価値は直接測定できた。</span></b>
+      <span class="lx" lang="en">Proprietary-knowledge accuracy went 0 → over 80%; a weak model gets armed; the ledger is auditable.</span>
+      <span class="lx" lang="ja">固有知識 0 → 8 割超・弱モデルの武装・監査可能な台帳。</span>
+    </li>
+    <li>
+      <b><span class="lx" lang="en">The harness's essential value is "boundary," not "accuracy."</span><span class="lx" lang="ja">ハーネスの本質価値は「精度」より「境界」。</span></b>
+      <span class="lx" lang="en">Now that coding skill has saturated, the value has shifted to correct structural understanding and the judgment of "what is okay to publish."</span>
+      <span class="lx" lang="ja">コード力が飽和した現在、価値は正しい構造理解と「公開してよいものの判断」に移っている。</span>
+    </li>
+    <li>
+      <b><span class="lx" lang="en">Cost.</span><span class="lx" lang="ja">コスト。</span></b>
+      <span class="lx" lang="en">Re-referencing already-researched knowledge is about 33% cheaper via the store than the web. On the knowledge benchmark, 3–6x the input buys more than 4x the correct-answer rate.</span>
+      <span class="lx" lang="ja">研究済み知識の再参照は store が web 比 約 33% 安。知識ベンチでは入力 3〜6 倍で正答 4 倍超を買う。</span>
+    </li>
+    <li>
+      <b><span class="lx" lang="en">Model operations.</span><span class="lx" lang="ja">モデル運用。</span></b>
+      <span class="lx" lang="en">sonnet is sufficient for implementation (on the precondition that it's given the structural canonical reference). Auditing should use a different model. Haiku should be limited to mechanical search — the lack of self-verification cannot be fixed by tooling.</span>
+      <span class="lx" lang="ja">実装は sonnet で足りる（ただし構造の正本を渡すことが前提条件）。監査は別モデル。haiku は機械的検索限定——自己検証の欠如は道具では治らない。</span>
+    </li>
+  </ol>
+</section>
+
+<!-- 08. LIMITATIONS -->
+<section class="sec" id="limitations">
+  <div class="sec-head reveal">
+    <span class="ghost">08</span>
+    <h2>Limitations</h2>
+    <p><span class="lx" lang="en">Disclosed for the sake of honesty</span><span class="lx" lang="ja">誠実性のための開示</span></p>
+  </div>
+  <div class="lim-box reveal">
+    <ul>
+      <li class="lx" lang="en">Descriptive statistics from 1 run per cell (haiku only, partially, at 3 runs). No variance, no confidence intervals.</li>
+      <li class="lx" lang="ja">各セル 1 走行（haiku の一部のみ 3 走行）の記述統計。分散・信頼区間なし。</li>
+      <li class="lx" lang="en">Knowledge-benchmark scoring checks against an explicit key, but some scorers were not independent instances.</li>
+      <li class="lx" lang="ja">知識ベンチの採点は明示キーとの突き合わせだが、採点者の一部は独立インスタンスでない。</li>
+      <li class="lx" lang="en">A few cells had tooling-environment differences, substituted with an equivalent method (disclosed per cell). Only harness×haiku had one extra sentence of guidance text.</li>
+      <li class="lx" lang="ja">一部セルでツール環境差があり等価手段で代替（各セル開示済み）。ハーネス×haiku のみ案内文が 1 文多い。</li>
+      <li class="lx" lang="en">The answer keys themselves were AI-authored (cross-validated by independent answers from multiple models converging on the same facts).</li>
+      <li class="lx" lang="ja">正解キー自体も AI 作成（複数モデルの独立回答が同一事実へ収束することで相互裏付け）。</li>
+      <li class="lx" lang="en">Cost normalization depends on an assumed pricing ratio (convert to your own price sheet for absolute amounts).</li>
+      <li class="lx" lang="ja">コスト正規化は料金比率の仮定に依存（絶対額は各自の料金表で換算のこと）。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-band reveal">
+  <div class="cta-inner">
+    <h2><span class="lx" lang="en">The store, measured — not promised.</span><span class="lx" lang="ja">約束ではなく、測定された store。</span></h2>
+    <p><span class="lx" lang="en">This page is one of Banto's evidence artifacts, grounded in the measurements above.</span><span class="lx" lang="ja">このページは Banto の実測資料のひとつ。上記の測定に基づく。</span></p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      <a class="btn btn-primary" href="ai-context-store.html"><span class="lx" lang="en">How the store works →</span><span class="lx" lang="ja">store の仕組みを見る →</span></a>
+      <a class="btn btn-ghost" href="index.html" style="color:var(--paper);border-color:rgba(245,240,230,.4)"><span class="lx" lang="en">Back to home</span><span class="lx" lang="ja">ホームへ戻る</span></a>
+    </div>
+  </div>
+</div>
+
+<footer class="doc-foot">
+  <span class="lx" lang="en">Banto — a self-driving harness for Claude Code. Enforced by deterministic hooks.</span>
+  <span class="lx" lang="ja">Banto — Claude Code のための自走ハーネス。決定論的な hook が強制する。</span>
+  <a href="https://github.com/banto-org/banto" target="_blank" rel="noopener">github.com/banto-org/banto</a>
+</footer>
+
+</main>
+<script src="app.js"></script>
+</body>
+</html>

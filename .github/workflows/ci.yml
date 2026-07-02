@@ -40,7 +40,7 @@ jobs:
           print('yaml OK')
           "
 
-      - name: Unit tests (hook wiring / store resolver / scaffold guard / store-first session / safety cores)
+      - name: Unit tests (hook wiring / store resolver / scaffold guard / store-first session / safety cores / repo-ontology)
         run: |
           sh plugins/banto/scripts/test-ai-context-paths-wiring.sh
           sh plugins/banto/scripts/test-resolve-store-path.sh
@@ -50,6 +50,7 @@ jobs:
           sh plugins/banto/scripts/test-odd-kill-switch.sh
           sh plugins/banto/scripts/test-egress-guard.sh
           sh plugins/banto/scripts/test-hook-payloads.sh
+          sh plugins/banto/scripts/test-ontology.sh
           sh plugins/banto/scripts/test-i18n.sh
 
       - name: i18n sync (EN generated from JA canonical)

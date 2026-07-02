@@ -90,9 +90,20 @@ merge_settings() {  # $1 = plan|apply
     else
         echo "    statusLine = token-monitor.sh"
     fi
+    # autoUpdate: サードパーティ marketplace は既定 off のため、banto-marketplace に autoUpdate=true を
+    # 設定してリリース追従を自動化（source は known_marketplaces.json の実登録を優先して保持）
+    km="$HOME/.claude/plugins/known_marketplaces.json"
+    km_src='{"source":"github","repo":"banto-org/banto"}'
+    if [ -f "$km" ]; then
+        found=$(jq -c '.["banto-marketplace"].source // empty' "$km" 2>/dev/null)
+        [ -n "$found" ] && km_src=$found
+    fi
+    echo "    extraKnownMarketplaces.banto-marketplace.autoUpdate = true（リリース自動追従）"
     [ "$act" = apply ] || return 0
     tmp=$(mktemp)
-    jq '
+    jq --argjson kmsrc "$km_src" '
+      .extraKnownMarketplaces["banto-marketplace"] =
+        ((.extraKnownMarketplaces["banto-marketplace"] // {source: $kmsrc}) + {autoUpdate: true}) |
       .permissions.allow = ((.permissions.allow // []) + [
         "mcp__playwright__*", "mcp__ide__*",
         "Bash(git -C ~/ai-context-store:*)"

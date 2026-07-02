@@ -64,7 +64,7 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
 │           ├── workspace.md      #   WS 定義（ブランチ / 依存 / 関連 doc）
 │           ├── tasks.md          #   この WS の active タスク（旧 active.md 相当）
 │           └── tasks-old/        #   Phase 退避（旧 tasks/old 相当）
-├── WORKSPACE.md         # 軽量ポインタ（per-checkout）                          ← store .gitignore
+├── WORKSPACE.md         # pointer fallback for non-git checkouts (primary: <git-dir>/banto-ws-pointer.md) ← store .gitignore
 ├── DASHBOARD.md         # hook 管理の鳥瞰図（per-checkout）                     ← store .gitignore
 └── *-combined.txt       # 検索用テキスト層（hook が自動再生成）                 ← store .gitignore
 ```
@@ -81,7 +81,9 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
   A space for operating the store, not project knowledge. `store-map-gen.sh` generates `meta/store-map.md`.
 - **Lazy-generated buckets**: a specific skill digs them only on its first run, so if it hasn't run there is no actual entry (the linter tolerates the absence).
   `docs/specs/` (spec) / `concept/CONCEPT.md` (concept) / `experiments/<project>/ledger.jsonl` (model-lab) /
-  `refs/<topic>/` (doc-import, legacy) / `tmp/search/` (search's temporary output, gitignore) / `search-lexicon.md` (search appends on a successful deep run).
+  `tmp/search/` (search's temporary output, gitignore) / `search-lexicon.md` (search appends on a successful deep run) /
+  `tasks/` (legacy read-fallback only, never auto-created) / `WORKSPACE.md` (pointer fallback for non-git checkouts;
+  the primary pointer lives at `<git-dir>/banto-ws-pointer.md`). The old `refs/` bucket (doc-import) was retired in 5.75.10.
 
 - **grandfather (legacy)**: projects that already have an in-repo `.ai-context/` keep using the same bucket structure
   on the in-repo base until they migrate (`/ai-context migrate`) — read/write stays as before. Nothing new is generated.
@@ -107,7 +109,7 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
 | `sessions/pending/<author>.md` | `save-checkpoint` (save) / SessionStart (ingest) | Equivalent to `checkpoint-{YYYY-MM-DD}-{HHMM}.md`. Transitions pending → consumed |
 | `sessions/consumed/<author>/` | SessionStart (moves to ingested) | Ingested checkpoints (per-author) |
 | `workspaces/<author>/[scope] topic/` | `ws` (WS definition, active tasks) | `workspace.md` / `tasks.md` / `tasks-old/` (new layout) |
-| `WORKSPACE.md`・`DASHBOARD.md` | `ws` / management hook (per-checkout pointer) | Lightweight pointer / overview (gitignore) |
+| `WORKSPACE.md`・`DASHBOARD.md` | `ws` (non-git fallback / multi read-refs) / management hook | Pointer fallback / overview (gitignore). The primary pointer lives at `<git-dir>/banto-ws-pointer.md` |
 | `sessions/registry/` | `session-registry.sh` (Fleet ledger) | `<session_id>.json`. Collision detection in a 12h window, 7-day GC (gitignore) |
 | `sessions-cache/` | `ai_context_combined.py` (cache for full-combined) | `<session_id>.txt` (gitignore) |
 | `telemetry/` | `telemetry-log.sh` (records skill launches / artifacts) | `usage-YYYY-MM.jsonl`. basename / prefix only, zero PII |

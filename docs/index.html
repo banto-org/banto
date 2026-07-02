@@ -27,6 +27,7 @@
     <a href="#pipeline" class="lx" lang="en">Pipeline</a><a href="#pipeline" class="lx" lang="ja">パイプライン</a>
     <a href="#safety" class="lx" lang="en">Safety</a><a href="#safety" class="lx" lang="ja">安全</a>
     <a href="#toolset" class="lx" lang="en">Toolset</a><a href="#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="evidence.html" class="lx" lang="en">Evidence</a><a href="evidence.html" class="lx" lang="ja">実測</a>
   </nav>
   <div class="nav-right">
     <div class="lang-toggle" role="group" aria-label="language">
@@ -94,20 +95,20 @@
         <!-- owner -->
         <g class="node node-owner">
           <circle cx="210" cy="58" r="34"/>
-          <text x="210" y="54" class="n-title">OWNER</text>
-          <text x="210" y="70" class="n-sub">vision</text>
+          <text x="210" y="54" class="n-title lx" lang="en">OWNER</text><text x="210" y="54" class="n-title lx" lang="ja">オーナー</text>
+          <text x="210" y="70" class="n-sub lx" lang="en">vision</text><text x="210" y="70" class="n-sub lx" lang="ja">方針</text>
         </g>
 
         <!-- vision down to bantō -->
         <path class="flow flow-1" d="M210,92 L210,150" marker-end="url(#arrow)"/>
-        <text x="224" y="124" class="edge-label">vision ↓</text>
+        <text x="224" y="124" class="edge-label lx" lang="en">vision ↓</text><text x="224" y="124" class="edge-label lx" lang="ja">方針 ↓</text>
 
         <!-- bantō (the seal) -->
         <g class="node node-banto">
           <rect x="150" y="150" width="120" height="92" rx="10"/>
-          <text x="210" y="186" class="n-title">BANTŌ</text>
-          <text x="210" y="206" class="n-sub">番頭</text>
-          <text x="210" y="226" class="n-sub2">runs the dev</text>
+          <text x="210" y="186" class="n-title lx" lang="en">BANTŌ</text><text x="210" y="186" class="n-title lx" lang="ja">番頭</text>
+          <text x="210" y="206" class="n-sub lx" lang="en">番頭</text><text x="210" y="206" class="n-sub lx" lang="ja">BANTŌ</text>
+          <text x="210" y="226" class="n-sub2 lx" lang="en">runs the dev</text><text x="210" y="226" class="n-sub2 lx" lang="ja">開発を回す</text>
         </g>
 
         <!-- bantō to fleet -->
@@ -116,15 +117,15 @@
         <path class="flow flow-2" d="M250,242 L320,300" marker-end="url(#arrow)"/>
 
         <!-- fleet of agents -->
-        <g class="node node-agent a1"><rect x="58" y="300" width="84" height="58" rx="8"/><text x="100" y="326" class="n-title sm">agent</text><text x="100" y="344" class="n-sub">spec</text></g>
-        <g class="node node-agent a2"><rect x="168" y="300" width="84" height="58" rx="8"/><text x="210" y="326" class="n-title sm">agent</text><text x="210" y="344" class="n-sub">build</text></g>
-        <g class="node node-agent a3"><rect x="278" y="300" width="84" height="58" rx="8"/><text x="320" y="326" class="n-title sm">agent</text><text x="320" y="344" class="n-sub">verify</text></g>
+        <g class="node node-agent a1"><rect x="58" y="300" width="84" height="58" rx="8"/><text x="100" y="326" class="n-title sm">agent</text><text x="100" y="344" class="n-sub lx" lang="en">spec</text><text x="100" y="344" class="n-sub lx" lang="ja">仕様</text></g>
+        <g class="node node-agent a2"><rect x="168" y="300" width="84" height="58" rx="8"/><text x="210" y="326" class="n-title sm">agent</text><text x="210" y="344" class="n-sub lx" lang="en">build</text><text x="210" y="344" class="n-sub lx" lang="ja">実装</text></g>
+        <g class="node node-agent a3"><rect x="278" y="300" width="84" height="58" rx="8"/><text x="320" y="326" class="n-title sm">agent</text><text x="320" y="344" class="n-sub lx" lang="en">verify</text><text x="320" y="344" class="n-sub lx" lang="ja">検証</text></g>
 
         <!-- exception floats back up to owner -->
         <path class="flow flow-exc" d="M360,316 C405,250 405,120 246,66" marker-end="url(#arrow-ink)"/>
         <g class="exc-badge">
           <rect x="338" y="372" width="74" height="26" rx="13"/>
-          <text x="375" y="389" class="exc-text">exception</text>
+          <text x="375" y="389" class="exc-text lx" lang="en">exception</text><text x="375" y="389" class="exc-text lx" lang="ja">例外</text>
         </g>
       </svg>
       <div class="hero-art-caption">
@@ -179,7 +180,7 @@
     <figure class="northstar reveal">
       <blockquote>
         <span class="lx" lang="en">"Humans never think about invocation; the harness self-drives; exceptions arrive only as checkpoints."</span>
-        <span class="lx" lang="ja">「人間は呼び出しを意識しない。ハーネスが自走する。例外だけが checkpoint として届く。」</span>
+        <span class="lx" lang="ja">「人間はスキルの起動を意識しない。ハーネスが自走する。例外だけがチェックポイントとして届く。」</span>
       </blockquote>
       <figcaption><span class="lx" lang="en">— the North Star</span><span class="lx" lang="ja">— 北極星</span></figcaption>
     </figure>
@@ -198,7 +199,7 @@
       Everything below is real and shipping. These three are the ones to look at first.
     </p>
     <p class="section-lede center reveal lx" lang="ja">
-      下のすべては実装済み・出荷中。まず見るべきはこの 3 つ。
+      以下はすべて実装済み（beta 公開中）。まず見るべきはこの 3 つ。
     </p>
 
     <div class="flag-index reveal">
@@ -220,50 +221,62 @@
       <div class="flag-body">
         <div class="flag-text">
           <p class="lx" lang="en">
-            Decisions, research, tasks, and checkpoints live in a central knowledge store
+            Decisions, research, and checkpoints live in a central knowledge store
             (<code>~/ai-context-store/&lt;project&gt;/</code>), not in your repo. They are
             <strong>re-injected at every session start</strong>, so context never dies with a
             <code>/clear</code> or a compaction. Knowledge goes to the store; code stays in the repo.
           </p>
           <p class="lx" lang="ja">
-            決定ログ・リサーチ・タスク・checkpoint は repo ではなく中央ナレッジ store
+            決定ログ・調査・チェックポイントは repo ではなく中央ナレッジ store
             (<code>~/ai-context-store/&lt;project&gt;/</code>) に置く。<strong>セッション開始ごとに
-            再注入</strong>されるので、<code>/clear</code> や compact でコンテキストが死なない。
+            再注入</strong>されるため、<code>/clear</code> や自動圧縮で文脈を失わない。
             知識は store へ、code は repo へ。
           </p>
           <ul class="ticks">
             <li class="lx" lang="en">Claude-native internal search — query expansion + ranking over everything accumulated</li>
             <li class="lx" lang="ja">Claude ネイティブの内部検索 — 蓄積した全てにクエリ展開 + ランキング</li>
-            <li class="lx" lang="en">A stable directory layout that external tools can read as a contract</li>
-            <li class="lx" lang="ja">外部ツールが契約として読める安定したディレクトリ構造</li>
-            <li class="lx" lang="en">decisions / docs / research / tasks / sessions / workspaces</li>
-            <li class="lx" lang="ja">decisions / docs / research / tasks / sessions / workspaces</li>
+            <li class="lx" lang="en">A stable directory layout — a fixed home that any tool can read</li>
+            <li class="lx" lang="ja">安定したフォルダ構成 — どのツールからも読める、決まった置き場所</li>
+            <li class="lx" lang="en">decisions / docs / research / sessions / workspaces</li>
+            <li class="lx" lang="ja">decisions / docs / research / sessions / workspaces</li>
           </ul>
           <a class="flag-more" href="ai-context-store.html"><span class="lx" lang="en">Read the deep-dive — what's inside &amp; how it wires into Claude Code →</span><span class="lx" lang="ja">詳しい解説 — 中身と Claude Code 連携の仕組み →</span></a>
+          <a class="flag-more" href="evidence.html" style="display:block;margin-top:8px"><span class="lx" lang="en">See the evidence — 4 benchmarks, 36 cells →</span><span class="lx" lang="ja">実測を見る — 4 ベンチマーク・36 セル →</span></a>
         </div>
         <div class="flag-art" aria-hidden="true">
-          <svg viewBox="0 0 360 300" class="diagram diag-context" role="img">
-            <!-- store at center -->
-            <g class="ctx-store">
-              <rect x="120" y="116" width="120" height="78" rx="10"/>
-              <text x="180" y="146" class="n-title">store</text>
-              <text x="180" y="166" class="n-sub">decisions · docs</text>
-              <text x="180" y="182" class="n-sub">tasks · sessions</text>
-            </g>
-            <!-- session 1 -->
-            <g class="ctx-sess s1"><rect x="20" y="30" width="110" height="50" rx="8"/><text x="75" y="52" class="n-title sm">session 1</text><text x="75" y="68" class="n-sub">/clear</text></g>
-            <!-- session 2 -->
-            <g class="ctx-sess s2"><rect x="230" y="30" width="110" height="50" rx="8"/><text x="285" y="52" class="n-title sm">session 2</text><text x="285" y="68" class="n-sub">restored</text></g>
-            <!-- write down to store -->
-            <path class="ctx-flow w1" d="M75,80 L150,116" marker-end="url(#arrow)"/>
-            <text x="86" y="106" class="edge-label">save</text>
-            <!-- inject up to session 2 -->
-            <path class="ctx-flow w2" d="M236,140 C300,120 300,100 285,82" marker-end="url(#arrow)"/>
-            <text x="300" y="118" class="edge-label">inject</text>
-            <!-- repo stays clean -->
-            <g class="ctx-repo"><rect x="120" y="240" width="120" height="44" rx="8"/><text x="180" y="262" class="n-title sm">your repo</text><text x="180" y="278" class="n-sub">stays clean</text></g>
-            <path class="ctx-flow w3" d="M180,194 L180,240" marker-end="url(#arrow-ink)"/>
-          </svg>
+          <!-- mini timeline: the same 3-panel strip as the deep-dive page, scaled down -->
+          <div class="tl3 mini">
+            <div class="tl3-row">
+              <div class="tl3-panel">
+                <div class="tl3-cap"><span class="no">1</span><span class="lx" lang="en">Session 1</span><span class="lx" lang="ja">セッション 1</span></div>
+                <div class="tl3-box sess">
+                  <b class="lx" lang="en">work happens</b><b class="lx" lang="ja">作業する</b>
+                  <i class="end lx" lang="en">/clear — memory gone</i><i class="end lx" lang="ja">/clear — 記憶は消える</i>
+                </div>
+                <div class="tl3-arrow"><span class="gl">↓</span><em class="lx" lang="en">save</em><em class="lx" lang="ja">保存</em></div>
+              </div>
+              <div class="tl3-panel">
+                <div class="tl3-cap"><span class="no">2</span><span class="lx" lang="en">Saved</span><span class="lx" lang="ja">ストアへ保存</span></div>
+                <div class="tl3-box ghosted">
+                  <b class="lx" lang="en">no session</b><b class="lx" lang="ja">セッションは無い</b>
+                  <span class="lx" lang="en">the store still holds it</span><span class="lx" lang="ja">ストアだけが覚えている</span>
+                </div>
+                <div class="tl3-arrow"></div>
+              </div>
+              <div class="tl3-panel">
+                <div class="tl3-cap"><span class="no">3</span><span class="lx" lang="en">Session 2</span><span class="lx" lang="ja">セッション 2</span></div>
+                <div class="tl3-box sess">
+                  <b class="lx" lang="en">picks up the thread</b><b class="lx" lang="ja">続きから始まる</b>
+                  <i class="end ok lx" lang="en">restored automatically</i><i class="end ok lx" lang="ja">自動で復元</i>
+                </div>
+                <div class="tl3-arrow"><span class="gl">↑</span><em class="lx" lang="en">restore</em><em class="lx" lang="ja">復元</em></div>
+              </div>
+            </div>
+            <div class="tl3-store">
+              <b>~/ai-context-store/</b>
+              <span class="lx" lang="en">the same store stays put</span><span class="lx" lang="ja">同じストアが居続ける</span>
+            </div>
+          </div>
         </div>
       </div>
     </article>
@@ -325,7 +338,7 @@
             <circle class="ws-dot d4" cx="260" cy="240" r="5"/>
             <circle class="ws-dot d5" cx="300" cy="150" r="5"/>
             <circle class="ws-dot d6 gate" cx="320" cy="60" r="6"/>
-            <text x="318" y="44" class="branch-label gate-lbl">ship ⛔ gate</text>
+            <text x="318" y="44" class="branch-label gate-lbl lx" lang="en">ship ⛔ gate</text><text x="318" y="44" class="branch-label gate-lbl lx" lang="ja">ship ⛔ 人間ゲート</text>
           </svg>
         </div>
       </div>
@@ -420,7 +433,7 @@
           <span class="lstep-n">B</span>
           <h4 class="lx" lang="en">Generate, don't hand-maintain</h4><h4 class="lx" lang="ja">手で保守せず生成する</h4>
           <p class="lx" lang="en"><code>i18n-gen.sh</code> hashes each canonical file; when a hash drifts it calls an LLM translator with a strict contract — never touch YAML keys, code fences, paths, or commands; <em>do</em> localize trigger phrases.</p>
-          <p class="lx" lang="ja"><code>i18n-gen.sh</code> が正本をハッシュし、ズレたファイルだけ LLM 翻訳を呼ぶ。契約は厳格 — YAML キー・コードフェンス・パス・コマンドは触らない。トリガー文だけは自然な言い回しへ localize。</p>
+          <p class="lx" lang="ja"><code>i18n-gen.sh</code> が正本をハッシュし、ズレたファイルだけ LLM 翻訳を呼ぶ。契約は厳格 — YAML キー・コードフェンス・パス・コマンドは触らない。トリガー文だけは自然な言い回しに直す。</p>
         </div>
         <div class="lstep reveal">
           <span class="lstep-n">C</span>
@@ -498,8 +511,12 @@
           <g class="loop-step ls2"><circle cx="226" cy="130" r="6"/></g>
           <g class="loop-step ls3"><circle cx="130" cy="226" r="6"/></g>
           <g class="loop-step ls4"><circle cx="34" cy="130" r="6"/></g>
-          <text x="130" y="126" class="loop-center-1">until</text>
-          <text x="130" y="150" class="loop-center-2">green</text>
+          <text x="130" y="18" class="loop-lbl lx" lang="en">Decompose</text><text x="130" y="18" class="loop-lbl lx" lang="ja">分解</text>
+          <text x="226" y="112" class="loop-lbl lx" lang="en">Implement</text><text x="226" y="112" class="loop-lbl lx" lang="ja">実装</text>
+          <text x="130" y="248" class="loop-lbl lx" lang="en">Verify</text><text x="130" y="248" class="loop-lbl lx" lang="ja">検証</text>
+          <text x="34" y="112" class="loop-lbl lx" lang="en">Fix</text><text x="34" y="112" class="loop-lbl lx" lang="ja">修正</text>
+          <text x="130" y="126" class="loop-center-1 lx" lang="en">until</text><text x="130" y="126" class="loop-center-1 lx" lang="ja">緑になるまで</text>
+          <text x="130" y="150" class="loop-center-2 lx" lang="en">green</text><text x="130" y="150" class="loop-center-2 lx" lang="ja">回す</text>
         </svg>
       </div>
       <ol class="loop-list">
@@ -525,7 +542,7 @@
       about, not hoped for. Approvals stay minimal; the guard rails are mechanical.
     </p>
     <p class="section-lede center reveal light lx" lang="ja">
-      起きてはならないことは、実行前に決定論的な hook が block する — 訊くのでも祈るのでもなく。
+      起きてはならないことは、実行前に決定論的な hook が遮断する — 訊くのでも祈るのでもなく。
       承認は最小限、ガードレールは機械的。
     </p>
 
@@ -533,7 +550,7 @@
       <div class="gate-action">git push origin main --no-verify</div>
       <div class="gate-wall"><span class="gate-stamp">⛔</span></div>
       <div class="gate-result lx" lang="en">blocked by kill-switch</div>
-      <div class="gate-result lx" lang="ja">kill-switch が block</div>
+      <div class="gate-result lx" lang="ja">kill-switch が遮断</div>
     </div>
 
     <div class="cards safety-cards">
@@ -545,17 +562,17 @@
       <div class="card dark reveal">
         <h4>egress guard</h4>
         <p class="lx" lang="en">Blocks internal names / PII from leaking into client deliverables, driven by a private name registry.</p>
-        <p class="lx" lang="ja">内部名・PII の客先成果物への流出を、非公開の名前レジストリ駆動で block。</p>
+        <p class="lx" lang="ja">内部名・個人情報の客先成果物への流出を遮断。非公開の名前レジストリが照合する。</p>
       </div>
       <div class="card dark reveal">
         <h4>verify-before-claim</h4>
         <p class="lx" lang="en">No "done" without fully successful, verified output. The claim has to be earned.</p>
-        <p class="lx" lang="ja">完全に成功・検証された出力なしに「完了」と言えない。主張は勝ち取るもの。</p>
+        <p class="lx" lang="ja">検証済みの成功出力なしに「完了」と言えない。「完了」は検証してから名乗る。</p>
       </div>
       <div class="card dark reveal">
         <h4><span class="lx" lang="en">OS sandbox · opt-in</span><span class="lx" lang="ja">OS サンドボックス · opt-in</span></h4>
         <p class="lx" lang="en">A second layer: Claude's bash can run in an OS sandbox (Seatbelt / bubblewrap) blocking credential reads and off-allowlist network. Off by default.</p>
-        <p class="lx" lang="ja">もう一段の層 — Claude の bash を OS サンドボックス（Seatbelt / bubblewrap）で走らせ、秘匿情報の読取と許可外ネットワークを block。既定は off。</p>
+        <p class="lx" lang="ja">もう一段の層 — Claude の bash を OS サンドボックス（Seatbelt / bubblewrap）で走らせ、秘匿情報の読取と許可外ネットワークを遮断。既定は off。</p>
       </div>
     </div>
 
@@ -689,7 +706,7 @@
     </h2>
     <div class="phil-grid">
       <div class="phil reveal"><b class="lx" lang="en">Self-driving, not approval-gated</b><b class="lx" lang="ja">承認ゲートではなく自走</b><span class="lx" lang="en">Enforcement belongs to hooks; approvals stay minimal.</span><span class="lx" lang="ja">強制は hook に、承認は最小限に。</span></div>
-      <div class="phil reveal"><b class="lx" lang="en">Deterministic over promised</b><b class="lx" lang="ja">約束より決定論</b><span class="lx" lang="en">What must never happen is blocked by a hook, not a prompt.</span><span class="lx" lang="ja">起きてはならないことは prompt でなく hook が block。</span></div>
+      <div class="phil reveal"><b class="lx" lang="en">Deterministic over promised</b><b class="lx" lang="ja">約束より決定論</b><span class="lx" lang="en">What must never happen is blocked by a hook, not a prompt.</span><span class="lx" lang="ja">起きてはならないことは prompt でなく hook が遮断。</span></div>
       <div class="phil reveal"><b class="lx" lang="en">Lean</b><b class="lx" lang="ja">lean</b><span class="lx" lang="en">Delegate to proven mechanisms (git-town, official plugins). Don't reinvent.</span><span class="lx" lang="ja">枯れた仕組み（git-town・公式 plugin）に委譲し、車輪を再発明しない。</span></div>
       <div class="phil reveal"><b class="lx" lang="en">Measure, then fold</b><b class="lx" lang="ja">測って、畳む</b><span class="lx" lang="en">Telemetry tracks skill usage; dead features get removed.</span><span class="lx" lang="ja">telemetry が使用度を記録し、死蔵機能は削除。</span></div>
     </div>
@@ -704,9 +721,9 @@
       </p>
       <p class="lx" lang="ja">
         Banto は「内部名がひとつ客先成果物に漏れたらインシデント」という受託開発の現場で生まれた。
-        egress guard はレジストリ記載の名前を客先パスから block し、名前レジストリは user スコープに
-        置かれて決してコミットされず、content-hygiene 監査がドキュメント内の固有参照・貼り込み残骸を
-        検出する。
+        egress guard は、レジストリ記載の名前が客先パスへ出るのを遮断する。名前レジストリは user
+        スコープに置かれ、決してコミットされない。content-hygiene 監査は、ドキュメント内の固有参照や
+        貼り込み残骸を検出する。
       </p>
     </div>
   </div>
@@ -737,6 +754,14 @@
       初回セットアップを提案する。<code>harness-setup.sh</code> が行動 rules・statusline・最小限の
       permissions・<strong>無効状態</strong>の OS サンドボックスブロックを配置し、store を初期化する。
       既定は英語 — 日本語にするには <code>/set-language ja</code> を一度だけ（更新をまたいで保持）。
+    </p>
+    <p class="install-note reveal lx" lang="en">
+      <code>harness-setup.sh</code> also enables marketplace <strong>autoUpdate</strong>, so every
+      later release follows automatically. To apply an update mid-session, run <code>/reload-plugins</code>.
+    </p>
+    <p class="install-note reveal lx" lang="ja">
+      <code>harness-setup.sh</code> が marketplace の <strong>autoUpdate</strong> を有効化し、
+      以後のリリースは自動追従。セッション中の反映は <code>/reload-plugins</code>。
     </p>
 
     <div class="req reveal">

@@ -72,15 +72,15 @@
       "naming": null,
       "note": "WS state under workspaces/<author>/[scope] topic/{workspace.md,tasks.md,tasks-old/}; archived under old/." },
 
-    { "path": "tasks", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": false,
+    { "path": "tasks", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": true,
       "owners": ["ai-context"],
       "naming": null,
-      "note": "Legacy task ledger (active.md + old/). Vestigial; superseded by workspaces/<author>/<topic>/tasks.md." },
+      "note": "Legacy task ledger (active.md + old/). Read-fallback only, never auto-created; superseded by workspaces/<author>/<topic>/tasks.md." },
 
     { "path": "meta", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": false,
-      "owners": ["store-map-gen.sh", "store-map-lint.sh", "ai-context-lint.sh"],
+      "owners": ["store-map-gen.sh", "store-map-lint.sh", "ai-context-lint.sh", "ontology-gen.sh", "ontology-lint.sh"],
       "naming": null,
-      "note": "Store-own metadata: store-map.md (folder<->skill map), indexes, health-lint reports." },
+      "note": "Store-own metadata: store-map.md (folder<->skill map), indexes, health-lint reports, repo ontology (ontology.md committed; ontology.json + ontology-cache/ gitignored per Q3)." },
 
     { "path": "tmp", "kind": "dir", "scope": "ephemeral", "gitignore": true, "lazy": true,
       "owners": ["search", "search-agent"],
@@ -102,11 +102,6 @@
       "naming": null,
       "note": "model-lab claim ledger under experiments/<project>/ledger.jsonl. Lazy: only when model-lab runs." },
 
-    { "path": "refs", "kind": "dir", "scope": "shared", "gitignore": false, "lazy": true,
-      "owners": ["doc-import (legacy)", "plugin-audit"],
-      "naming": null,
-      "note": "Imported reference docs under refs/<topic>/ (+ _index.md). Lazy/legacy: doc-import feature." },
-
     { "path": "config.json", "kind": "file", "scope": "shared", "gitignore": false, "lazy": true,
       "owners": ["ai-context", "search"],
       "naming": "^config\\.json$",
@@ -125,7 +120,7 @@
     { "path": "WORKSPACE.md", "kind": "file", "scope": "ephemeral", "gitignore": true, "lazy": true,
       "owners": ["ws"],
       "naming": "^WORKSPACE(-refs)?\\.md$",
-      "note": "Legacy per-checkout pointer. Current pointer lives at <git-dir>/banto-ws-pointer.md." },
+      "note": "Pointer fallback for non-git checkouts (primary pointer: <git-dir>/banto-ws-pointer.md) + WORKSPACE-refs.md (ws multi read-refs)." },
 
     { "path": "project-combined.txt", "kind": "file", "scope": "ephemeral", "gitignore": true, "lazy": true,
       "owners": ["ai_context_combined.py"],

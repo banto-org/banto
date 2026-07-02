@@ -21,9 +21,9 @@
       "ja_sha256": "25fa31198377a2b075e06d1cb5c4e462e3cd8506eff943892695023f9e6157ec"
     },
     "agents/research-agent.md": {
-      "en_sha256": "6b22f01c00e92ac0b3f5a565acfd99e7eb4fcfff4ab2fb9ab5dd42d45173eaa6",
+      "en_sha256": "0292a2fd6667e7ac216c046d0984b538f15d3cb5aa8a3987389bbf98ab8d8f1e",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "8ee246e0146dcea6ecfea47801db91b7205c44ec8de77f26d6d67161e2b3c8ff"
+      "ja_sha256": "ed824194688abae83c23aa5ebc3d100902746d849f811c48c26633ddd9b3dd47"
     },
     "agents/search-agent.md": {
       "en_sha256": "89c30340ae05f4c87e723f9c53d952461be32c921fd6cef68d4350da3d3c0dfa",
@@ -66,9 +66,9 @@
       "ja_sha256": "f79d9e120389d0412367cde8723895453ddd560b01dd4de336358d3d532bf34d"
     },
     "skills/ai-context/references/central-store-guide.md": {
-      "en_sha256": "add028736d4db671ab09bb24621c5c4a89ff91f3a50225fd3540918c8efdc4f7",
+      "en_sha256": "0276b5dff187b9d733fb6026bf59a49d3107012d1d808bc86f417de340622242",
       "generated_at": "2026-06-20T15:22:50Z",
-      "ja_sha256": "4fe374948a40c964af0d48b40d6453c8d806362e831ae57f314dd94bf6e0f89d"
+      "ja_sha256": "5f045f7369d044bb1b3dde450a22d7bf5497b5f683ffb4c3f7a491f19c217a8d"
     },
     "skills/ai-context/references/decisions.md": {
       "en_sha256": "8fba2c6e41dc6641a99d42a4f67ff1db482414c55902bd5c8683b496409cfe44",
@@ -76,9 +76,9 @@
       "ja_sha256": "8eafb8ce5693ac1003ed8aa8f2a2e80961d03c39f60fb005242f086be45263b6"
     },
     "skills/ai-context/references/directory-structure.md": {
-      "en_sha256": "51b74b3f71b0dfa8e168ac225753c59d26dc8493ceb793fe7b69b40007e5413d",
+      "en_sha256": "4a5428445f31b6ba927735b54356e426f6e05487fd1f3076231b6d710858fb69",
       "generated_at": "2026-06-24T08:24:57Z",
-      "ja_sha256": "85d05cf6e9ddcf68559f1db0dfdb00270f630d09baa70fe4b4e9e31d7b21ec05"
+      "ja_sha256": "37ad41d4a4a40ce8b551bc9df9f164eef25cd8fb982c1f33f4ee0b05055cc3f0"
     },
     "skills/ai-context/references/doctor.md": {
       "en_sha256": "3838616d914593f338cc88c8073bbe05d5bb6868670a7dcc03c2a4ad32388795",
@@ -131,9 +131,9 @@
       "ja_sha256": "cb01e80f662fc19f93d51fa3e5495ef54e508fb2f59a30d0766905654e87fb57"
     },
     "skills/dev-loop/SKILL.md": {
-      "en_sha256": "9bf1b38af7ca03664bd481edc68ff4683b8b370d816a52b0949f245db658760a",
+      "en_sha256": "27ddfa95751884fae2e068a93aaabee073ef4fb7abe71f6aaaca5591dbc2d957",
       "generated_at": "2026-06-22T14:04:29Z",
-      "ja_sha256": "dc3f54e0b8261c76bc8127330e91b1af3de253b405e12515801354e34909fdf1"
+      "ja_sha256": "d88da4fc7d4fbad7e1177ce2df74e15c4694b82863fdb0e4ef6783502e8f85ca"
     },
     "skills/dev-loop/odd.yaml": {
       "en_sha256": "725c43e20601a70dd8e4298e2563cbed1fc31ea8b0c2e199e9a79969e5c53d6a",
@@ -221,9 +221,9 @@
       "ja_sha256": "4272d0f4e8e53d285d7c721ffd70890a794cb293f2be42c188a8fff5b5eaf279"
     },
     "skills/plugin-audit/references/scoring.md": {
-      "en_sha256": "8c86a4cdd5dc0717c6aaf8663a0dbb8f8928a5df40baaaf84151519d50c103b7",
+      "en_sha256": "117e3dcf9c6795ce185ce6fd766bae9a26ca9a3241c07e290f2403190f1e91e3",
       "generated_at": "2026-06-24T08:37:36Z",
-      "ja_sha256": "6b6aaa4e16ac6ea270bf67740d32c81d7081e136b0613123c9cedcf0f12a98f9"
+      "ja_sha256": "1fe9b4b81241fb64055f4a336da990cdc60c53e4de50dc924b73a88cabcde698"
     },
     "skills/plugin-audit/references/verify.md": {
       "en_sha256": "6f5dd3d106ed348a9f77831717a91b8031de9680deaa2a41c6ff0a7a13be4313",
@@ -296,9 +296,9 @@
       "ja_sha256": "24f2d06565ab03861ad3e69cc3c4dcea60a1ff1a18f8d202be3758e82aa22985"
     },
     "skills/research/SKILL.md": {
-      "en_sha256": "94f0c1b9dc8745d05148d2e329bb30fe3456a1cd157d03c178329233cede3400",
+      "en_sha256": "221bf3aaf645f04ad8fe5447d09b135f03ab3b90b94837fa063188ed44982146",
       "generated_at": "2026-06-24T08:41:10Z",
-      "ja_sha256": "e19b0690c16515586f245511c321aaab28957f69dcc242d78dd6082433bb8c9f"
+      "ja_sha256": "5592466759f123a7b401ef5d5934ba7207f46f31bd086a8c7fa9a5f6c4feb2c8"
     },
     "skills/research/odd.yaml": {
       "en_sha256": "cbc7f6e6349655af286478b5431bdde562f3c3cd7816d7730e2c01c423e5a83c",
@@ -311,7 +311,7 @@
       "ja_sha256": "f36e581a5fc270d7b25f38379da7aa8761edf3d99d39272c49e3709fa75c0de1"
     },
     "skills/research/references/approval-flow.md": {
-      "en_sha256": "439394bec499c572705464aa29e04b0b9e07e42759a5d8503602c7dbd0ff74ea",
+      "en_sha256": "bc2020f4d5aa2547eed622b4edf2e863b6470ae64d84e777e1f17bb8b2cde569",
       "generated_at": "2026-06-20T15:22:51Z",
       "ja_sha256": "c15e80a36b3cf7f5765d4a05efe651b1362de01cf45d62c7cebbe7bd9f796407"
     },
@@ -341,9 +341,9 @@
       "ja_sha256": "ca1712c293a2f1f6ec116cbbe4ee4c59553a070ec0f2ad53319f54b28f198ad4"
     },
     "skills/spec/SKILL.md": {
-      "en_sha256": "c39d927706077cb5b55c39bc1aba460d96aa27d345715e452b194e59b42c7087",
+      "en_sha256": "faed4cc6bf75691fe7b665ca482d82228de991e353396c9862f53990c60d9b00",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "efae0a82eec34ff35f4e0158786f62f284fd562f207d9b48f26308fb07ce884a"
+      "ja_sha256": "ce2642a94dcab5044330cd52942ffaf5dbb72cc243a973544964de772beec6fb"
     },
     "skills/spec/odd.yaml": {
       "en_sha256": "664c61e5cd9a9e834119f3d3d1d98b6909a144f352643801ea522bcf7a5b5e3c",
@@ -371,9 +371,9 @@
       "ja_sha256": "f212511793f66ff9c62ff7001efd29686247c86a01b6295b54588adb0ca69f4f"
     },
     "skills/ws/SKILL.md": {
-      "en_sha256": "a723989e873a3dc1ed238b367544be78e5a87baa41c7c26d79d1302a639429f9",
+      "en_sha256": "416d9c0d8452ff9b698601b7ffdd18398df06d16d6d617c4ccac3839c32cd33e",
       "generated_at": "2026-06-24T08:46:01Z",
-      "ja_sha256": "a26f0da83a42cec92cc128c7c6e1d1e8a1c7319347439f17a8d79cfe6da8c29c"
+      "ja_sha256": "fc025ecc82427353338ae7ea6fb5f97f0c1ea1c4fa7130f7cb52b088a4df5300"
     },
     "skills/ws/odd.yaml": {
       "en_sha256": "a5ab3656c4b9d3680f9bb98975b25e85271b5c87ce130ee82c208096b44c5627",
@@ -386,9 +386,9 @@
       "ja_sha256": "b8f38d6163028acecdcd5816a6a5720e2be6e74d79431238f9dfd93b62c13d02"
     },
     "skills/ws/references/basic-commands.md": {
-      "en_sha256": "c4b33cb6bcc80cbcba3b399d3b0442a510ac726d1f0e92a9d8229c3ec81b5107",
+      "en_sha256": "284b542fe31c4bd45234685049a71b8de82fd94d05b20bdfefcc303ad1c5a463",
       "generated_at": "2026-06-24T08:46:55Z",
-      "ja_sha256": "995c1bff5e2f5201b7642579083708cde9e7b79952cc42df1899099e5cddd0a0"
+      "ja_sha256": "4fba9845446f06dd23e3ee827ecbdcf27604df5660a18e63165ac84c859ad747"
     },
     "skills/ws/references/formats.md": {
       "en_sha256": "130ab7a8aff04eade6e7bc53f2bea81e30090c7211632710cea42fdc9e4ce05f",
@@ -396,9 +396,9 @@
       "ja_sha256": "d6a163550c6a5666a4dba819eaf0aaa336bee718b7126442a52072258b4b5af5"
     },
     "skills/ws/references/git-town-flow.md": {
-      "en_sha256": "eca88c5059a1b6e7337ffa1155f404139f0856c0f665a6ecd6c143289776b7f5",
+      "en_sha256": "8a5d3c684a757a8117487775f253a7aa2fcec238e771dc97b12d0f397f27b8ff",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "6d6cb13b3e52f15e54a77fdf450ba759d3138f64ac2272437162863df1d6d1d0"
+      "ja_sha256": "944d41ce073b7902e2cb1fde43793db84fe5b6376df61ce7a423af30b510acab"
     },
     "skills/ws/references/multi-mode.md": {
       "en_sha256": "eed0c114bf0eaa7ea91072ebffac11b41491b2d18c50922353fc05b1183b9ac3",
@@ -406,9 +406,9 @@
       "ja_sha256": "162b6038b12929a3f738f8a64b7f73343311a80f63c07b65173bc43af142b7cf"
     },
     "skills/ws/references/new-and-archive.md": {
-      "en_sha256": "e79ad1e0480f3cc2cc1c022c1a94708bf0d2946a59cc08db02a9e4d6077bf3c5",
+      "en_sha256": "488388e4ff81eb3c528111bde48adbab1fd0fcd51854a7a06e27376da15da9e8",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "f8d16d3846beea39d480c3314ced86aa33fd6f5dd1b9a423672b54660c5ce771"
+      "ja_sha256": "932e75abbbf04ca43184a0234f8e695b1894cd369042e3ab1a5fc5ae97db9e26"
     },
     "skills/ws/references/parallel-proposal.md": {
       "en_sha256": "47f28b97200598f5051f1ec59e2c5b2644963b96ad8bad4b7c8dc9d2f6a19250",
@@ -420,5 +420,7 @@
       "generated_at": "2026-06-20T15:22:51Z",
       "ja_sha256": "bf9f0a8b0293210ffdd4cc44b2885c15968ab316bf454e0d7dd60ae6bd54de12"
     }
-  }
+  },
+  "generated_at": "2026-07-02T03:18:23Z",
+  "source_commit": "7941c78"
 }

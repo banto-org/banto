@@ -33,11 +33,13 @@ Quality evaluation axes for every Banto asset (skill / agent / rule / hook). Thi
 
 The judgment-type skills (`plugin-audit eval` / `plugin-audit fix` / `harness-audit`) **must always render their judgment in a subagent**. The main session carries work-history context contamination, which produces self-evaluation bias.
 
-| skill | Reviewer |
-|-------|---------|
-| `plugin-audit eval` | Judge each case independently with an Agent (general-purpose); vote across multiple Agents |
-| `plugin-audit fix` | An Agent (general-purpose) proposes fixes; interactive approval happens in the main session |
-| `harness-audit` | Delegate subjective axes such as dead-skill judgment to an Agent (general-purpose) |
+The default model for judge / reviewer Agents is `model: "opus"` (the `audit` default in `templates/model-policy.json`; `audit_alt: "fable"` is an optional upgrade).
+
+| skill | Reviewer | model |
+|-------|---------|-------|
+| `plugin-audit eval` | Judge each case independently with an Agent (general-purpose); vote across multiple Agents | opus |
+| `plugin-audit fix` | An Agent (general-purpose) proposes fixes; interactive approval happens in the main session | opus |
+| `harness-audit` | Delegate subjective axes such as dead-skill judgment to an Agent (general-purpose) | opus |
 
 ---
 
@@ -273,9 +275,7 @@ Judges whether standards that **can vary per company / project / team** — "cod
 [logic inside the skill, unified]
 
 1. Read .claude/rules/{topic}.md (a rule placed by harness-setup.sh / the project side)
-2. If absent → look under {base}/refs/{topic}/:
-   2a. use the search skill (query expansion + grep ranking) to find the semantically closest section
-   2b. if search finds nothing → Read {base}/refs/_index.md → Read section by section
+2. If absent → use the search skill (query expansion + grep ranking) to find the semantically closest passage in the store's decisions / docs
 3. If absent → use the skill's built-in default
 ```
 

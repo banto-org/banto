@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>AI-Context-Store — Banto / セッションを越える知識ストア</title>
-<meta name="description" content="How Banto's AI-Context-Store works: what lives in the store (decisions / docs / tasks / sessions / workspaces), what the plugin does with it, and how it wires into Claude Code's lifecycle through deterministic hooks." />
+<meta name="description" content="Banto's AI-Context-Store: an external memory per project. What accumulates (decisions / docs / sessions / workspaces), how the next session restores automatically, and how deterministic hooks run it all." />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
 <link rel="stylesheet" href="styles.css" />
 <style>
@@ -20,35 +20,42 @@
   .sec-head{ position:relative; margin:0 0 26px; }
   .sec-head .ghost{ position:absolute; left:-4px; top:-.55em; font-family:var(--serif); font-weight:700; font-size:clamp(70px,11vw,128px); color:var(--accent); opacity:.07; line-height:1; pointer-events:none; z-index:0; }
   .sec-head h2{ position:relative; z-index:1; font-size:clamp(24px,3.4vw,34px); }
-  .sec-head p{ position:relative; z-index:1; color:var(--ink-2); max-width:42em; margin:10px 0 0; font-size:17px; }
+  .sec-head p{ position:relative; z-index:1; color:var(--ink-2); max-width:44em; margin:10px 0 0; font-size:17px; }
   .card{ background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:22px 24px; }
-  /* ---- familiar folder tree ---- */
-  .tree-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow-l); overflow:hidden; }
-  .tree-bar{ display:flex; align-items:center; gap:8px; padding:11px 16px; background:var(--paper-2); border-bottom:1px solid var(--line); }
-  .tree-bar .dot{ width:11px; height:11px; border-radius:50%; }
-  .tree-bar .d1{ background:#E0685C; } .tree-bar .d2{ background:#E4B95B; } .tree-bar .d3{ background:#8FBE7E; }
-  .tree-bar .ttl{ margin-left:6px; font-family:var(--mono); font-size:12.5px; color:var(--ink-soft); }
-  .tree{ margin:0; padding:18px 20px; font-family:var(--mono); font-size:13.5px; line-height:1.9; color:var(--ink-2); overflow-x:auto; }
-  .tree .ln{ white-space:pre; display:block; }
-  .tree .br{ color:var(--line-2); }
-  .tree .dir{ color:var(--accent-d); font-weight:600; }
-  .tree .cm{ color:var(--ink-soft); }
-  .tree .tag{ font-size:10.5px; font-weight:700; padding:.05em .4em; border-radius:5px; }
-  .tree .tag.sh{ color:var(--green); background:rgba(74,124,89,.12); }
-  .tree .tag.pe{ color:var(--accent-d); background:var(--accent-t); }
-  @media (prefers-reduced-motion:no-preference){
-    .tree-card.reveal.in .ln{ animation:lnIn .5s ease backwards; }
-    .tree-card.reveal.in .ln:nth-child(1){animation-delay:.02s}.tree-card.reveal.in .ln:nth-child(2){animation-delay:.08s}
-    .tree-card.reveal.in .ln:nth-child(3){animation-delay:.14s}.tree-card.reveal.in .ln:nth-child(4){animation-delay:.2s}
-    .tree-card.reveal.in .ln:nth-child(5){animation-delay:.26s}.tree-card.reveal.in .ln:nth-child(6){animation-delay:.32s}
-    .tree-card.reveal.in .ln:nth-child(7){animation-delay:.38s}.tree-card.reveal.in .ln:nth-child(8){animation-delay:.44s}
-    .tree-card.reveal.in .ln:nth-child(9){animation-delay:.5s}.tree-card.reveal.in .ln:nth-child(10){animation-delay:.56s}
-    .tree-card.reveal.in .ln:nth-child(11){animation-delay:.62s}.tree-card.reveal.in .ln:nth-child(12){animation-delay:.68s}
-    @keyframes lnIn{ from{ opacity:0; transform:translateX(-8px); } }
-  }
+  /* ---- 0. pain: before / after ---- */
+  .pain-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:6px; }
+  @media(max-width:720px){ .pain-grid{ grid-template-columns:1fr; } }
+  .pain-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:20px 22px; }
+  .pain-card .pc-tag{ display:inline-block; font-size:11.5px; font-weight:700; letter-spacing:.05em; padding:.2em .7em; border-radius:20px; }
+  .pain-card.bad .pc-tag{ color:var(--ink-soft); background:rgba(28,24,20,.07); }
+  .pain-card.good .pc-tag{ color:var(--green); background:rgba(74,124,89,.12); }
+  .pain-card h3{ font-size:17.5px; margin:10px 0 0; }
+  .pain-card.bad h3{ color:var(--ink-soft); }
+  .pain-card ul{ margin:12px 0 0; padding:0; list-style:none; }
+  .pain-card li{ position:relative; padding:5px 0 5px 24px; font-size:14.5px; color:var(--ink-2); border-top:1px solid var(--line); }
+  .pain-card li:first-child{ border-top:0; }
+  .pain-card.bad li::before{ content:"×"; position:absolute; left:2px; color:var(--ink-soft); font-weight:700; }
+  .pain-card.good li::before{ content:"✓"; position:absolute; left:2px; color:var(--green); font-weight:700; }
+  /* ---- 1. definition ---- */
+  .defbox{ background:var(--card); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:0 var(--r) var(--r) 0; box-shadow:var(--shadow); padding:24px 28px; }
+  .defbox p{ margin:0; font-family:var(--serif); font-size:clamp(19px,2.4vw,24px); line-height:1.45; }
+  .defbox + .ticks{ margin-top:20px; }
+  /* ---- 3. store table ---- */
+  .store-table-wrap{ background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow-l); overflow-x:auto; }
+  .store-table{ width:100%; border-collapse:collapse; font-size:14px; min-width:640px; }
+  .store-table th{ text-align:left; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); background:var(--paper-2); padding:11px 16px; border-bottom:1px solid var(--line); }
+  .store-table td{ padding:11px 16px; border-bottom:1px solid var(--line); color:var(--ink-2); vertical-align:top; line-height:1.5; }
+  .store-table tr:last-child td{ border-bottom:0; }
+  .store-table .fd{ font-family:var(--mono); font-size:13px; color:var(--accent-d); font-weight:600; white-space:nowrap; }
+  .tag{ font-size:10.5px; font-weight:700; padding:.12em .5em; border-radius:5px; white-space:nowrap; }
+  .tag.sh{ color:var(--green); background:rgba(74,124,89,.12); }
+  .tag.pe{ color:var(--accent-d); background:var(--accent-t); }
+  .tag.ep{ color:var(--ink-soft); background:rgba(28,24,20,.08); }
   .legend{ display:flex; gap:16px; flex-wrap:wrap; margin:14px 2px 0; font-size:13px; color:var(--ink-soft); }
   .legend b{ font-size:10.5px; font-weight:700; padding:.05em .45em; border-radius:5px; margin-right:5px; }
-  .legend .sh{ color:var(--green); background:rgba(74,124,89,.12); } .legend .pe{ color:var(--accent-d); background:var(--accent-t); }
+  .legend .sh{ color:var(--green); background:rgba(74,124,89,.12); }
+  .legend .pe{ color:var(--accent-d); background:var(--accent-t); }
+  .legend .ep{ color:var(--ink-soft); background:rgba(28,24,20,.08); }
   /* command groups */
   .cmd-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(255px,1fr)); gap:16px; margin-top:6px; }
   .cmd-grid h3{ font-size:16px; margin:0 0 4px; display:flex; align-items:center; gap:8px; }
@@ -57,25 +64,34 @@
   .cmd-grid li{ font-size:14px; color:var(--ink-2); padding:5px 0; border-top:1px solid var(--line); line-height:1.45; }
   .cmd-grid li:first-child{ border-top:0; }
   .cmd-grid code{ color:var(--accent-d); }
-  /* lifecycle (animated) */
-  .life{ position:relative; margin:6px 0 0; padding-left:26px; }
-  .life::before{ content:""; position:absolute; left:7px; top:6px; width:2px; height:0; background:linear-gradient(var(--accent),var(--line-2)); }
-  .card.reveal.in .life::before{ animation:grow 1.4s ease .15s forwards; }
-  @keyframes grow{ to{ height:calc(100% - 12px); } }
-  .life .step{ position:relative; padding:0 0 20px 16px; }
-  .life .step::before{ content:""; position:absolute; left:-26px; top:4px; width:14px; height:14px; border-radius:50%; background:var(--card); border:3px solid var(--accent); box-shadow:var(--shadow); }
-  .life .ev{ font-family:var(--mono); font-size:12.5px; font-weight:700; color:var(--accent-d); }
-  .life .what{ font-size:15px; color:var(--ink); margin:3px 0 0; font-weight:600; }
-  .life .det{ font-size:13.5px; color:var(--ink-soft); margin:3px 0 0; line-height:1.5; }
-  @media (prefers-reduced-motion:no-preference){
-    .card.reveal.in .life .step{ animation:stepIn .5s ease backwards; }
-    .card.reveal.in .life .step:nth-child(1){animation-delay:.2s}.card.reveal.in .life .step:nth-child(2){animation-delay:.4s}
-    .card.reveal.in .life .step:nth-child(3){animation-delay:.6s}.card.reveal.in .life .step:nth-child(4){animation-delay:.8s}
-    .card.reveal.in .life .step:nth-child(5){animation-delay:1s}.card.reveal.in .life .step:nth-child(6){animation-delay:1.2s}
-    @keyframes stepIn{ from{ opacity:0; transform:translateY(10px); } }
-  }
-  .note{ display:flex; gap:12px; padding:15px 18px; border-radius:11px; background:var(--paper-2); border:1px solid var(--line); margin:16px 0 0; font-size:14.5px; color:var(--ink-2); }
-  .note .seal{ width:26px; height:26px; font-size:15px; flex:none; }
+  .subhead{ margin:clamp(30px,4vw,44px) 0 14px; }
+  .subhead h3{ font-size:clamp(19px,2.6vw,24px); }
+  .subhead p{ color:var(--ink-2); max-width:44em; margin:8px 0 0; font-size:15.5px; }
+  /* ---- 4. three scenes ---- */
+  .scene-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px; margin-top:6px; }
+  .scene{ position:relative; padding-top:20px; }
+  .scene .sc-no{ position:absolute; top:-14px; left:20px; width:30px; height:30px; display:grid; place-items:center; border-radius:9px; background:var(--accent); color:#fff; font-family:var(--serif); font-weight:700; box-shadow:var(--shadow); }
+  .scene .sc-when{ font-family:var(--mono); font-size:12px; font-weight:700; color:var(--accent-d); letter-spacing:.02em; }
+  .scene h3{ font-size:19px; margin:4px 0 0; }
+  .scene p{ font-size:14px; color:var(--ink-2); margin:10px 0 0; line-height:1.6; }
+  .scene code{ color:var(--accent-d); }
+  /* hooks appendix fold */
+  .fold{ margin-top:20px; background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); }
+  .fold summary{ cursor:pointer; padding:15px 20px; font-size:14.5px; font-weight:600; color:var(--ink-2); list-style:none; display:flex; align-items:center; gap:10px; }
+  .fold summary::before{ content:"▸"; color:var(--accent); transition:transform .2s; }
+  .fold[open] summary::before{ transform:rotate(90deg); }
+  .fold summary::-webkit-details-marker{ display:none; }
+  .fold .fold-body{ padding:4px 20px 18px; border-top:1px solid var(--line); }
+  .fold dl{ margin:0; }
+  .fold dt{ font-family:var(--mono); font-size:12.5px; font-weight:700; color:var(--accent-d); margin-top:14px; }
+  .fold dd{ margin:3px 0 0; font-size:13.5px; color:var(--ink-2); line-height:1.55; }
+  .fold code{ color:var(--accent-d); }
+  /* ---- 5. migrate ---- */
+  .mini-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; margin-top:6px; }
+  .mini-grid .card h3{ font-size:17px; display:flex; align-items:center; gap:9px; }
+  .mini-grid .card h3 .step-n{ width:26px; height:26px; display:grid; place-items:center; border-radius:8px; background:var(--ink); color:var(--paper); font-family:var(--serif); font-size:14px; flex:none; }
+  .mini-grid .card p{ font-size:14px; color:var(--ink-2); margin:10px 0 0; line-height:1.6; }
+  .mini-grid code{ color:var(--accent-d); }
   .cta-band{ max-width:var(--maxw); margin:clamp(48px,7vw,80px) auto 0; padding:0 var(--pad); }
   .cta-inner{ background:var(--ink); color:var(--paper); border-radius:18px; padding:clamp(28px,5vw,46px); box-shadow:var(--shadow-l); }
   .cta-inner h2{ color:var(--paper); font-size:clamp(22px,3vw,30px); }
@@ -83,9 +99,6 @@
   .doc-foot{ max-width:var(--maxw); margin:40px auto 0; padding:26px var(--pad) 48px; border-top:1px solid var(--line); color:var(--ink-soft); font-size:14px; display:flex; gap:18px; flex-wrap:wrap; justify-content:space-between; }
   .crumb{ font-size:13.5px; color:var(--ink-soft); }
   .crumb a{ color:var(--accent-d); }
-  /* diagram extras for this page */
-  .diag-flow.barrier{ stroke:var(--ink-soft); stroke-width:1.5; stroke-dasharray:4 4; }
-  .ctx-clear text{ fill:var(--ink-soft); }
 </style>
 </head>
 <body data-lang="en">
@@ -100,10 +113,12 @@
     <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
   </a>
   <nav class="nav-links" aria-label="primary">
+    <a href="#what" class="lx" lang="en">What it is</a><a href="#what" class="lx" lang="ja">これは何か</a>
+    <a href="#how" class="lx" lang="en">How it works</a><a href="#how" class="lx" lang="ja">仕組み</a>
     <a href="#inside" class="lx" lang="en">Inside</a><a href="#inside" class="lx" lang="ja">中身</a>
-    <a href="#does" class="lx" lang="en">What it does</a><a href="#does" class="lx" lang="ja">動作</a>
-    <a href="#wiring" class="lx" lang="en">Claude Code</a><a href="#wiring" class="lx" lang="ja">連携</a>
+    <a href="#auto" class="lx" lang="en">Automatic</a><a href="#auto" class="lx" lang="ja">自動で回る</a>
     <a href="plugin-tools.html" class="lx" lang="en">Plugin tools</a><a href="plugin-tools.html" class="lx" lang="ja">プラグイン道具</a>
+    <a href="evidence.html" class="lx" lang="en">Evidence</a><a href="evidence.html" class="lx" lang="ja">実測</a>
   </nav>
   <div class="nav-right">
     <div class="lang-toggle" role="group" aria-label="language">
@@ -128,16 +143,16 @@
       <div class="kicker reveal"><span class="lx" lang="en">AI-Context-Store</span><span class="lx" lang="ja">AI コンテキストストア</span></div>
       <h1 class="reveal">
         <span class="lx" lang="en">Knowledge that survives the session.</span>
-        <span class="lx" lang="ja">セッションを越えて生き残る知識。</span>
+        <span class="lx" lang="ja">セッションを越えて残る知識。</span>
       </h1>
       <p class="lede reveal lx" lang="en">
-        Every decision, research note, task, and checkpoint lives in a <strong>central store outside your repo</strong>.
-        Banto injects it at the start of every session and harvests it at the end — so a <code>/clear</code> or a
+        Every decision, research note, working state, and checkpoint lives in a <strong>central store outside your repo</strong>.
+        Banto injects it at the start of every session and saves it at the end — so a <code>/clear</code> or a
         compaction never costs you the thread. Your code stays clean; the knowledge accrues.
       </p>
       <p class="lede reveal lx" lang="ja">
-        決定・リサーチ・タスク・チェックポイントは、すべて <strong>repo の外の中央ストア</strong>に置く。
-        Banto がセッション開始時に注入し、終了時に収穫する — <code>/clear</code> や compaction で文脈を失わない。
+        決定・調査・作業状態・チェックポイントは、すべて <strong>repo の外の中央ストア</strong>に置く。
+        Banto がセッション開始時に注入し、終了時に保存する — <code>/clear</code> や自動圧縮で文脈を失わない。
         コードは綺麗なまま、知識だけが積もる。
       </p>
     </div>
@@ -149,9 +164,15 @@
           <marker id="arrow-ink" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#6B6155"/></marker>
         </defs>
         <!-- sessions across the top -->
-        <g class="ctx-sess s1"><rect x="8" y="20" width="116" height="52" rx="9"/><text x="66" y="42" class="n-title sm">session 1</text><text x="66" y="59" class="n-sub">ends · /clear</text></g>
-        <g class="ctx-sess s2"><rect x="142" y="20" width="116" height="52" rx="9"/><text x="200" y="42" class="n-title sm">session 2</text><text x="200" y="59" class="n-sub">compacted</text></g>
-        <g class="ctx-sess s3"><rect x="276" y="20" width="116" height="52" rx="9"/><text x="334" y="42" class="n-title sm">session 3</text><text x="334" y="59" class="n-sub strong">restored</text></g>
+        <g class="ctx-sess s1"><rect x="8" y="20" width="116" height="52" rx="9"/>
+          <text x="66" y="42" class="n-title sm lx" lang="en">session 1</text><text x="66" y="42" class="n-title sm lx" lang="ja">セッション 1</text>
+          <text x="66" y="59" class="n-sub lx" lang="en">ends · /clear</text><text x="66" y="59" class="n-sub lx" lang="ja">終了 · /clear</text></g>
+        <g class="ctx-sess s2"><rect x="142" y="20" width="116" height="52" rx="9"/>
+          <text x="200" y="42" class="n-title sm lx" lang="en">session 2</text><text x="200" y="42" class="n-title sm lx" lang="ja">セッション 2</text>
+          <text x="200" y="59" class="n-sub lx" lang="en">compacted</text><text x="200" y="59" class="n-sub lx" lang="ja">自動圧縮</text></g>
+        <g class="ctx-sess s3"><rect x="276" y="20" width="116" height="52" rx="9"/>
+          <text x="334" y="42" class="n-title sm lx" lang="en">session 3</text><text x="334" y="42" class="n-title sm lx" lang="ja">セッション 3</text>
+          <text x="334" y="59" class="n-sub strong lx" lang="en">restored</text><text x="334" y="59" class="n-sub strong lx" lang="ja">復元</text></g>
         <!-- central store -->
         <g class="ctx-store"><rect x="120" y="140" width="160" height="92" rx="13"/>
           <text x="200" y="168" class="n-title">AI-Context-Store</text>
@@ -161,70 +182,192 @@
         </g>
         <!-- flows: sessions 1 & 2 save down; store injects up into session 3 -->
         <path class="ctx-flow w1" d="M66,72 L150,140" marker-end="url(#arrow)"/>
-        <text x="78" y="116" class="edge-label">save</text>
+        <text x="78" y="116" class="edge-label lx" lang="en">save</text><text x="78" y="116" class="edge-label lx" lang="ja">保存</text>
         <path class="ctx-flow w2" d="M200,72 L200,140" marker-end="url(#arrow)"/>
-        <text x="206" y="112" class="edge-label">save</text>
+        <text x="206" y="112" class="edge-label lx" lang="en">save</text><text x="206" y="112" class="edge-label lx" lang="ja">保存</text>
         <path class="ctx-flow w3" d="M276,150 C320,118 320,96 334,74" marker-end="url(#arrow)"/>
-        <text x="300" y="120" class="edge-label">inject</text>
+        <text x="300" y="120" class="edge-label lx" lang="en">inject</text><text x="300" y="120" class="edge-label lx" lang="ja">注入</text>
         <!-- repo stays clean -->
-        <g class="ctx-repo"><rect x="120" y="270" width="160" height="46" rx="9"/><text x="200" y="293" class="n-title sm">your repo</text><text x="200" y="309" class="n-sub">stays clean — code only</text></g>
+        <g class="ctx-repo"><rect x="120" y="270" width="160" height="46" rx="9"/>
+          <text x="200" y="293" class="n-title sm lx" lang="en">your repo</text><text x="200" y="293" class="n-title sm lx" lang="ja">あなたの repo</text>
+          <text x="200" y="309" class="n-sub lx" lang="en">stays clean — code only</text><text x="200" y="309" class="n-sub lx" lang="ja">汚れない — code だけ</text></g>
         <path class="ctx-flow w3" d="M200,232 L200,270" marker-end="url(#arrow-ink)"/>
       </svg>
-      <p class="crumb" style="text-align:center;margin-top:8px"><span class="lx" lang="en">Every session writes down; the next reads up.</span><span class="lx" lang="ja">どのセッションも書き下ろし、次が読み上げる。</span></p>
+      <p class="crumb" style="text-align:center;margin-top:8px"><span class="lx" lang="en">Each session saves; the next session reads it back.</span><span class="lx" lang="ja">各セッションが保存し、次のセッションが読み込む。</span></p>
     </div>
   </div>
 </section>
 
-<!-- INSIDE: familiar folder tree -->
-<section class="sec" id="inside">
+<!-- 0. PAIN: before / after -->
+<section class="sec" id="pain">
+  <div class="sec-head reveal">
+    <span class="ghost">0</span>
+    <h2><span class="lx" lang="en">The pain: context dies with the session</span><span class="lx" lang="ja">困りごと：文脈がセッションと一緒に消える</span></h2>
+    <p><span class="lx" lang="en">Everything built up in a conversation — decisions, research, half-finished plans — vanishes on <code>/clear</code> or auto-compaction. Next session, you explain it all again.</span><span class="lx" lang="ja">会話で積み上げた決定・調査・途中の計画は、<code>/clear</code> や自動圧縮で消える。次のセッションで、同じ説明をまた繰り返す。</span></p>
+  </div>
+  <div class="pain-grid">
+    <div class="pain-card bad reveal">
+      <span class="pc-tag"><span class="lx" lang="en">without a store</span><span class="lx" lang="ja">ストアなし</span></span>
+      <h3><span class="lx" lang="en">The session ends — memory drops to zero</span><span class="lx" lang="ja">セッション終了 — 記憶はゼロ</span></h3>
+      <ul>
+        <li><span class="lx" lang="en">why a decision was made is lost</span><span class="lx" lang="ja">決定の理由が消える</span></li>
+        <li><span class="lx" lang="en">the same research gets redone</span><span class="lx" lang="ja">同じ調査をやり直す</span></li>
+        <li><span class="lx" lang="en">the same explanation, every session</span><span class="lx" lang="ja">毎セッション、同じ説明を繰り返す</span></li>
+      </ul>
+    </div>
+    <div class="pain-card good reveal">
+      <span class="pc-tag"><span class="lx" lang="en">with the store</span><span class="lx" lang="ja">ストアあり</span></span>
+      <h3><span class="lx" lang="en">The store remembers — the next session continues</span><span class="lx" lang="ja">ストアが覚えている — 次のセッションは続きから</span></h3>
+      <ul>
+        <li><span class="lx" lang="en">decisions and research persist</span><span class="lx" lang="ja">決定・調査が残る</span></li>
+        <li><span class="lx" lang="en">restored automatically at session start</span><span class="lx" lang="ja">開始時に自動で復元</span></li>
+        <li><span class="lx" lang="en">no re-explaining</span><span class="lx" lang="ja">説明のやり直しなし</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 1. WHAT IT IS -->
+<section class="sec" id="what">
   <div class="sec-head reveal">
     <span class="ghost">01</span>
-    <h2><span class="lx" lang="en">What lives in the store</span><span class="lx" lang="ja">ストアの中身</span></h2>
-    <p><span class="lx" lang="en">One folder per project, with a fixed layout — readable as a contract by any tool. Shared knowledge is flat and author-tagged; personal state is namespaced under the author.</span><span class="lx" lang="ja">プロジェクトごとに 1 フォルダ・固定レイアウト — どのツールも契約として読める。共有知識はフラットで author 帰属、個人状態は author 名前空間で分離。</span></p>
+    <h2><span class="lx" lang="en">What it is</span><span class="lx" lang="ja">これは何か</span></h2>
   </div>
-  <div class="tree-card reveal">
-    <div class="tree-bar"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="ttl">~/ai-context-store/&lt;project&gt;/</span></div>
-    <!-- EN tree -->
-    <div class="tree lx" lang="en">
-      <span class="ln"><span class="dir">~/ai-context-store/&lt;project&gt;/</span></span>
-      <span class="ln"><span class="br">├─ </span><span class="dir">decisions/</span>        <span class="cm"># design-decision log</span>   <span class="tag sh">shared</span></span>
-      <span class="ln"><span class="br">├─ </span><span class="dir">docs/</span></span>
-      <span class="ln"><span class="br">│  ├─ </span><span class="dir">research/</span>     <span class="cm"># external findings</span>     <span class="tag sh">shared</span></span>
-      <span class="ln"><span class="br">│  └─ </span><span class="dir">knowledges/</span>   <span class="cm"># promoted knowledge</span>    <span class="tag sh">shared</span></span>
-      <span class="ln"><span class="br">├─ </span><span class="dir">sessions/</span>         <span class="cm"># checkpoints</span>           <span class="tag pe">personal</span></span>
-      <span class="ln"><span class="br">├─ </span><span class="dir">workspaces/</span></span>
-      <span class="ln"><span class="br">│  └─ </span><span class="dir">&lt;author&gt;/</span>     <span class="cm"># per-workspace state</span>   <span class="tag pe">personal</span></span>
-      <span class="ln"><span class="br">├─ </span><span class="dir">learnings/</span></span>
-      <span class="ln"><span class="br">│  └─ </span><span class="dir">&lt;author&gt;/</span>     <span class="cm"># personal lessons</span>      <span class="tag pe">personal</span></span>
-      <span class="ln"><span class="br">└─ </span><span class="dir">meta/</span>             <span class="cm"># store operation notes</span></span>
-    </div>
-    <!-- JA tree -->
-    <div class="tree lx" lang="ja">
-      <span class="ln"><span class="dir">~/ai-context-store/&lt;project&gt;/</span></span>
-      <span class="ln"><span class="br">├─ </span><span class="dir">decisions/</span>        <span class="cm"># 設計判断ログ</span>      <span class="tag sh">共有</span></span>
-      <span class="ln"><span class="br">├─ </span><span class="dir">docs/</span></span>
-      <span class="ln"><span class="br">│  ├─ </span><span class="dir">research/</span>     <span class="cm"># 外部調査</span>        <span class="tag sh">共有</span></span>
-      <span class="ln"><span class="br">│  └─ </span><span class="dir">knowledges/</span>   <span class="cm"># 昇格ナレッジ</span>      <span class="tag sh">共有</span></span>
-      <span class="ln"><span class="br">├─ </span><span class="dir">sessions/</span>         <span class="cm"># チェックポイント</span>   <span class="tag pe">個人</span></span>
-      <span class="ln"><span class="br">├─ </span><span class="dir">workspaces/</span></span>
-      <span class="ln"><span class="br">│  └─ </span><span class="dir">&lt;author&gt;/</span>     <span class="cm"># WS 単位の作業状態</span>  <span class="tag pe">個人</span></span>
-      <span class="ln"><span class="br">├─ </span><span class="dir">learnings/</span></span>
-      <span class="ln"><span class="br">│  └─ </span><span class="dir">&lt;author&gt;/</span>     <span class="cm"># 個人の教訓</span>       <span class="tag pe">個人</span></span>
-      <span class="ln"><span class="br">└─ </span><span class="dir">meta/</span>             <span class="cm"># ストア運用メモ</span></span>
-    </div>
+  <div class="defbox reveal">
+    <p><span class="lx" lang="en">An external memory, one per project. It accumulates decisions, research, and working state — and recalls them automatically at session start.</span><span class="lx" lang="ja">プロジェクトごとの外部メモリ。決定・調査・作業状態を貯め、セッション開始時に自動で思い出す。</span></p>
   </div>
-  <div class="legend reveal">
-    <span><b class="sh">shared</b><span class="lx" lang="en">flat, author-tagged (<code>…_&lt;github&gt;.md</code>) — a team shares decisions</span><span class="lx" lang="ja">フラット・author 帰属（<code>…_&lt;github&gt;.md</code>）— チームで決定を共有</span></span>
-    <span><b class="pe">personal</b><span class="lx" lang="en">under <code>&lt;author&gt;/</code> — working state never collides</span><span class="lx" lang="ja"><code>&lt;author&gt;/</code> 配下 — 作業状態が衝突しない</span></span>
+  <ul class="ticks reveal">
+    <li class="lx" lang="en">Context survives <code>/clear</code> — the thread continues</li>
+    <li class="lx" lang="ja"><code>/clear</code> しても文脈が残る</li>
+    <li class="lx" lang="en">Your code repo stays clean — knowledge lives in the store</li>
+    <li class="lx" lang="ja">コードリポジトリは汚れない — 知識はストアへ</li>
+    <li class="lx" lang="en">Everything accumulated is searchable later</li>
+    <li class="lx" lang="ja">貯めた内容を後から検索できる</li>
+  </ul>
+</section>
+
+<!-- 2. HOW IT WORKS: 3-panel timeline -->
+<section class="sec" id="how">
+  <div class="sec-head reveal">
+    <span class="ghost">02</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">どう働くか</span></h2>
+    <p><span class="lx" lang="en">One store persists; sessions come and go. Left to right: session 1 works and clears, the store keeps everything, session 2 restores automatically.</span><span class="lx" lang="ja">ストアは 1 つ、セッションは入れ替わる。左から右へ：セッション 1 が作業して <code>/clear</code>、ストアが保存し、セッション 2 が自動で復元する。</span></p>
+  </div>
+  <div class="tl3 reveal" aria-hidden="true">
+    <div class="tl3-row">
+      <div class="tl3-panel">
+        <div class="tl3-cap"><span class="no">1</span><span class="lx" lang="en">Session 1</span><span class="lx" lang="ja">セッション 1</span></div>
+        <div class="tl3-box sess">
+          <b class="lx" lang="en">work happens</b><b class="lx" lang="ja">作業する</b>
+          <span class="lx" lang="en">decisions, research, working state</span><span class="lx" lang="ja">決定・調査・作業状態が生まれる</span>
+          <i class="end lx" lang="en">/clear — session memory gone</i><i class="end lx" lang="ja">/clear — セッションの記憶は消える</i>
+        </div>
+        <div class="tl3-arrow"><span class="gl">↓</span><em class="lx" lang="en">save</em><em class="lx" lang="ja">保存</em></div>
+      </div>
+      <div class="tl3-panel">
+        <div class="tl3-cap"><span class="no">2</span><span class="lx" lang="en">Saved to the store</span><span class="lx" lang="ja">ストアへ保存</span></div>
+        <div class="tl3-box ghosted">
+          <b class="lx" lang="en">no session is running</b><b class="lx" lang="ja">セッションは無い</b>
+          <span class="lx" lang="en">the session is gone; the store still holds it all</span><span class="lx" lang="ja">セッションが消えても、ストアだけが覚えている</span>
+        </div>
+        <div class="tl3-arrow"></div>
+      </div>
+      <div class="tl3-panel">
+        <div class="tl3-cap"><span class="no">3</span><span class="lx" lang="en">Session 2</span><span class="lx" lang="ja">セッション 2</span></div>
+        <div class="tl3-box sess">
+          <b class="lx" lang="en">picks up the thread</b><b class="lx" lang="ja">続きから始まる</b>
+          <span class="lx" lang="en">starts already knowing the last decisions and state</span><span class="lx" lang="ja">前回の決定・状態を把握した状態で開始</span>
+          <i class="end ok lx" lang="en">restored automatically</i><i class="end ok lx" lang="ja">自動で復元</i>
+        </div>
+        <div class="tl3-arrow"><span class="gl">↑</span><em class="lx" lang="en">restore</em><em class="lx" lang="ja">復元</em></div>
+      </div>
+    </div>
+    <div class="tl3-store">
+      <b>~/ai-context-store/&lt;project&gt;/</b>
+      <span class="lx" lang="en">the same store stays put — only the sessions change</span><span class="lx" lang="ja">同じストアが居続ける — 入れ替わるのはセッションだけ</span>
+    </div>
   </div>
 </section>
 
-<!-- DOES -->
-<section class="sec" id="does">
+<!-- 3. WHAT ACCUMULATES: table -->
+<section class="sec" id="inside">
   <div class="sec-head reveal">
-    <span class="ghost">02</span>
-    <h2><span class="lx" lang="en">What the plugin does with it</span><span class="lx" lang="ja">plugin がそれで何をするか</span></h2>
-    <p><span class="lx" lang="en">The store is not a passive folder. The <code>ai-context</code> skill captures, navigates, and maintains it — reachable by intent, never by memorizing commands.</span><span class="lx" lang="ja">ストアは受け身のフォルダではない。<code>ai-context</code> skill が記録・案内・保守する — コマンド暗記でなくインテントで到達する。</span></p>
+    <span class="ghost">03</span>
+    <h2><span class="lx" lang="en">What accumulates</span><span class="lx" lang="ja">何が貯まるか</span></h2>
+    <p><span class="lx" lang="en">One folder per project, a fixed layout — a fixed home that any tool can read. Shared knowledge is flat and author-tagged; personal state is namespaced per author.</span><span class="lx" lang="ja">プロジェクトごとに 1 フォルダ・決まった構成 — どのツールからも読める、決まった置き場所。共有知識はフラットでファイル名に作成者を持ち、個人状態は作成者ごとの名前空間で分離。</span></p>
+  </div>
+  <div class="store-table-wrap reveal">
+    <table class="store-table">
+      <thead>
+        <tr>
+          <th><span class="lx" lang="en">Folder</span><span class="lx" lang="ja">フォルダ</span></th>
+          <th><span class="lx" lang="en">What goes in</span><span class="lx" lang="ja">何が入るか</span></th>
+          <th><span class="lx" lang="en">When it's used</span><span class="lx" lang="ja">いつ使うか</span></th>
+          <th><span class="lx" lang="en">Scope</span><span class="lx" lang="ja">区分</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="fd">decisions/</td>
+          <td><span class="lx" lang="en">design-decision log (one decision, one file)</span><span class="lx" lang="ja">設計の決定ログ（1 決定 = 1 ファイル）</span></td>
+          <td><span class="lx" lang="en">when you ask "why is it this way" later</span><span class="lx" lang="ja">「なぜこうなったか」を後から引くとき</span></td>
+          <td><b class="tag sh"><span class="lx" lang="en">shared</span><span class="lx" lang="ja">共有</span></b></td>
+        </tr>
+        <tr>
+          <td class="fd">docs/research/</td>
+          <td><span class="lx" lang="en">external research findings</span><span class="lx" lang="ja">外部調査の結果</span></td>
+          <td><span class="lx" lang="en">searched first, so the same research never runs twice</span><span class="lx" lang="ja">次の調査の前に検索し、同じ調査を繰り返さない</span></td>
+          <td><b class="tag sh"><span class="lx" lang="en">shared</span><span class="lx" lang="ja">共有</span></b></td>
+        </tr>
+        <tr>
+          <td class="fd">docs/knowledges/</td>
+          <td><span class="lx" lang="en">promoted, durable knowledge</span><span class="lx" lang="ja">昇格させた恒久ナレッジ</span></td>
+          <td><span class="lx" lang="en">fixed once, referenced every session</span><span class="lx" lang="ja">何度も効く知見を固定し、毎セッション参照</span></td>
+          <td><b class="tag sh"><span class="lx" lang="en">shared</span><span class="lx" lang="ja">共有</span></b></td>
+        </tr>
+        <tr>
+          <td class="fd">docs/specs/</td>
+          <td><span class="lx" lang="en">specifications (output of the <code>spec</code> skill)</span><span class="lx" lang="ja">仕様書（<code>spec</code> skill の出力）</span></td>
+          <td><span class="lx" lang="en">to settle the design before implementing, then referenced during the build</span><span class="lx" lang="ja">実装前に設計を固め、実装中に参照</span></td>
+          <td><b class="tag sh"><span class="lx" lang="en">shared</span><span class="lx" lang="ja">共有</span></b></td>
+        </tr>
+        <tr>
+          <td class="fd">workspaces/&lt;author&gt;/</td>
+          <td><span class="lx" lang="en">per-workspace state and tasks</span><span class="lx" lang="ja">作業単位ごとの状態とタスク</span></td>
+          <td><span class="lx" lang="en">switching work, resuming where you left off</span><span class="lx" lang="ja">作業の切替・続きからの再開</span></td>
+          <td><b class="tag pe"><span class="lx" lang="en">personal</span><span class="lx" lang="ja">個人</span></b></td>
+        </tr>
+        <tr>
+          <td class="fd">learnings/&lt;author&gt;/</td>
+          <td><span class="lx" lang="en">personal lessons</span><span class="lx" lang="ja">個人の教訓</span></td>
+          <td><span class="lx" lang="en">injected automatically at session start</span><span class="lx" lang="ja">セッション開始時に自動で注入</span></td>
+          <td><b class="tag pe"><span class="lx" lang="en">personal</span><span class="lx" lang="ja">個人</span></b></td>
+        </tr>
+        <tr>
+          <td class="fd">sessions/</td>
+          <td><span class="lx" lang="en">checkpoints (session-state snapshots)</span><span class="lx" lang="ja">チェックポイント（セッション状態の要約）</span></td>
+          <td><span class="lx" lang="en">saved before <code>/clear</code> or compaction, read at the next start</span><span class="lx" lang="ja"><code>/clear</code>・圧縮の前に保存し、次の開始時に取込</span></td>
+          <td><b class="tag ep"><span class="lx" lang="en">ephemeral</span><span class="lx" lang="ja">一時</span></b></td>
+        </tr>
+        <tr>
+          <td class="fd">meta/</td>
+          <td><span class="lx" lang="en">notes for operating the store itself</span><span class="lx" lang="ja">ストア運用のメタ情報</span></td>
+          <td><span class="lx" lang="en">health checks and the folder map</span><span class="lx" lang="ja">健康診断・フォルダ地図の確認</span></td>
+          <td><b class="tag sh"><span class="lx" lang="en">shared</span><span class="lx" lang="ja">共有</span></b></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="legend reveal">
+    <span><b class="sh"><span class="lx" lang="en">shared</span><span class="lx" lang="ja">共有</span></b><span class="lx" lang="en">flat, author-tagged (<code>…_&lt;github&gt;.md</code>) — the team shares it</span><span class="lx" lang="ja">フラット・ファイル名に作成者（<code>…_&lt;github&gt;.md</code>）— チームで共有</span></span>
+    <span><b class="pe"><span class="lx" lang="en">personal</span><span class="lx" lang="ja">個人</span></b><span class="lx" lang="en">under <code>&lt;author&gt;/</code> — working state never collides</span><span class="lx" lang="ja"><code>&lt;author&gt;/</code> 配下 — 作業状態が衝突しない</span></span>
+    <span><b class="ep"><span class="lx" lang="en">ephemeral</span><span class="lx" lang="ja">一時</span></b><span class="lx" lang="en">gitignored, never committed — this machine, this moment only</span><span class="lx" lang="ja">gitignore・コミットされない — この機械・その時だけ</span></span>
+  </div>
+
+  <!-- how Banto uses the store -->
+  <div class="subhead reveal" id="does">
+    <h3><span class="lx" lang="en">How Banto uses the store</span><span class="lx" lang="ja">Banto はストアをこう使う</span></h3>
+    <p><span class="lx" lang="en">The store is not just a place to put files. The <code>ai-context</code> skill records, navigates, and maintains it — no command to memorize; ask in plain words and the right one is reached.</span><span class="lx" lang="ja">ストアはただの置き場ではない。<code>ai-context</code> skill が記録・案内・保守する — コマンドを覚えなくても、普通の言葉で頼めば届く。</span></p>
   </div>
   <div class="cmd-grid">
     <div class="card reveal">
@@ -246,60 +389,84 @@
     <div class="card reveal">
       <h3><span class="tag">maintain</span><span class="lx" lang="en">Keep healthy</span><span class="lx" lang="ja">健全に保つ</span></h3>
       <ul>
-        <li><code>doctor</code> · <span class="lx" lang="en">lint broken links / orphans / stale decisions (detect only)</span><span class="lx" lang="ja">壊れリンク / orphan / 古い決定を診断（検出のみ）</span></li>
-        <li><code>bootstrap</code> · <span class="lx" lang="en">back the store with a GitHub repo</span><span class="lx" lang="ja">GitHub repo でストアを裏づけ</span></li>
+        <li><code>doctor</code> · <span class="lx" lang="en">lint broken links / orphans / stale decisions (detect only)</span><span class="lx" lang="ja">壊れたリンク・孤立ファイル・古い決定を診断（検出のみ）</span></li>
+        <li><code>bootstrap</code> · <span class="lx" lang="en">back the store with a GitHub repo</span><span class="lx" lang="ja">GitHub の置き場をストアに登録</span></li>
         <li><code>local</code> · <span class="lx" lang="en">pin a project local-only</span><span class="lx" lang="ja">プロジェクトをローカル固定</span></li>
       </ul>
     </div>
   </div>
-  <div class="note reveal">
-    <span class="seal" aria-hidden="true">番</span>
-    <div><span class="lx" lang="en"><strong>Never blocks.</strong> An unregistered project lands immediately in a temporary local store (<code>~/ai-context-local/&lt;project&gt;/</code>, same layout) — work is never gated on setup. <code>bootstrap</code> later registers or creates a private GitHub store and migrates the local one in (additive, never overwrites).</span><span class="lx" lang="ja"><strong>決して止めない。</strong>未登録のプロジェクトはまず仮ローカルストア（<code>~/ai-context-local/&lt;project&gt;/</code>・同レイアウト）に着地する — 準備で作業を止めない。<code>bootstrap</code> が後から private な GitHub ストアを登録 / 作成し、ローカル分を取り込む（追加のみ・上書きしない）。</span></div>
-  </div>
 </section>
 
-<!-- WIRING: animated lifecycle -->
-<section class="sec" id="wiring">
+<!-- 4. AUTOMATIC: three scenes + hook appendix -->
+<section class="sec" id="auto">
   <div class="sec-head reveal">
-    <span class="ghost">03</span>
-    <h2><span class="lx" lang="en">How it wires into Claude Code</span><span class="lx" lang="ja">Claude Code への食い込み方</span></h2>
-    <p><span class="lx" lang="en">Banto hooks every stage of Claude Code's lifecycle. The store is fed in, guarded, and harvested automatically — the human never calls it.</span><span class="lx" lang="ja">Banto は Claude Code のライフサイクル各段に hook を張る。ストアは自動で注入・防御・収穫される — 人間は呼ばない。</span></p>
+    <span class="ghost">04</span>
+    <h2><span class="lx" lang="en">It runs by itself</span><span class="lx" lang="ja">自動で回る</span></h2>
+    <p><span class="lx" lang="en">Banto hooks into Claude Code's lifecycle, so the store is injected, guarded, and saved automatically — the human never calls it. Three scenes.</span><span class="lx" lang="ja">Banto が Claude Code のライフサイクルに hook を張るため、ストアは自動で注入・防御・保存される — 人間は呼ばない。場面は 3 つ。</span></p>
   </div>
-  <div class="card reveal">
-    <div class="life">
-      <div class="step">
-        <div class="ev">SessionStart</div>
-        <div class="what"><span class="lx" lang="en">Inject the store + restore context</span><span class="lx" lang="ja">ストア注入 + 文脈復元</span></div>
-        <div class="det"><span class="lx" lang="en">The absolute store path, the latest checkpoint, today's decisions, and the active workspace are injected. Drafts past a threshold prompt a promote-or-delete review.</span><span class="lx" lang="ja">ストアの絶対パス・直近チェックポイント・本日の決定・現ワークスペースを注入。下書きが閾値を超えると昇格 / 削除レビューを提示。</span></div>
-      </div>
-      <div class="step">
-        <div class="ev">UserPromptSubmit</div>
-        <div class="what"><span class="lx" lang="en">Nudge to capture</span><span class="lx" lang="ja">記録のうながし</span></div>
-        <div class="det"><span class="lx" lang="en">Reminds you where decisions are saved, and recommends a checkpoint as a phase wraps up.</span><span class="lx" lang="ja">決定の保存先を提示し、Phase の区切りでチェックポイントを推奨。</span></div>
-      </div>
-      <div class="step">
-        <div class="ev">PreToolUse</div>
-        <div class="what"><span class="lx" lang="en">Guard before the action runs</span><span class="lx" lang="ja">実行前に防御</span></div>
-        <div class="det"><span class="lx" lang="en">Deterministic safety valves fire <em>before</em> a tool runs: <code>egress-guard</code> (internal names / PII leaking to a client path), <code>safety-guard</code> (risky shell), <code>odd-kill-switch</code> (direct push to main).</span><span class="lx" lang="ja">tool 実行の<em>前</em>に決定論的な安全弁が発火：<code>egress-guard</code>（内部名 / PII の client パス流出）・<code>safety-guard</code>（危険シェル）・<code>odd-kill-switch</code>（main 直 push）。</span></div>
-      </div>
-      <div class="step">
-        <div class="ev">PostToolUse</div>
-        <div class="what"><span class="lx" lang="en">Number decisions, rebuild search</span><span class="lx" lang="ja">決定採番・検索層再生成</span></div>
-        <div class="det"><span class="lx" lang="en">A write into <code>decisions/</code>/<code>docs/</code> regenerates the combined search corpus (milliseconds, no model) so internal search always sees the latest.</span><span class="lx" lang="ja"><code>decisions/</code>・<code>docs/</code> への書き込みで連結検索コーパスを再生成（ミリ秒・モデル不要）。内部検索が常に最新を見る。</span></div>
-      </div>
-      <div class="step">
-        <div class="ev">PreCompact</div>
-        <div class="what"><span class="lx" lang="en">Snapshot before context is squeezed</span><span class="lx" lang="ja">圧縮の前に要約保存</span></div>
-        <div class="det"><span class="lx" lang="en">A checkpoint is written to <code>sessions/</code> and the store is synced — so a compaction never costs you the thread.</span><span class="lx" lang="ja">チェックポイントを <code>sessions/</code> に書き、ストアを同期 — compaction で文脈を失わない。</span></div>
-      </div>
-      <div class="step">
-        <div class="ev">Stop</div>
-        <div class="what"><span class="lx" lang="en">Verify before claiming, then learn</span><span class="lx" lang="ja">断定前に検証・そして学習</span></div>
-        <div class="det"><span class="lx" lang="en"><code>verify-claim-guard</code> blocks a "done" claim while verification is red; a self-improvement loop captures a learning draft for later review.</span><span class="lx" lang="ja"><code>verify-claim-guard</code> が検証 red のままの「完了」をブロック。自己改善ループが教訓の下書きを残す。</span></div>
-      </div>
+  <div class="scene-grid">
+    <div class="card scene reveal">
+      <div class="sc-no">1</div>
+      <div class="sc-when"><span class="lx" lang="en">at session start</span><span class="lx" lang="ja">開始時</span></div>
+      <h3><span class="lx" lang="en">Remember</span><span class="lx" lang="ja">思い出す</span></h3>
+      <p><span class="lx" lang="en">The moment a session starts, the store path, the latest checkpoint, today's decisions, and the current working state are injected. When drafts exceed 10, a promote-or-delete review is offered.</span><span class="lx" lang="ja">セッション開始と同時に、ストアの場所・直近チェックポイント・本日の決定・現在の作業状態を注入。下書きが 10 件を超えると、昇格 / 削除のレビューを提示。</span></p>
+    </div>
+    <div class="card scene reveal">
+      <div class="sc-no">2</div>
+      <div class="sc-when"><span class="lx" lang="en">while working</span><span class="lx" lang="ja">作業中</span></div>
+      <h3><span class="lx" lang="en">Guard &amp; record</span><span class="lx" lang="ja">守る・記録する</span></h3>
+      <p><span class="lx" lang="en">Before a tool runs, deterministic safety valves fire: a write that would leak an internal name or PII into a client file is stopped (<code>egress-guard</code>); a dangerous shell command is stopped (<code>safety-guard</code>); a direct push to main is stopped (<code>odd-kill-switch</code>). Every saved decision or doc regenerates the search text automatically.</span><span class="lx" lang="ja">tool 実行の前に、決定論の安全弁が働く：内部名や個人情報が客先ファイルへ出そうなら止める（<code>egress-guard</code>）。危険なシェルコマンドを止める（<code>safety-guard</code>）。main への直接 push を止める（<code>odd-kill-switch</code>）。決定や doc を書き込むたびに、検索用テキストを自動で再生成。</span></p>
+    </div>
+    <div class="card scene reveal">
+      <div class="sc-no">3</div>
+      <div class="sc-when"><span class="lx" lang="en">at end / compaction</span><span class="lx" lang="ja">終了・圧縮時</span></div>
+      <h3><span class="lx" lang="en">Save</span><span class="lx" lang="ja">保存する</span></h3>
+      <p><span class="lx" lang="en">Before context is squeezed, a checkpoint is saved to <code>sessions/</code> and the store is synced. A "done" claim with red verification is blocked (<code>verify-claim-guard</code>), and a lesson draft is kept for later.</span><span class="lx" lang="ja">圧縮の前にチェックポイントを <code>sessions/</code> へ保存し、ストアを同期。検証が通らないままの「完了」は遮断（<code>verify-claim-guard</code>）。教訓の下書きを残す。</span></p>
     </div>
   </div>
+  <details class="fold reveal">
+    <summary><span class="lx" lang="en">Appendix: the six hooks, by lifecycle event</span><span class="lx" lang="ja">付録：ライフサイクル別の 6 つの hook</span></summary>
+    <div class="fold-body">
+      <dl>
+        <dt>SessionStart</dt>
+        <dd><span class="lx" lang="en">Injects the absolute store path, the latest checkpoint, today's decisions, and the active workspace. When drafts exceed 10, a promote-or-delete review is offered.</span><span class="lx" lang="ja">ストアの絶対パス・直近チェックポイント・本日の決定・現在のワークスペースを注入。下書きが 10 件を超えると昇格 / 削除レビューを提示。</span></dd>
+        <dt>UserPromptSubmit</dt>
+        <dd><span class="lx" lang="en">Reminds where decisions are saved, and recommends a checkpoint as a phase wraps up.</span><span class="lx" lang="ja">決定の保存先を提示し、Phase の区切りでチェックポイントを推奨。</span></dd>
+        <dt>PreToolUse</dt>
+        <dd><span class="lx" lang="en">Guards before the action runs: <code>egress-guard</code> stops internal names / PII heading into a client file; <code>safety-guard</code> stops dangerous shell commands; <code>odd-kill-switch</code> stops a direct push to main.</span><span class="lx" lang="ja">実行前の防御。内部名や個人情報の客先ファイル流出を止める（<code>egress-guard</code>）。危険なシェルコマンドを止める（<code>safety-guard</code>）。main への直接 push を止める（<code>odd-kill-switch</code>）。</span></dd>
+        <dt>PostToolUse</dt>
+        <dd><span class="lx" lang="en">A write into <code>decisions/</code> or <code>docs/</code> regenerates the combined search text (milliseconds, no model) — internal search always sees the latest.</span><span class="lx" lang="ja"><code>decisions/</code>・<code>docs/</code> への書き込みで、検索用の連結テキストを再生成（ミリ秒・モデル不要）。内部検索が常に最新を見る。</span></dd>
+        <dt>PreCompact</dt>
+        <dd><span class="lx" lang="en">Writes a checkpoint to <code>sessions/</code> and syncs the store before context is squeezed.</span><span class="lx" lang="ja">圧縮の前にチェックポイントを <code>sessions/</code> へ書き、ストアを同期。</span></dd>
+        <dt>Stop</dt>
+        <dd><span class="lx" lang="en"><code>verify-claim-guard</code> blocks a "done" claim while verification is red; a self-improvement loop keeps a lesson draft in <code>learnings/</code>.</span><span class="lx" lang="ja">検証が通らないままの「完了」を遮断（<code>verify-claim-guard</code>）。自己改善ループが教訓の下書きを <code>learnings/</code> に残す。</span></dd>
+      </dl>
+    </div>
+  </details>
   <p class="crumb reveal" style="margin-top:18px"><span class="lx" lang="en">Enforcement is hooks, never promises — the same principle across the whole harness.</span><span class="lx" lang="ja">強制は約束ではなく hook — ハーネス全体を貫く原則。</span></p>
+</section>
+
+<!-- 5. NEVER BLOCKS / MIGRATE LATER -->
+<section class="sec" id="migrate">
+  <div class="sec-head reveal">
+    <span class="ghost">05</span>
+    <h2><span class="lx" lang="en">Never blocks — migrate later</span><span class="lx" lang="ja">止めない。移行は後から</span></h2>
+    <p><span class="lx" lang="en">Setup never gates the work. Before any registration, a temporary local home is used — move it to GitHub whenever you like.</span><span class="lx" lang="ja">準備で作業を止めない。登録前でも仮の置き場ですぐ動き、後から GitHub の置き場へ移せる。</span></p>
+  </div>
+  <div class="mini-grid">
+    <div class="card reveal">
+      <h3><span class="step-n">1</span><span class="lx" lang="en">Works immediately</span><span class="lx" lang="ja">すぐ動く</span></h3>
+      <p><span class="lx" lang="en">An unregistered project is first saved to a temporary local home (<code>~/ai-context-local/&lt;project&gt;/</code>, same layout). Nothing waits on setup.</span><span class="lx" lang="ja">未登録のプロジェクトは、まず仮のローカル置き場（<code>~/ai-context-local/&lt;project&gt;/</code>・同じ構成）に保存される。準備を待たずに動く。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">2</span><span class="lx" lang="en">Migrate later</span><span class="lx" lang="ja">後から移せる</span></h3>
+      <p><span class="lx" lang="en"><code>bootstrap</code> registers or creates a private GitHub store, then pulls the local content in.</span><span class="lx" lang="ja"><code>bootstrap</code> が非公開の GitHub ストアを登録 / 作成し、ローカル分を取り込む。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">3</span><span class="lx" lang="en">Additive only</span><span class="lx" lang="ja">追加のみ</span></h3>
+      <p><span class="lx" lang="en">Migration only adds — nothing already in the store is overwritten.</span><span class="lx" lang="ja">移行は追加のみで、既存の内容を上書きしない。</span></p>
+    </div>
+  </div>
 </section>
 
 <!-- CTA -->
@@ -308,7 +475,8 @@
     <h2><span class="lx" lang="en">The harness holds the knowledge. You hold the vision.</span><span class="lx" lang="ja">知識はハーネスが持つ。方針はあなたが持つ。</span></h2>
     <p><span class="lx" lang="en">AI-Context-Store is one of Banto's three flagships, alongside workspace &amp; fleet operations and the JA-canonical i18n method.</span><span class="lx" lang="ja">AI-Context-Store は Banto の 3 つの目玉の 1 つ。ワークスペース &amp; 艦隊運用、JA 正本 i18n 手法と並ぶ。</span></p>
     <div style="display:flex;gap:14px;flex-wrap:wrap">
-      <a class="btn btn-primary" href="index.html#flagships"><span class="lx" lang="en">See the other flagships</span><span class="lx" lang="ja">他の目玉を見る</span></a>
+      <a class="btn btn-primary" href="evidence.html"><span class="lx" lang="en">See the evidence — 4 benchmarks, 36 cells →</span><span class="lx" lang="ja">実測を見る — 4 ベンチマーク・36 セル →</span></a>
+      <a class="btn btn-ghost" href="index.html#flagships" style="color:var(--paper);border-color:rgba(245,240,230,.4)"><span class="lx" lang="en">See the other flagships</span><span class="lx" lang="ja">他の目玉を見る</span></a>
       <a class="btn btn-ghost" href="plugin-tools.html" style="color:var(--paper);border-color:rgba(245,240,230,.4)"><span class="lx" lang="en">Plugin audit &amp; dev tools →</span><span class="lx" lang="ja">プラグイン監査 &amp; 開発の道具 →</span></a>
     </div>
   </div>

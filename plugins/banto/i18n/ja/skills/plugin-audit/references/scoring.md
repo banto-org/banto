@@ -33,11 +33,13 @@ banto 全資産（skill / agent / rule / hook）の品質評価軸。本書を `
 
 判定系 skill（`plugin-audit eval` / `plugin-audit fix` / `harness-audit`）は **必ずサブエージェントで判定** する。メインセッションには作業履歴コンテキスト汚染があり、self-evaluation bias が発生する。
 
-| skill | Reviewer |
-|-------|---------|
-| `plugin-audit eval` | Agent (general-purpose) で各ケース独立判定、複数 Agent で投票 |
-| `plugin-audit fix` | Agent (general-purpose) が修正提案、メインで対話承認 |
-| `harness-audit` | 死蔵判定など主観の入る軸を Agent (general-purpose) に委譲 |
+judge / reviewer Agent の既定モデルは `model: "opus"`（`templates/model-policy.json` の `audit` 既定、`audit_alt: "fable"` は任意アップグレード）。
+
+| skill | Reviewer | model |
+|-------|---------|-------|
+| `plugin-audit eval` | Agent (general-purpose) で各ケース独立判定、複数 Agent で投票 | opus |
+| `plugin-audit fix` | Agent (general-purpose) が修正提案、メインで対話承認 | opus |
+| `harness-audit` | 死蔵判定など主観の入る軸を Agent (general-purpose) に委譲 | opus |
 
 ---
 
@@ -273,9 +275,7 @@ skill 同士の境界が曖昧だと Claude のルーティング判断がブレ
 [skill 内のロジック、統一]
 
 1. .claude/rules/{topic}.md を Read（harness-setup.sh / プロジェクト側が配置した rule）
-2. なければ → {base}/refs/{topic}/ を探す:
-   2a. search skill（クエリ展開 + grep ランキング）で意味的に近い章を探す
-   2b. search で見つからなければ → {base}/refs/_index.md を Read → 章ごとに Read
+2. なければ → search skill（クエリ展開 + grep ランキング）で store の decisions / docs から意味的に近い記述を探す
 3. なければ → skill 内蔵の default を使う
 ```
 

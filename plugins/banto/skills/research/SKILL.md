@@ -92,7 +92,7 @@ For topics where the accuracy of a claim drives a real decision, delegate to Cla
    Workflow({ name: "deep-research", args: "<refined question>" })
    ```
 4. **Graceful fallback**: if the environment lacks `deep-research` (older Claude Code), the Workflow call fails at name resolution → fall back to the normal parallel `research-agent` path. Never hard-fail.
-5. **Persistence wrapper (this is the core of the integration — required)**: deep-research **saves nothing**. It returns `{ summary, findings[], caveats, sources, stats }`. You **must** format that object into a standard research document and save it to `{BASE}/docs/research/{YYYY-MM-DD}_{slug}.md` (the deep-research template is in [`references/output-format.md`](references/output-format.md)). Keep the per-finding confidence + votes and the list of rejected claims (transparency).
+5. **Persistence wrapper (this is the core of the integration — required)**: deep-research **saves nothing**. It returns `{ summary, findings[], caveats, sources, stats }`. You **must** format that object into a standard research document and save it to `{base}/docs/research/{YYYY-MM-DD}_{slug}.md` (the deep-research template is in [`references/output-format.md`](references/output-format.md)). Keep the per-finding confidence + votes and the list of rejected claims (transparency).
 6. **Store-first integration**: after saving, check consistency against past `decisions/` and existing research, and report it (same as the normal path). This is what turns a one-off report into accumulated knowledge.
 
 ## Pre-context check (always run before external research)
@@ -107,7 +107,7 @@ Before starting external research, **first launch the `search` skill to check th
 4. `search` returns with **zero confidence** (confident: false) → proceed to external research (Step 1 onward)
 
 Supplementary checks (for context `search` may not pick up — optional, can run in parallel):
-- **WS related documents**: check `## 関連ドキュメント` in `{base}/WORKSPACE.md` for any URL that is a primary source for the topic (if present, use it as the primary source for that subtopic in Step 1)
+- **WS related documents**: check `## 関連ドキュメント` in the current WS entity `workspaces/<author>/<topic>/workspace.md` (pointer: `<git-dir>/banto-ws-pointer.md`; `{base}/WORKSPACE.md` outside git) for any URL that is a primary source for the topic (if present, use it as the primary source for that subtopic in Step 1)
 - **active.md**: Read the current task file and understand how the research topic relates to the current task
 
 **Decision rules**:

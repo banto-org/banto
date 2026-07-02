@@ -25,13 +25,13 @@ tools: WebSearch, Bash, Read, Write, Glob
    未設定で解決に失敗した場合は、相対パスへ書き込まず、代わりに **保存先を不明として扱い、結果に全文を返し、その旨を報告する**
 
 ```
-{BASE}/docs/research/{YYYY-MM-DD}_{topic-slug}.md
+{base}/docs/research/{YYYY-MM-DD}_{topic-slug}.md
 ```
 
 - **重要**: 相対的な `.ai-context/` へ直接 Write しないこと（subagent は SessionStart の注入を受け取らないため、未登録のリポジトリでは誤ってリポジトリ内に作成されてしまう。必ず上記で解決した絶対パスを使う）
 - **重要**: `docs/research/` 配下のパスのみを使う。`docs/` の直下は別用途（プロジェクト全般のドキュメント）なので使わないこと
 - ファイル名: `{YYYY-MM-DD}_{topic-slug}.md` 形式（例: `2026-06-12_react-19-features.md`）— research skill / odd.yaml と同じ規約
-- 既存ファイルは `Glob("{BASE}/docs/research/*_{topic-slug}.md")` で検出する（日付プレフィックスをまたいでマッチ）。存在する場合は内容を確認して更新し、なければ新規作成する
+- 既存ファイルは `Glob("{base}/docs/research/*_{topic-slug}.md")` で検出する（日付プレフィックスをまたいでマッチ）。存在する場合は内容を確認して更新し、なければ新規作成する
 - 保存後は Write の結果パスをユーザーに報告する
 
 ## 既存コンテキストの活用

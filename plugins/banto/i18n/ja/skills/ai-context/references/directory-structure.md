@@ -62,7 +62,7 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
 │           ├── workspace.md      #   WS 定義（ブランチ / 依存 / 関連 doc）
 │           ├── tasks.md          #   この WS の active タスク（旧 active.md 相当）
 │           └── tasks-old/        #   Phase 退避（旧 tasks/old 相当）
-├── WORKSPACE.md         # 軽量ポインタ（per-checkout）                          ← store .gitignore
+├── WORKSPACE.md         # 非 git 環境のポインタ fallback（本体は <git-dir>/banto-ws-pointer.md）← store .gitignore
 ├── DASHBOARD.md         # hook 管理の鳥瞰図（per-checkout）                     ← store .gitignore
 └── *-combined.txt       # 検索用テキスト層（hook が自動再生成）                 ← store .gitignore
 ```
@@ -79,7 +79,9 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
   プロジェクトの知識ではなく store 運用のための領域。`store-map-gen.sh` が `meta/store-map.md` を生成する。
 - **遅延生成（lazy）バケット**: 特定 skill が初回実行時にだけ掘るため、未起動なら実体は無い（リンターは欠落を許容）。
   `docs/specs/`（spec）/ `concept/CONCEPT.md`（concept）/ `experiments/<project>/ledger.jsonl`（model-lab）/
-  `refs/<topic>/`（doc-import・legacy）/ `tmp/search/`（search の一時出力・gitignore）/ `search-lexicon.md`（search が deep 成功時に追記）。
+  `tmp/search/`（search の一時出力・gitignore）/ `search-lexicon.md`（search が deep 成功時に追記）/
+  `tasks/`（legacy 読取フォールバックのみ・新規生成なし）/ `WORKSPACE.md`（非 git 環境のポインタ fallback。
+  本体は `<git-dir>/banto-ws-pointer.md`）。旧 `refs/`（doc-import）は 5.75.10 で廃止。
 
 - **grandfather（legacy）**: 既存の repo 内 `.ai-context/` を持つ案件は、移行（`/ai-context migrate`）
   まで同じバケット構造を repo 内 base で使い続ける（読み書き従来どおり）。新規生成はされない。
@@ -105,7 +107,7 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
 | `sessions/pending/<author>.md` | `save-checkpoint`（保存）/ SessionStart（取込）| `checkpoint-{YYYY-MM-DD}-{HHMM}.md` 相当。pending → consumed へ遷移 |
 | `sessions/consumed/<author>/` | SessionStart（取込済みへ移動）| 取込済みチェックポイント（per-author）|
 | `workspaces/<author>/[scope] topic/` | `ws`（WS 定義・active タスク）| `workspace.md` / `tasks.md` / `tasks-old/`（新 layout）|
-| `WORKSPACE.md`・`DASHBOARD.md` | `ws` / 管理 hook（per-checkout ポインタ）| 軽量ポインタ・鳥瞰図（gitignore）|
+| `WORKSPACE.md`・`DASHBOARD.md` | `ws`（非 git fallback / multi 参照）/ 管理 hook | ポインタ fallback・鳥瞰図（gitignore）。ポインタ本体は `<git-dir>/banto-ws-pointer.md` |
 | `sessions/registry/` | `session-registry.sh`（Fleet 台帳）| `<session_id>.json`。衝突検知 12h 窓・7日 GC（gitignore）|
 | `sessions-cache/` | `ai_context_combined.py`（full-combined 用キャッシュ）| `<session_id>.txt`（gitignore）|
 | `telemetry/` | `telemetry-log.sh`（skill 起動 / artifact 記録）| `usage-YYYY-MM.jsonl`。basename / prefix のみ・PII ゼロ |

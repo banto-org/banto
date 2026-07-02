@@ -96,15 +96,15 @@ User-facing output (messages and listings): respond in Japanese if the user is s
 
 ### /ws (no argument) / /ws list: display
 
-`/ws` Reads WORKSPACE.md and shows the current WS; `/ws list` Globs workspaces/ and lists active / archived. Concrete Read/Glob procedure and display format: [`references/basic-commands.md`](references/basic-commands.md).
+`/ws` Reads the effective pointer (`<git-dir>/banto-ws-pointer.md`; WORKSPACE.md outside git) and shows the current WS; `/ws list` Globs workspaces/ and lists active / archived. Concrete Read/Glob procedure and display format: [`references/basic-commands.md`](references/basic-commands.md).
 
 ### /ws new / /ws archive / /ws import: create / shelve / import
 
 Detailed procedure: [`references/new-and-archive.md`](references/new-and-archive.md)
 
 Key points:
-- `/ws new`: Read config.json → confirm scope + topic → create the entity `workspaces/<author>/[scope] name/{workspace.md, tasks.md(scaffold), tasks-old/}` → write `WORKSPACE.md` as the lightweight pointer
-- `/ws archive`: move the entity dir to `workspaces/<author>/old/`, delete WORKSPACE.md
+- `/ws new`: Read config.json → confirm scope + topic → **confirm whether it's an implementation WS** (default = implementation; implementation WS worktree launches use `claude --model sonnet`, design WS get no flag = session default) → create the entity `workspaces/<author>/[scope] name/{workspace.md, tasks.md(scaffold), tasks-old/}` → write the lightweight pointer (`<git-dir>/banto-ws-pointer.md`; WORKSPACE.md outside git)
+- `/ws archive`: move the entity dir to `workspaces/<author>/old/`, delete the effective pointer
 - `/ws import`: pull in another WS's related documents and add them to the "dependencies" field
 
 ### /ws switch <name>: switch (with automatic branch switching)
@@ -113,7 +113,7 @@ Detailed procedure: [`references/switch-procedure.md`](references/switch-procedu
 
 Main steps:
 1. Check for uncommitted changes (abort if any; avoid a destructive operation)
-2. Rewrite `WORKSPACE.md` as the lightweight pointer for the new WS (delete WORKSPACE-refs.md)
+2. Rewrite the lightweight pointer (`<git-dir>/banto-ws-pointer.md`) for the new WS (delete WORKSPACE-refs.md; writing the old WORKSPACE.md is legacy-configuration only)
 3. Auto-switch the branch using the "branch:" line of the entity `workspace.md` (git checkout / -b)
 4. Read the pointer + entity `workspace.md` + `tasks.md` to inject context
 5. Check dependent WS

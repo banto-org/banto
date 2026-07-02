@@ -110,6 +110,7 @@ if [ -d "$EN" ]; then
     find "$EN" -type d -empty -delete 2>/dev/null || true
 fi
 
-jq -S . "$tmp" > "$MANIFEST"
+SOURCE_COMMIT=$(git -C "$PLUGIN_ROOT" rev-parse --short HEAD 2>/dev/null || echo unknown)
+jq -S --arg ts "$(_now)" --arg sc "$SOURCE_COMMIT" '. + {generated_at:$ts, source_commit:$sc}' "$tmp" > "$MANIFEST"
 rm -f "$tmp"
 echo "i18n-gen ($MODE): translated=$generated recorded=$recorded pruned=$pruned → $MANIFEST"

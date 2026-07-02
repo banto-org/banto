@@ -96,15 +96,15 @@ epic に値しない単発作業に epic を提案しない（誤発火の官僚
 
 ### /ws（引数なし）/ /ws list: 表示系
 
-`/ws` は WORKSPACE.md を Read して現在の WS を表示、`/ws list` は workspaces/ を Glob して active / archived を一覧表示。Read/Glob の具体手順・表示形式: [`references/basic-commands.md`](references/basic-commands.md)。
+`/ws` は実効ポインタ（`<git-dir>/banto-ws-pointer.md`、非 git は WORKSPACE.md）を Read して現在の WS を表示、`/ws list` は workspaces/ を Glob して active / archived を一覧表示。Read/Glob の具体手順・表示形式: [`references/basic-commands.md`](references/basic-commands.md)。
 
 ### /ws new / /ws archive / /ws import: 作成 / 退避 / インポート
 
 詳細手順: [`references/new-and-archive.md`](references/new-and-archive.md)
 
 要点:
-- `/ws new`: config.json を Read → スコープ + トピックを確認 → 実体 `workspaces/<author>/[scope] name/{workspace.md, tasks.md(scaffold), tasks-old/}` を作成 → 軽量ポインタとして `WORKSPACE.md` を書く
-- `/ws archive`: 実体 dir を `workspaces/<author>/old/` へ移動、WORKSPACE.md を削除
+- `/ws new`: config.json を Read → スコープ + トピックを確認 → **実装 WS か確認**（既定 = 実装。実装 WS の並走起動は `claude --model sonnet`、設計 WS はフラグなし＝セッション既定） → 実体 `workspaces/<author>/[scope] name/{workspace.md, tasks.md(scaffold), tasks-old/}` を作成 → 軽量ポインタ（`<git-dir>/banto-ws-pointer.md`、非 git は WORKSPACE.md）を書く
+- `/ws archive`: 実体 dir を `workspaces/<author>/old/` へ移動、実効ポインタを削除
 - `/ws import`: 別 WS の関連ドキュメントを引き込んで 「依存:」 欄に追加
 
 ### /ws switch <name>: 切替（ブランチ自動切替付き）
@@ -113,7 +113,7 @@ epic に値しない単発作業に epic を提案しない（誤発火の官僚
 
 主なステップ:
 1. 未コミット変更をチェック（あれば中止；破壊的操作を回避）
-2. `WORKSPACE.md` を新 WS の軽量ポインタとして書き換え（WORKSPACE-refs.md を削除）
+2. 軽量ポインタ（`<git-dir>/banto-ws-pointer.md`）を新 WS へ書き換え（WORKSPACE-refs.md を削除。旧 WORKSPACE.md を書くのは legacy 構成のみ）
 3. 実体 `workspace.md` の 「ブランチ:」 行を使ってブランチを自動切替（git checkout / -b）
 4. ポインタ + 実体 `workspace.md` + `tasks.md` を Read して文脈を注入
 5. 依存 WS を確認

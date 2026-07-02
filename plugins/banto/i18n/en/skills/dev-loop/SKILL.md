@@ -39,11 +39,11 @@ odd.yaml = **L3 (Autopilot = continuous execution + user requested on exceptions
 
 ### Phase 1: iterate (until tasks.md is exhausted)
 For each task:
-1. Get the next `[ ]` (with dependencies cleared) via `ai-context` next. Parallel-flagged groups fan out as multiple Agent calls in one message; the rest run serially.
+1. Get the next `[ ]` (with dependencies cleared) via `ai-context` next. Parallel-flagged groups fan out as multiple Agent calls in one message (implementation Agents use `model: "sonnet"` — the `implement` default in `templates/model-policy.json`); the rest run serially.
 2. **Implement** (Edit / Write). On each edit the PostToolUse `auto-test.sh` runs the related test. After 3 consecutive failures `odd-gate.sh` auto-blocks edits (churn prevention = the existing retry cap).
 3. **Full verify**: `sh "$CLAUDE_PLUGIN_ROOT/hooks/verify-run.sh" <project>` (aggregates build → test → api; exit 0=green / 2=red; result in `$HOME/.cache/banto/verify-last-<session>` as `green` or `red:<steps>`).
 4. **red** → fix the root cause with the `debugger` agent → back to 3. If you hit `odd-gate`'s 3-consecutive-failure guard, **stop the loop and escalate to the owner** (do not churn).
-5. **green** → mark the `tasks.md` line `[x]`, commit to the branch (push / PR / main stay human-gated = existing safety).
+5. **green** → an audit Agent (`model: "opus"`, fresh and in a separate context from implementation, reviewing the diff + spec — the `audit` default in `templates/model-policy.json`; `audit_alt: "fable"` is an optional upgrade) confirms spec conformance → mark the `tasks.md` line `[x]`, commit to the branch (push / PR / main stay human-gated = existing safety).
 
 ### Phase 2: convergence / exception
 - tasks.md exhausted → completion report (summary of implementation, verification, adopted interpretations). If a phase is complete, archive to `tasks-old/` via `ai-context` phase-done.

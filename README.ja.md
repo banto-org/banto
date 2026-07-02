@@ -79,6 +79,14 @@ sh "$(ls -d ~/.claude/plugins/cache/*/banto/*/ | sort -V | tail -1)scripts/harne
 GitHub `ai-context-store` を登録するか／どの org に新規作成するか／ローカルのみか。選んだ org は以降の
 プロジェクトに再利用されます）。チーム運用時のみ store の git 同期を設定します。
 
+### 更新への追従
+
+`harness-setup.sh` は settings.json に Banto marketplace の `autoUpdate: true` も設定します
+（サードパーティ marketplace の既定はオフ）。以後、新リリースはセッション開始時に自動で取り込まれます。
+セッション途中で反映する場合は対話コマンド `/reload-plugins` を実行（hooks・MCP は再読み込み。
+再起動が必要なのは monitors のみ）。手動更新は
+`claude plugin marketplace update banto-marketplace && claude plugin update banto@banto-marketplace`。
+
 ## 日本語で使う（公開既定は英語）
 
 skill / agent の表示を日本語に切り替えるには、**一度だけ**次を実行する:
