@@ -29,8 +29,9 @@ sh "$GEN" --base "$BASE"
 J="$BASE/meta/ontology.json"
 M="$BASE/meta/ontology.md"
 jq empty "$J" >/dev/null 2>&1 && ok "gen: emits valid JSON ABox" || no "gen: invalid/absent ABox"
-[ "$(jq '[.entities[]|select(.type=="skill")]|length' "$J" 2>/dev/null)" = "18" ] \
-    && ok "gen: 18 skill entities" || no "gen: skill count != 18"
+EXPECT_SKILLS=$(find "$PLUGIN_ROOT/skills" -mindepth 2 -maxdepth 2 -name SKILL.md 2>/dev/null | wc -l | tr -d ' ')
+[ "$(jq '[.entities[]|select(.type=="skill")]|length' "$J" 2>/dev/null)" = "$EXPECT_SKILLS" ] \
+    && ok "gen: $EXPECT_SKILLS skill entities" || no "gen: skill count != $EXPECT_SKILLS"
 [ "$(jq '[.entities[]|select(.type=="agent")]|length' "$J" 2>/dev/null)" = "6" ] \
     && ok "gen: 6 agent entities" || no "gen: agent count != 6"
 [ "$(jq '[.entities[]|select(.type=="rule")]|length' "$J" 2>/dev/null)" = "9" ] \
