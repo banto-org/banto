@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Store Search — Banto / store 横断セクション検索</title>
+<meta name="description" content="Banto's cross-store section search: every markdown document in the ai-context store, indexed locally into SQLite FTS5 in 2.5 seconds — no server, nothing committed. Queried in under a millisecond, measured against the existing search on a fixed benchmark." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+  .doc-hero{ padding:clamp(36px,6vw,68px) var(--pad) 6px; max-width:var(--maxw); margin:0 auto; }
+  .doc-hero .kicker{ display:inline-flex; align-items:center; gap:9px; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-d); }
+  .doc-hero .kicker::before{ content:""; width:30px; height:3px; background:var(--accent); border-radius:2px; }
+  .doc-hero h1{ font-size:clamp(30px,4.6vw,48px); margin:16px 0 0; letter-spacing:-.02em; }
+  .doc-hero .lede{ max-width:56em; }
+  .sec{ max-width:var(--maxw); margin:0 auto; padding:clamp(40px,6vw,72px) var(--pad) 0; position:relative; }
+  .sec-head{ position:relative; margin:0 0 26px; }
+  .sec-head .ghost{ position:absolute; left:-4px; top:-.55em; font-family:var(--serif); font-weight:700; font-size:clamp(70px,11vw,128px); color:var(--accent); opacity:.07; line-height:1; pointer-events:none; z-index:0; }
+  .sec-head .sub{ font-family:var(--mono); font-size:13px; color:var(--accent-d); position:relative; z-index:1; }
+  .sec-head h2{ position:relative; z-index:1; font-size:clamp(22px,3.2vw,32px); }
+  .sec-head p{ position:relative; z-index:1; color:var(--ink-2); max-width:52em; margin:10px 0 0; font-size:16.5px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:22px 24px; }
+  .prose-p{ font-size:15.5px; color:var(--ink-2); max-width:60em; margin:0 0 8px; line-height:1.65; }
+
+  .mini-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-top:6px; }
+  .mini-grid .card h3{ font-size:16.5px; display:flex; align-items:center; gap:9px; }
+  .mini-grid .card h3 .step-n{ width:26px; height:26px; display:grid; place-items:center; border-radius:8px; background:var(--ink); color:var(--paper); font-family:var(--serif); font-size:14px; flex:none; }
+  .mini-grid .card p{ font-size:14px; color:var(--ink-2); margin:10px 0 0; line-height:1.6; }
+
+  .method{ background:var(--card); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:var(--r); box-shadow:var(--shadow); padding:22px 26px; }
+  .method ol{ margin:0; padding-left:20px; }
+  .method li{ font-size:14.5px; color:var(--ink-2); padding:7px 0; line-height:1.6; }
+  .method li b{ color:var(--ink); }
+
+  .store-table-wrap{ background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow-l); overflow-x:auto; margin-top:18px; }
+  .store-table{ width:100%; border-collapse:collapse; font-size:14px; min-width:520px; }
+  .store-table th{ text-align:left; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--ink-soft); background:var(--paper-2); padding:11px 16px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  .store-table td{ padding:11px 16px; border-bottom:1px solid var(--line); color:var(--ink-2); vertical-align:top; line-height:1.5; }
+  .store-table tr:last-child td{ border-bottom:0; }
+  .store-table td.mono{ font-family:var(--mono); font-size:13px; }
+  .store-table tr.hl-row td{ font-weight:700; background:var(--accent-t); color:var(--ink); }
+  .fine{ font-size:13px; color:var(--ink-soft); margin-top:10px; line-height:1.55; }
+
+  .obs-list{ list-style:none; padding:0; margin:16px 0 0; }
+  .obs-list li{ position:relative; padding:7px 0 7px 22px; font-size:14.5px; color:var(--ink-2); border-top:1px solid var(--line); line-height:1.6; }
+  .obs-list li:first-child{ border-top:0; }
+  .obs-list li::before{ content:"—"; position:absolute; left:0; color:var(--accent-d); font-weight:700; }
+
+  /* pipeline: md → index → query */
+  .flow{ display:flex; align-items:stretch; gap:14px; margin-top:18px; flex-wrap:wrap; }
+  .flow .card{ flex:1 1 220px; }
+  .flow .card h3{ font-size:15.5px; display:flex; align-items:center; gap:9px; margin:0; }
+  .flow .card h3 .step-n{ width:26px; height:26px; display:grid; place-items:center; border-radius:8px; background:var(--ink); color:var(--paper); font-family:var(--serif); font-size:14px; flex:none; }
+  .flow .card p{ font-size:13.5px; color:var(--ink-2); margin:10px 0 0; line-height:1.6; }
+  .flow .card .mono-line{ font-family:var(--mono); font-size:12px; color:var(--accent-d); margin-top:10px; word-break:break-all; }
+  .flow-arrow{ align-self:center; font-size:22px; color:var(--line-2); flex:none; }
+
+  .lim-box{ background:var(--paper-2); border:1px dashed var(--line-2); border-radius:var(--r); padding:22px 26px; }
+  .lim-box ul{ margin:0; padding-left:20px; }
+  .lim-box li{ font-size:14.5px; color:var(--ink-2); padding:6px 0; line-height:1.6; }
+
+  .cta-band{ max-width:var(--maxw); margin:clamp(48px,7vw,80px) auto 0; padding:0 var(--pad); }
+  .cta-inner{ background:var(--ink); color:var(--paper); border-radius:18px; padding:clamp(28px,5vw,46px); box-shadow:var(--shadow-l); }
+  .cta-inner h2{ color:var(--paper); font-size:clamp(22px,3vw,30px); }
+  .cta-inner p{ color:#D8CDB9; margin:12px 0 22px; max-width:42em; }
+  .doc-foot{ max-width:var(--maxw); margin:40px auto 0; padding:26px var(--pad) 48px; border-top:1px solid var(--line); color:var(--ink-soft); font-size:14px; display:flex; gap:18px; flex-wrap:wrap; justify-content:space-between; }
+  .crumb{ font-size:13.5px; color:var(--ink-soft); }
+  .crumb a{ color:var(--accent-d); }
+</style>
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<!-- NAV -->
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="#what" class="lx" lang="en">What it is</a><a href="#what" class="lx" lang="ja">これは何か</a>
+    <a href="#how" class="lx" lang="en">How it works</a><a href="#how" class="lx" lang="ja">仕組み</a>
+    <a href="#measured" class="lx" lang="en">Measured</a><a href="#measured" class="lx" lang="ja">実測</a>
+    <a href="#team" class="lx" lang="en">Git &amp; team</a><a href="#team" class="lx" lang="ja">git と複数人</a>
+    <a href="ai-context-store.html" class="lx" lang="en">AI-Context-Store</a><a href="ai-context-store.html" class="lx" lang="ja">コンテキストストア</a>
+    <a href="evidence.html" class="lx" lang="en">Evidence</a><a href="evidence.html" class="lx" lang="ja">実測レポート</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<!-- HERO -->
+<section class="doc-hero">
+  <div class="crumb reveal"><a href="index.html" class="lx" lang="en">← Home</a><a href="index.html" class="lx" lang="ja">← ホーム</a><span> / </span><span class="lx" lang="en">Store Search</span><span class="lx" lang="ja">横断検索</span></div>
+  <div style="margin-top:14px; max-width:60em">
+    <div class="kicker reveal"><span class="lx" lang="en">Feature — cross-store section search</span><span class="lx" lang="ja">機能 — store 横断セクション検索</span></div>
+    <h1 class="reveal">
+      <span class="lx" lang="en">Every document you ever wrote, one query away. No server.</span>
+      <span class="lx" lang="ja">書いてきた全ドキュメントを、クエリ 1 本で。サーバなしで。</span>
+    </h1>
+    <p class="lede reveal lx" lang="en">
+      The ai-context store grows without limit — decisions, research, specs, across every project.
+      Store Search indexes every markdown section into a local SQLite FTS5 file and answers in under a
+      millisecond, across project boundaries. The canonical data stays in git-managed markdown; the index
+      is a throwaway local artifact, rebuilt from scratch in 2.5 seconds. Nothing to install, nothing to
+      host, nothing committed.
+    </p>
+    <p class="lede reveal lx" lang="ja">
+      ai-context store は決定・リサーチ・仕様と、プロジェクトを跨いで際限なく育つ。Store Search は
+      その全 markdown をセクション単位でローカルの SQLite FTS5 ファイルに索引化し、プロジェクト境界を
+      越えて 1ms 未満で答える。正本は git 管理の markdown のまま。索引は 2.5 秒でゼロから作り直せる
+      使い捨てのローカル生成物であり、何もインストールせず、何も常駐させず、何もコミットしない。
+    </p>
+  </div>
+  <div class="stat-strip reveal">
+    <div class="stat"><b class="count" data-to="1471">0</b><span class="lx" lang="en">documents indexed</span><span class="lx" lang="ja">索引化ドキュメント</span></div>
+    <div class="stat"><b>2.5s</b><span class="lx" lang="en">full rebuild</span><span class="lx" lang="ja">フル再生成</span></div>
+    <div class="stat"><b>&lt;1ms</b><span class="lx" lang="en">per query</span><span class="lx" lang="ja">クエリ応答</span></div>
+    <div class="stat"><b>0</b><span class="lx" lang="en">servers, ever</span><span class="lx" lang="ja">常駐サーバ</span></div>
+  </div>
+</section>
+
+<!-- 01. WHAT -->
+<section class="sec" id="what">
+  <div class="sec-head reveal">
+    <span class="ghost">01</span>
+    <h2><span class="lx" lang="en">What it is — and where it sits</span><span class="lx" lang="ja">これは何か — どの層に立つか</span></h2>
+    <p><span class="lx" lang="en">The content layer of a three-layer design: route, count, then search.</span><span class="lx" lang="ja">3 層設計の内容層。案内し、数え、それから検索する。</span></p>
+  </div>
+  <div class="mini-grid">
+    <div class="card reveal">
+      <h3><span class="step-n">0</span><span class="lx" lang="en">Router</span><span class="lx" lang="ja">ルーター</span></h3>
+      <p><span class="lx" lang="en">A tiny guide injected at session start: census questions go to the ledger, content questions go here. No wholesale context dumping.</span><span class="lx" lang="ja">セッション開始時に注入される小さな案内。数える質問は台帳へ、内容の質問はここへ。コンテキストの全投入はしない。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">1</span><span class="lx" lang="en">Ledger</span><span class="lx" lang="ja">台帳</span></h3>
+      <p><span class="lx" lang="en">A deterministic, complete document ledger for counting, auditing, and existence guarantees — measured to be where index-based navigation actually wins.</span><span class="lx" lang="ja">数える・監査する・存在を保証するための決定論的な全数台帳。索引ナビが実測で勝つのはここ。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">2</span><span class="lx" lang="en">Store Search (this)</span><span class="lx" lang="ja">Store Search（本機能）</span></h3>
+      <p><span class="lx" lang="en">Full-text section search over every store, ranked by BM25, returning exact line ranges — so the agent reads the section, not the whole file.</span><span class="lx" lang="ja">全 store を対象にした全文セクション検索。BM25 で順位付けし、行範囲を返す — エージェントは全文でなくセクションだけを読む。</span></p>
+    </div>
+  </div>
+  <ul class="obs-list reveal">
+    <li class="lx" lang="en">Cross-project by construction: one index spans every project store on the machine, so "which project solved this before?" becomes answerable — structurally impossible with the previous per-project search text.</li>
+    <li class="lx" lang="ja">構造として横断的：索引はマシン上の全プロジェクト store を 1 つに束ねる。「これ、前にどのプロジェクトで解いた？」に答えられる — 従来のプロジェクト別検索テキストでは構造上不可能だった。</li>
+    <li class="lx" lang="en">Japanese works out of the box: the trigram tokenizer matches CJK text directly, no morphological analyzer needed.</li>
+    <li class="lx" lang="ja">日本語はそのまま動く。trigram トークナイザが CJK を直接マッチさせるため、形態素解析器は不要。</li>
+  </ul>
+</section>
+
+<!-- 02. HOW -->
+<section class="sec" id="how">
+  <div class="sec-head reveal">
+    <span class="ghost">02</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+    <p><span class="lx" lang="en">Markdown is canonical. The index is derived, local, and disposable.</span><span class="lx" lang="ja">正本は markdown。索引は派生物・ローカル・使い捨て。</span></p>
+  </div>
+  <div class="flow">
+    <div class="card reveal">
+      <h3><span class="step-n">1</span><span class="lx" lang="en">Write markdown</span><span class="lx" lang="ja">markdown を書く</span></h3>
+      <p><span class="lx" lang="en">Decisions, research, specs land in the store as plain markdown — diffable, mergeable, git-managed. This is the only thing humans and git ever touch.</span><span class="lx" lang="ja">決定・リサーチ・仕様は素の markdown として store に入る。diff でき、マージでき、git が管理する。人と git が触るのはこれだけ。</span></p>
+    </div>
+    <span class="flow-arrow" aria-hidden="true">→</span>
+    <div class="card reveal">
+      <h3><span class="step-n">2</span><span class="lx" lang="en">Index locally</span><span class="lx" lang="ja">ローカルで索引化</span></h3>
+      <p><span class="lx" lang="en">A session-start hook rebuilds the SQLite FTS5 index from scratch — every heading becomes a section row with its line range. Built to a temp file, swapped atomically, skipped when nothing changed. Gitignored, like every derived artifact in the store.</span><span class="lx" lang="ja">セッション開始 hook が SQLite FTS5 索引をゼロから再構築する。見出しごとに行範囲つきのセクション行になる。一時ファイルに構築して原子的に差し替え、更新がなければスキップ。store の他の派生物と同じく gitignore。</span></p>
+      <p class="mono-line">1,471 docs → 23,587 sections / 2.5s</p>
+    </div>
+    <span class="flow-arrow" aria-hidden="true">→</span>
+    <div class="card reveal">
+      <h3><span class="step-n">3</span><span class="lx" lang="en">Query, then read the section</span><span class="lx" lang="ja">引いて、セクションだけ読む</span></h3>
+      <p><span class="lx" lang="en">One wrapper command takes search terms, returns the top sections with BM25 rank, snippet, and exact line range. Terms too short for the trigram index fall back to a full scan automatically (16ms). Weak models never write SQL.</span><span class="lx" lang="ja">ラッパーコマンドに検索語を渡すと、BM25 順位・抜粋・正確な行範囲つきで上位セクションが返る。trigram に短すぎる語は自動で全走査（16ms）へフォールバック。弱いモデルに SQL は書かせない。</span></p>
+      <p class="mono-line">&lt;1ms / query · census 0.4ms</p>
+    </div>
+  </div>
+  <ul class="obs-list reveal">
+    <li class="lx" lang="en">No migrations, ever: a schema change means "rebuild in 2.5 seconds," not a migration script.</li>
+    <li class="lx" lang="ja">マイグレーションは永遠に不要。スキーマ変更は「2.5 秒で作り直す」であって、移行スクリプトではない。</li>
+    <li class="lx" lang="en">Fail-open like the rest of the harness: no SQLite or no FTS5 on the machine → the existing search path keeps working.</li>
+    <li class="lx" lang="ja">ハーネスの他と同じく fail-open。マシンに SQLite や FTS5 がなければ、既存の検索経路がそのまま動き続ける。</li>
+  </ul>
+</section>
+
+<!-- 03. MEASURED -->
+<section class="sec" id="measured">
+  <div class="sec-head reveal">
+    <span class="ghost">03</span>
+    <div class="sub">R5</div>
+    <h2><span class="lx" lang="en">Measured, honestly</span><span class="lx" lang="ja">実測 — 正直に</span></h2>
+    <p><span class="lx" lang="en">Prototype benchmark, 2026-07-02: same fixed 10 questions as prior rounds, two models, against the existing search.</span><span class="lx" lang="ja">プロトタイプ実測（2026-07-02）。先行ラウンドと同一の固定 10 問・2 モデルで、既存検索と突き合わせた。</span></p>
+  </div>
+  <p class="prose-p reveal lx" lang="en">Conditions: "FTS5" = section search + reading only the returned line ranges (whole-file reads forbidden). "Existing" = grep over the per-project combined text, whole-file reads allowed. Census questions (5) used filesystem scans in both conditions; the difference loads entirely onto the 5 content-investigation questions. Answer keys were fixed immediately before the runs.</p>
+  <p class="prose-p reveal lx" lang="ja">条件：「FTS5」= セクション検索 + 返された行範囲のみ Read(全文 Read 禁止)。「既存」= プロジェクト別結合テキストの grep + 全文 Read 可。census 5 問は両条件ともファイル走査のため、条件差は内容調査 5 問にのみ載る。正解キーは走行直前に固定。</p>
+
+  <div class="store-table-wrap reveal">
+    <table class="store-table">
+      <thead>
+        <tr>
+          <th><span class="lx" lang="en">cell</span><span class="lx" lang="ja">セル</span></th>
+          <th><span class="lx" lang="en">correct</span><span class="lx" lang="ja">正答</span></th>
+          <th><span class="lx" lang="en">tokens</span><span class="lx" lang="ja">トークン</span></th>
+          <th><span class="lx" lang="en">tool calls</span><span class="lx" lang="ja">tool 数</span></th>
+          <th><span class="lx" lang="en">seconds</span><span class="lx" lang="ja">秒</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">FTS5 × opus</td><td>10/10</td><td>68,678</td><td><strong>14</strong></td><td>153.5</td></tr>
+        <tr><td class="mono">FTS5 × haiku</td><td>9/10</td><td>46,853</td><td><strong>17</strong></td><td>151.1</td></tr>
+        <tr><td class="mono"><span class="lx" lang="en">existing × opus</span><span class="lx" lang="ja">既存 × opus</span></td><td>10/10</td><td>68,731</td><td>18</td><td>143.3</td></tr>
+        <tr><td class="mono"><span class="lx" lang="en">existing × haiku</span><span class="lx" lang="ja">既存 × haiku</span></td><td>10/10</td><td>45,565</td><td>26</td><td>174.6</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="obs-list reveal">
+    <li class="lx" lang="en">Accuracy is equal (39/40 overall) — while FTS5 searched a corpus 3.4x wider (1,471 documents across every project, vs. 433 in the per-project text) at the same cost. Cross-store reach came for free.</li>
+    <li class="lx" lang="ja">精度は同等（総計 39/40）。しかも FTS5 は 3.4 倍広いコーパス（全プロジェクト 1,471 doc、既存はプロジェクト内 433 doc）を同コストで検索している。横断到達力は無料でついてきた。</li>
+    <li class="lx" lang="en">Tokens did not drop (opus: −0.08%, haiku: +2.8%). The "read sections, save tokens" hypothesis did not materialize at this document size — decision records are only tens of lines, so section reads ≈ whole reads. This replicates, for the third time, the earlier finding that index type doesn't change content-investigation cost.</li>
+    <li class="lx" lang="ja">トークンは減らなかった（opus −0.08%・haiku +2.8%）。「セクション読みで token 削減」仮説は、この文書サイズでは成立しない — 決定記録は数十行で、セクション読み ≒ 全文読み。「索引の種類は内容調査のコストを変えない」という先行実測を三たび再現した。</li>
+    <li class="lx" lang="en">Tool calls did drop (14 vs 18 on opus, 17 vs 26 on haiku): ranked sections mean less grep juggling to find the right document.</li>
+    <li class="lx" lang="ja">tool 呼び出し数は確実に減った（opus 14 vs 18・haiku 17 vs 26）。順位付きセクションが返るため、正しい文書へ届くまでの grep の試行錯誤が減る。</li>
+    <li class="lx" lang="en">The single miss: the weak model stopped at a derived record that quoted the question itself instead of the primary source — a known weak-model failure mode observed in earlier rounds, not an index defect.</li>
+    <li class="lx" lang="ja">唯一の失点は、弱いモデルが一次資料でなく「質問文そのものを引用した派生記録」で停止したもの。先行ラウンドで観測済みの弱モデル固有の失敗型であり、索引の欠陥ではない。</li>
+  </ul>
+
+  <p class="prose-p reveal lx" lang="en" style="margin-top:26px">So why adopt it? Because the case was never token savings — the measurements killed that claim before it shipped. The case is what the old design cannot do at all:</p>
+  <p class="prose-p reveal lx" lang="ja" style="margin-top:26px">では、なぜ採用するのか。根拠は最初から token 削減ではない — その主張は出荷前に実測が棄却した。根拠は、旧設計には原理的にできないこと：</p>
+
+  <div class="mini-grid">
+    <div class="card reveal">
+      <h3><span class="step-n">a</span><span class="lx" lang="en">Cross-store reach</span><span class="lx" lang="ja">横断到達力</span></h3>
+      <p><span class="lx" lang="en">One query spans every project's memory. Per-project search text can never answer "where did we solve this before?"</span><span class="lx" lang="ja">クエリ 1 本が全プロジェクトの記憶に届く。プロジェクト別の検索テキストは「前にどこで解いた？」に永遠に答えられない。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">b</span><span class="lx" lang="en">Scale headroom</span><span class="lx" lang="ja">規模ヘッドルーム</span></h3>
+      <p><span class="lx" lang="en">The combined text grows linearly and is already megabytes; the index answers in sub-millisecond regardless, and section reads start paying off on long documents (hundreds of lines) the store keeps accumulating.</span><span class="lx" lang="ja">結合テキストは線形に育ち、すでに MB 級。索引は規模によらず 1ms 未満で答え、セクション読みは store に増え続ける長文（数百行級）で効き始める。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">c</span><span class="lx" lang="en">One artifact, both jobs</span><span class="lx" lang="ja">1 生成物で 2 役</span></h3>
+      <p><span class="lx" lang="en">Counting and content search share the same file — and the same metadata enables deterministic consistency gates (e.g., "an accepted spec has a newer contradicting decision") in one SQL statement.</span><span class="lx" lang="ja">数える仕事と内容検索が同じファイルで済む。同じメタデータで「accepted の spec より新しい矛盾する決定がある」といった一貫性ゲートを SQL 1 本で建てられる。</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- 04. TEAM -->
+<section class="sec" id="team">
+  <div class="sec-head reveal">
+    <span class="ghost">04</span>
+    <h2><span class="lx" lang="en">Git and team scale</span><span class="lx" lang="ja">git と複数人</span></h2>
+    <p><span class="lx" lang="en">The rule is one line: the index is never committed.</span><span class="lx" lang="ja">規律は 1 行 — 索引は絶対にコミットしない。</span></p>
+  </div>
+  <div class="method reveal">
+    <ol>
+      <li><b><span class="lx" lang="en">Canonical vs. derived.</span><span class="lx" lang="ja">正本と派生物。</span></b> <span class="lx" lang="en">Git manages markdown only. The index is a local cache with zero information value — delete it and lose nothing; the next session rebuilds it in 2.5 seconds.</span><span class="lx" lang="ja">git が管理するのは markdown だけ。索引は情報価値ゼロのローカルキャッシュであり、消しても何も失わない。次のセッションが 2.5 秒で作り直す。</span></li>
+      <li><b><span class="lx" lang="en">No shared database.</span><span class="lx" lang="ja">共有 db なし。</span></b> <span class="lx" lang="en">SQLite's classic weaknesses — concurrent writers, corruption on network filesystems — never arise: each machine builds its own index from the markdown it has, and the only writer is the local rebuild.</span><span class="lx" lang="ja">sqlite の古典的弱点（同時書き込み・ネットワークファイルシステム上の破損）は構造上発生しない。各マシンが手元の markdown から自分の索引を作り、書き込むのはローカルの再生成だけ。</span></li>
+      <li><b><span class="lx" lang="en">Teammates never see it.</span><span class="lx" lang="ja">メンバーは意識しない。</span></b> <span class="lx" lang="en">New members clone, open a session, and have their own index — no setup step, no shared infrastructure, no SQLite knowledge required.</span><span class="lx" lang="ja">新メンバーは clone してセッションを開くだけで自分の索引を持つ。準備手順なし、共有インフラなし、sqlite の知識も不要。</span></li>
+      <li><b><span class="lx" lang="en">Access control stays in git.</span><span class="lx" lang="ja">アクセス制御は git のまま。</span></b> <span class="lx" lang="en">Your index is built only from markdown you legitimately have — sharing granularity is decided by repository access, and the index can never widen it.</span><span class="lx" lang="ja">索引は自分が正当に持つ markdown からしか作られない。共有の粒度はリポジトリのアクセス権が決め、索引がそれを広げることは決してない。</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 05. LIMITATIONS -->
+<section class="sec" id="limitations">
+  <div class="sec-head reveal">
+    <span class="ghost">05</span>
+    <h2>Limitations</h2>
+    <p><span class="lx" lang="en">Disclosed for the sake of honesty</span><span class="lx" lang="ja">誠実性のための開示</span></p>
+  </div>
+  <div class="lim-box reveal">
+    <ul>
+      <li class="lx" lang="en">Numbers on this page are prototype measurements (2026-07-02, 1 run per cell); the production wiring ships the same mechanism with atomic swap and freshness checks.</li>
+      <li class="lx" lang="ja">本ページの数値はプロトタイプ実測（2026-07-02・各セル 1 走行）。本番配線は同じ機構に原子的差し替えと鮮度チェックを加えて出荷する。</li>
+      <li class="lx" lang="en">No token savings at current document sizes — adoption rests on reach, scale headroom, and fewer search steps, not cost.</li>
+      <li class="lx" lang="ja">現状の文書サイズでは token 削減なし。採用根拠は到達力・規模ヘッドルーム・検索手数の削減であり、コストではない。</li>
+      <li class="lx" lang="en">The trigram index needs 3+ characters; shorter terms fall back to a sequential scan (16ms measured — acceptable, but a real asymmetry).</li>
+      <li class="lx" lang="ja">trigram 索引は 3 文字以上が必要。短い語は全走査フォールバック（実測 16ms — 実用上問題ないが、非対称は非対称）。</li>
+      <li class="lx" lang="en">The index is ~7x the source text on disk (85.5MB for 12.4MB of markdown) — cheap for a local cache, disclosed anyway.</li>
+      <li class="lx" lang="ja">索引はソースの約 7 倍のディスクを使う（markdown 12.4MB に対し 85.5MB）。ローカルキャッシュとしては安いが、開示はする。</li>
+      <li class="lx" lang="en">A 10x-scale synthetic stress test has not been run yet; the linear-vs-logarithmic scale argument beyond current size is extrapolation.</li>
+      <li class="lx" lang="ja">10 倍規模の合成負荷試験は未実施。現規模を超える線形 vs 対数の規模議論は外挿にとどまる。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-band reveal">
+  <div class="cta-inner">
+    <h2><span class="lx" lang="en">Adopted on evidence — including the evidence against it.</span><span class="lx" lang="ja">実測で採用した — 不利な実測も含めて。</span></h2>
+    <p><span class="lx" lang="en">The token-savings claim died in measurement before it could ship. What survived is what the old design could never do.</span><span class="lx" lang="ja">token 削減の主張は出荷前に実測で死んだ。生き残ったのは、旧設計には決してできないことだった。</span></p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      <a class="btn btn-primary" href="evidence.html"><span class="lx" lang="en">All measurements →</span><span class="lx" lang="ja">実測レポートを見る →</span></a>
+      <a class="btn btn-ghost" href="ai-context-store.html" style="color:var(--paper);border-color:rgba(245,240,230,.4)"><span class="lx" lang="en">How the store works</span><span class="lx" lang="ja">store の仕組み</span></a>
+    </div>
+  </div>
+</div>
+
+<footer class="doc-foot">
+  <span class="lx" lang="en">Banto — a self-driving harness for Claude Code. Enforced by deterministic hooks.</span>
+  <span class="lx" lang="ja">Banto — Claude Code のための自走ハーネス。決定論的な hook が強制する。</span>
+  <a href="https://github.com/banto-org/banto" target="_blank" rel="noopener">github.com/banto-org/banto</a>
+</footer>
+
+</main>
+<script src="app.js"></script>
+</body>
+</html>

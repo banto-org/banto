@@ -9,7 +9,7 @@ Supplements SKILL.md: the concrete iteration, state files, cadence, and the swap
 | `$HOME/.cache/banto/verify-last-<session>` | `verify-run.sh` | `green` / `green (no verify commands detected)` / `red:<failed steps>` |
 | `$HOME/.cache/banto/test-failures-<session>` | `auto-test.sh` / `verify-run.sh` | TF counter (reset to 0 on green · +1 on red) |
 
-`<session>` is `BANTO_SESSION_ID` / `CLAUDE_SESSION_ID` (falls back to `manual`). State dir is `ODD_STATE_DIR` (default `$HOME/.cache/banto`).
+`<session>` resolves in 3 steps: `BANTO_SESSION_ID` / `CLAUDE_SESSION_ID` (env) → the per-cwd pointer `session-current-<cwd_id>` that odd-gate leaves on PreToolUse:Write|Edit (in an implementation loop a preceding Edit always writes it) → `manual` when neither exists. State dir is `ODD_STATE_DIR` (default `$HOME/.cache/banto`). The pointer key is a cksum of the cwd, so **call verify-run from the session cwd (the repository root)** — pointing it at a subdirectory splits the key and falls back to manual.
 
 ## How to run a full verify
 

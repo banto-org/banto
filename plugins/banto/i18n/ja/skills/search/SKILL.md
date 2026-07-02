@@ -34,6 +34,7 @@ compatibility: Claude Code (requires bash, git, jq, python3)
 | `{base}/decisions/` `{base}/docs/` | 設計判断、報告書、リサーチ | 生ファイルを直接検索 |
 | `{base}/project-combined.txt` | 上記を連結したテキスト | 保存時に hook が自動再生成（ai-context-combined-rebuild.sh） |
 | `{base}/full-combined.txt` + `sessions-cache/` | + 会話履歴（compact で失われた内容を含む） | 検索時にオンデマンドで更新（後述の deep パス参照） |
+| store ルートの `.store-index.db` | **store 横断 FTS5 セクション索引**（全プロジェクトの md・BM25 順位 + 行範囲） | SessionStart / store 書き込み時に hook が自動再生成（scripts/store_index_gen.py。コミットされない派生物） |
 | `{base}/search-lexicon.md` | **検索レキシコン**（概念 ↔ 訳語 / 同義語 / 略語） | deep パス成功時に追記（後述） |
 | プロジェクトの `docs/` `specs/` など | `{base}/config.json` の `extra_docs_dirs` で追加 | combined 生成に含まれる |
 
@@ -85,6 +86,18 @@ python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_search_rank.py" \
 
 index だけで足りるなら full は開かない。経緯質問なら timeline を主に提示する。確信ヒットがあれば Step 3 へ（開くと決めたファイルだけ検証する）。
 
+### Step 2.7: cross-store クイックパス（横断意図を検出したとき）
+
+「他のプロジェクトで」「前にどこかで」など**現プロジェクト外**を示す語があれば、deep パスへ行く前に FTS5 セクション索引を直接引く（1ms・BM25 上位 8 件 + 行範囲）：
+
+```bash
+sh "$CLAUDE_PLUGIN_ROOT/scripts/store-query.sh" --all 認証 OAuth
+```
+
+- ヒットの**行範囲だけ**を Read（offset/limit）して Step 3 の検証へ（全文 Read しない）
+- exit 1（sqlite3 / 索引不在）→ そのまま Step 5 deep の cross-store 経路へ（fail-open）
+- 現プロジェクト内の絞り込み検索にも使える（`--all` を外すと既定でカレントプロジェクトに絞る）。3 文字未満の語は自動で LIKE 走査へ切り替わる
+
 ### Step 3: 検証（Read して判断）
 
 上位 3〜5 ファイルを Read し、**関連性を自分で判断**する：
@@ -108,7 +121,7 @@ index だけで足りるなら full は開かない。経緯質問なら timelin
 1. **1 メッセージ内で 3〜5 個の `search-agent`（model=haiku）を並列起動**する。標準的な役割分担：
    - (a) 日本語表記ゆれエージェント：`{base}/decisions/` `{base}/docs/`
    - (b) 英語 / コード用語エージェント：同じパス
-   - (c) cross-store エージェント：`~/ai-context-store/*/decisions/` `*/docs/`（store ルートを直接 grep）
+   - (c) cross-store：まず `store-query.sh --all` を直接実行する（エージェント不要・1ms）。索引が無い環境でのみ従来どおり haiku grep エージェント（`~/ai-context-store/*/decisions/` `*/docs/`）を立てる
    - (d) 会話履歴エージェント：`{base}/full-combined.txt`
 2. 各エージェントには常に：正規表現パターンセット / 対象パス / **limit N（パターンごと top 15、120 文字スニペット）** / 一時ファイル出力パス `{base}/tmp/search/<run-id>-<role>.txt` を渡す。各エージェントも Grep を並列で実行させる
 3. **確信度はエージェント間の候補の一致で判断する**（複数エージェントが同じファイルを浮上させたら強いシグナル。haiku の自己申告の確信度は使わない）
@@ -143,7 +156,7 @@ deep パスが正解にたどり着いたら、効いた展開を 1 行として
 ### Notes
 - {supersede relations, explicit "not confident", etc.}
 
-### Search method: {fast (ranking vN) / fast+layered (index→timeline→full) / deep (haiku xN parallel, wall time Xs) / cross-store: {store names,...}}
+### Search method: {fast (ranking vN) / fast+layered (index→timeline→full) / fts5 (store-query.sh, project|all) / deep (haiku xN parallel, wall time Xs) / cross-store: {store names,...}}
 ```
 
 **確信がない**場合（しきい値を下回って終わった場合）は、推測で埋めず「確信なし」と明示する。

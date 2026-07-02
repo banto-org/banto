@@ -109,6 +109,15 @@ done
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
 
+## 0.2.0
+
+- **Store Search — a cross-store full-text section index.** Every markdown document across all of your project stores is indexed locally into SQLite FTS5 (trigram tokenizer — Japanese works out of the box) at section granularity with line ranges. The search skill queries it via `scripts/store-query.sh` (BM25-ranked top hits, `--all` for cross-store reach, automatic LIKE fallback for short terms) and falls back to the combined-text path when SQLite is absent. The index is a derived local artifact: rebuilt from scratch in seconds at session start, never committed — canonical data stays in git-managed markdown.
+- **Location cards + a relation graph.** External documents (SharePoint, file servers, URLs, files outside the store) register as `docs/refs/[Ref] *.md` pointer cards (source / uri / fetched / related — no content mirroring). `related:` frontmatter is extracted deterministically into the ontology ledger's `references` relations and a queryable refs table; traverse both directions with `store-query.sh --related`. `scripts/ref_scan.py` bulk-inventories whole directories — for Excel workbooks it extracts sheet names, row counts, header text and cross-sheet formula references using the standard library only (a synthetic 100-sheet workbook inventories in 0.05s), and rejects DTD/entity-bearing OOXML from untrusted sources.
+- **Japanese output style, applied automatically.** A compact style block (`templates/ja-style-core.md`), distilled for models weaker at Japanese, ships embedded in all 6 bundled agents and is referenced by the fan-out guidance in the quality rule.
+- **Hook hardening (full 46-hook audit).** Fixed a class of "silent disablement" bugs: a date-glob drift causing false "unsaved decision" warnings, a freshness check watching a file that never updates, a permanently-dead workspace nudge, typecheck silently disabled on stock macOS, quoted-path bypasses of the secrets guard and the `rm -rf` kill switch, and a session-key mismatch that kept the test-failure circuit breaker from accumulating. The universal safety rules no longer depend on plugin-root resolution succeeding, and a dead PreToolUse branch was removed.
+- **Skill/doc consistency.** ws / dev-loop / model-lab declarations now match their implementations — the `/ws new` workspace rule now ships as a real template (`templates/workspace-rule.md`), gate descriptions no longer over-claim, and stale guidance (task-worktree `claude -w` usage, hook "force-update" wording) is corrected.
+- **Site.** New Store Search page (`docs/store-search.html`) with measured numbers — including the honest negative result (no token savings at current scale; the wins are cross-store reach, scale headroom and fewer search steps).
+
 ## 0.1.9
 
 - **macOS / POSIX robustness.** Fixed a `harness-setup.sh` crash on macOS under `set -u`, and audited & fixed dash/GNU portability across the hook and script set so the harness runs cleanly on both macOS and Linux CI.
@@ -167,7 +176,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.1.9"
+PUB_VERSION="0.2.0"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"

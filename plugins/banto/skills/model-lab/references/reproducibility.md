@@ -2,7 +2,7 @@
 
 Source: `{base}/docs/research/2026-06-24_experiment-tracking-reproducibility.md`. Leave behind "a form you can reproduce the results from later" from the start. repro-gate / repro-check.sh check this statically.
 
-## The 4 reproducibility points (what repro-gate checks)
+## The 4 reproducibility points (repro-gate auto-checks 1 and 4; 2 and 3 are discipline only — automated checks are a future extension)
 1. **Fixed seed**: fixed seed in the training script + `torch.use_deterministic_algorithms(True)` + `CUBLAS_WORKSPACE_CONFIG=:4096:8`. Non-deterministic ops are caught early via RuntimeError.
 2. **A seed key in config**: Hydra + OmegaConf. State seed / data version / environment explicitly in config (depending on environment variables is discouraged).
 3. **DVC registration of data**: `dvc.lock` × git commit fixes "code × data × results." A warning if large data is unregistered in DVC.

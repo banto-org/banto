@@ -27,7 +27,7 @@ owner が大玉を渡す → 小型タスクへ分解 → 各タスクを実装�
 
 ## 自律度（L3・Autopilot）
 
-odd.yaml = **L3（Autopilot＝継続実行＋例外時のみ owner 要求）**。banto は L0–L3 のみ（L4+ は別 plugin `banto-autonomy` に分離）。explicit stop は deterministic hook（`odd-gate` / `verify-claim-guard`）が担い、human gate は Phase 0 の分解プラン確認と push/PR/main。
+odd.yaml = **L3（Autopilot＝継続実行＋例外時のみ owner 要求）**。banto は L0–L3 のみ（L4+ は別 plugin `banto-autonomy` へ分離する構想 — 未実装・スコープ境界の宣言）。explicit stop は deterministic hook（`odd-gate` / `verify-claim-guard`）が担い、human gate は Phase 0 の分解プラン確認と push/PR/main。
 
 ## ループ手順
 

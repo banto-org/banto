@@ -27,8 +27,9 @@ fi
 command -v jq >/dev/null 2>&1 || exit 0
 
 # 当日の decision ファイルが既にあればOK（早期リターンで負荷削減）
+# 命名は YYYY-MM-DD-HHMMSS_slug（日付直後は "-"）。旧 YYYY-MM-DD_slug も拾うため日付直後を固定しない
 TODAY=$(date +%Y-%m-%d)
-ls "$AI_BASE/decisions/${TODAY}"_*.md >/dev/null 2>&1 && exit 0
+ls "$AI_BASE/decisions/${TODAY}"*.md >/dev/null 2>&1 && exit 0
 
 # セッション単位の発火抑制
 if command -v md5sum >/dev/null 2>&1; then
@@ -42,7 +43,9 @@ LOCK_FILE="${TMPDIR:-/tmp}/ai-context-stop-${HASH}.fired"
 [ -f "$LOCK_FILE" ] && exit 0
 
 # 直近のユーザーメッセージ10件のテキストのみを抽出
-USER_TEXT=$(tail -2000 "$TRANSCRIPT" 2>/dev/null | jq -r '
+# -R + fromjson?: 壊れた JSONL が 1 行あっても jq がストリーム全体を中断しない（行単位で読み飛ばす）
+USER_TEXT=$(tail -2000 "$TRANSCRIPT" 2>/dev/null | jq -Rr '
+    fromjson? |
     select(.type == "user" and .message.role == "user") |
     .message.content |
     if type == "string" then .

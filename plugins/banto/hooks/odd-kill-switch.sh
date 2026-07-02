@@ -33,7 +33,6 @@ set -u
 
 # プラグインルートを推定（CLAUDE_PLUGIN_ROOT 環境変数優先、無ければスクリプト相対）
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
-SKILLS_DIR="$PLUGIN_ROOT/skills"
 
 # stdin から payload を読む（hook 標準フォーマット）。空でも続行。
 PAYLOAD=$(cat 2>/dev/null || true)
@@ -60,11 +59,9 @@ else
     FILE_PATH=$(extract_field "$PAYLOAD" "file_path")
 fi
 
-# odd.yaml が一つも無ければ何もしない（早期 exit）
-ODD_COUNT=$(find "$SKILLS_DIR" -maxdepth 2 -name "odd.yaml" 2>/dev/null | wc -l | tr -d ' ')
-if [ "$ODD_COUNT" = "0" ]; then
-    exit 0
-fi
+# 注: 以前は「odd.yaml が一つも無ければ早期 exit」していたが、本 hook の 4 ルールは
+# odd.yaml を実際には読まない横断安全ルール（safety.md 由来）であり、プラグインルート解決の
+# 失敗だけで安全ガードが黙って全無効になる構造だった（2026-07-02 監査で指摘）。ガードを撤去。
 
 warn() {
     printf "[ODD warn] %s\n" "$1" >&2
@@ -194,7 +191,9 @@ fi
 # ---- 検出ルール 3: rm -rf / ~ $HOME 系 ---- (BLOCK)
 # safety-guard / lint-guard でカバーされない横断 kill switch
 # 削除先が "/" "~" "$HOME" 単体で終わる場合のみ検知（"/tmp/..." 等は除外）
-if printf "%s" "$CMD" | grep -E '\brm[[:space:]]+-[rf]+[[:space:]]+(/|~|\$HOME)([[:space:]]|;|&|\||$)' >/dev/null 2>&1; then
+# 引用符除去（rm -rf "/" 回避封鎖）+ 分割フラグ許容（rm -r -f /。2026-07-02 監査）
+CMD_NOQ=$(printf '%s' "$CMD" | tr -d '\042\047')
+if printf "%s" "$CMD_NOQ" | grep -E '\brm[[:space:]]+(-[rf]+[[:space:]]+)+(/|~|\$HOME)([[:space:]]|;|&|\||$)' >/dev/null 2>&1; then
     if [ "${ODD_ALLOW_RM_RF_ROOT:-0}" = "1" ]; then
         warn "rm -rf root/home (allowed via ODD_ALLOW_RM_RF_ROOT=1)"
     else

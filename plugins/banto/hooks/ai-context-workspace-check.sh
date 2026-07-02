@@ -41,8 +41,9 @@ case "$FILE_PATH" in
     *) exit 0 ;;
 esac
 
-# WORKSPACE.md が存在しない場合はスキップ
+# WORKSPACE.md が存在しない場合はスキップ（per-checkout 実効ポインタを他 hook と同じ resolver で解決）
 WS_FILE="$AI_BASE/WORKSPACE.md"
+command -v _ai_context_ws_pointer >/dev/null 2>&1 && WS_FILE=$(_ai_context_ws_pointer "$AI_BASE" "$CWD")
 [ ! -f "$WS_FILE" ] && exit 0
 
 # multi モード判定（WORKSPACE-refs.md が存在すれば multi）

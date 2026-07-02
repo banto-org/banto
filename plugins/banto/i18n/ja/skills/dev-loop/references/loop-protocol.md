@@ -9,7 +9,7 @@ SKILL.md の補足。周回の具体・状態ファイル・cadence・ML 学習�
 | `$HOME/.cache/banto/verify-last-<session>` | `verify-run.sh` | `green` ／ `green (no verify commands detected)` ／ `red:<失敗ステップ>` |
 | `$HOME/.cache/banto/test-failures-<session>` | `auto-test.sh` / `verify-run.sh` | TF カウンタ（green で 0 リセット・red で +1） |
 
-`<session>` は `BANTO_SESSION_ID` / `CLAUDE_SESSION_ID`（無ければ `manual`）。状態 dir は `ODD_STATE_DIR`（既定 `$HOME/.cache/banto`）。
+`<session>` の解決順は 3 段：`BANTO_SESSION_ID` / `CLAUDE_SESSION_ID`（env）→ odd-gate が PreToolUse:Write|Edit で残す cwd 単位ポインタ `session-current-<cwd_id>`（実装ループでは先行 Edit が必ず書く）→ どちらも無ければ `manual`。状態 dir は `ODD_STATE_DIR`（既定 `$HOME/.cache/banto`）。ポインタ鍵は cwd の cksum のため、**verify-run はセッションの cwd（リポジトリ root）で呼ぶ**こと（サブディレクトリ指定だと鍵が割れて manual に落ちる）。
 
 ## フル検証の呼び方
 

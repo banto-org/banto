@@ -8,7 +8,7 @@ Source: `{base}/docs/research/2026-06-24_compute-portability-local-cluster-cloud
 
 ## Execution management
 - For cross-cluster / cross-cloud, **SkyPilot v0.12** (Slurm integration · 20+ clouds · automatic Spot recovery).
-- Spot / preemptible cuts cost 60-90% (SkyPilot handles interruption recovery automatically). compute-cost-gate stops over-budget runs.
+- Spot / preemptible cuts cost 60-90% (SkyPilot handles interruption recovery automatically). compute-cost-gate stops every paid launch, Spot included, and routes it to the owner's budget confirmation (authorize with `BANTO_ALLOW_COMPUTE=1`).
 
 ## Mac's place
 MPS / MLX are for inference, debugging, and small-scale verification only. CUDA kernels (FlashAttention / bitsandbytes) aren't supported on MPS, so production training is Nvidia-only. eGPU is already dropped from macOS.

@@ -1,6 +1,6 @@
 # /ws multi モード（複数 WS 並列参照）
 
-複数の研究テーマや実験を**同一ブランチ上で同時に参照**するモード。最初の引数が primary（書き込み対象）、残りは reference（参照専用）。
+複数の研究テーマや実験を**同一ブランチ上で同時に参照**するモード（単一 checkout 限定 — `WORKSPACE-refs.md` は store 直下のため、並走 worktree 間では共有される点に注意）。最初の引数が primary（書き込み対象）、残りは reference（参照専用）。
 
 ## /ws multi <ws1> <ws2> ...: 複数 WS を並列参照
 

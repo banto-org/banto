@@ -54,11 +54,11 @@ eval の green/red と再現性チェックは閾値で deterministic に回す�
 
 ### Stage 4: Implement（学習コード + 再現性）
 - 学習コード（PyTorch + Accelerate + FSDP2）+ config（Hydra）+ データ版（DVC）+ 追跡（ClearML）+ 環境（pixi + Docker）。
-- **再現性を最初から**: seed 固定 + 決定性フラグ。`repro-gate` が seed/config/DVC の欠落を検出する（[`references/reproducibility.md`](references/reproducibility.md)）。
+- **再現性を最初から**: seed 固定 + 決定性フラグ。`repro-gate` が seed 固定・決定性フラグの欠落と、結果ドキュメントの std / CI 欠落を検出する（config の seed キー・DVC 登録は規律のみ・自動検査は未実装）（[`references/reproducibility.md`](references/reproducibility.md)）。
 
 ### Stage 5: Run（Mac → Nvidia → cloud）
 - Mac(MLX/MPS) でロジック検証 → Nvidia 小規模 → SkyPilot で Spot クラウド / クラスタへ。
-- **有料計算の起動前に `compute-cost-gate`**（予算超過は停止 → owner）。ClearML が run を記録。
+- **有料計算の起動前に `compute-cost-gate`**（有料 launch は一律停止 → owner 予算確認・認可後 `BANTO_ALLOW_COMPUTE=1`）。ClearML が run を記録。
 
 ### Stage 6: Verify（eval + ablation + 統計）
 - lm-evaluation-harness + lighteval でベンチ + ablation + baseline 比較。
@@ -68,7 +68,7 @@ eval の green/red と再現性チェックは閾値で deterministic に回す�
 
 ### Stage 7: Analyze（結果を実行出力から生成）
 - 結果の表 / 図を**実行出力から生成**（`plot.py` / `make figures`。手打ち禁止）。
-- 主張ごとに claim 台帳（`{base}/experiments/<project>/ledger.jsonl`）へ `verified`（run_id + config + seed + CI）を記録する。
+- 主張ごとに claim 台帳（`{base}/experiments/<project>/ledger.jsonl`）へ `verified`（run_id + config + seed + CI）を記録する。台帳ゲート（model-claim-guard の C 検査）を有効にするため `export BANTO_LEDGER={base}/experiments/<project>/ledger.jsonl` を設定する（未設定だと C 検査は黙って no-op — eval red 検査は独立に機能）。
 
 ### Stage 8: Paper & Publish（人間ゲート）
 - LaTeX 草稿（学会テンプレ）+ related work（research から）+ 結果節を実験出力に結線 + 再現性 appendix。
@@ -84,8 +84,8 @@ eval の green/red と再現性チェックは閾値で deterministic に回す�
 | ガード | hook | 効果 |
 |---|---|---|
 | 裏づけなき主張 | `model-claim-guard.sh`（Stop） | claim 台帳に verified が無い「完了 / 論文化」をブロック（verify-claim-guard の研究版） |
-| 再現性欠落 | `repro-gate.sh`（PreToolUse） | seed 固定 / config の seed / DVC 登録 / 結果の std・CI の欠落を検出 |
-| 計算コスト | `compute-cost-gate.sh`（PreToolUse） | 予算超過の有料計算起動を停止 → owner（ローカル / Spot は通す） |
+| 再現性欠落 | `repro-gate.sh`（PreToolUse） | seed 固定・決定性フラグ / 結果の std・CI の欠落を検出（escape: `BANTO_ALLOW_UNREPRO=1`） |
+| 計算コスト | `compute-cost-gate.sh`（PreToolUse） | 有料計算の launch（クラウド / クラスタ起動・Spot 含む）を一律停止 → owner が予算確認、認可後 `BANTO_ALLOW_COMPUTE=1`（ローカル実行は対象外） |
 | 外部流出 | `egress-guard.sh`（既存） | eval / 学習データへの client 本番データ・PII 混入を遮断 |
 | 不可逆操作 | safety rule（既存） | push / PR / main / 削除 / 外部投稿は人間ゲート |
 

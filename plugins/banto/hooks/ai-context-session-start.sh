@@ -364,7 +364,14 @@ ONTO_JSON="$AI_BASE/meta/ontology.json"
 if [ -n "$AI_BASE" ] && [ -f "$ONTO_JSON" ] && command -v jq >/dev/null 2>&1; then
     ONTO_NE=$(jq '.entities|length' "$ONTO_JSON" 2>/dev/null)
     ONTO_NR=$(jq '.relations|length' "$ONTO_JSON" 2>/dev/null)
-    printf '[Repo Ontology router] %s entities / %s relations at %s/meta/ontology.json (schema + jq examples in ontology.md).\nRoute by question type: counting / enumeration / existence / audit -> query the ledger with jq (never read it wholesale). Content investigation (why / how / root cause) -> search skill (full-text). Cold file-walking without an index loses recall on weaker models -- go through the ledger or search first.\n\n' "$ONTO_NE" "$ONTO_NR" "$AI_BASE"
+    printf '[Repo Ontology router] %s entities / %s relations at %s/meta/ontology.json (schema + jq examples in ontology.md).\nRoute by question type: counting / enumeration / existence / audit -> query the ledger with jq (never read it wholesale). Content investigation (why / how / root cause) -> search skill (full-text; cross-store FTS5 section index via scripts/store-query.sh when present). Cold file-walking without an index loses recall on weaker models -- go through the ledger or search first.\n\n' "$ONTO_NE" "$ONTO_NR" "$AI_BASE"
+fi
+
+# --- store 横断 FTS5 セクション索引（内容層・decision 2026-07-02-223134）---
+# 鮮度スキップ・原子的差し替え・fail-open はスクリプト内蔵。非同期でセッション開始を妨げない。
+# 索引はコミットしないローカル派生物（正本は md。decision 2026-07-02-215442）。
+if [ -n "$AI_BASE" ] && [ -f "$PATHS_DIR/store_index_gen.py" ] && command -v python3 >/dev/null 2>&1; then
+    ( python3 "$PATHS_DIR/store_index_gen.py" --base "$AI_BASE" >/dev/null 2>&1 & )
 fi
 
 # --- plugin cache GC（日次・非同期。update が旧版を掃除しない構造問題への自走対処） ---
@@ -379,7 +386,10 @@ fi
 # combined.txt より新しい .md が decisions/docs にあれば検索コーパスが遅れている＝検索で拾えない。
 # 過去に再生成 hook の server パス drift で停止した事故の再発検知
 # （decisions/2026-06-01 index-rebuild-path-drift）。再生成は走らせず事実だけ通知する。
-COMBINED=$(ls "$AI_BASE"/*-combined.txt 2>/dev/null | head -1)
+# PostToolUse 再生成が更新するのは project-combined.txt のみ（--scope project）。
+# ls glob だと full-combined.txt（自動更新なし）を先に掴み恒常 stale 警告になるため project を優先
+COMBINED="$AI_BASE/project-combined.txt"
+[ -f "$COMBINED" ] || COMBINED=$(ls "$AI_BASE"/*-combined.txt 2>/dev/null | head -1)
 if [ -n "$COMBINED" ] && [ -f "$COMBINED" ]; then
     NEWER=$(find "$AI_BASE/decisions" "$AI_BASE/docs" -name '*.md' -newer "$COMBINED" 2>/dev/null | head -5)
     if [ -n "$NEWER" ]; then

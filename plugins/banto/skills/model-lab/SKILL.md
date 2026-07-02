@@ -29,7 +29,7 @@ The machinery is delegated to existing, proven tools (no reimplementation): inte
 
 odd.yaml = **L3 (Autopilot = keep running, request the owner only on exceptions)**. The cheap inner loop (local Mac verification, eval of existing results, iteration) runs autonomously. It always stops at these **human gates**:
 
-- **Launching paid compute** (cloud / cluster) — exceeding the Frame cost ceiling is stopped by `compute-cost-gate` → owner
+- **Launching paid compute** (cloud / cluster, Spot included) — every paid launch is stopped by `compute-cost-gate` → owner checks it against the Frame cost ceiling
 - **Publishing** (arxiv submission / HF push / GitHub push / PR / main) — existing safety + this skill's gates
 - **A method / architecture selection goal fork** (the acceptance criteria, order-of-magnitude cost, or novelty changes) — present once in Design and confirm
 
@@ -54,11 +54,11 @@ Detailed steps are in [`references/stages.md`](references/stages.md). The quick 
 
 ### Stage 4: Implement (training code + reproducibility)
 - Training code (PyTorch + Accelerate + FSDP2) + config (Hydra) + data versioning (DVC) + tracking (ClearML) + environment (pixi + Docker).
-- **Reproducibility from the start**: fixed seed + determinism flags. `repro-gate` detects missing seed/config/DVC ([`references/reproducibility.md`](references/reproducibility.md)).
+- **Reproducibility from the start**: fixed seed + determinism flags. `repro-gate` detects a missing fixed seed / determinism flags and missing std / CI in result documents (the config seed key and DVC registration are discipline only — no automated check) ([`references/reproducibility.md`](references/reproducibility.md)).
 
 ### Stage 5: Run (Mac → Nvidia → cloud)
 - Verify the logic on Mac (MLX/MPS) → small-scale Nvidia → Spot cloud / cluster via SkyPilot.
-- **Before launching paid compute, `compute-cost-gate`** (over budget → stop → owner). ClearML records the run.
+- **Before launching paid compute, `compute-cost-gate`** (every paid launch stops → owner confirms the budget → authorize with `BANTO_ALLOW_COMPUTE=1`). ClearML records the run.
 
 ### Stage 6: Verify (eval + ablation + statistics)
 - Benchmark + ablation + baseline comparison with lm-evaluation-harness + lighteval.
@@ -68,7 +68,7 @@ Detailed steps are in [`references/stages.md`](references/stages.md). The quick 
 
 ### Stage 7: Analyze (generate from execution output)
 - **Generate** the result tables / figures **from execution output** (`plot.py` / `make figures`. No hand-typing).
-- For each claim, record `verified` (run_id + config + seed + CI) into the claim ledger (`{base}/experiments/<project>/ledger.jsonl`).
+- For each claim, record `verified` (run_id + config + seed + CI) into the claim ledger (`{base}/experiments/<project>/ledger.jsonl`). To arm the ledger gate (model-claim-guard check C), set `export BANTO_LEDGER={base}/experiments/<project>/ledger.jsonl` (unset, check C is silently a no-op — the eval-red check works independently).
 
 ### Stage 8: Paper & Publish (human gate)
 - LaTeX draft (conference template) + related work (from research) + results section wired to the experiment output + reproducibility appendix.
@@ -84,8 +84,8 @@ Detailed steps are in [`references/stages.md`](references/stages.md). The quick 
 | Guard | hook | Effect |
 |---|---|---|
 | unbacked claim | `model-claim-guard.sh` (Stop) | Blocks a "done / paper-ready" with no verified entry in the claim ledger (the research version of verify-claim-guard) |
-| missing reproducibility | `repro-gate.sh` (PreToolUse) | Detects a missing fixed seed / config seed / DVC registration / std·CI in results |
-| compute cost | `compute-cost-gate.sh` (PreToolUse) | Stops launching paid compute over budget → owner (local / Spot pass through) |
+| missing reproducibility | `repro-gate.sh` (PreToolUse) | Detects a missing fixed seed / determinism flags / std·CI in results (escape: `BANTO_ALLOW_UNREPRO=1`) |
+| compute cost | `compute-cost-gate.sh` (PreToolUse) | Stops every paid-compute launch (cloud / cluster, Spot included) → owner confirms the budget, then authorize with `BANTO_ALLOW_COMPUTE=1` (local runs are not gated) |
 | egress | `egress-guard.sh` (existing) | Blocks client production data / PII leaking into eval / training data |
 | irreversible ops | safety rule (existing) | push / PR / main / deletion / external posting are human gates |
 

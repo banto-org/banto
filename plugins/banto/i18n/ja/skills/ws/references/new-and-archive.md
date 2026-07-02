@@ -46,7 +46,7 @@
 
 `WORKSPACE-refs.md` が残っていれば削除（single モードへ）。
 
-8. 初回のみ `.claude/rules/workspace.md` を生成（workspace ルール、本スキル末尾参照）。
+8. 初回のみ `$CLAUDE_PLUGIN_ROOT/templates/workspace-rule.md` を `.claude/rules/workspace.md` へコピーして生成（workspace ルールの正本テンプレート）。
 
 ## /ws archive: アーカイブ
 

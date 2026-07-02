@@ -2,7 +2,7 @@
 # pending-channel.sh — 例外（人間が見るべき checkpoint）の単一集約チャネルを管理する。
 #
 # 北極星「例外は checkpoint のみ」を UX で実体化する。各 hook が stderr に散発させていた
-# 警告を <base>/checkpoints/pending.md の named section に冪等集約し、SessionStart が注入する。
+# 警告を <base>/sessions/pending/<author>.md の named section に冪等集約し、SessionStart が注入する。
 #   spec: docs/specs/2026-06-10_harness-next-level（P2）
 #
 # Usage: pending-channel.sh <section> [cwd]

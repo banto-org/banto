@@ -22,3 +22,7 @@ Verify the consistency of `{base}/decisions/` and `{base}/docs/` against the sea
 4. Verify: use Grep to confirm that the `<<<FILE:...>>>` marker of the most recently written file is present in combined.txt.
 
 For the decision-log format, see the ai-context skill's `references/decision-log-format.md` (the decision-writing conventions are the ai-context skill's responsibility).
+
+## Japanese output style
+
+When writing reports/deliverables in Japanese, follow mechanically (canonical: templates/ja-style-core.md): put the conclusion in the first sentence / one idea per sentence (~60 chars, <=2 commas) / never end sentences with だ・である・です・ます (noun predicates stop at the noun 「実装は完了。」, verb predicates stay dictionary form 「自動で再適用される。」) / do not write in English or katakana what plain Japanese can say (proper nouns, command names, paths stay as-is) / never round numbers (do not turn 「32 件」 into 「約 30」) / half-width space between Japanese and ASCII / keep terminology consistent within a document.

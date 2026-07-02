@@ -1,6 +1,6 @@
 # /ws multi mode (parallel reference of multiple WS)
 
-A mode for **referencing multiple research topics or experiments at the same time on the same branch**. The first argument is the primary (write target), the rest are references (read-only).
+A mode for **referencing multiple research topics or experiments at the same time on the same branch** (single-checkout only — note that `WORKSPACE-refs.md` lives at the store root and is therefore shared across parallel worktrees). The first argument is the primary (write target), the rest are references (read-only).
 
 ## /ws multi <ws1> <ws2> ...: parallel reference of multiple WS
 

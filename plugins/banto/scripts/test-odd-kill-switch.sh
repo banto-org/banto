@@ -80,6 +80,20 @@ run_hook 'rm -rf /'; [ $? -eq 2 ] \
     && ok "R4: rm -rf / blocked" || bad "R4: rm -rf / not blocked"
 run_hook 'rm -rf ./build'; [ $? -eq 0 ] \
     && ok "R4: rm -rf ./build passes" || bad "R4: relative rm blocked"
+# 引用符・分割フラグの回避形（2026-07-02 監査で封鎖）
+run_hook 'rm -rf "/"'; [ $? -eq 2 ] \
+    && ok "R4: quoted root blocked (historic bypass)" || bad "R4: quoted root passes"
+run_hook 'rm -r -f /'; [ $? -eq 2 ] \
+    && ok "R4: split flags blocked (historic bypass)" || bad "R4: split flags pass"
+run_hook 'rm -rf ~'; [ $? -eq 2 ] \
+    && ok "R4: rm -rf ~ blocked" || bad "R4: rm -rf ~ not blocked"
+run_hook 'rm -r -f ./build'; [ $? -eq 0 ] \
+    && ok "R4: split flags on relative path pass (negative)" || bad "R4: relative split flags blocked"
+
+# === 早期 exit 撤去: プラグインルート解決が壊れても 4 ルールは生きる（2026-07-02 監査） ===
+mkdir -p "$TMP/empty-root/hooks"
+CLAUDE_PLUGIN_ROOT="$TMP/empty-root" sh -c "printf '%s' '{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"git push origin main\"}}' | sh '$HOOK' >/dev/null 2>&1"; [ $? -eq 2 ] \
+    && ok "guard survives broken plugin-root (no odd.yaml)" || bad "guard silently disabled without odd.yaml"
 
 # === jq 不在フォールバック（PATH から jq を消して単純 payload を通す） ===
 NOJQ="$TMP/nojq-bin"

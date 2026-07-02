@@ -85,7 +85,9 @@ while IFS= read -r _seg; do
     # ---- 1) .env 系の生読み出し ----
     case "$_first" in
         cat|head|tail|less|more|bat|strings|diff|grep|egrep|fgrep|rg)
-            case " $_seg " in
+            # 引用符を剥がしてから照合（cat "$HOME/.env" / cat '.env' の引用回避を塞ぐ）
+            _seg_noq=$(printf '%s' "$_seg" | tr -d '\042\047')
+            case " $_seg_noq " in
                 *".env.example"*|*".env.sample"*|*".env.template"*|*".env.dist"*)
                     : ;;  # secret を含まない約束事ファイルは通過
                 *"/.env "*|*"/.env"|*" .env "*|*" .env"|*"/.env."*|*" .env."*)

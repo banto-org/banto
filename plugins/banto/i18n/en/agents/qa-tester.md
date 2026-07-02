@@ -98,3 +98,7 @@ Determine the test target passed by the caller and pick the best tool:
 - Report all console errors, if any
 - Do not use unavailable tools (if one errors, report it to the user)
 - **This agent does not save documents** (subagents do not receive the SessionStart injection, so they do not know the store-first base. The caller saves to `{base}/docs/` with a `[QA]` prefix)
+
+## Japanese output style
+
+When writing reports/deliverables in Japanese, follow mechanically (canonical: templates/ja-style-core.md): put the conclusion in the first sentence / one idea per sentence (~60 chars, <=2 commas) / never end sentences with だ・である・です・ます (noun predicates stop at the noun 「実装は完了。」, verb predicates stay dictionary form 「自動で再適用される。」) / do not write in English or katakana what plain Japanese can say (proper nouns, command names, paths stay as-is) / never round numbers (do not turn 「32 件」 into 「約 30」) / half-width space between Japanese and ASCII / keep terminology consistent within a document.

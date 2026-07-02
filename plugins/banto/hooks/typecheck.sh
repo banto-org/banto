@@ -12,12 +12,17 @@ cd "$CWD" 2>/dev/null || exit 0
 
 EXT="${FILE_PATH##*.}"
 
+# macOS 標準に timeout が無い（coreutils の gtimeout のみの環境あり）。
+# 不在のまま `timeout 20 ...` を呼ぶと command not found → ERRORS 空 → 型チェックが黙って無効化されるため、
+# 実在する方を使い、どちらも無ければタイムアウトなしで実行する
+TIMEOUT_BIN=$(command -v timeout 2>/dev/null || command -v gtimeout 2>/dev/null)
+
 case "$EXT" in
   ts|tsx)
     [ ! -f "tsconfig.json" ] && exit 0
     # tsc --noEmit の結果から対象ファイルのエラーだけ抽出
     # タイムアウト20秒（大規模プロジェクト対策）
-    ERRORS=$(timeout 20 npx tsc --noEmit --pretty false 2>&1 | grep -F "$(basename "$FILE_PATH")" | head -5)
+    ERRORS=$(${TIMEOUT_BIN:+$TIMEOUT_BIN 20} npx tsc --noEmit --pretty false 2>&1 | grep -F "$(basename "$FILE_PATH")" | head -5)
     if [ -n "$ERRORS" ]; then
       echo "[Harness typecheck] Type errors:" >&2
       echo "$ERRORS" >&2
@@ -27,7 +32,7 @@ case "$EXT" in
   py)
     # pyright があれば対象ファイルのみチェック（高速）
     if command -v pyright >/dev/null 2>&1; then
-      ERRORS=$(timeout 15 pyright "$FILE_PATH" 2>&1 | grep -E "error:" | head -5)
+      ERRORS=$(${TIMEOUT_BIN:+$TIMEOUT_BIN 15} pyright "$FILE_PATH" 2>&1 | grep -E "error:" | head -5)
       if [ -n "$ERRORS" ]; then
         echo "[Harness typecheck] Type errors:" >&2
         echo "$ERRORS" >&2

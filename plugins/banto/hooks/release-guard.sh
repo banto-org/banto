@@ -63,9 +63,10 @@ while IFS= read -r _seg; do
     case "$_padded" in
         *" gh pr merge"*) _pr_merge=1 ;;
     esac
-    # R3: パブリック公開系（--dry-run は通過）
+    # R3: パブリック公開系（--dry-run のみ通過。汎用 " -n " 許容は publish 系以外の -n を
+    # 巻き込んで block を迂回させ得たため廃止 — 2026-07-02 監査）
     case "$_padded" in
-        *"--dry-run"*|*" -n "*) ;;
+        *"--dry-run"*) ;;
         *" gh repo create "*)
             case "$_padded" in *"--public"*) _publish=1; _publish_what="gh repo create --public" ;; esac ;;
         *" gh repo edit "*)
