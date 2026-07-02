@@ -24,6 +24,19 @@ SESSION_ID=$(printf "%s" "$PAYLOAD" | jq -r '.session_id // empty')
 [ -z "$SESSION_ID" ] && exit 0
 
 STATE_DIR="${ODD_STATE_DIR:-$HOME/.cache/banto}"
+
+# verify-run.sh（Bash 内から起動され hook payload を持たない）が同じ counter 鍵を引けるよう、
+# cwd 単位の現行 session ポインタを残す。本 hook は PreToolUse:Write|Edit 登録のため、ポインタは
+# 実装ループの先行 Edit/Write で書かれる（定常フローでは verify-run より先に必ず発火する。
+# 先行 Edit の無い baseline verify は env 不在なら manual に落ちる — 既知の限界）。
+# 2026-07-02 監査: env フォールバック "manual" による鍵ズレの修正 / 2026-07-03 監査: 根拠コメント訂正。
+_CWD=$(printf "%s" "$PAYLOAD" | jq -r '.cwd // empty')
+if [ -n "$_CWD" ]; then
+    _cwd_id=$(printf '%s' "$_CWD" | cksum | awk '{print $1}')
+    mkdir -p "$STATE_DIR" 2>/dev/null
+    printf '%s' "$SESSION_ID" > "$STATE_DIR/session-current-${_cwd_id}" 2>/dev/null
+fi
+
 TF_FILE="$STATE_DIR/test-failures-${SESSION_ID}"
 [ -f "$TF_FILE" ] || exit 0
 

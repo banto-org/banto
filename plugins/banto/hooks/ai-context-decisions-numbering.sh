@@ -2,8 +2,9 @@
 # ai-context-decisions-numbering.sh
 # decisions/ ファイルのタイムスタンプ命名 (YYYY-MM-DD-HHMMSS_topic_user.md) を支援する hook。
 #
-# - PreToolUse(Write): decisions/ への書き込み前に推奨ファイル名（秒精度の時刻ベース）を context に注入
 # - PostToolUse(Write|Edit): 日付始まりだが命名規約に合わない decisions 書き込みを警告
+#   （PreToolUse の推奨名注入は 2026-07-02 監査で廃止 — PreToolUse の stdout はモデルに
+#    inject されず死にコードだった。CONTRACT.md:40）
 #
 # v5.14.0: 同日連番 NNN を導入。
 # v5.21.4: チーム並行・オフライン運用で NNN がローカル走査ゆえ衝突する問題を回避するため、
@@ -42,21 +43,6 @@ AUTHOR="${USER:-unknown}"
 command -v _ai_context_author >/dev/null 2>&1 && AUTHOR=$(_ai_context_author "$CWD")
 
 case "$EVENT" in
-    PreToolUse)
-        cat << END
-[Decisions Naming] Recommended filename (second-precision timestamp): ${NOW}_{topic-slug}_{github-account}.md
-
-Examples:
-  ${NOW}_install-sh-update_${AUTHOR}.md
-  ${NOW}_central-store-migration_${AUTHOR}.md
-
-Naming convention (v5.21.4+):
-- YYYY-MM-DD-HHMMSS_topic_author (second-precision time + author name at the end)
-- Unique even with parallel/offline team work (no same-day collisions). NNN sequence numbers are retired.
-- Existing files in the old YYYY-MM-DD_NNN_ format remain valid (no rename needed).
-END
-        ;;
-
     PostToolUse)
         BASENAME=$(basename "$FILE")
         # 新形式（タイムスタンプ）でも旧形式（NNN）でもなく、日付始まりだけのものを警告

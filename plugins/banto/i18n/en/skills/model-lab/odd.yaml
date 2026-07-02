@@ -19,7 +19,7 @@ out_of_scope:
   - Reimplementing the training / tracking / eval infrastructure (delegate to proven tools; the bundle is only a thin verification spine + orchestration)
 
 safety_boundaries:
-  - Paid compute (cloud / cluster) stops when over the cost ceiling → owner (compute-cost-gate). Spot / preemptible by default
+  - Every paid-compute launch (cloud / cluster, Spot included) stops → owner checks it against the cost ceiling and authorizes (compute-cost-gate; then BANTO_ALLOW_COMPUTE=1). Spot / preemptible by default
   - Don't mix client production data / PII / internal names into eval / training data (egress-guard blocks leaks to client paths)
   - Don't bake Claude's ids · pricing into SKILL.md / scripts (the claude-api skill is canonical)
   - The bundled scripts (repro-check / eval-stats / claim-link) are a no-op when dependencies are absent (fail-open) — never stop implementation just because verification can't run
@@ -40,7 +40,7 @@ approval_gates:
   - When importing external / production data into eval / training data, confirm its provenance
 
 metrics:
-  eval_seed_min: 5
+  eval_seed_min: 3  # minimum (unified with eval-rigor.md; 5-10 recommended)
   eval_ci_level: 95
   eval_plateau_rounds: 3
   compute_cost_ceiling_usd: null  # set per project by the owner at Frame. When null, launching cloud / cluster always requires confirmation

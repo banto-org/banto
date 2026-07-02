@@ -37,6 +37,7 @@ compatibility: Claude Code (requires bash, git, jq)
 | `migrate [path\|--all]` | プロジェクトの ai-context を中央 store へ移行 | `references/setup.md` |
 | `memo [text]` | 会話 / 指定内容を `[Memo]` ドキュメント化（旧 `memo` skill を内包） | 下記「メモ（`memo`）」 |
 | `knowledge [list\|promote\|<topic>]` | ナレッジ下書きの一覧 / 昇格 / 新規作成（旧 `knowledge` skill を内包） | 下記「ナレッジ（`knowledge`）」 |
+| `ref [場所/URI]` | 外部文書の所在カードを `docs/refs/` に登録（「ここにある」でも発火） | 下記「所在登録（`ref`）」 |
 
 引数が空または不明な場合は使い方を表示する。
 
@@ -98,6 +99,31 @@ sh "$CLAUDE_PLUGIN_ROOT/scripts/ai-context-store-init.sh" local
 - **どこ**: `{base}/decisions/YYYY-MM-DD-HHMMSS_{topic-slug}_{github-account}.md`（PreToolUse hook が推奨名を注入; 旧 `YYYY-MM-DD_NNN_` 形式も有効）。
 - **形式**: 軽量（タイトル + 判断）/ 完全（出発点 / 選択肢 / 決め手 / 不採用理由 / **フリクション** / **学んだこと**）。フリクションと学びが組織学習の核。
 - **シークレット**（鉄則）: `sk-*` / `ghp_*` / `Bearer *` / `.env` 値を decisions / チェックポイントに書かない → `{SECRET}` に置換。露出時は即 **revoke / rotation**（チャット履歴に残る）。
+
+## 所在登録（`ref`）— 外部文書の所在カード
+
+外部にある文書（SharePoint / ファイルサーバ / URL / store 外のローカルファイル）の**所在と相関だけ**を
+`{base}/docs/refs/[Ref] <名前>.md` に 1 枚で登録する。本文はミラーしない（全文が必要なら research の取り込みを使う）。
+発火語：「ここにある」「この場所を覚えて」「所在登録」— また **Claude 自身が作業中に外部文書を読んで根拠に使ったとき**は、会話の副産物として同カードを自発的に作成・更新する。
+
+```markdown
+---
+title: <人間が読む名前>
+source: sharepoint | fileserver | url | local
+uri: <https://… / smb://… / /Volumes/…>
+fetched: <YYYY-MM-DD 最後に実物を確認した日>
+related:
+  - <decisions/… や docs/… — 関係する store 文書（プレフィックスで可）>
+---
+# <名前>
+
+<要旨 2〜3 行（任意）。何のための文書で、どの作業と関係するか。>
+```
+
+- `related:` は決定論抽出され、台帳の `references` 関係 + 検索 db の refs テーブルになる。
+  芋づるは `sh "$CLAUDE_PLUGIN_ROOT/scripts/store-query.sh" --related <断片>`（→ 参照先 / ← 被参照）。
+- 正本は常に外部（uri 先）。カードは「どこにあって何と関係するか」だけを持つ。
+- 一括棚卸し（ディレクトリ走査で自動生成）は `scripts/ref_scan.py`（Excel はシート一覧 + シート間参照付き）。
 
 ## メモ（`memo`）
 

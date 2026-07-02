@@ -33,7 +33,7 @@ echo "$PROMPT" | grep -qiE "$SMALL_SIGNALS" && exit 0
 
 # セッション単位の発火抑制（CWD ハッシュで代用）
 if [ -z "$SESSION_ID" ]; then
-    SESSION_ID=$(echo -n "$CWD" | (md5sum 2>/dev/null || md5 2>/dev/null || cksum) | cut -d' ' -f1)
+    SESSION_ID=$(printf '%s' "$CWD" | (md5sum 2>/dev/null || md5 2>/dev/null || cksum) | cut -d' ' -f1)
 fi
 FLAG="${TMPDIR:-/tmp}/scope-detect-${SESSION_ID}.fired"
 [ -f "$FLAG" ] && exit 0

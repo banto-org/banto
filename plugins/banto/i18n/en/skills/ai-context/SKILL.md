@@ -37,6 +37,7 @@ Interpret the first token of `$ARGUMENTS` as a subcommand, Read the correspondin
 | `migrate [path\|--all]` | Migrate a project's ai-context to the central store | `references/setup.md` |
 | `memo [text]` | Turn the conversation / given content into a `[Memo]` document (absorbs the former `memo` skill) | "Memo (`memo`)" below |
 | `knowledge [list\|promote\|<topic>]` | List / promote / create knowledge drafts (absorbs the former `knowledge` skill) | "Knowledge (`knowledge`)" below |
+| `ref [location/URI]` | Register an external document's location card under `docs/refs/` (also fires on "it's here") | "Location registration (`ref`)" below |
 
 If the argument is empty or unknown, show usage.
 
@@ -98,6 +99,35 @@ Details: [`references/decisions.md`](references/decisions.md)
 - **Where**: `{base}/decisions/YYYY-MM-DD-HHMMSS_{topic-slug}_{github-account}.md` (the PreToolUse hook injects the recommended name; the old `YYYY-MM-DD_NNN_` format is still valid).
 - **Format**: lightweight (title + decision) / full (starting point / options / deciding factor / why rejected / **friction** / **lessons learned**). Friction and lessons are the core of organizational learning.
 - **Secrets** (ironclad rule): don't write `sk-*` / `ghp_*` / `Bearer *` / `.env` values into decisions / checkpoints → replace with `{SECRET}`. On exposure, **revoke / rotate** immediately (it stays in the chat history).
+
+## Location registration (`ref`) — external-document location cards
+
+Register **only the location and relations** of an external document (SharePoint / file server / URL /
+local file outside the store) as one card at `{base}/docs/refs/[Ref] <name>.md`. Never mirror the body
+(use the research intake when full text is needed).
+Triggers: "it's here", "remember this location", "register the location" — and **whenever Claude itself
+reads an external document and uses it as evidence during work**, create/update the card proactively
+as a by-product of the conversation.
+
+```markdown
+---
+title: <human-readable name>
+source: sharepoint | fileserver | url | local
+uri: <https://… / smb://… / /Volumes/…>
+fetched: <YYYY-MM-DD when the real document was last verified>
+related:
+  - <decisions/… or docs/… — related store documents (prefix form is fine)>
+---
+# <name>
+
+<2–3-line summary (optional): what the document is for and which work it relates to.>
+```
+
+- `related:` is extracted deterministically into the ledger's `references` relations + the search db's
+  refs table. Traverse with `sh "$CLAUDE_PLUGIN_ROOT/scripts/store-query.sh" --related <fragment>`
+  (→ outgoing / ← incoming).
+- The canonical copy always lives at the external uri; the card holds only "where it is and what it relates to".
+- Bulk inventory (auto-generation by directory scan) is `scripts/ref_scan.py` (Excel: sheet list + cross-sheet references).
 
 ## Memo (`memo`)
 

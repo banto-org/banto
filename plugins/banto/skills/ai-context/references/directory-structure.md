@@ -42,8 +42,9 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
 ├── decisions/           # 設計判断ログ（フラット・ファイル名に author 帰属）  ← store 共有
 ├── docs/                # 報告・記録系（フラット・プレフィックス必須）          ← store 共有
 │   ├── research/        #   research-agent の調査出力                          ← store 共有
-│   └── knowledges/      #   昇格済みナレッジ（プレフィックスなし例外）          ← store 共有
-│       └── drafts/      #     ナレッジ下書き（hook が自動保存・閾値でレビュー） ← store .gitignore
+│   ├── knowledges/      #   昇格済みナレッジ（プレフィックスなし例外）          ← store 共有
+│   │   └── drafts/      #     ナレッジ下書き（hook が自動保存・閾値でレビュー） ← store .gitignore
+│   └── refs/            #   Location cards (external-doc pointers + relations)  ← store shared
 ├── learnings/           # 教訓・学び（教訓 scope。個人状態）                    ← store 共有
 │   └── <author>/        #   メンバー名前空間（Stop hook 自己改善が書く）
 ├── meta/                # store 自身のメタ（新 scope）                          ← store 共有
@@ -103,6 +104,7 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
 | `docs/research/` | `research` (emitted by `research-agent`) | `YYYY-MM-DD_<topic>.md` (no prefix) |
 | `docs/knowledges/` | `knowledge` (`ai-context knowledge`) promotion target | No prefix (**exception**). Title = filename `{topic}.md` |
 | `docs/knowledges/drafts/` | `ai-context-auto.sh` (hook auto-saves) → review / promote via `knowledge` | `{topic}.md`. SessionStart surfaces them once the threshold (`BANTO_DRAFT_REVIEW_MIN`, default 10) is exceeded |
+| `docs/refs/` | `ai-context` (in-conversation location registration) / `ref_scan.py` (bulk inventory) | `[Ref] <name>.md`. Frontmatter = source / uri / fetched / related. Body = summary only (no content mirror) |
 | `learnings/<author>/` | `ai-context-stop-self-improve.sh` (Stop hook self-improvement loop) / SessionStart (read / inject) | Learnings drafts (per-author) |
 | `meta/` | Store operation (mapping / index / health reports from `ai-context-lint.sh`) | Format depends on the use (index / report) |
 | `tasks/active.md`・`tasks/old/` | `ai-context` (legacy operation, unmigrated projects only) | `active.md` / `old/YYYY-MM-DD_phase-name.md` |

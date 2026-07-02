@@ -13,8 +13,17 @@ set -u
 
 DIR=${1:-.}
 SELF_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-SESSION_ID=${BANTO_SESSION_ID:-${CLAUDE_SESSION_ID:-manual}}
 STATE_DIR="${ODD_STATE_DIR:-$HOME/.cache/banto}"
+# session 鍵: env 優先 → odd-gate が PreToolUse:Bash で残す cwd 単位ポインタ → manual。
+# hook payload の session_id（odd-gate / auto-test の counter 鍵）と揃えるための配線
+#（2026-07-02 監査: env が無く "manual" に落ち、circuit breaker に積算されない鍵ズレの修正）。
+SESSION_ID=${BANTO_SESSION_ID:-${CLAUDE_SESSION_ID:-}}
+if [ -z "$SESSION_ID" ]; then
+    _cwd_abs=$(CDPATH= cd -- "$DIR" 2>/dev/null && pwd || printf '%s' "$DIR")
+    _cwd_id=$(printf '%s' "$_cwd_abs" | cksum | awk '{print $1}')
+    SESSION_ID=$(cat "$STATE_DIR/session-current-${_cwd_id}" 2>/dev/null)
+fi
+[ -n "$SESSION_ID" ] || SESSION_ID=manual
 VERIFY_STATE="$STATE_DIR/verify-last-${SESSION_ID}"
 TF_FILE="$STATE_DIR/test-failures-${SESSION_ID}"
 

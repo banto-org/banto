@@ -178,6 +178,29 @@ _doctitle() {
     [ -z "$t" ] && t=$(grep -m1 '^# ' "$1" 2>/dev/null | sed 's/^#[[:space:]]*//')
     printf '%s' "$t"
 }
+# frontmatter の related: リスト（素朴な YAML ブロック形式）を列挙
+_docrelated() {
+    awk 'NR==1 && $0!="---"{exit} /^---$/{c++; if(c>1) exit; next}
+         c==1 && /^related:[[:space:]]*$/{f=1; next}
+         c==1 && f && /^[[:space:]]+-[[:space:]]/{sub(/^[[:space:]]+-[[:space:]]+/,""); print; next}
+         c==1 && f{f=0}' "$1" 2>/dev/null
+}
+# related エントリ（.md / author 接尾辞を欠く prefix 形が多い）を実ファイルへ解決し、
+# 解決できたエッジのみ references として台帳へ（TBox doc-layer で宣言済みの follow-up 実装）
+_emit_references() { # $1=source file  $2=source rel（doc:<rel> の <rel>）
+    _docrelated "$1" | while IFS= read -r _rr; do
+        [ -n "$_rr" ] || continue
+        if [ -f "$BASE/$_rr" ]; then _tgt="$BASE/$_rr"
+        else _tgt=$(ls "$BASE/$_rr"*.md 2>/dev/null | head -1); fi
+        [ -n "$_tgt" ] && [ -f "$_tgt" ] || continue
+        _trel=${_tgt#"$BASE/"}
+        # 台帳（doc-layer）に entity として載る decisions/ docs/ のみエッジ化（L2 端点解決を保つ。
+        # workspaces 等の doc-layer 収録は R2 実測で既知の fidelity 改善候補 — 収録時にこの制限を外す）
+        case "$_trel" in decisions/*|docs/*) ;; *) continue ;; esac
+        jq -nc --arg from "doc:$2" --arg to "doc:$_trel" \
+            '{from:$from,type:"references",to:$to}' >> "$REL"
+    done
+}
 if [ -d "$BASE/decisions" ]; then
     for f in "$BASE"/decisions/*.md; do
         [ -f "$f" ] || continue
@@ -187,6 +210,7 @@ if [ -d "$BASE/decisions" ]; then
         s=$(sed -n 's/^status:[[:space:]]*//p' "$f" 2>/dev/null | head -1)
         jq -nc --arg id "doc:$rel" --arg t "$t" --arg a "$a" --arg s "$s" \
             '{id:$id,type:"document",doc_type:"decision",title:(if $t=="" then null else $t end),author:(if $a=="" then null else $a end),status:(if $s=="" then null else $s end)}' >> "$ENT"
+        _emit_references "$f" "$rel"
     done
 fi
 if [ -d "$BASE/docs" ]; then
@@ -204,6 +228,7 @@ if [ -d "$BASE/docs" ]; then
         [ -z "$t" ] && t=$(printf '%s' "$b" | sed -E 's/^\[[A-Za-z]+\][[:space:]]*//; s/\.(md|html)$//')
         jq -nc --arg id "doc:$rel" --arg dt "$dt" --arg t "$t" \
             '{id:$id,type:"document",doc_type:$dt,title:$t}' >> "$ENT"
+        _emit_references "$f" "$rel"
     done
 fi
 
@@ -305,7 +330,7 @@ jq --arg s "$STAMP" '.generated=$s' "$TMPJSON" > "$OUTJSON" 2>/dev/null || exit 
     echo "- \`.entities[]\` = { id, type, autonomy?, user_invocable?, registered?, scope?, gitignore? }"
     echo "- \`.relations[]\` = { from, type, to }"
     echo "- id formats: \`skill:<n>\` \`agent:<n>\` \`hook:<n>\` \`rule:<n>\` \`script:<n>\` \`bucket:<path>\` \`event:<Event>:<matcher>\` \`dir:<n>\` \`dep:<n>\` \`repo:<n>\`"
-    echo "- relation types: \`gates\` (hook→event) · \`writes-to\` (skill/hook→bucket) · \`contains\` · \`depends-on\`; concept-layer types (\`invokes\` \`excludes\` \`conforms-to\` …) appear only under \`--scope full\`"
+    echo "- relation types: \`gates\` (hook→event) · \`writes-to\` (skill/hook→bucket) · \`contains\` · \`depends-on\` · \`references\` (doc→doc, from \`related:\` frontmatter); concept-layer types (\`invokes\` \`excludes\` \`conforms-to\` …) appear only under \`--scope full\`"
     echo ""
     echo "## Example queries (jq over meta/ontology.json)"
     echo ""

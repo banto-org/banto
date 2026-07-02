@@ -82,6 +82,8 @@ touch "$LOCK"
     else
         touch "$FAIL_MARKER"
     fi
+    # FTS5 セクション索引も追従させる（鮮度スキップ・原子的差し替え・fail-open は内蔵）
+    [ -f "$PATHS_DIR/store_index_gen.py" ] && python3 "$PATHS_DIR/store_index_gen.py" --base "$AI_BASE" >/dev/null 2>&1
     rm -f "$LOCK"
 ) &
 

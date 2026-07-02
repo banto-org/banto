@@ -1,34 +1,34 @@
 {
   "files": {
     "agents/architect.md": {
-      "en_sha256": "de657eb169bcc7ca1c6bc81bf41db8cdb5a975fc5948a640e51f07f0c6d0b02d",
+      "en_sha256": "390e4dd5016f328d459c13b0d4407aa636a2a6923fd58561e9540d0f28c9e4c2",
       "generated_at": "2026-06-20T14:58:57Z",
-      "ja_sha256": "e905723300a9c12fd50c7798f6ed662dfbdb0fd3d13d2bafe8623e0e57aaf862"
+      "ja_sha256": "c6df881b158dc0bfff4033a2e76ae37e3899574b51fc5b53d705b5099717992a"
     },
     "agents/context-keeper.md": {
-      "en_sha256": "34b30826f0d2edd9b6058b5ea87ee0a052b7375f79c1dcf2d1b3e021bd5eb358",
+      "en_sha256": "a1417128900ea4b86b712196ed3fecefeb170e790b222749442067d6413f40bf",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "633fe2649e6a57a0f3c9ca49af77f5ff0165ed56e08d9a4fc8b8367f62e57efa"
+      "ja_sha256": "cc7a13771bb043daf4d6c226c79cb3aa4cf08a1da2a08d6fcc2a1334340ee085"
     },
     "agents/debugger.md": {
-      "en_sha256": "b150423d1b84e4562189e7001e47ba8e632d0458137720e7e4bf5cf492f05925",
+      "en_sha256": "f0ad5cb4573f558b324631f82aece0fb88874482123e462bb46ea727444e8e5e",
       "generated_at": "2026-06-20T14:58:57Z",
-      "ja_sha256": "3a1367da73df66c3533e06e521c8dd60930737c728cece9cdc157eaecc1f0474"
+      "ja_sha256": "790c22fd0d1674d35ccb1d71e99f3fd20187c6f1ead42cd79ed8282afaa9c65d"
     },
     "agents/qa-tester.md": {
-      "en_sha256": "7b18906402983185cf6f4085e85ed7ba84671d4ca39e097b77d1cd791314ded8",
+      "en_sha256": "c2de1b1b8e545a7ba829fcb52bf2db5e07b1bfb5edd9875039f49c65edd2aaf5",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "25fa31198377a2b075e06d1cb5c4e462e3cd8506eff943892695023f9e6157ec"
+      "ja_sha256": "0f5efedeb67bf7ceec7bda70fb93856305aa91e773724519d66845778d35ba25"
     },
     "agents/research-agent.md": {
-      "en_sha256": "0292a2fd6667e7ac216c046d0984b538f15d3cb5aa8a3987389bbf98ab8d8f1e",
+      "en_sha256": "0f67cb22f4812a05715ded254403b66982e9d406ef38feb163c1bb5ecca7b84f",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "ed824194688abae83c23aa5ebc3d100902746d849f811c48c26633ddd9b3dd47"
+      "ja_sha256": "83005413d1ddc4b739c954a58a3e2942ede4972450126a1c1d8160338305ac63"
     },
     "agents/search-agent.md": {
-      "en_sha256": "89c30340ae05f4c87e723f9c53d952461be32c921fd6cef68d4350da3d3c0dfa",
+      "en_sha256": "1c23c913f0d393e536fad8c4e32fd330b351b63935a77552a34cb5c7c074ee73",
       "generated_at": "2026-06-20T14:42:39Z",
-      "ja_sha256": "a9eefebe323747d0878ec137752b2f823efb382531a121963ab90329bccabef8"
+      "ja_sha256": "e4d28b8791bd8996ba8bd822449b1527f2ea0e04c98206a7417d7a32879af575"
     },
     "skills/ai-build/SKILL.md": {
       "en_sha256": "b9e34f7887233c9b6f61c1c20898b5a1c7b915fa26acc75510a75d735929cd82",
@@ -56,9 +56,9 @@
       "ja_sha256": "ad682974713255a3e5582b8dec50be2472837f3745049c56697bbe1c7e486ac4"
     },
     "skills/ai-context/SKILL.md": {
-      "en_sha256": "be6ab30e1d91ca68d7b30a1de9722b79359279448aaf8f3c028946b6f3cf7bae",
+      "en_sha256": "e5d78506e3e7c3e03001ffae3f9d018165fac1d8310e2a1e131286cf589ffa4b",
       "generated_at": "2026-06-24T08:21:34Z",
-      "ja_sha256": "218344aae049fe69035abf2d5e7ab58d6df6121833e5c27a6006efcf9ef3e7e9"
+      "ja_sha256": "8dac1fa134bfdab61eda272e8f47aca69da72ee110e7d96ebb49fa14815255ba"
     },
     "skills/ai-context/odd.yaml": {
       "en_sha256": "a0c06aafbe556633a206832c79795fe07dcf05db5e20e9972b5c35a23811b496",
@@ -76,9 +76,9 @@
       "ja_sha256": "8eafb8ce5693ac1003ed8aa8f2a2e80961d03c39f60fb005242f086be45263b6"
     },
     "skills/ai-context/references/directory-structure.md": {
-      "en_sha256": "4a5428445f31b6ba927735b54356e426f6e05487fd1f3076231b6d710858fb69",
+      "en_sha256": "6dba915b62df9403e470cb0ac65cc03beeae8d27c97c4c7debe6aa15934d1c85",
       "generated_at": "2026-06-24T08:24:57Z",
-      "ja_sha256": "37ad41d4a4a40ce8b551bc9df9f164eef25cd8fb982c1f33f4ee0b05055cc3f0"
+      "ja_sha256": "964dd82ab8cd4d4ad0d9f522675147cd21da44edbcf8378477f1577e08a61822"
     },
     "skills/ai-context/references/doctor.md": {
       "en_sha256": "3838616d914593f338cc88c8073bbe05d5bb6868670a7dcc03c2a4ad32388795",
@@ -131,9 +131,9 @@
       "ja_sha256": "cb01e80f662fc19f93d51fa3e5495ef54e508fb2f59a30d0766905654e87fb57"
     },
     "skills/dev-loop/SKILL.md": {
-      "en_sha256": "27ddfa95751884fae2e068a93aaabee073ef4fb7abe71f6aaaca5591dbc2d957",
+      "en_sha256": "6b1f8250a45d27c4330894e091d5404e2bfb0f736bc97cb8c01278cfade0fb4a",
       "generated_at": "2026-06-22T14:04:29Z",
-      "ja_sha256": "d88da4fc7d4fbad7e1177ce2df74e15c4694b82863fdb0e4ef6783502e8f85ca"
+      "ja_sha256": "6711ba132d1f0ecd93806b213d819140b5b00ebe6032fcfe9cb96d66d1fb38a7"
     },
     "skills/dev-loop/odd.yaml": {
       "en_sha256": "725c43e20601a70dd8e4298e2563cbed1fc31ea8b0c2e199e9a79969e5c53d6a",
@@ -141,9 +141,9 @@
       "ja_sha256": "5dca68142bfe041169442ecc83859aa84474268f9333ffbac482ea3870e4ce89"
     },
     "skills/dev-loop/references/loop-protocol.md": {
-      "en_sha256": "e76182c8f294efbe500e1007775bfa99214922fe2b2914f0c76c7c876bd8080b",
+      "en_sha256": "1ffc9eae54d3c7c88356f5783623a679fa780e6afbab5d2766d399349cf7232d",
       "generated_at": "2026-06-22T14:04:29Z",
-      "ja_sha256": "cb1a3a0253b7a6dd7f351fe59b49991778337274f2e04f8b82495babd3997c92"
+      "ja_sha256": "39a6ac23fe0d2262cbfb4e1f88ee2091bea9f233954000a7643666f2c20062b2"
     },
     "skills/kit/SKILL.md": {
       "en_sha256": "116ff12c736b5cf0db038ec7f0fbbfb4e4010521c29e672fcfa3478c29aeb9b8",
@@ -156,19 +156,19 @@
       "ja_sha256": "e476c6199667a321bec3d3de448274083e34fbf30fc3d21000c8eba30394d341"
     },
     "skills/model-lab/SKILL.md": {
-      "en_sha256": "eddbaaf85915da9e4e9494494416ca85267372df965e97fd2a3cca09effda6c5",
+      "en_sha256": "e3c544cf1f8ab36b890508ee5fdf6228d3fa141f582c2d621b381f03a0aa6c89",
       "generated_at": "2026-06-24T21:59:56Z",
-      "ja_sha256": "ad79f106cae73927d3ecd94e96cd9166758679884c467336ca7e264b4ff12718"
+      "ja_sha256": "cd68ecaad5e97d80e5b838e02e939a37edf60f3db87b947d7b44afda313eba67"
     },
     "skills/model-lab/odd.yaml": {
-      "en_sha256": "c09d265a4935356c1c15eb20739a78a9e60d9950cd4b7f882f43ab649ba3e020",
+      "en_sha256": "3c825113df0e6ba402827f5581f24efa60a46ffa67cf954d460204eef4b6f823",
       "generated_at": "2026-06-24T21:59:56Z",
-      "ja_sha256": "f07a4a6495762d14d7cc1b4611ce4b130ee475c7eaebad6e20163568cc552d92"
+      "ja_sha256": "c4b31c7e6f2178aa159885678937767844ba03e62d2840b3f7b3d1196cbd83d0"
     },
     "skills/model-lab/references/compute.md": {
-      "en_sha256": "ad22d270075c8ec3ddf90e6bba148c8c91908ad73b14e7f25925d6b25523e81d",
+      "en_sha256": "4457bf3916e506fb362c68acc363e60f1f33c29a71f76e2453bc5d09b2c2c36e",
       "generated_at": "2026-06-24T21:59:56Z",
-      "ja_sha256": "4f57a73a7faa6d80c122d32ddc77c654e63fead06fa9f88a4347b53e6a8819f6"
+      "ja_sha256": "06302c08937b291198e9e7ab0e3e989c3a3504bafebaa54124ecb2f32e1ff6dc"
     },
     "skills/model-lab/references/eval-rigor.md": {
       "en_sha256": "5b051f55b62a2d7d4d2cd654de1e130f9c733eec45b0c0244e1588a329c1aac8",
@@ -186,9 +186,9 @@
       "ja_sha256": "0ca72f239a0f8872611d27facc39f6c69e43d98b096c4b82279654d9b0b0234e"
     },
     "skills/model-lab/references/reproducibility.md": {
-      "en_sha256": "f22455974ab8b3f427e1fc6ad1788d056ef33bd1fadc069b2731d7bb42408932",
+      "en_sha256": "8d1847d22e0fa5e7db62e74664ff92a1c92e7c841e7a099ba2fec834a88d8297",
       "generated_at": "2026-06-24T21:59:56Z",
-      "ja_sha256": "316348ec860e41e92b78f3d6ba6c1dd8e3cce6579eddb9491a2fd5a59a80e6cf"
+      "ja_sha256": "d80da1e9c6a0a4ab39348712ac469d56e1a3c38d1e215a25e19c313de587b902"
     },
     "skills/model-lab/references/stack.md": {
       "en_sha256": "66065d53b16d278f8dd020cd3b536d58a0a04669dd2cbd51fb18aaf6452f061f",
@@ -331,9 +331,9 @@
       "ja_sha256": "7448ac59b6729c9c3fa412db2c3b6b99dcf8dd1c28a4f8ca93e6de279a938de1"
     },
     "skills/search/SKILL.md": {
-      "en_sha256": "0e1253cd821822f007921c4d5bc162a203b7ca5d677e73ac73045a385f76bdca",
+      "en_sha256": "b29821aba839d3048bf70ec4ef67c069878f19018c27987d832429669b49bbad",
       "generated_at": "2026-06-24T08:44:22Z",
-      "ja_sha256": "25ea9d706e10da7fc94daee1cf8b071224fe15cad18a58f6c0dcd1bfa43c2dfa"
+      "ja_sha256": "825ac753af1f1e311b864cfe44a48ba44773c004b56c4d2e48e7117c1d4ec619"
     },
     "skills/search/odd.yaml": {
       "en_sha256": "fbdc9ace8c983d5e227f73acb0d232a4b7f912ca652931ebeb8a9237f0c89303",
@@ -371,14 +371,14 @@
       "ja_sha256": "f212511793f66ff9c62ff7001efd29686247c86a01b6295b54588adb0ca69f4f"
     },
     "skills/ws/SKILL.md": {
-      "en_sha256": "416d9c0d8452ff9b698601b7ffdd18398df06d16d6d617c4ccac3839c32cd33e",
+      "en_sha256": "c5125e737f66fad757ed25ead550ac84d8a5e6ee3b847a343b46021236f938d0",
       "generated_at": "2026-06-24T08:46:01Z",
-      "ja_sha256": "fc025ecc82427353338ae7ea6fb5f97f0c1ea1c4fa7130f7cb52b088a4df5300"
+      "ja_sha256": "60d73bf6c7587166b709a4b68465b7cd43330a06e4902d19e749ad11240147ee"
     },
     "skills/ws/odd.yaml": {
-      "en_sha256": "a5ab3656c4b9d3680f9bb98975b25e85271b5c87ce130ee82c208096b44c5627",
+      "en_sha256": "ec2bdfa8bd33ae9e5927b3e9d127d2587fa557c9cb1bca74d58c3fb959be9878",
       "generated_at": "2026-06-24T08:46:44Z",
-      "ja_sha256": "896db0668ba98214bfd145b014d9d0b0cb6c6c71a4922b323349ea68b9a02ba0"
+      "ja_sha256": "a52f6a66ee06a1419ea4e7d20a564637b0f7e769a9f5111c1bef9b5b15848b43"
     },
     "skills/ws/references/architecture.md": {
       "en_sha256": "1d6882ea0cc5b97632c869467d95be126b4a6235dd26831ec16e1b5381e30138",
@@ -391,24 +391,24 @@
       "ja_sha256": "4fba9845446f06dd23e3ee827ecbdcf27604df5660a18e63165ac84c859ad747"
     },
     "skills/ws/references/formats.md": {
-      "en_sha256": "130ab7a8aff04eade6e7bc53f2bea81e30090c7211632710cea42fdc9e4ce05f",
+      "en_sha256": "f2bd75b34ba868f468692ee4655eb6fb188295319967d9655af274d17c058398",
       "generated_at": "2026-06-22T14:04:30Z",
-      "ja_sha256": "d6a163550c6a5666a4dba819eaf0aaa336bee718b7126442a52072258b4b5af5"
+      "ja_sha256": "0963d0fa74f4b0a081fb5cc09659b7c0f6016dced902389d54dca9c86b785e89"
     },
     "skills/ws/references/git-town-flow.md": {
-      "en_sha256": "8a5d3c684a757a8117487775f253a7aa2fcec238e771dc97b12d0f397f27b8ff",
+      "en_sha256": "694ba6ada9f23acf4ac8088be265f876d020ff0dd7781a655dc856e2ea60319a",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "944d41ce073b7902e2cb1fde43793db84fe5b6376df61ce7a423af30b510acab"
+      "ja_sha256": "42d4b2a78d95387452dea45cb1601bf391bf3036eb57df778224af861ab51bab"
     },
     "skills/ws/references/multi-mode.md": {
-      "en_sha256": "eed0c114bf0eaa7ea91072ebffac11b41491b2d18c50922353fc05b1183b9ac3",
+      "en_sha256": "959b737870ae6bdcd27793a401f5562709892a0a4707264fecab770eb5e8da44",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "162b6038b12929a3f738f8a64b7f73343311a80f63c07b65173bc43af142b7cf"
+      "ja_sha256": "5b19144d8efea8a40d01c4442134a8ce9aa2d68511355c06be6914691e8f7737"
     },
     "skills/ws/references/new-and-archive.md": {
-      "en_sha256": "488388e4ff81eb3c528111bde48adbab1fd0fcd51854a7a06e27376da15da9e8",
+      "en_sha256": "ce9b9240072b19437b003eb81c7251d5a0da9fce18837e19f031dfef6976cc94",
       "generated_at": "2026-06-20T15:22:51Z",
-      "ja_sha256": "932e75abbbf04ca43184a0234f8e695b1894cd369042e3ab1a5fc5ae97db9e26"
+      "ja_sha256": "05b283e763ba95a7a5361c897b4b181fbbf9c414e919c2fee28a44193442a181"
     },
     "skills/ws/references/parallel-proposal.md": {
       "en_sha256": "47f28b97200598f5051f1ec59e2c5b2644963b96ad8bad4b7c8dc9d2f6a19250",
@@ -421,6 +421,6 @@
       "ja_sha256": "bf9f0a8b0293210ffdd4cc44b2885c15968ab316bf454e0d7dd60ae6bd54de12"
     }
   },
-  "generated_at": "2026-07-02T03:18:23Z",
-  "source_commit": "7941c78"
+  "generated_at": "2026-07-02T16:11:53Z",
+  "source_commit": "52d3465"
 }

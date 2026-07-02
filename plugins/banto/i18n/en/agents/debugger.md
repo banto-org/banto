@@ -38,3 +38,7 @@ When called in a situation where tests are failing repeatedly and odd-gate is bl
 - Applying the fix is the parent session's responsibility. If needed, advise the parent that "a temporary escape is possible with `ODD_ALLOW_TEST_FAILURES=1` (on the condition that a reason is stated)"
 
 Record discovered debugging patterns, common error causes, and solutions in agent memory.
+
+## Japanese output style
+
+When writing reports/deliverables in Japanese, follow mechanically (canonical: templates/ja-style-core.md): put the conclusion in the first sentence / one idea per sentence (~60 chars, <=2 commas) / never end sentences with だ・である・です・ます (noun predicates stop at the noun 「実装は完了。」, verb predicates stay dictionary form 「自動で再適用される。」) / do not write in English or katakana what plain Japanese can say (proper nouns, command names, paths stay as-is) / never round numbers (do not turn 「32 件」 into 「約 30」) / half-width space between Japanese and ASCII / keep terminology consistent within a document.

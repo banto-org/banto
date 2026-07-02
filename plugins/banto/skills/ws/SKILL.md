@@ -61,7 +61,7 @@ Detailed procedures, fallbacks, safety checks: [`references/git-town-flow.md`](r
 
 Key points (verified on git-town 23.x):
 - **epic**: `git town hack <epic>` (branches off main, tracks the parent). At the same time create a WS (`[feat] <epic>`)
-- **task**: **always run `git town append <task>` while checked out on the epic** (it becomes a child of current) → `git worktree add ../<repo>-wt-<task> <task>` for physical separation → start a new session with `claude -w` or in that directory
+- **task**: **always run `git town append <task>` while checked out on the epic** (it becomes a child of current) → `git worktree add ../<repo>-wt-<task> <task>` for physical separation → `cd` into that directory and start a new session with plain `claude` (`claude -w` creates yet another worktree outside banto's 3-tier parent tracking — do not use it here)
 - **drift propagation**: `git town sync` (epic updates → cascade to all tasks; works from inside a worktree too). Runs automatically at the start of a task session and before done
 - **done**: confirm tests PASS → `git town merge` on the task branch (merges into the parent epic + auto-deletes the branch) → `git town sync` → worktree remove. **Never use `git town ship`** (main-only; it's been demonstrated to be rejected on stacked children)
 - **ship**: `git town propose` (creates the PR; gh fallback available). **PR/main is a human gate** — fires on utterances like "ship it" and confirms exactly once before creation
@@ -130,4 +130,4 @@ Key points:
 
 ## Format spec (lightweight pointer / workspace.md / multi hook integration)
 
-The format of the lightweight pointer (**inside the git-dir**, WS name + branch + entity path only, independent per worktree) and workspace.md (the entity, where the "branch:" line drives `/ws switch`'s auto-switch, "## Related documents" is force-updated by the hook, and tasks live in `tasks.md` in the same dir), along with the multi-mode hook integration: [`references/formats.md`](references/formats.md).
+The format of the lightweight pointer (**inside the git-dir**, WS name + branch + entity path only, independent per worktree) and workspace.md (the entity, where the "branch:" line drives `/ws switch`'s auto-switch, "## Related documents" is updated by the AI when hooks notify about unregistered files, and tasks live in `tasks.md` in the same dir), along with the multi-mode hook integration: [`references/formats.md`](references/formats.md).

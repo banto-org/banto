@@ -14,8 +14,9 @@ SELF_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 [ -z "$CWD" ] || [ -z "$FILE_PATH" ] && exit 0
 
 # consecutive test-failure counter (read by odd-gate.sh as a circuit breaker)
+# 空 session_id のフォールバック token は verify-run と同じ "manual" に統一（2026-07-03 監査: 鍵割れ防止）
 TF_DIR="${ODD_STATE_DIR:-$HOME/.cache/banto}"
-TF_FILE="$TF_DIR/test-failures-${SESSION_ID:-nosession}"
+TF_FILE="$TF_DIR/test-failures-${SESSION_ID:-manual}"
 _tf_bump() { mkdir -p "$TF_DIR" 2>/dev/null; _n=$(cat "$TF_FILE" 2>/dev/null); case "$_n" in ''|*[!0-9]*) _n=0;; esac; printf '%s' "$((_n + 1))" > "$TF_FILE" 2>/dev/null; }
 _tf_reset() { mkdir -p "$TF_DIR" 2>/dev/null; printf '0' > "$TF_FILE" 2>/dev/null; }
 cd "$CWD" 2>/dev/null || exit 0

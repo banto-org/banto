@@ -27,7 +27,7 @@ The owner hands over a big task → decompose into small tasks → implement eac
 
 ## Autonomy level (L3 · Autopilot)
 
-odd.yaml = **L3 (Autopilot = continuous execution + user requested on exceptions)**. banto covers L0–L3 only (L4+ belongs to a separate plugin `banto-autonomy`). Explicit stops are deterministic hooks (`odd-gate` / `verify-claim-guard`); human gates are the Phase 0 decomposition-plan confirmation and push/PR/main.
+odd.yaml = **L3 (Autopilot = continuous execution + user requested on exceptions)**. banto covers L0–L3 only (L4+ is envisioned as a separate plugin `banto-autonomy` — unimplemented; a scope-boundary declaration). Explicit stops are deterministic hooks (`odd-gate` / `verify-claim-guard`); human gates are the Phase 0 decomposition-plan confirmation and push/PR/main.
 
 ## Loop procedure
 

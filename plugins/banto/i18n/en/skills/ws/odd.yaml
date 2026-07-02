@@ -4,7 +4,7 @@
 schema_version: 1
 skill: ws
 autonomy_level: L2  # Copilot baseline. Per operation: done/sync=L3 (auto-execute, report only) / epic/task=L2 (proposal with adopted interpretation) / ship=human gate (PR confirmation) / switch/multi=L1
-# Promotion condition: observe the false-fire rate of epic proposals via telemetry, and if low, move to L3 (decisions/2026-06-10_intent-first)
+# Promotion condition: observe the false-fire rate of epic proposals via telemetry, and if low, move to L3 (decisions/2026-06-10-114006_intent-first-commands-as-aliases)
 
 in_scope:
   - workspace list / switch / create / archive / multi / import (existing features, backward-compatible)

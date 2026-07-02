@@ -2,7 +2,7 @@
 
 出典: `{base}/docs/research/2026-06-24_experiment-tracking-reproducibility.md`。「結果を後で再現できる形」を最初から残す。repro-gate / repro-check.sh が静的に検査する。
 
-## 再現性 4 点（repro-gate の検査対象）
+## 再現性 4 点（repro-gate が自動検査するのは 1 と 4。2・3 は規律であり自動検査は未実装 — 将来拡張）
 1. **seed 固定**: 学習スクリプトに seed 固定 + `torch.use_deterministic_algorithms(True)` + `CUBLAS_WORKSPACE_CONFIG=:4096:8`。非決定的演算は RuntimeError で早期検出。
 2. **config に seed キー**: Hydra + OmegaConf。config に seed / データ版 / 環境を明示（環境変数依存は非推奨）。
 3. **データの DVC 登録**: `dvc.lock` × git commit で「コード × データ × 結果」を固定。大容量データが DVC 未登録なら警告。

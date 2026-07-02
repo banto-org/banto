@@ -4,7 +4,7 @@
 schema_version: 1
 skill: ws
 autonomy_level: L2  # Copilot 基準。操作別: done/sync=L3（自動実行・報告のみ）/ epic/task=L2（採用解釈つき提案）/ ship=人間ゲート（PR 確認）/ switch/multi=L1
-# 昇格条件: epic 提案の誤発火率を telemetry で観測し、低ければ L3 へ（decisions/2026-06-10_intent-first）
+# 昇格条件: epic 提案の誤発火率を telemetry で観測し、低ければ L3 へ（decisions/2026-06-10-114006_intent-first-commands-as-aliases）
 
 in_scope:
   - workspace 一覧 / 切替 / 新規作成 / アーカイブ / multi / import（従来機能・後方互換）

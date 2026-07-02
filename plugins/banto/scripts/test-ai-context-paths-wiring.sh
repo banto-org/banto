@@ -7,10 +7,12 @@
 #   3. unregistered + no legacy + empty store     → derive target has no decisions (negative control)
 #   4. unregistered + no legacy + store has <dirname>/decisions → derive resolves into the store
 #
-# keystone = ai-context-decisions-numbering.sh. Since v5.21.4 the hook emits a timestamp-based
-# "[Decisions Naming]" recommendation iff the resolved <base>/decisions exists, so wiring is
-# observable as output presence: the central/derive cwd has NO local .ai-context, hence any
-# output there proves the store redirect resolved (and case 3 proves the converse).
+# keystone = ai-context-decisions-numbering.sh. The PostToolUse branch warns on a
+# date-prefixed but non-conforming decisions filename iff the resolved <base>/decisions exists,
+# so wiring is observable as output presence: the central/derive cwd has NO local .ai-context,
+# hence any output there proves the store redirect resolved (and case 3 proves the converse).
+# (The former keystone — the PreToolUse recommendation — was removed 2026-07-02: PreToolUse
+#  stdout is never injected, dead code per CONTRACT.md:40.)
 # Depends on jq. exit 0 when green.
 set -u
 DIR=$(cd "$(dirname "$0")" && pwd)
@@ -44,10 +46,11 @@ mkdir -p "$STORE2"
 DRV="$TMP/derive-proj"
 mkdir -p "$DRV"
 
-# Helper: invoke the hook once and report whether the naming recommendation was injected
+# Helper: invoke the hook once and report whether the naming warning was emitted
+# (date-prefixed but non-conforming filename → PostToolUse warns iff <base>/decisions resolves)
 naming_emitted() { # cwd mappingfile storeroot
-    OUT=$(printf '{"cwd":"%s","hook_event_name":"PreToolUse","tool_input":{"file_path":"%s/decisions/new.md"}}' "$1" "$1" \
-        | AI_CONTEXT_MAPPING="$2" AI_CONTEXT_STORE_ROOT="$3" sh "$HOOK")
+    OUT=$(printf '{"cwd":"%s","hook_event_name":"PostToolUse","tool_input":{"file_path":"%s/decisions/2026-01-01-nonconforming.md"}}' "$1" "$1" \
+        | AI_CONTEXT_MAPPING="$2" AI_CONTEXT_STORE_ROOT="$3" sh "$HOOK" 2>&1)
     case "$OUT" in
         *"[Decisions Naming]"*) echo "yes" ;;
         *) echo "no" ;;

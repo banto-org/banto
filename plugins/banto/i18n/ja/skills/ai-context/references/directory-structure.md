@@ -40,8 +40,9 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
 ├── decisions/           # 設計判断ログ（フラット・ファイル名に author 帰属）  ← store 共有
 ├── docs/                # 報告・記録系（フラット・プレフィックス必須）          ← store 共有
 │   ├── research/        #   research-agent の調査出力                          ← store 共有
-│   └── knowledges/      #   昇格済みナレッジ（プレフィックスなし例外）          ← store 共有
-│       └── drafts/      #     ナレッジ下書き（hook が自動保存・閾値でレビュー） ← store .gitignore
+│   ├── knowledges/      #   昇格済みナレッジ（プレフィックスなし例外）          ← store 共有
+│   │   └── drafts/      #     ナレッジ下書き（hook が自動保存・閾値でレビュー） ← store .gitignore
+│   └── refs/            #   所在カード（外部文書のポインタ + 相関。本文は持たない）← store 共有
 ├── learnings/           # 教訓・学び（教訓 scope。個人状態）                    ← store 共有
 │   └── <author>/        #   メンバー名前空間（Stop hook 自己改善が書く）
 ├── meta/                # store 自身のメタ（新 scope）                          ← store 共有
@@ -101,6 +102,7 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
 | `docs/research/` | `research`（`research-agent` が出力）| `YYYY-MM-DD_<topic>.md`（プレフィックスなし）|
 | `docs/knowledges/` | `knowledge`（`ai-context knowledge`）昇格先 | プレフィックスなし（**例外**）。タイトル = ファイル名 `{topic}.md` |
 | `docs/knowledges/drafts/` | `ai-context-auto.sh`（hook が自動保存）→ `knowledge` でレビュー / 昇格 | `{topic}.md`。閾値（`BANTO_DRAFT_REVIEW_MIN` 既定 10）超で SessionStart が提示 |
+| `docs/refs/` | `ai-context`（会話の所在登録）/ `ref_scan.py`（一括棚卸し）| `[Ref] <名前>.md`。frontmatter = source / uri / fetched / related。本文は要旨のみ（ミラー禁止）|
 | `learnings/<author>/` | `ai-context-stop-self-improve.sh`（Stop hook 自己改善ループ）/ SessionStart（読取・注入）| 教訓ドラフト（per-author） |
 | `meta/` | store 運用（マッピング / 索引 / `ai-context-lint.sh` の health レポート）| 形式は用途別（索引 / レポート）|
 | `tasks/active.md`・`tasks/old/` | `ai-context`（legacy 運用・未移行案件のみ）| `active.md` / `old/YYYY-MM-DD_phase-name.md` |

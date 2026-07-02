@@ -19,7 +19,7 @@ out_of_scope:
   - 学習・追跡・eval 基盤の再実装（実績ツールへ委譲する。同梱は薄い検証スパイン + オーケストレーションのみ）
 
 safety_boundaries:
-  - 有料計算（クラウド / クラスタ）は cost ceiling 超過で停止 → owner（compute-cost-gate）。Spot / preemptible を既定
+  - 有料計算（クラウド / クラスタ）の launch は Spot 含め一律停止 → owner が cost ceiling と突き合わせて認可（compute-cost-gate・認可後 BANTO_ALLOW_COMPUTE=1）。Spot / preemptible を既定
   - eval / 学習データに client 本番データ・PII・内部名を混ぜない（egress-guard が client パス流出を遮断）
   - Claude の id・価格を SKILL.md / スクリプトに焼き込まない（claude-api skill が正本）
   - 同梱スクリプト（repro-check / eval-stats / claim-link）は依存不在で no-op（fail-open）— 検証不能で実装を止めない
@@ -40,7 +40,7 @@ approval_gates:
   - eval / 学習データに外部・本番データを取り込む場合は出所を確認
 
 metrics:
-  eval_seed_min: 5
+  eval_seed_min: 3  # 最低値（eval-rigor.md と統一。推奨 5-10）
   eval_ci_level: 95
   eval_plateau_rounds: 3
   compute_cost_ceiling_usd: null  # owner が Frame で案件ごとに設定。null のときクラウド / クラスタ起動は必ず確認

@@ -8,7 +8,7 @@
 
 ## 実行管理
 - クラスタ / クラウド横断は **SkyPilot v0.12**（Slurm 統合・20+ クラウド・Spot 自動回復）。
-- Spot / preemptible で 60-90% コスト減（SkyPilot が中断回復を自動処理）。compute-cost-gate が予算超過を停止。
+- Spot / preemptible で 60-90% コスト減（SkyPilot が中断回復を自動処理）。compute-cost-gate は有料 launch を Spot 含め一律停止し owner の予算確認へ回す（認可後 `BANTO_ALLOW_COMPUTE=1`）。
 
 ## Mac の位置づけ
 MPS / MLX は推論・デバッグ・小規模検証専用。CUDA カーネル（FlashAttention / bitsandbytes）は MPS 非対応で本番学習は Nvidia 一択。eGPU は macOS 廃止済み。

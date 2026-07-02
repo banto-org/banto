@@ -46,7 +46,7 @@ Also prepare `tasks-old/` with `mkdir -p`.
 
 If `WORKSPACE-refs.md` remains, delete it (back to single mode).
 
-8. Only on the first time, generate `.claude/rules/workspace.md` (the workspace rule, see the end of this skill).
+8. Only on the first time, copy `$CLAUDE_PLUGIN_ROOT/templates/workspace-rule.md` to `.claude/rules/workspace.md` (the canonical workspace-rule template).
 
 ## /ws archive: archive
 

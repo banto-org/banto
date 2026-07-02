@@ -22,7 +22,8 @@ it.** (The concept → spec → autonomous-implementation pipeline is dogfooded 
   Version: `plugins/banto/.claude-plugin/plugin.json`.
 - Languages: POSIX sh (hooks) + Markdown (skills / rules / docs). `jq` required.
 - Knowledge base (store-first): the ai-context base injected at SessionStart — central store
-  `~/ai-context-store/<project>/` (decisions / docs/research / tasks / sessions / workspaces).
+  `~/ai-context-store/<project>/` (decisions / docs/research / tasks / sessions / workspaces;
+  model-lab adds experiments/ for its claim ledger).
   Save design decisions under `{base}/decisions/`. (No in-repo `.ai-context/` since 5.30.)
 
 ## Development flow (specific to this repo)

@@ -61,7 +61,7 @@ epic に値しない単発作業に epic を提案しない（誤発火の官僚
 
 要点（git-town 23.x で検証済み）:
 - **epic**: `git town hack <epic>`（main から分岐、parent を追跡）。同時に WS（`[feat] <epic>`）を作成
-- **task**: **必ず epic checkout 上で** `git town append <task>` を実行（current の子になる）→ `git worktree add ../<repo>-wt-<task> <task>` で物理分離 → `claude -w` で、またはそのディレクトリで新セッションを開始
+- **task**: **必ず epic checkout 上で** `git town append <task>` を実行（current の子になる）→ `git worktree add ../<repo>-wt-<task> <task>` で物理分離 → そのディレクトリへ `cd` して素の `claude` で新セッションを開始（`claude -w` は別の worktree を新規作成する banto 非管理の臨時分離であり、3 階層の親子追跡から外れるためここでは使わない）
 - **drift 伝播**: `git town sync`（epic 更新 → 全 task へ連鎖；worktree 内からも動作する）。task セッション開始時と done 前に自動実行
 - **done**: テスト PASS 確認 → task ブランチ上で `git town merge`（親 epic へマージ + ブランチ自動削除）→ `git town sync` → worktree remove。**`git town ship` は決して使わない**（main 専用；stacked 子では拒否されることが実証済み）
 - **ship**: `git town propose`（PR 作成；gh fallback あり）。**PR/main は人間ゲート** — 「これで出して」 / "ship it" のような発話で発火し、作成前に 1 度だけ確認する
@@ -130,4 +130,4 @@ epic に値しない単発作業に epic を提案しない（誤発火の官僚
 
 ## 形式仕様（軽量ポインタ / workspace.md / multi hook 連携）
 
-軽量ポインタ（**git-dir 内**・WS 名 + ブランチ + 実体パスのみ・worktree ごとに独立）と workspace.md（実体・「ブランチ:」行が `/ws switch` の自動切替を駆動・「## 関連ドキュメント」は hook が強制更新・タスクは同 dir の `tasks.md`）の形式、および multi モードの hook 連携: [`references/formats.md`](references/formats.md)。
+軽量ポインタ（**git-dir 内**・WS 名 + ブランチ + 実体パスのみ・worktree ごとに独立）と workspace.md（実体・「ブランチ:」行が `/ws switch` の自動切替を駆動・「## 関連ドキュメント」は hook が未登録を通知し AI が更新・タスクは同 dir の `tasks.md`）の形式、および multi モードの hook 連携: [`references/formats.md`](references/formats.md)。
