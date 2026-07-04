@@ -81,7 +81,7 @@ gh repo create <あなたのアカウント>/ai-context-store --private --source
 以後は PreCompact auto-sync / nightly push が効く（store は marker により main 直 push 許可）。
 git にしない運用なら Time Machine / rsync 等でディレクトリごと保全する。
 
-- 再生成可能物はバックアップ不要: `combined.txt`（検索テキスト層・hook が自動再生成）
+- 再生成可能物はバックアップ不要: `full-combined.txt`（検索テキスト層・SessionStart 日次 + deep 開始時オンデマンドで再生成）
 - リストア = (b) と同じ（ディレクトリを戻して起動するだけ）
 
 ---

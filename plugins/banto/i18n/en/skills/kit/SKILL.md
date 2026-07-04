@@ -89,7 +89,7 @@ Pattern shared by the document-creation skills: `${CLAUDE_PLUGIN_ROOT}/templates
 | `qa-tester` | E2E testing for web/desktop/mobile | Directly via `Agent(subagent_type="qa-tester", ...)` |
 | `research-agent` | Web research (parallel launch) | Launched in parallel from `/research` / the research skill |
 | `search-agent` | Mechanical execution of internal search (haiku, lightweight) | From the search skill's deep path: 3–5 in parallel, `Agent(subagent_type="search-agent", model="haiku", ...)` |
-| `context-keeper` | Consistency check / regeneration of the search text layer (combined.txt) | Fallback when the combined-rebuild hook fails, or directly |
+| `context-keeper` | Consistency check / regeneration of the search text layer (full-combined.txt / sessions-cache) | Fallback when full-combined.txt looks stale, or directly |
 
 > Code review and security audit are delegated to the official Anthropic plugins (`code-review` / `security-guidance`).
 

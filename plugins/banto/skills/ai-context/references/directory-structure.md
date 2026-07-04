@@ -67,7 +67,7 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
 │           └── tasks-old/        #   Phase 退避（旧 tasks/old 相当）
 ├── WORKSPACE.md         # pointer fallback for non-git checkouts (primary: <git-dir>/banto-ws-pointer.md) ← store .gitignore
 ├── DASHBOARD.md         # hook 管理の鳥瞰図（per-checkout）                     ← store .gitignore
-└── *-combined.txt       # 検索用テキスト層（hook が自動再生成）                 ← store .gitignore
+└── full-combined.txt    # 検索用テキスト層（decisions/docs + 会話履歴。SessionStart 日次 + deep 開始時オンデマンドで再生成）← store .gitignore
 ```
 
 **Attribution principles**:
@@ -100,11 +100,11 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
 | Folder | Writing skill / hook | prefix / format |
 |---|---|---|
 | `decisions/` | `ai-context` (decision records) / `spec`・`dev-loop` (decision derivatives) | No prefix. `YYYY-MM-DD-HHMMSS_<slug>_{github-account}.md` (flat, author attribution) |
-| `docs/` (top level) | `memo` (`ai-context memo`) / `status` / `harness-audit` / `plugin-audit` / `qa-tester` (caller saves) | One of the "fixed prefixes" below is required. E.g. `[Memo] ...` / `[Status] ...` / `[Audit] ...` |
+| `docs/` (top level) | `memo` (`ai-context memo`) / `status` / `harness-audit` / `plugin-audit` / `qa-tester` (caller saves) | One of the "fixed prefixes" below is required. E.g. `[Memo] ...` / `[Status] ...` / `[Audit] ...`. Extension is `.md` or `.html` (HTML materials follow the same prefix rule) |
 | `docs/research/` | `research` (emitted by `research-agent`) | `YYYY-MM-DD_<topic>.md` (no prefix) |
 | `docs/knowledges/` | `knowledge` (`ai-context knowledge`) promotion target | No prefix (**exception**). Title = filename `{topic}.md` |
 | `docs/knowledges/drafts/` | `ai-context-auto.sh` (hook auto-saves) → review / promote via `knowledge` | `{topic}.md`. SessionStart surfaces them once the threshold (`BANTO_DRAFT_REVIEW_MIN`, default 10) is exceeded |
-| `docs/refs/` | `ai-context` (in-conversation location registration) / `ref_scan.py` (bulk inventory) | `[Ref] <name>.md`. Frontmatter = source / uri / fetched / related. Body = summary only (no content mirror) |
+| `docs/refs/` | `ai-context` (in-conversation location registration) / `ref_scan.py` (bulk inventory) | `[Ref] <name>.md`. Frontmatter = source / uri / fetched / related. Body = 2-3 line summary required (no content mirror) |
 | `learnings/<author>/` | `ai-context-stop-self-improve.sh` (Stop hook self-improvement loop) / SessionStart (read / inject) | Learnings drafts (per-author) |
 | `meta/` | Store operation (mapping / index / health reports from `ai-context-lint.sh`) | Format depends on the use (index / report) |
 | `tasks/active.md`・`tasks/old/` | `ai-context` (legacy operation, unmigrated projects only) | `active.md` / `old/YYYY-MM-DD_phase-name.md` |

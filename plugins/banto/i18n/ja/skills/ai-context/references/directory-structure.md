@@ -65,7 +65,7 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
 │           └── tasks-old/        #   Phase 退避（旧 tasks/old 相当）
 ├── WORKSPACE.md         # 非 git 環境のポインタ fallback（本体は <git-dir>/banto-ws-pointer.md）← store .gitignore
 ├── DASHBOARD.md         # hook 管理の鳥瞰図（per-checkout）                     ← store .gitignore
-└── *-combined.txt       # 検索用テキスト層（hook が自動再生成）                 ← store .gitignore
+└── full-combined.txt    # 検索用テキスト層（decisions/docs + 会話履歴。SessionStart 日次 + deep 開始時オンデマンドで再生成）← store .gitignore
 ```
 
 **帰属の原則**:
@@ -98,11 +98,11 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
 | フォルダ | 書く skill / hook | prefix / 形式 |
 |---|---|---|
 | `decisions/` | `ai-context`（決定記録）/ `spec`・`dev-loop`（決定の派生）| プレフィックスなし。`YYYY-MM-DD-HHMMSS_<slug>_{github-account}.md`（フラット・author 帰属）|
-| `docs/`（直下）| `memo`（`ai-context memo`）/ `status` / `harness-audit` / `plugin-audit` / `qa-tester`（呼出元が保存）| 下記「固定プレフィックス」必須。例 `[Memo] ...` / `[Status] ...` / `[Audit] ...` |
+| `docs/`（直下）| `memo`（`ai-context memo`）/ `status` / `harness-audit` / `plugin-audit` / `qa-tester`（呼出元が保存）| 下記「固定プレフィックス」必須。例 `[Memo] ...` / `[Status] ...` / `[Audit] ...`。拡張子は `.md` または `.html`（HTML 資料も同じプレフィックス規則で置く）|
 | `docs/research/` | `research`（`research-agent` が出力）| `YYYY-MM-DD_<topic>.md`（プレフィックスなし）|
 | `docs/knowledges/` | `knowledge`（`ai-context knowledge`）昇格先 | プレフィックスなし（**例外**）。タイトル = ファイル名 `{topic}.md` |
 | `docs/knowledges/drafts/` | `ai-context-auto.sh`（hook が自動保存）→ `knowledge` でレビュー / 昇格 | `{topic}.md`。閾値（`BANTO_DRAFT_REVIEW_MIN` 既定 10）超で SessionStart が提示 |
-| `docs/refs/` | `ai-context`（会話の所在登録）/ `ref_scan.py`（一括棚卸し）| `[Ref] <名前>.md`。frontmatter = source / uri / fetched / related。本文は要旨のみ（ミラー禁止）|
+| `docs/refs/` | `ai-context`（会話の所在登録）/ `ref_scan.py`（一括棚卸し）| `[Ref] <名前>.md`。frontmatter = source / uri / fetched / related。本文は要旨 2〜3 行必須（ミラー禁止）|
 | `learnings/<author>/` | `ai-context-stop-self-improve.sh`（Stop hook 自己改善ループ）/ SessionStart（読取・注入）| 教訓ドラフト（per-author） |
 | `meta/` | store 運用（マッピング / 索引 / `ai-context-lint.sh` の health レポート）| 形式は用途別（索引 / レポート）|
 | `tasks/active.md`・`tasks/old/` | `ai-context`（legacy 運用・未移行案件のみ）| `active.md` / `old/YYYY-MM-DD_phase-name.md` |

@@ -51,6 +51,9 @@ T="$BASE/docs/refs/$CARD"
 grep -q "| サマリ | 2 | 顧客名・売上 | 明細 |" "$T" && ok "xlsx: sheet row (name/rows/headers/ja xref)" || fail "xlsx: sheet table wrong"
 grep -q "| 明細 | 3 |" "$T" && ok "xlsx: second sheet inventoried" || fail "xlsx: second sheet missing"
 
+# 要約プレースホルダ（Phase 2: 意味要約は本スクリプトの対象外 — 空のまま出さず可視化する）
+grep -q "要約未記入 — 検索に載らない" "$T" && ok "summary: placeholder present on auto-generated card" || fail "summary: placeholder missing"
+
 # カード命名 ERE（store-layout の naming と一致）
 ls "$BASE/docs/refs/" | grep -vE '^\[Ref\] .+\.md$' >/dev/null && fail "naming: ERE violation" || ok "naming: all cards match ^\\[Ref\\] .+\\.md$"
 

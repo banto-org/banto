@@ -6,7 +6,7 @@ skill: search
 autonomy_level: L2  # 通常パス=L1（クエリ展開→ランキング→Read検証の軽量ユーティリティ）/ deep パス=L2（並列 haiku agent の fan-out を伴う）
 
 in_scope:
-  - ローカル AI Context（decisions / docs / sessions / combined.txt）の内部検索
+  - ローカル AI Context（decisions / docs / sessions / full-combined.txt）の内部検索
   - クエリの 3 tier 展開（同義語・訳語・略語）とランキングスクリプトによるスコアリング
   - 上位候補の Read 検証と出典付き回答
   - zero-hit / cross-store / 履歴クエリの deep パス（search-agent の並列起動）

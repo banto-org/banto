@@ -25,7 +25,7 @@ tools: Grep, Glob, Read, Write
 ## Execution procedure
 
 1. **Parallel execution**: call multiple Grep at once within a single message for the given pattern groups (no serial execution — parallel is 4-10x faster)
-2. Always truncate huge files (combined.txt / JSONL) with `-C 2` or `head_limit`. No raw cat
+2. Always truncate huge files (full-combined.txt / JSONL) with `-C 2` or `head_limit`. No raw cat
 3. **Write the full set to the temp file**: Write the raw results to the specified destination
 4. **Keep the reply lightweight**: return **only** the following format (no explanatory text or preamble)
 
@@ -59,4 +59,4 @@ Report only the total hit count; the orchestrator will Read the temp file when n
 
 ## Japanese output style
 
-When writing reports/deliverables in Japanese, follow mechanically (canonical: templates/ja-style-core.md): put the conclusion in the first sentence / one idea per sentence (~60 chars, <=2 commas) / never end sentences with だ・である・です・ます (noun predicates stop at the noun 「実装は完了。」, verb predicates stay dictionary form 「自動で再適用される。」) / do not write in English or katakana what plain Japanese can say (proper nouns, command names, paths stay as-is) / never round numbers (do not turn 「32 件」 into 「約 30」) / half-width space between Japanese and ASCII / keep terminology consistent within a document.
+When writing reports/deliverables in Japanese, follow mechanically (canonical: templates/ja-style-core.md): put the conclusion in the first sentence / one idea per sentence (~60 chars, <=2 commas) / never end sentences with だ・である・です・ます (noun predicates stop at the noun 「実装は完了。」, verb predicates stay dictionary form 「自動で再適用される。」) / do not write in English or katakana what plain Japanese can say (proper nouns, command names, paths stay as-is) / never round numbers (do not turn 「32 件」 into 「約 30」) / half-width space between Japanese and ASCII / keep terminology consistent within a document / prefer prose over bullet lists (bullets only for 3+ truly parallel items) and write no preamble, no "まとめると" recap, no boilerplate closing.

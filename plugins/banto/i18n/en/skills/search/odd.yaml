@@ -6,7 +6,7 @@ skill: search
 autonomy_level: L2  # normal path = L1 (lightweight utility: query expansion → ranking → Read verification) / deep path = L2 (entails fan-out of parallel haiku agents)
 
 in_scope:
-  - Internal search of the local AI Context (decisions / docs / sessions / combined.txt)
+  - Internal search of the local AI Context (decisions / docs / sessions / full-combined.txt)
   - 3-tier query expansion (synonyms / translations / abbreviations) and scoring with the ranking script
   - Read verification of the top candidates and a sourced answer
   - The deep path for zero-hit / cross-store / history queries (parallel launch of search-agent)

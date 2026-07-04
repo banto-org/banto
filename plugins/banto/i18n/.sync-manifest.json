@@ -1,34 +1,34 @@
 {
   "files": {
     "agents/architect.md": {
-      "en_sha256": "390e4dd5016f328d459c13b0d4407aa636a2a6923fd58561e9540d0f28c9e4c2",
+      "en_sha256": "04e1c580e704ff93a1895499bae42b17aaea6fe8462dfe568101d1d10507a8a2",
       "generated_at": "2026-06-20T14:58:57Z",
-      "ja_sha256": "c6df881b158dc0bfff4033a2e76ae37e3899574b51fc5b53d705b5099717992a"
+      "ja_sha256": "7b1e3e45616e50a9b7b2d28e26b4d90c5573b366ac706baab2799db67e137d03"
     },
     "agents/context-keeper.md": {
-      "en_sha256": "a1417128900ea4b86b712196ed3fecefeb170e790b222749442067d6413f40bf",
+      "en_sha256": "4cabe0fdf39980c0ffb4b52c1c4cc66a07e56d114202d3d4b5c4bdff930f0f96",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "cc7a13771bb043daf4d6c226c79cb3aa4cf08a1da2a08d6fcc2a1334340ee085"
+      "ja_sha256": "81e902e500b0452c6fb5339b0a65ad4b04b6ab832ff79168c401ea2b7a1d567e"
     },
     "agents/debugger.md": {
-      "en_sha256": "f0ad5cb4573f558b324631f82aece0fb88874482123e462bb46ea727444e8e5e",
+      "en_sha256": "2ac8818a6dfbd748b6ad39597e8ef99f7aa62876d7a9290a6e9c52723cecaff7",
       "generated_at": "2026-06-20T14:58:57Z",
-      "ja_sha256": "790c22fd0d1674d35ccb1d71e99f3fd20187c6f1ead42cd79ed8282afaa9c65d"
+      "ja_sha256": "37d1c6fa8ebbc9f225fa21b0c5c54ed4c16f1faa39e30d6ceb69f64fe96d312b"
     },
     "agents/qa-tester.md": {
-      "en_sha256": "c2de1b1b8e545a7ba829fcb52bf2db5e07b1bfb5edd9875039f49c65edd2aaf5",
+      "en_sha256": "28bbefdd4d522e2db51dd7035c6b047d541f4e8ee53dde8f122ed4a1a3803f14",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "0f5efedeb67bf7ceec7bda70fb93856305aa91e773724519d66845778d35ba25"
+      "ja_sha256": "5767afb8163c6a3af4e8387ffbf397de6b87b9405a4fd165f917019bcf94ba94"
     },
     "agents/research-agent.md": {
-      "en_sha256": "0f67cb22f4812a05715ded254403b66982e9d406ef38feb163c1bb5ecca7b84f",
+      "en_sha256": "776a292e7d9773fe241810516391fb213602a7838a752d5162864e0d415c9699",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "83005413d1ddc4b739c954a58a3e2942ede4972450126a1c1d8160338305ac63"
+      "ja_sha256": "7917730a64d38afd2dd68174b78d41c247035e3db19033bb5789f1c805a4df64"
     },
     "agents/search-agent.md": {
-      "en_sha256": "1c23c913f0d393e536fad8c4e32fd330b351b63935a77552a34cb5c7c074ee73",
+      "en_sha256": "2993affb141eaae4a85f5c574e525171dd15c0b830e834f58f33f5c9e533e2eb",
       "generated_at": "2026-06-20T14:42:39Z",
-      "ja_sha256": "e4d28b8791bd8996ba8bd822449b1527f2ea0e04c98206a7417d7a32879af575"
+      "ja_sha256": "c8df58cab012cf2f46a3a3e286c6523f1855b85427631f358810ce92be186822"
     },
     "skills/ai-build/SKILL.md": {
       "en_sha256": "b9e34f7887233c9b6f61c1c20898b5a1c7b915fa26acc75510a75d735929cd82",
@@ -56,19 +56,19 @@
       "ja_sha256": "ad682974713255a3e5582b8dec50be2472837f3745049c56697bbe1c7e486ac4"
     },
     "skills/ai-context/SKILL.md": {
-      "en_sha256": "e5d78506e3e7c3e03001ffae3f9d018165fac1d8310e2a1e131286cf589ffa4b",
+      "en_sha256": "941f5c674bb41c0477e023da4b7f422739362a033b355240f74660363c4a15d0",
       "generated_at": "2026-06-24T08:21:34Z",
-      "ja_sha256": "8dac1fa134bfdab61eda272e8f47aca69da72ee110e7d96ebb49fa14815255ba"
+      "ja_sha256": "fec180cef71fabca27937dfdb4304166c901e5c8bd1765334545fb53b53fcc13"
     },
     "skills/ai-context/odd.yaml": {
-      "en_sha256": "a0c06aafbe556633a206832c79795fe07dcf05db5e20e9972b5c35a23811b496",
+      "en_sha256": "f67c3d22fe59af446d09fcfd3442d74f69119c9438879f393471f9d1d96286d7",
       "generated_at": "2026-06-24T08:21:51Z",
-      "ja_sha256": "f79d9e120389d0412367cde8723895453ddd560b01dd4de336358d3d532bf34d"
+      "ja_sha256": "267fbc4f48e9814c53a24e8fe2f6d0993507841938a61bc36ec683bdcf751369"
     },
     "skills/ai-context/references/central-store-guide.md": {
-      "en_sha256": "0276b5dff187b9d733fb6026bf59a49d3107012d1d808bc86f417de340622242",
+      "en_sha256": "53dc3c59fd04c75eb897c5f348ffcd9a0321dfe68fc7f43b4673908a4d05c690",
       "generated_at": "2026-06-20T15:22:50Z",
-      "ja_sha256": "5f045f7369d044bb1b3dde450a22d7bf5497b5f683ffb4c3f7a491f19c217a8d"
+      "ja_sha256": "55b5ce30228855fc265ba5f8ec4120997898e3ca6ed51068e909d3f23a0b2390"
     },
     "skills/ai-context/references/decisions.md": {
       "en_sha256": "8fba2c6e41dc6641a99d42a4f67ff1db482414c55902bd5c8683b496409cfe44",
@@ -76,14 +76,14 @@
       "ja_sha256": "8eafb8ce5693ac1003ed8aa8f2a2e80961d03c39f60fb005242f086be45263b6"
     },
     "skills/ai-context/references/directory-structure.md": {
-      "en_sha256": "6dba915b62df9403e470cb0ac65cc03beeae8d27c97c4c7debe6aa15934d1c85",
+      "en_sha256": "1fd32aea4858f156ca4b6b12ba409e36d3518cb7fef17d5de0af759577fd9856",
       "generated_at": "2026-06-24T08:24:57Z",
-      "ja_sha256": "964dd82ab8cd4d4ad0d9f522675147cd21da44edbcf8378477f1577e08a61822"
+      "ja_sha256": "aa953ba6653ff85ac5ec36422eed672fecb8768d32efba3e094014ff1fdcbf7f"
     },
     "skills/ai-context/references/doctor.md": {
-      "en_sha256": "3838616d914593f338cc88c8073bbe05d5bb6868670a7dcc03c2a4ad32388795",
+      "en_sha256": "f83e704efe714b9f9e517aaa7355dae692738f20dc1cb46e51e7c8bc66cff7af",
       "generated_at": "2026-06-24T08:26:33Z",
-      "ja_sha256": "6a1f9785366d7a302057b5674588d80f4f1521b9323ac41c62ccbc7e7e4a0685"
+      "ja_sha256": "bba4b4dee8bdd349e6a3ac01eae6a1da87b070a27c861397257dd9fc780fd908"
     },
     "skills/ai-context/references/ignore.md": {
       "en_sha256": "aa1fdd39d792067280a1fcddf711252e859bc040318851aa3047609559e3ccd7",
@@ -96,9 +96,9 @@
       "ja_sha256": "229b708482bb55e6b2ac83dab850881aba49a146276e1ed929e58d2db0dd8ae5"
     },
     "skills/ai-context/references/sort.md": {
-      "en_sha256": "1a514ae05b49a5e65ed3e881638b93f28962da83a914764a0899441ddbf45cde",
+      "en_sha256": "d6fe3bc144d13801bef790e81313989775349e744d7999568c1853a07603b30b",
       "generated_at": "2026-06-24T08:27:35Z",
-      "ja_sha256": "7d4bdb1662103c2fac1853a51a910977537ded1b250ab245565ddf79a81b3a2a"
+      "ja_sha256": "06fa58fe9eec8f81ea71153dfc19108fc4ff50999d7b19ac71a178f711995ae1"
     },
     "skills/ai-context/references/task-lifecycle.md": {
       "en_sha256": "9a6cd2db00232be903af7d0f959d5488be0578c48f4307b5073eec483ad0537e",
@@ -146,9 +146,9 @@
       "ja_sha256": "39a6ac23fe0d2262cbfb4e1f88ee2091bea9f233954000a7643666f2c20062b2"
     },
     "skills/kit/SKILL.md": {
-      "en_sha256": "116ff12c736b5cf0db038ec7f0fbbfb4e4010521c29e672fcfa3478c29aeb9b8",
+      "en_sha256": "8527eccd3f51d61cfac0e6f4f75b0f33036a587d82f48163370150272cd3cc43",
       "generated_at": "2026-06-24T08:53:28Z",
-      "ja_sha256": "4b5d032433c1f079a1ca6a236bf269055dcf303c26c897ac3965a9af49706dac"
+      "ja_sha256": "f03f61dbc08bed08ccf4d3a7942b885322047373d045703271346f10f358348a"
     },
     "skills/kit/odd.yaml": {
       "en_sha256": "141a195a99b3367907d784ac9f7fbc219a1f130c2a8bdd4a2d7e5f0b614aaecc",
@@ -331,14 +331,14 @@
       "ja_sha256": "7448ac59b6729c9c3fa412db2c3b6b99dcf8dd1c28a4f8ca93e6de279a938de1"
     },
     "skills/search/SKILL.md": {
-      "en_sha256": "b29821aba839d3048bf70ec4ef67c069878f19018c27987d832429669b49bbad",
+      "en_sha256": "f7fdda6671f85c214d18b48a402cda7d7b8530107d335f33b9ea23657912022c",
       "generated_at": "2026-06-24T08:44:22Z",
-      "ja_sha256": "825ac753af1f1e311b864cfe44a48ba44773c004b56c4d2e48e7117c1d4ec619"
+      "ja_sha256": "2de0874ec6263adc075c8125457de01adc83ea34bb76b4de1a4021a9c978b975"
     },
     "skills/search/odd.yaml": {
-      "en_sha256": "fbdc9ace8c983d5e227f73acb0d232a4b7f912ca652931ebeb8a9237f0c89303",
+      "en_sha256": "05611d9b64f583c65fd0398630d8c5b3c4b7b05cb1e8f6fcc772b8e7cec25aaa",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "ca1712c293a2f1f6ec116cbbe4ee4c59553a070ec0f2ad53319f54b28f198ad4"
+      "ja_sha256": "efdb97ec214990b334663a6cd18d082dfadf8d4c971059891c0ac23d3babc3a0"
     },
     "skills/spec/SKILL.md": {
       "en_sha256": "faed4cc6bf75691fe7b665ca482d82228de991e353396c9862f53990c60d9b00",
@@ -421,6 +421,6 @@
       "ja_sha256": "bf9f0a8b0293210ffdd4cc44b2885c15968ab316bf454e0d7dd60ae6bd54de12"
     }
   },
-  "generated_at": "2026-07-02T16:11:53Z",
-  "source_commit": "52d3465"
+  "generated_at": "2026-07-04T04:47:33Z",
+  "source_commit": "7f1d238"
 }

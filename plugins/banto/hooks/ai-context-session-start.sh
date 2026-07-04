@@ -214,6 +214,10 @@ if [ ! -f "$HARNESS_MARKER" ]; then
         sh "$PATHS_DIR/dead-skill-report.sh" "$CWD" 2>/dev/null \
             | sh "$SCRIPT_DIR/pending-channel.sh" dead "$CWD" 2>/dev/null
     fi
+    if [ -f "$PATHS_DIR/lexicon-distill.sh" ]; then
+        sh "$PATHS_DIR/lexicon-distill.sh" "$CWD" 2>/dev/null \
+            | sh "$SCRIPT_DIR/pending-channel.sh" lexicon "$CWD" 2>/dev/null
+    fi
 fi
 # pending に未解消の section があれば注入（DASHBOARD の直後・最優先で目に入る位置）
 # 新 per-user パス優先・旧フラットへフォールバック（上の harness 再評価で新パスが書かれた可能性を再解決）
@@ -382,25 +386,15 @@ if [ ! -f "$GC_MARKER" ] && [ -f "$PATHS_DIR/plugin-cache-gc.sh" ]; then
     ( sh "$PATHS_DIR/plugin-cache-gc.sh" --apply >/dev/null 2>&1 & )
 fi
 
-# --- combined.txt 鮮度チェック（軽量・mtime 比較のみ。再生成は PostToolUse hook が担う） ---
-# combined.txt より新しい .md が decisions/docs にあれば検索コーパスが遅れている＝検索で拾えない。
-# 過去に再生成 hook の server パス drift で停止した事故の再発検知
-# （decisions/2026-06-01 index-rebuild-path-drift）。再生成は走らせず事実だけ通知する。
-# PostToolUse 再生成が更新するのは project-combined.txt のみ（--scope project）。
-# ls glob だと full-combined.txt（自動更新なし）を先に掴み恒常 stale 警告になるため project を優先
-COMBINED="$AI_BASE/project-combined.txt"
-[ -f "$COMBINED" ] || COMBINED=$(ls "$AI_BASE"/*-combined.txt 2>/dev/null | head -1)
-if [ -n "$COMBINED" ] && [ -f "$COMBINED" ]; then
-    NEWER=$(find "$AI_BASE/decisions" "$AI_BASE/docs" -name '*.md' -newer "$COMBINED" 2>/dev/null | head -5)
-    if [ -n "$NEWER" ]; then
-        NEWER_CNT=$(printf '%s\n' "$NEWER" | grep -c .)
-        echo "=== ⚠ Search corpus (combined.txt) may be stale (freshness check) ==="
-        echo "  ${NEWER_CNT}+ decisions/docs are newer than combined.txt (search may miss them):"
-        printf '%s\n' "$NEWER" | while IFS= read -r f; do echo "    - $(basename "$f")"; done
-        echo "  Fix: any Write into decisions/docs makes the PostToolUse hook regenerate combined.txt automatically."
-        echo "  (If this warning appears every time, the combined.txt rebuild hook may be broken — consider harness-audit)"
-        echo ""
-    fi
+# --- full-combined.txt: 日次スロットル付きバックグラウンド再生成 ---
+# 旧 project scope（廃止済み）畳み込み後、search ランキング（store-query.sh）は decisions/docs を
+# 直接走査するため combined.txt を読まない。full-combined.txt は deep パス（会話履歴込み検索）
+# 専用の唯一の combined 層として残り、write-time では再生成しない（ontology-gen と同型の
+# 日次スロットル + 非同期実行。deep パス開始時のオンデマンド更新は search skill 側が担う）。
+FULLCOMBINED_MARKER="${TMPDIR:-/tmp}/banto-full-combined-$(date +%Y%m%d)"
+if [ ! -f "$FULLCOMBINED_MARKER" ] && [ -f "$PATHS_DIR/ai_context_combined.py" ] && command -v python3 >/dev/null 2>&1; then
+    touch "$FULLCOMBINED_MARKER"
+    ( python3 "$PATHS_DIR/ai_context_combined.py" --project-root "$CWD" --base "$AI_BASE" --scope full >/dev/null 2>&1 & )
 fi
 
 echo "[When a new design decision is made, save it to $AI_BASE/decisions/ immediately]"

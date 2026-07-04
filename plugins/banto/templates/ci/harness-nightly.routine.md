@@ -13,7 +13,12 @@ Add this routine only if you want fully unattended runs. Duplication is harmless
 | Frequency | What runs | Output |
 |---|---|---|
 | Nightly (daily) | store sync health + `harness-drift-check.sh` (drift between the edit repo ↔ live cache) | drift section of `<base>/checkpoints/pending.md` |
-| Weekly | `dead-skill-report.sh` (dead-skill candidates) + `lexicon-distill.sh` (search-lexicon candidates) | pending.md / append candidates to the search lexicon |
+| Weekly | `dead-skill-report.sh` (dead-skill candidates) | pending.md |
+
+`lexicon-distill.sh` (search-lexicon candidates) needs no entry in this routine: it already
+auto-aggregates into pending via the SessionStart 24h throttle, the same mechanism as drift/dead above.
+Add it here only if you want a fully unattended run that doesn't depend on a session being opened
+(opt-in, redundant with the SessionStart trigger).
 
 ## Setup (recommended: native `/schedule`)
 
