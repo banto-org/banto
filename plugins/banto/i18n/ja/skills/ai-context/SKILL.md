@@ -103,7 +103,8 @@ sh "$CLAUDE_PLUGIN_ROOT/scripts/ai-context-store-init.sh" local
 ## 所在登録（`ref`）— 外部文書の所在カード
 
 外部にある文書（SharePoint / ファイルサーバ / URL / store 外のローカルファイル）の**所在と相関だけ**を
-`{base}/docs/refs/[Ref] <名前>.md` に 1 枚で登録する。本文はミラーしない（全文が必要なら research の取り込みを使う）。
+`{base}/docs/refs/[Ref] <名前>.md` に 1 枚で登録する。本文はミラーしない — 中身まで検索したい文書は
+research skill で本文を `docs/research/` へ取り込む。
 発火語：「ここにある」「この場所を覚えて」「所在登録」— また **Claude 自身が作業中に外部文書を読んで根拠に使ったとき**は、会話の副産物として同カードを自発的に作成・更新する。
 
 ```markdown
@@ -117,13 +118,15 @@ related:
 ---
 # <名前>
 
-<要旨 2〜3 行（任意）。何のための文書で、どの作業と関係するか。>
+<要旨 2〜3 行（必須）。何のための文書で、どの作業と関係するか。>
 ```
 
+- frontmatter（`source` / `uri` / `fetched` / `related`）が構造メタデータの確定仕様。
+- **要約 2〜3 行は必須**：検索でヒットするのはカードの要約だけであり、タイトル + URL だけのカードは中身が永遠に検索に載らない。
 - `related:` は決定論抽出され、台帳の `references` 関係 + 検索 db の refs テーブルになる。
   芋づるは `sh "$CLAUDE_PLUGIN_ROOT/scripts/store-query.sh" --related <断片>`（→ 参照先 / ← 被参照）。
 - 正本は常に外部（uri 先）。カードは「どこにあって何と関係するか」だけを持つ。
-- 一括棚卸し（ディレクトリ走査で自動生成）は `scripts/ref_scan.py`（Excel はシート一覧 + シート間参照付き）。
+- 一括棚卸し（ディレクトリ走査で自動生成）は `scripts/ref_scan.py`（Excel はシート一覧 + シート間参照付き。要約欄が空のカードには「(要約未記入 — 検索に載らない)」のプレースホルダが出る — 見つけたら埋める）。
 
 ## メモ（`memo`）
 
@@ -209,7 +212,7 @@ Pick the ones to promote (number, or "all").
    git mv "{base}/docs/knowledges/drafts/{file}" "{base}/docs/knowledges/{file}"
    ```
    （store 内で git 管理外なら `mv`）
-3. combined.txt は docs への Write を契機に PostToolUse hook が自動再生成する
+3. 検索ランキングは decisions/docs を直接走査するため、移動後はそのまま検索対象になる（FTS5 セクション索引は Write を契機に PostToolUse hook が自動追従する）
 
 #### 新規作成
 
@@ -275,14 +278,15 @@ Pick the ones to promote (number, or "all").
 
 **検索は `search` skill が所有する**。ユーザーが 「前に決めた」「思い出して」 ("we decided this before", "remember...") のように言うと、その skill が自動発火する。`/search <query>` で明示的に呼ぶこともできる。Claude がクエリを 3 層に展開 → ランキングスクリプトが grep で候補を採点 → 上位を Read で検証（対象: `{base}/` 配下の decisions/docs + `config.json` の `extra_docs_dirs`）。
 
-## 検索テキスト層の管理（combined.txt）
+## 検索テキスト層の管理（索引 / full-combined.txt）
 
-検索の grep 対象である `combined.txt` は **保存時に hook（`ai-context-combined-rebuild.sh`）が自動再生成する**:
-- `{base}/decisions/` への書き込み時
-- `{base}/docs/` への書き込み時
-- バックグラウンドで動作（デバウンス）
+search ランキング（`store-query.sh`）は `{base}/decisions/` `{base}/docs/` を**直接走査する**（combined.txt は読まない — search-layer-redesign 分岐 1A）。書き込み直後から検索対象になり、手動操作は不要。
 
-手動操作は不要。検索対象を追加するには `config.json` の `extra_docs_dirs` を直接編集する; 次回の hook 再生成から有効になる。
+補完する 2 層:
+- **FTS5 セクション索引**: `{base}/decisions/` `{base}/docs/` への書き込みを契機に hook（`ai-context-index-rebuild.sh`）がバックグラウンドで自動再生成する。
+- **full-combined.txt**（会話履歴込みの deep パス専用層）: 書き込みには追従せず、SessionStart の日次スロットル + deep パス開始時のオンデマンド更新でのみ再生成する。
+
+検索対象を追加するには `config.json` の `extra_docs_dirs` を直接編集する（次回の索引 / full-combined.txt 再生成から有効になる）。
 
 ## チェックポイント作成
 

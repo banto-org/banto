@@ -27,7 +27,7 @@ safety_boundaries:
   - "書き込み先: {base}/ 配下のみ（例外: ~/.claude/banto-ignore は ignore サブコマンド限定 / store-init CLI は mapping・conf を更新）"
   - decisions/ ファイルは append-only 原則（既存は破壊しない）
   - サブコマンド未指定なら使い方表示のみ（書き込みなし）
-  - combined.txt 再生成は hook 任せ（手動実行しない）
+  - full-combined.txt 再生成は hook 任せ（手動実行しない）
   - bootstrap / local は store-init CLI に委譲（GitHub 作成は private 固定・ローカル固定 repo は GitHub へ送らない）
 
 kill_switch_conditions:

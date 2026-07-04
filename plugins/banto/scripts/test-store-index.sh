@@ -80,9 +80,13 @@ if command -v sqlite3 >/dev/null 2>&1; then
     OUT=$(STORE_QUERY_DB="$ROOT/.store-index.db" sh "$QUERY" --all "importance" "pruning" 2>/dev/null)
     printf '%s' "$OUT" | grep -q "projB" && ok "query: --all reaches other project" || fail "query: --all no cross hit"
 
-    # --- 5) query: --project 絞り込み ---
+    # --- 5) query: --project 絞り込み(0 件は黙らず明示・他プロジェクトへは漏れない) ---
     OUT=$(STORE_QUERY_DB="$ROOT/.store-index.db" sh "$QUERY" --project projA "importance" "pruning" 2>/dev/null)
-    [ -z "$OUT" ] && ok "query: --project filter excludes others" || fail "query: filter leaked"
+    if printf '%s' "$OUT" | grep -q "0 hits" && ! printf '%s' "$OUT" | grep -q "projB"; then
+        ok "query: --project filter excludes others (0-hit reported, not silent)"
+    else
+        fail "query: filter leaked or 0-hit silent: $OUT"
+    fi
 
     OUT=$(STORE_QUERY_DB="$ROOT/.store-index.db" sh "$QUERY" --project projA "横断検索" 2>/dev/null)
     printf '%s' "$OUT" | grep -q "projA" && ok "query: japanese trigram match" || fail "query: ja match failed"
@@ -94,6 +98,18 @@ if command -v sqlite3 >/dev/null 2>&1; then
     # --- 7) 行範囲の妥当性（L 開始-終了 を返す） ---
     OUT=$(STORE_QUERY_DB="$ROOT/.store-index.db" sh "$QUERY" --all "importance" "pruning" 2>/dev/null)
     printf '%s' "$OUT" | grep -qE 'L[0-9]+-[0-9]+' && ok "query: line ranges present" || fail "query: no line ranges"
+
+    # --- 7.1) AND 0 件 → OR 緩和を明示して再検索（R8: 無言 0 件で弱モデルが諦める問題の修正） ---
+    OUT=$(STORE_QUERY_DB="$ROOT/.store-index.db" sh "$QUERY" --project projB "importance" "zzznope" 2>/dev/null)
+    if printf '%s' "$OUT" | grep -q "OR に緩和" && printf '%s' "$OUT" | grep -q "projB"; then
+        ok "query: AND-miss relaxes to OR with explicit notice"
+    else
+        fail "query: OR relaxation missing: $OUT"
+    fi
+
+    # --- 7.2) 完全 0 件でも無言にしない（次の一手を必ず出力） ---
+    OUT=$(STORE_QUERY_DB="$ROOT/.store-index.db" sh "$QUERY" --all "zzznope9x" 2>/dev/null)
+    printf '%s' "$OUT" | grep -q "0 hits" && ok "query: total miss reports next steps" || fail "query: silent 0-hit"
 else
     echo "  skip: sqlite3 CLI not found — query tests skipped"
 fi
@@ -123,7 +139,64 @@ if command -v sqlite3 >/dev/null 2>&1; then
     printf '%s' "$OUT" | grep -q "fts-adoption_tester.md" && ok "--related: outgoing resolved (prefix → full path)" || fail "--related: outgoing unresolved"
     OUT=$(STORE_QUERY_DB="$ROOT/.store-index.db" sh "$QUERY" --related "fts-adoption" 2>/dev/null)
     printf '%s' "$OUT" | grep -q "external-sheet" && ok "--related: incoming (referenced by) found" || fail "--related: incoming missing"
+
+    # --- 7.6) store ルート直下のファイルを project として索引しない（README.md 残骸の混入防止） ---
+    echo "# store readme" > "$ROOT/README.md"
+    python3 "$GEN" --base "$ROOT/projA" --force >/dev/null 2>&1
+    NR=$(sqlite3 "$ROOT/.store-index.db" "SELECT count(*) FROM docs WHERE project='README.md'")
+    [ "$NR" = "0" ] && ok "build: root-level files not indexed as projects" || fail "build: README.md indexed as project (count=$NR)"
 fi
+
+# --- 10) rank: decision が同語の doc より上位に来る（doc_type 重み付け） ---
+cat > "$ROOT/projA/decisions/2026-07-02-140000_weight-test_tester.md" << 'MD'
+---
+title: 重み付けテスト用decision
+status: accepted
+author: tester
+---
+
+# 重み付けテスト用decision
+
+## 本文
+
+rankweightprobe を含む一次文書サンプル行。
+MD
+cat > "$ROOT/projA/docs/weight-test-doc.md" << 'MD'
+# 重み付けテスト用doc
+
+## 本文
+
+rankweightprobe を含む派生文書サンプル行。
+MD
+python3 "$GEN" --base "$ROOT/projA" --force >/dev/null 2>&1
+if command -v sqlite3 >/dev/null 2>&1; then
+    OUT=$(STORE_QUERY_DB="$ROOT/.store-index.db" sh "$QUERY" --project projA "rankweightprobe" 2>/dev/null)
+    FIRSTLINE=$(printf '%s\n' "$OUT" | head -1)
+    printf '%s' "$FIRSTLINE" | grep -q "decisions/" && ok "rank: decision weighted above same-term doc" || fail "rank: decision not first: $FIRSTLINE"
+fi
+
+# --- 11) sessions/ 配下の md は索引に載らない（checkpoint 除外） ---
+mkdir -p "$ROOT/projA/sessions"
+cat > "$ROOT/projA/sessions/2026-07-02-150000_checkpoint.md" << 'MD'
+# checkpoint
+
+## メモ
+
+セッション checkpoint 本文。
+MD
+python3 "$GEN" --base "$ROOT/projA" --force >/dev/null 2>&1
+if command -v sqlite3 >/dev/null 2>&1; then
+    NSESS=$(sqlite3 "$ROOT/.store-index.db" "SELECT count(*) FROM docs WHERE relpath LIKE '%sessions/%'" 2>/dev/null)
+    [ "$NSESS" = "0" ] && ok "sessions: checkpoint excluded from index" || fail "sessions: indexed count=$NSESS (want 0)"
+fi
+
+# --- 12) fail-open 文言: combined.txt が消え、Grep 案内になっている ---
+if grep -q 'combined.txt' "$QUERY"; then
+    fail "fail-open: combined.txt reference still present in store-query.sh"
+else
+    ok "fail-open: combined.txt reference removed"
+fi
+grep -q 'Grep' "$QUERY" && ok "fail-open: Grep guidance present" || fail "fail-open: Grep guidance missing"
 
 # --- 8) legacy（マーカー無し）: db は base 直下 ---
 LEG=$(mktemp -d)

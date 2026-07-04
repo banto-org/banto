@@ -27,7 +27,7 @@ safety_boundaries:
   - "Write targets: only under {base}/ (exceptions: ~/.claude/banto-ignore is limited to the ignore subcommand / the store-init CLI updates mapping and conf)"
   - decisions/ files follow an append-only principle (existing files are never destroyed)
   - with no subcommand specified, only usage is shown (no writes)
-  - combined.txt regeneration is left to the hook (never run it manually)
+  - full-combined.txt regeneration is left to the hook (never run it manually)
   - bootstrap / local delegate to the store-init CLI (GitHub creation is fixed to private; locally pinned repos are never pushed to GitHub)
 
 kill_switch_conditions:

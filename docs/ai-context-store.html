@@ -252,7 +252,7 @@
   <div class="sec-head reveal">
     <span class="ghost">02</span>
     <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">どう働くか</span></h2>
-    <p><span class="lx" lang="en">One store persists; sessions come and go. Left to right: session 1 works and clears, the store keeps everything, session 2 restores automatically.</span><span class="lx" lang="ja">ストアは 1 つ、セッションは入れ替わる。左から右へ：セッション 1 が作業して <code>/clear</code>、ストアが保存し、セッション 2 が自動で復元する。</span></p>
+    <p><span class="lx" lang="en">One store persists; sessions come and go. Left to right: session 1 works and clears, the store keeps everything, session 2 restores automatically.</span><span class="lx" lang="ja">ストアは 1 つ、セッションは入れ替わる。左から右へ：セッション 1 が作業して <code>/clear</code> を実行し、ストアが保存、セッション 2 が自動で復元する。</span></p>
   </div>
   <div class="tl3 reveal" aria-hidden="true">
     <div class="tl3-row">
@@ -295,7 +295,7 @@
   <div class="sec-head reveal">
     <span class="ghost">03</span>
     <h2><span class="lx" lang="en">What accumulates</span><span class="lx" lang="ja">何が貯まるか</span></h2>
-    <p><span class="lx" lang="en">One folder per project, a fixed layout — a fixed home that any tool can read. Shared knowledge is flat and author-tagged; personal state is namespaced per author.</span><span class="lx" lang="ja">プロジェクトごとに 1 フォルダ・決まった構成 — どのツールからも読める、決まった置き場所。共有知識はフラットでファイル名に作成者名が入り、個人状態は作成者ごとの名前空間で分離。</span></p>
+    <p><span class="lx" lang="en">One folder per project, a fixed layout — a fixed home that any tool can read. Shared knowledge is flat and author-tagged; personal state is namespaced per author.</span><span class="lx" lang="ja">プロジェクトごとに 1 フォルダ・決まった構成 — どのツールからも読める、決まった置き場所。共有知識は階層を持たず、ファイル名に作成者名が入る。個人の状態は、作成者ごとの名前空間で分離する。</span></p>
   </div>
   <div class="store-table-wrap reveal">
     <table class="store-table">
@@ -334,7 +334,7 @@
         </tr>
         <tr>
           <td class="fd">workspaces/&lt;author&gt;/</td>
-          <td><span class="lx" lang="en">per-workspace state and tasks</span><span class="lx" lang="ja">作業単位ごとの状態とタスク</span></td>
+          <td><span class="lx" lang="en">per-workspace state and tasks</span><span class="lx" lang="ja">ワークスペースごとの状態とタスク</span></td>
           <td><span class="lx" lang="en">switching work, resuming where you left off</span><span class="lx" lang="ja">作業の切替・続きからの再開</span></td>
           <td><b class="tag pe"><span class="lx" lang="en">personal</span><span class="lx" lang="ja">個人</span></b></td>
         </tr>
@@ -360,7 +360,7 @@
     </table>
   </div>
   <div class="legend reveal">
-    <span><b class="sh"><span class="lx" lang="en">shared</span><span class="lx" lang="ja">共有</span></b><span class="lx" lang="en">flat, author-tagged (<code>…_&lt;github&gt;.md</code>) — the team shares it</span><span class="lx" lang="ja">フラット・ファイル名に作成者（<code>…_&lt;github&gt;.md</code>）— チームで共有</span></span>
+    <span><b class="sh"><span class="lx" lang="en">shared</span><span class="lx" lang="ja">共有</span></b><span class="lx" lang="en">flat, author-tagged (<code>…_&lt;github&gt;.md</code>) — the team shares it</span><span class="lx" lang="ja">階層なし・ファイル名に作成者（<code>…_&lt;github&gt;.md</code>）— チームで共有</span></span>
     <span><b class="pe"><span class="lx" lang="en">personal</span><span class="lx" lang="ja">個人</span></b><span class="lx" lang="en">under <code>&lt;author&gt;/</code> — working state never collides</span><span class="lx" lang="ja"><code>&lt;author&gt;/</code> 配下 — 作業状態が衝突しない</span></span>
     <span><b class="ep"><span class="lx" lang="en">ephemeral</span><span class="lx" lang="ja">一時</span></b><span class="lx" lang="en">gitignored, never committed — this machine, this moment only</span><span class="lx" lang="ja">gitignore・コミットされない — このマシンのその場限り</span></span>
   </div>
@@ -384,7 +384,7 @@
       <ul>
         <li><code>next</code> · <span class="lx" lang="en">advance to the next open task</span><span class="lx" lang="ja">次の未完タスクへ</span></li>
         <li><code>phase-done</code> · <span class="lx" lang="en">close a phase, auto-archive</span><span class="lx" lang="ja">Phase 完了・自動アーカイブ</span></li>
-        <li><code>sort</code> · <span class="lx" lang="en">route a stray doc to its home</span><span class="lx" lang="ja">散らかった doc を振り分け</span></li>
+        <li><code>sort</code> · <span class="lx" lang="en">route a stray doc to its home</span><span class="lx" lang="ja">散らかった文書を振り分け</span></li>
       </ul>
     </div>
     <div class="card reveal">
@@ -403,7 +403,7 @@
   <div class="sec-head reveal">
     <span class="ghost">04</span>
     <h2><span class="lx" lang="en">It runs by itself</span><span class="lx" lang="ja">自動で回る</span></h2>
-    <p><span class="lx" lang="en">Banto hooks into Claude Code's lifecycle, so the store is injected, guarded, and saved automatically — the human never calls it. Three scenes.</span><span class="lx" lang="ja">Banto が Claude Code のライフサイクルに hook を張るため、ストアは自動で注入・防御・保存される — 人間は呼ばない。場面は 3 つ。</span></p>
+    <p><span class="lx" lang="en">Banto hooks into Claude Code's lifecycle, so the store is injected, guarded, and saved automatically — the human never calls it. Three scenes.</span><span class="lx" lang="ja">Banto が Claude Code のライフサイクルに hook を張るため、ストアは自動で注入・防御・保存される。人間は呼ばない。場面は 3 つ。</span></p>
   </div>
   <div class="scene-grid">
     <div class="card scene reveal">
@@ -416,7 +416,7 @@
       <div class="sc-no">2</div>
       <div class="sc-when"><span class="lx" lang="en">while working</span><span class="lx" lang="ja">作業中</span></div>
       <h3><span class="lx" lang="en">Guard &amp; record</span><span class="lx" lang="ja">守る・記録する</span></h3>
-      <p><span class="lx" lang="en">Before a tool runs, deterministic safety valves fire: a write that would leak an internal name or PII into a client file is stopped (<code>egress-guard</code>); a dangerous shell command is stopped (<code>safety-guard</code>); a direct push to main is stopped (<code>odd-kill-switch</code>). Every saved decision or doc regenerates the search text automatically.</span><span class="lx" lang="ja">tool 実行の前に、決定論の安全弁が働く：内部名や個人情報が客先ファイルへ出そうなら止める（<code>egress-guard</code>）。危険なシェルコマンドを止める（<code>safety-guard</code>）。main への直接 push を止める（<code>odd-kill-switch</code>）。決定や doc を書き込むたびに、検索用テキストを自動で再生成。</span></p>
+      <p><span class="lx" lang="en">Before a tool runs, deterministic safety valves fire: a write that would leak an internal name or PII into a client file is stopped (<code>egress-guard</code>); a dangerous shell command is stopped (<code>safety-guard</code>); a direct push to main is stopped (<code>odd-kill-switch</code>). Every saved decision or doc regenerates the search text automatically.</span><span class="lx" lang="ja">ツール実行の前に、決定論の安全弁が働く：内部名や個人情報が客先ファイルへ流出しそうなら止める（<code>egress-guard</code>）。危険なシェルコマンドを止める（<code>safety-guard</code>）。main への直接 push を止める（<code>odd-kill-switch</code>）。決定や文書を書き込むたびに、検索用テキストを自動で再生成。</span></p>
     </div>
     <div class="card scene reveal">
       <div class="sc-no">3</div>
@@ -474,7 +474,7 @@
 <div class="cta-band reveal">
   <div class="cta-inner">
     <h2><span class="lx" lang="en">The harness holds the knowledge. You hold the vision.</span><span class="lx" lang="ja">知識はハーネスが持つ。方針はあなたが持つ。</span></h2>
-    <p><span class="lx" lang="en">AI-Context-Store is one of Banto's three flagships, alongside workspace &amp; fleet operations and the JA-canonical i18n method.</span><span class="lx" lang="ja">AI-Context-Store は Banto の 3 つの目玉の 1 つ。ワークスペース &amp; 艦隊運用、JA 正本 i18n 手法と並ぶ。</span></p>
+    <p><span class="lx" lang="en">AI-Context-Store is one of Banto's three flagships, alongside workspace &amp; fleet operations and the JA-canonical i18n method.</span><span class="lx" lang="ja">AI-Context-Store は Banto の 3 大目玉の 1 つ。ワークスペース &amp; 艦隊運用、JA 正本 i18n 手法と並ぶ。</span></p>
     <div style="display:flex;gap:14px;flex-wrap:wrap">
       <a class="btn btn-primary" href="evidence.html"><span class="lx" lang="en">See the evidence — 5 benchmarks, 42 cells →</span><span class="lx" lang="ja">実測を見る — 5 ベンチマーク・42 セル →</span></a>
       <a class="btn btn-ghost" href="index.html#flagships" style="color:var(--paper);border-color:rgba(245,240,230,.4)"><span class="lx" lang="en">See the other flagships</span><span class="lx" lang="ja">他の目玉を見る</span></a>

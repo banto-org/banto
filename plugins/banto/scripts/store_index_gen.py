@@ -5,7 +5,8 @@
 decision 2026-07-02-215442（db 非コミット・各自ローカル再生成）/ 223134（R5 実測）の実装。
 
 - 対象: base の親ディレクトリに .ai-context-store マーカーがあれば store ルート配下の全 *.md
-  （プロジェクト横断）、無ければ base 配下のみ。meta/ tmp/ .git/ は除外。
+  （プロジェクト横断）、無ければ base 配下のみ。meta/ tmp/ .git/ sessions/ は除外
+  （checkpoint は一次文書へ遡れない派生記録トラップになるため索引外）。
 - 鮮度: db より新しい md が無ければ何もしない（--force で強制再構築）。
 - 原子性: 一時ファイルに構築して os.replace で差し替え（読者は旧 db を読み続けられる）。
 - fail-open: FTS5 が無い・書き込めない等は exit 0（ハーネスを止めない）。
@@ -21,7 +22,7 @@ import sys
 import time
 from pathlib import Path
 
-SKIP_DIRS = {".git", "tmp", "meta"}
+SKIP_DIRS = {".git", "tmp", "meta", "sessions"}
 DB_NAME = ".store-index.db"
 
 
@@ -173,6 +174,8 @@ def main() -> int:
         ndocs = nsec = 0
         for f in files:
             rel = f.relative_to(root).as_posix()
+            if cross and "/" not in rel:
+                continue  # store ルート直下のファイル(README.md 等)はプロジェクト文書でない
             try:
                 text = f.read_text(errors="replace")
             except OSError:

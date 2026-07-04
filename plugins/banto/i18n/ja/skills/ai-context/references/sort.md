@@ -55,7 +55,7 @@
 
 4. 実行時は **`git mv` が使える場合は優先**、なければ `mv`。削除は `rm` 前に確認。
 
-5. 完了後、検索用 `combined.txt` は hook（`ai-context-combined-rebuild.sh`）が保存時に自動再生成するため、手動操作は不要。
+5. 完了後、search ランキングは decisions/docs を直接走査するため手動操作は不要（FTS5 セクション索引は hook（`ai-context-index-rebuild.sh`）が保存時に自動追従する）。
 
 6. 完了レポート:
 
@@ -111,7 +111,7 @@ vendor, target, .venv, venv
 
 **Step 4: 実行** — `git mv` 優先（なければ `mv`）。`docs/` 無ければ作成。
 
-**Step 5: 検索対象の登録提案** — `docs/` 等が `config.json` の `extra_docs_dirs` に未登録なら登録を提案 → yes で `extra_docs_dirs` に追加（次回の hook 再生成で `combined.txt` に反映される。手動再構築は不要）。
+**Step 5: 検索対象の登録提案** — `docs/` 等が `config.json` の `extra_docs_dirs` に未登録なら登録を提案 → yes で `extra_docs_dirs` に追加（次回の索引再生成 / full-combined.txt 再生成に反映される。手動再構築は不要）。
 
 **Step 6: 参照インデックス生成** — 全ドキュメントの索引を `{base}/docs/[Index] project-documents.md` に保存（docs/ / ルート（移動不可）/ サブパッケージ の 3 テーブル）。
 

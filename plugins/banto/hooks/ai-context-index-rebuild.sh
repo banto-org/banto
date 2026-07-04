@@ -1,11 +1,15 @@
 #!/bin/sh
-# AI Context Combined Rebuild Hook (PostToolUse: Write|Edit)
+# AI Context Index Rebuild Hook (PostToolUse: Write|Edit)
 # .ai-context/decisions/ または .ai-context/docs/ への書き込みを検知して
-# combined.txt（検索用の単一テキスト）をバックグラウンドで再生成する。
+# FTS5 セクション索引（store_index_gen.py）をバックグラウンドで再生成する。
 #
-# 旧 ai-context-index-rebuild.sh の後継（search-native-migration spec T1-3）:
-# SoftMatcha index 構築（uv + MCP venv + モデルロード ~6-8s/2.2GB）を廃し、
-# python3 stdlib の純テキスト連結（~50ms・メモリスパイクなし）に置換。
+# 旧名 ai-context-index-rebuild.sh へ回帰（search-layer-redesign spec 分岐 1A）。
+# 過去に同名だった SoftMatcha 版とは別物 — 実体は旧・書き込み時 combined 再生成 hook から
+# 廃止済みの project scope 出力（書き込み時再生成）を除去し、索引再構築専任へ純化した版。
+# 誰も読まない派生物の無駄な再生成を止め、fail-open の落ち先も「combined.txt 検索」から
+# 「Grep 直接走査（{base}/decisions/ {base}/docs/）」へ付け替え済み（store-query.sh 側）。
+# full-combined.txt（deep パスの会話履歴込み検索）は SessionStart の日次スロットル +
+# deep パス開始時のオンデマンド更新が担い、本 hook の対象外。
 # POSIX互換: macOS / Linux / WSL
 #
 # 重要: printf '%s' "$INPUT" | jq は JSON 内の $() 等がシェル展開されて壊れるため、
@@ -49,24 +53,24 @@ esac
 
 # silent failure 防止: python3 が無い時は stderr に 1 行出して可視化
 if ! command -v python3 >/dev/null 2>&1; then
-    printf '[AI Context] combined rebuild skipped: python3 is not installed. Search results may go stale.\n' >&2
+    printf '[AI Context] index rebuild skipped: python3 is not installed. Search results may go stale.\n' >&2
     exit 0
 fi
-COMBINED_PY="$PATHS_DIR/ai_context_combined.py"
-if [ ! -f "$COMBINED_PY" ]; then
-    printf '[AI Context] combined rebuild skipped: ai_context_combined.py not found (CLAUDE_PLUGIN_ROOT=%s).\n' "${CLAUDE_PLUGIN_ROOT:-unset}" >&2
+INDEX_PY="$PATHS_DIR/store_index_gen.py"
+if [ ! -f "$INDEX_PY" ]; then
+    printf '[AI Context] index rebuild skipped: store_index_gen.py not found (CLAUDE_PLUGIN_ROOT=%s).\n' "${CLAUDE_PLUGIN_ROOT:-unset}" >&2
     exit 0
 fi
 
 # lock はプロジェクト単位（複数プロジェクト並走時の取りこぼし防止。2026-06-05 監査 TEST 7）
 _proj_id=$(printf '%s' "$CWD" | cksum | awk '{print $1}')
-LOCK="${TMPDIR:-/tmp}/ai-context-combined-rebuild-${_proj_id}.lock"
+LOCK="${TMPDIR:-/tmp}/ai-context-index-rebuild-${_proj_id}.lock"
 
 # 前回のバックグラウンド再生成が失敗していたら可視化する（context-keeper agent への実導線。
 # バックグラウンド実行のため同一実行内では失敗を報せられない — マーカー経由で次回に通知）
-FAIL_MARKER="${TMPDIR:-/tmp}/ai-context-combined-rebuild-${_proj_id}.failed"
+FAIL_MARKER="${TMPDIR:-/tmp}/ai-context-index-rebuild-${_proj_id}.failed"
 if [ -f "$FAIL_MARKER" ]; then
-    printf '[AI Context] combined.txt: the previous rebuild failed. Run the context-keeper agent (Agent subagent_type="banto:context-keeper") to verify consistency and rebuild it.\n' >&2
+    printf '[AI Context] FTS5 index: the previous rebuild failed. Run the context-keeper agent (Agent subagent_type="banto:context-keeper") to verify consistency and rebuild it.\n' >&2
 fi
 if [ -f "$LOCK" ]; then
     if [ $(( $(date +%s) - $(stat -c %Y "$LOCK" 2>/dev/null || stat -f %m "$LOCK" 2>/dev/null || echo 0) )) -lt 10 ]; then
@@ -77,13 +81,12 @@ touch "$LOCK"
 
 (
     trap 'rm -f "$LOCK"' EXIT
-    if python3 "$COMBINED_PY" --project-root "$CWD" --base "$AI_BASE" --scope project >/dev/null 2>&1; then
+    # 鮮度スキップ・原子的差し替え・fail-open は store_index_gen.py 内蔵
+    if python3 "$INDEX_PY" --base "$AI_BASE" >/dev/null 2>&1; then
         rm -f "$FAIL_MARKER"
     else
         touch "$FAIL_MARKER"
     fi
-    # FTS5 セクション索引も追従させる（鮮度スキップ・原子的差し替え・fail-open は内蔵）
-    [ -f "$PATHS_DIR/store_index_gen.py" ] && python3 "$PATHS_DIR/store_index_gen.py" --base "$AI_BASE" >/dev/null 2>&1
     rm -f "$LOCK"
 ) &
 

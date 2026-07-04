@@ -172,8 +172,8 @@
       </p>
       <p class="reveal lx" lang="ja">
         AI が「作るコスト」をゼロに近づける時代、競争優位（moat）は実行から<strong>ビジョンと共感</strong>へ移る。
-        Banto は「開発ワークフローツール」ではなく、一人の人間が N の AI セッションを率いる
-        レバレッジを最大化するハーネス。
+        Banto は「開発ワークフローツール」ではない。一人の人間が N の AI セッションを率いる、
+        そのレバレッジを最大化するハーネス。
       </p>
     </div>
 
@@ -303,14 +303,14 @@
           <p class="lx" lang="ja">
             トピック別ワークスペースが <strong>main ← epic ← task worktree</strong> の 3 階層ブランチ
             （git-town 委譲）の上に乗る。git コマンドは打たない。インテント（「決済のリデザインを
-            始める」「この作業終わった」「main に入れて」）を述べると、Banto がブランチを開き、
-            worktree を分離し、マージ・sync・掃除まで回す。
+            始める」「この作業終わった」「main に入れて」）を述べるだけでいい。Banto がブランチを開き、
+            worktree を分離し、マージ・sync・掃除まで自動で回す。
           </p>
           <ul class="ticks">
             <li class="lx" lang="en">Worktree isolation lets multiple agents run in parallel without colliding</li>
             <li class="lx" lang="ja">worktree 分離で複数エージェントが衝突せず並走</li>
             <li class="lx" lang="en">A session registry with collision detection for the fleet</li>
-            <li class="lx" lang="ja">艦隊向けの衝突検知付きセッション registry</li>
+            <li class="lx" lang="ja">艦隊向けの衝突検知付きセッションレジストリ</li>
             <li class="lx" lang="en">Irreversible / outward actions (ship, push, PR) always stop at a human gate</li>
             <li class="lx" lang="ja">不可逆・外向き操作（ship / push / PR）は必ず人間ゲートで止まる</li>
           </ul>
@@ -482,7 +482,7 @@
     </p>
     <p class="section-lede reveal lx" lang="ja">
       思想層は CLAUDE.md に注入される判断フィルタになる。そこから仕事は下流へ流れ、
-      <code>dev-loop</code> がテストが緑になるまでビルドを駆動する。
+      <code>dev-loop</code> がテストがグリーンになるまでビルドを駆動する。
     </p>
 
     <div class="pipe reveal" aria-hidden="true">
@@ -516,7 +516,7 @@
           <text x="226" y="112" class="loop-lbl lx" lang="en">Implement</text><text x="226" y="112" class="loop-lbl lx" lang="ja">実装</text>
           <text x="130" y="248" class="loop-lbl lx" lang="en">Verify</text><text x="130" y="248" class="loop-lbl lx" lang="ja">検証</text>
           <text x="34" y="112" class="loop-lbl lx" lang="en">Fix</text><text x="34" y="112" class="loop-lbl lx" lang="ja">修正</text>
-          <text x="130" y="126" class="loop-center-1 lx" lang="en">until</text><text x="130" y="126" class="loop-center-1 lx" lang="ja">緑になるまで</text>
+          <text x="130" y="126" class="loop-center-1 lx" lang="en">until</text><text x="130" y="126" class="loop-center-1 lx" lang="ja">グリーンになるまで</text>
           <text x="130" y="150" class="loop-center-2 lx" lang="en">green</text><text x="130" y="150" class="loop-center-2 lx" lang="ja">回す</text>
         </svg>
       </div>
@@ -558,7 +558,7 @@
       <div class="card dark reveal">
         <h4>kill-switch</h4>
         <p class="lx" lang="en">No direct push to main, no <code>--no-verify</code>, no force-push. Full stop.</p>
-        <p class="lx" lang="ja">main 直 push なし、<code>--no-verify</code> なし、force-push なし。問答無用。</p>
+        <p class="lx" lang="ja">main への直接 push なし、<code>--no-verify</code> なし、force-push なし。問答無用。</p>
       </div>
       <div class="card dark reveal">
         <h4>egress guard</h4>
@@ -573,7 +573,7 @@
       <div class="card dark reveal">
         <h4><span class="lx" lang="en">OS sandbox · opt-in</span><span class="lx" lang="ja">OS サンドボックス · opt-in</span></h4>
         <p class="lx" lang="en">A second layer: Claude's bash can run in an OS sandbox (Seatbelt / bubblewrap) blocking credential reads and off-allowlist network. Off by default.</p>
-        <p class="lx" lang="ja">もう一段の層 — Claude の bash を OS サンドボックス（Seatbelt / bubblewrap）で走らせ、秘匿情報の読取と許可外のネットワーク接続を遮断。既定は off。</p>
+        <p class="lx" lang="ja">もう一段の層 — Claude の bash を OS サンドボックス（Seatbelt / bubblewrap）で走らせる。秘匿情報の読取と許可外のネットワーク接続を遮断。既定は無効。</p>
       </div>
     </div>
 
@@ -585,7 +585,7 @@
         actually does — so the docs never lie.
       </p>
       <p class="lx" lang="ja">
-        <strong>自己監査。</strong> 15 軸の plugin 品質監査（content-hygiene 込み）と 5 軸のハーネス
+        <strong>自己監査。</strong> 15 軸のプラグイン品質監査（content-hygiene 込み）と 5 軸のハーネス
         監査が、宣言と実体の乖離を見張る — ドキュメントが嘘をつかない。
       </p>
     </div>
@@ -606,7 +606,7 @@
     </p>
     <p class="section-lede reveal lx" lang="ja">
       15 スキル・6 エージェント・41 フック・9 行動ルール — MCP 同梱なし。コードレビューと
-      セキュリティレビューは再実装せず、Anthropic 公式 plugin へ意図的に委譲。
+      セキュリティレビューは再実装せず、Anthropic 公式プラグインへ意図的に委譲。
     </p>
 
     <div class="tool-group reveal">
@@ -623,7 +623,7 @@
     <div class="tool-group reveal">
       <h4 class="tg-head"><span class="lx" lang="en">Knowledge &amp; context</span><span class="lx" lang="ja">知識 &amp; コンテキスト</span></h4>
       <div class="chips">
-        <span class="chip star"><b>ai-context</b><i class="lx" lang="en">decisions · memo · knowledge · store</i><i class="lx" lang="ja">決定 · メモ · ナレッジ · ストア</i></span>
+        <span class="chip star"><b>ai-context</b><i class="lx" lang="en">decisions · memo · knowledge · store</i><i class="lx" lang="ja">決定 · メモ · 知識 · ストア</i></span>
         <span class="chip"><b>search</b><i class="lx" lang="en">internal search, no web</i><i class="lx" lang="ja">内部検索（web なし）</i></span>
         <span class="chip"><b>research</b><i class="lx" lang="en">external, saved to store</i><i class="lx" lang="ja">外部調査 → ストア</i></span>
         <span class="chip"><b>save-checkpoint</b><i class="lx" lang="en">session snapshot</i><i class="lx" lang="ja">セッション保存</i></span>
@@ -708,7 +708,7 @@
     <div class="phil-grid">
       <div class="phil reveal"><b class="lx" lang="en">Self-driving, not approval-gated</b><b class="lx" lang="ja">承認ゲートではなく自走</b><span class="lx" lang="en">Enforcement belongs to hooks; approvals stay minimal.</span><span class="lx" lang="ja">強制は hook に、承認は最小限に。</span></div>
       <div class="phil reveal"><b class="lx" lang="en">Deterministic over promised</b><b class="lx" lang="ja">約束より決定論</b><span class="lx" lang="en">What must never happen is blocked by a hook, not a prompt.</span><span class="lx" lang="ja">起きてはならないことは prompt でなく hook が遮断。</span></div>
-      <div class="phil reveal"><b class="lx" lang="en">Lean</b><b class="lx" lang="ja">lean</b><span class="lx" lang="en">Delegate to proven mechanisms (git-town, official plugins). Don't reinvent.</span><span class="lx" lang="ja">枯れた仕組み（git-town・公式 plugin）に委譲し、車輪を再発明しない。</span></div>
+      <div class="phil reveal"><b class="lx" lang="en">Lean</b><b class="lx" lang="ja">lean</b><span class="lx" lang="en">Delegate to proven mechanisms (git-town, official plugins). Don't reinvent.</span><span class="lx" lang="ja">枯れた仕組み（git-town・公式プラグイン）に委譲し、車輪を再発明しない。</span></div>
       <div class="phil reveal"><b class="lx" lang="en">Measure, then fold</b><b class="lx" lang="ja">測って、畳む</b><span class="lx" lang="en">Telemetry tracks skill usage; dead features get removed.</span><span class="lx" lang="ja">telemetry が使用度を記録し、死蔵機能は削除。</span></div>
     </div>
 
@@ -753,7 +753,7 @@
     <p class="install-note reveal lx" lang="ja">
       Claude Code を再起動。CLAUDE.md の無いプロジェクトでは SessionStart hook が正確なコマンド付きで
       初回セットアップを提案する。<code>harness-setup.sh</code> が行動ルール・statusline・最小限の
-      権限設定・<strong>既定で無効</strong>の OS サンドボックス設定を配置し、store を初期化する。
+      権限設定・<strong>既定で無効</strong>の OS サンドボックス設定を配置する。あわせてストアも初期化。
       既定は英語 — 日本語にするには <code>/set-language ja</code> を一度だけ（更新をまたいで保持）。
     </p>
     <p class="install-note reveal lx" lang="en">
@@ -775,7 +775,7 @@
       <p class="lx" lang="ja">
         Claude Code（CLI またはデスクトップ）と <code>git</code> / <code>jq</code>（必須）。
         <code>gh</code> / <code>git-town</code> / <code>python3</code> があると追加機能が有効になり、
-        無くても graceful に縮退する。macOS / Linux 対応、Windows は Git Bash 上で動作。
+        無くても支障なく縮退する。macOS / Linux 対応、Windows は Git Bash 上で動作。
       </p>
     </div>
 

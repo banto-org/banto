@@ -207,6 +207,8 @@ def main() -> int:
                 body = f"(自動抽出失敗: {type(e).__name__} — 所在のみ登録)"
                 errors += 1
             source = "fileserver" if str(fp).startswith("/Volumes/") else "local"
+            # 要約は決定論抽出の対象外（LLM 判定層は Phase 2）。空のまま出すと検索に永遠に
+            # 載らないため、必ずプレースホルダで可視化する（人間 / エージェントが後で埋める）。
             text = (
                 "---\n"
                 f"title: {fp.name}\n"
@@ -217,6 +219,7 @@ def main() -> int:
                 "generated: ref-scan\n"
                 "---\n\n"
                 f"# {fp.name}\n\n"
+                "(要約未記入 — 検索に載らない)\n\n"
                 f"{body}\n"
             )
             if card.exists():

@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Store Search — Banto / store 横断セクション検索</title>
-<meta name="description" content="Banto's cross-store section search: every markdown document in the ai-context store, indexed locally into SQLite FTS5 in 2.5 seconds — no server, nothing committed. Queried in under a millisecond, measured against the existing search on a fixed benchmark." />
+<meta name="description" content="Banto's cross-store section search: every markdown document in the ai-context store, indexed locally into SQLite FTS5 in 2.5 seconds — no server, nothing committed. Measured to lift a weak model's search accuracy at project-store scale, not to beat grep." />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
 <link rel="stylesheet" href="styles.css" />
 <style>
@@ -45,6 +45,22 @@
   .obs-list li{ position:relative; padding:7px 0 7px 22px; font-size:14.5px; color:var(--ink-2); border-top:1px solid var(--line); line-height:1.6; }
   .obs-list li:first-child{ border-top:0; }
   .obs-list li::before{ content:"—"; position:absolute; left:0; color:var(--accent-d); font-weight:700; }
+
+  .ev-highlight{ display:flex; align-items:center; justify-content:center; gap:clamp(20px,4vw,44px); margin:22px auto 0; padding:clamp(22px,4vw,32px); background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow-l); flex-wrap:wrap; }
+  .ev-stat{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .ev-num{ font-family:var(--serif); font-weight:700; font-size:clamp(30px,5vw,48px); line-height:1; }
+  .ev-num.bad{ color:var(--ink-soft); }
+  .ev-num.good{ color:var(--accent); }
+  .ev-unit{ font-size:.42em; color:var(--ink-soft); margin-left:2px; }
+  .ev-cap{ font-size:13px; color:var(--ink-soft); text-align:center; max-width:18em; }
+  .ev-arrow{ font-size:26px; color:var(--line-2); }
+  .cost-bars{ margin:18px auto 0; max-width:640px; display:flex; flex-direction:column; gap:12px; }
+  .cost-bar-row{ display:grid; grid-template-columns:110px 1fr 132px; align-items:center; gap:14px; }
+  .cost-bar-label{ font-size:13.5px; font-weight:600; color:var(--ink-2); }
+  .cost-bar-track{ height:22px; background:var(--paper-2); border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+  .cost-bar-fill{ height:100%; border-radius:6px 0 0 6px; background:var(--accent); }
+  .cost-bar-fill.hi{ background:var(--ink-soft); }
+  .cost-bar-val{ font-family:var(--mono); font-size:12.5px; color:var(--ink-soft); text-align:right; }
 
   /* pipeline: md → index → query */
   .flow{ display:flex; align-items:stretch; gap:14px; margin-top:18px; flex-wrap:wrap; }
@@ -108,23 +124,55 @@
   <div style="margin-top:14px; max-width:60em">
     <div class="kicker reveal"><span class="lx" lang="en">Feature — cross-store section search</span><span class="lx" lang="ja">機能 — store 横断セクション検索</span></div>
     <h1 class="reveal">
-      <span class="lx" lang="en">Every document you ever wrote, one query away. No server.</span>
-      <span class="lx" lang="ja">書いてきた全ドキュメントを、クエリ 1 本で。サーバなしで。</span>
+      <span class="lx" lang="en">Let the cheap model search. Save the expensive one for judgment.</span>
+      <span class="lx" lang="ja">検索は安いモデルに任せる。高いモデルは判断に使う。</span>
     </h1>
     <p class="lede reveal lx" lang="en">
-      The ai-context store grows without limit — decisions, research, specs, across every project.
-      Store Search indexes every markdown section into a local SQLite FTS5 file and answers in under a
-      millisecond, across project boundaries. The canonical data stays in git-managed markdown; the index
-      is a throwaway local artifact, rebuilt from scratch in 2.5 seconds. Nothing to install, nothing to
-      host, nothing committed.
+      Store Search is how the AI finds things in your accumulated records — decisions, research,
+      specs. It stacks three methods (plain grep, a full-text index, a document ledger), and when one
+      comes up empty it automatically moves to the next. We don't claim the index beats grep — measured
+      head-to-head, it doesn't. It earns its keep in exactly two situations: when your records have
+      grown to the ~1,500-document scale, and when a cheap model is doing the searching. With few
+      documents, grep alone is enough.
     </p>
     <p class="lede reveal lx" lang="ja">
-      ai-context store は決定・リサーチ・仕様と、プロジェクトを跨いで際限なく育つ。Store Search は
-      その全 markdown をセクション単位でローカルの SQLite FTS5 ファイルに索引化し、プロジェクト境界を
-      越えて 1ms 未満で答える。正本は git 管理の markdown のまま。索引は 2.5 秒でゼロから作り直せる
-      使い捨てのローカル生成物であり、何もインストールせず、何も常駐させず、何もコミットしない。
+      Store Search は、AI が蓄積した記録（決定・調査・仕様）から目当てを探し出す仕組み。索引なしの grep・
+      全文索引・文書台帳の 3 つを重ね、どれかが 0 件でも止まらず次の手に自動で進む。「索引は grep
+      より強い」とは言わない — 実測で比べたら、勝てなかった。効く場面はちょうど 2 つ：記録が
+      1,500 文書規模に育ったとき、そして安いモデルに検索させるとき。文書が少なければ grep で足りる。
     </p>
   </div>
+  <div class="ev-highlight reveal" style="margin-top:26px">
+    <div class="ev-stat">
+      <span class="ev-num bad">4<span class="ev-unit">/10</span></span>
+      <span class="ev-cap lx" lang="en">haiku, before the fix</span><span class="ev-cap lx" lang="ja">haiku・改善前</span>
+    </div>
+    <span class="ev-arrow" aria-hidden="true">→</span>
+    <div class="ev-stat">
+      <span class="ev-num good">10<span class="ev-unit">/10</span></span>
+      <span class="ev-cap lx" lang="en">haiku, after — best of 3 test runs*</span><span class="ev-cap lx" lang="ja">haiku・改善後（3 回テストの最高点）*</span>
+    </div>
+    <span class="ev-arrow" aria-hidden="true">＝</span>
+    <div class="ev-stat">
+      <span class="ev-num good">9<span class="ev-unit">/10</span></span>
+      <span class="ev-cap lx" lang="en">haiku at its <b>lowest</b> effort = opus 4.8 at its <b>highest</b> (both 9/10)</span><span class="ev-cap lx" lang="ja">effort <b>最低</b>の haiku ＝ effort <b>最高</b>の opus 4.8（どちらも 9/10）</span>
+    </div>
+  </div>
+  <p class="fine reveal lx" lang="en" style="margin-top:6px">*The test: 10 questions of the form "which file says X?", asked against the real store; score = correct file paths, machine-checked. The 3 runs scored 7, 8 and 10 (mean 8.3). Effort (the model's thinking-depth setting) was measured separately, 2 runs per setting: haiku scored 9 &amp; 8 at low, 8 &amp; 7 at medium, 9 &amp; 8 at high — turning effort up bought nothing.</p>
+  <p class="fine reveal lx" lang="ja" style="margin-top:6px">*テストの中身：実際の記録に対して「◯◯と書いたファイルはどれか」を 10 問出題し、正しいファイルを言い当てた数を機械採点。3 回の結果は 7 点・8 点・10 点（平均 8.3）。effort（モデルの思考量の設定）は別枠で各設定 2 回ずつ計測：haiku は low で 9 点と 8 点、medium で 8 点と 7 点、high で 9 点と 8 点 — 上げても伸びない。</p>
+  <p class="lede reveal lx" lang="en" style="margin-top:14px">
+    What changed: when a search finds nothing, it now loosens the query and retries instead of giving
+    up silently; formal decision records rank above working notes; session scratch files are out of the
+    index; and related documents are followed link by link. Those four fixes took the cheapest model
+    from 4/10 to 10/10 at best. And across a full 3-model &times; 3-effort sweep, effort barely
+    mattered — haiku's lowest setting tied opus 4.8's highest.
+  </p>
+  <p class="lede reveal lx" lang="ja" style="margin-top:14px">
+    何を変えたか：検索が 0 件のとき黙って諦めず、条件を緩めて自動で再検索する。正式な決定記録を
+    作業メモより上位に出す。セッションの一時メモを索引から外す。関連文書を芋づるで辿る。この 4 つの
+    改善で、いちばん安いモデルの成績が 4/10 から最高 10/10 まで上がった。さらに 3 モデル × effort
+    3 段階の総当たりでは effort はほぼ効かず、haiku の最低設定が opus 4.8 の最高設定と同点だった。
+  </p>
   <div class="stat-strip reveal">
     <div class="stat"><b class="count" data-to="1471">0</b><span class="lx" lang="en">documents indexed</span><span class="lx" lang="ja">索引化ドキュメント</span></div>
     <div class="stat"><b>2.5s</b><span class="lx" lang="en">full rebuild</span><span class="lx" lang="ja">フル再生成</span></div>
@@ -137,8 +185,8 @@
 <section class="sec" id="what">
   <div class="sec-head reveal">
     <span class="ghost">01</span>
-    <h2><span class="lx" lang="en">What it is — and where it sits</span><span class="lx" lang="ja">これは何か — どの層に立つか</span></h2>
-    <p><span class="lx" lang="en">The content layer of a three-layer design: route, count, then search.</span><span class="lx" lang="ja">3 層設計の内容層。案内し、数え、それから検索する。</span></p>
+    <h2><span class="lx" lang="en">What it is — one layer in a fail-open stack</span><span class="lx" lang="ja">これは何か — 0 件でも止まらない検索層の 1 つ</span></h2>
+    <p><span class="lx" lang="en">Not an index that beats grep — measured head-to-head, it doesn't. A search layer that mixes grep, a full-text index, and a document ledger, falling open to the next when one comes up empty.</span><span class="lx" lang="ja">grep に勝つ索引ではない。実測で正面から比べても、勝たない。grep・全文索引・文書台帳を組み合わせ、どれかが 0 件でも次へ開いたまま流す検索層。</span></p>
   </div>
   <div class="mini-grid">
     <div class="card reveal">
@@ -147,18 +195,20 @@
     </div>
     <div class="card reveal">
       <h3><span class="step-n">1</span><span class="lx" lang="en">Ledger</span><span class="lx" lang="ja">台帳</span></h3>
-      <p><span class="lx" lang="en">A deterministic, complete document ledger for counting, auditing, and existence guarantees — measured to be where index-based navigation actually wins.</span><span class="lx" lang="ja">数える・監査する・存在を保証するための決定論的な全数台帳。索引ナビが実測で勝つのはここ。</span></p>
+      <p><span class="lx" lang="en">A deterministic, complete document ledger for counting, auditing, and existence guarantees — measured to be where index-based navigation actually wins.</span><span class="lx" lang="ja">数える・監査する・存在を保証するための決定論的な全数台帳。索引をたどる探索が実測で勝つのはここ。</span></p>
     </div>
     <div class="card reveal">
       <h3><span class="step-n">2</span><span class="lx" lang="en">Store Search (this)</span><span class="lx" lang="ja">Store Search（本機能）</span></h3>
-      <p><span class="lx" lang="en">Full-text section search over every store, ranked by BM25, returning exact line ranges — so the agent reads the section, not the whole file.</span><span class="lx" lang="ja">全 store を対象にした全文セクション検索。BM25 で順位付けし、行範囲を返す — エージェントは全文でなくセクションだけを読む。</span></p>
+      <p><span class="lx" lang="en">Full-text section search over every store, ranked by BM25, returning exact line ranges — so the agent reads the section, not the whole file.</span><span class="lx" lang="ja">全 store を対象にした全文セクション検索。BM25 で順位付けし、行範囲を返す。エージェントは全文でなく、セクションだけを読む。</span></p>
     </div>
   </div>
   <ul class="obs-list reveal">
-    <li class="lx" lang="en">Cross-project by construction: one index spans every project store on the machine, so "which project solved this before?" becomes answerable — structurally impossible with the previous per-project search text.</li>
-    <li class="lx" lang="ja">構造として横断的：索引はマシン上の全プロジェクト store を 1 つに束ねる。「これ、前にどのプロジェクトで解いた？」に答えられる — 従来のプロジェクト別検索テキストでは構造上不可能だった。</li>
+    <li class="lx" lang="en">Cross-project by construction: one index spans every project store on the machine. That reach is real only against the harness's own previous design — a bare <code>grep -r</code> also reaches across projects (R8 measured it: opus × grep scored 15/15 on cross-project questions). The honest comparison is "index vs. the old per-project combined text," not "index vs. grep."</li>
+    <li class="lx" lang="ja">構造として横断的：索引はマシン上の全プロジェクト store を 1 つに束ねる。ただしこの到達力は、ハーネス自身の旧設計と比べたときにだけ成立する。索引なしの <code>grep -r</code> も横断はできる（検証ラウンド R8 の実測：opus × grep で横断 15/15）。誠実な比較は「索引 vs 旧・プロジェクト別 combined テキスト」であって、「索引 vs grep」ではない。</li>
     <li class="lx" lang="en">Japanese works out of the box: the trigram tokenizer matches CJK text directly, no morphological analyzer needed.</li>
-    <li class="lx" lang="ja">日本語はそのまま動く。trigram トークナイザが CJK を直接マッチさせるため、形態素解析器は不要。</li>
+    <li class="lx" lang="ja">日本語はそのまま動く。trigram トークナイザが CJK（日本語・中国語・韓国語）の文字を直接マッチさせるため、形態素解析器は不要。</li>
+    <li class="lx" lang="en">Two conditions decide when this layer is worth it: many documents across many projects (the 1,500-document scale below), or a weak model doing the searching. Below that scale, grep over a handful of files is enough — don't reach for the index.</li>
+    <li class="lx" lang="ja">この層に価値が出る条件は 2 つに限る：複数プロジェクトにまたがる大量文書（1,500 文書級・後述）か、弱いモデルに検索させる場面。それ未満の規模なら、少数ファイルへの grep で足りる。索引に頼る理由がない。</li>
   </ul>
 </section>
 
@@ -172,7 +222,7 @@
   <div class="flow">
     <div class="card reveal">
       <h3><span class="step-n">1</span><span class="lx" lang="en">Write markdown</span><span class="lx" lang="ja">markdown を書く</span></h3>
-      <p><span class="lx" lang="en">Decisions, research, specs land in the store as plain markdown — diffable, mergeable, git-managed. This is the only thing humans and git ever touch.</span><span class="lx" lang="ja">決定・リサーチ・仕様は素の markdown として store に入る。diff でき、マージでき、git が管理する。人と git が触るのはこれだけ。</span></p>
+      <p><span class="lx" lang="en">Decisions, research, specs land in the store as plain markdown — diffable, mergeable, git-managed. This is the only thing humans and git ever touch.</span><span class="lx" lang="ja">決定・リサーチ・仕様は通常の markdown として store に入る。diff でき、マージでき、git が管理する。人と git が触るのはこれだけ。</span></p>
     </div>
     <span class="flow-arrow" aria-hidden="true">→</span>
     <div class="card reveal">
@@ -191,7 +241,9 @@
     <li class="lx" lang="en">No migrations, ever: a schema change means "rebuild in 2.5 seconds," not a migration script.</li>
     <li class="lx" lang="ja">マイグレーションは永遠に不要。スキーマ変更は「2.5 秒で作り直す」であって、移行スクリプトではない。</li>
     <li class="lx" lang="en">Fail-open like the rest of the harness: no SQLite or no FTS5 on the machine → the existing search path keeps working.</li>
-    <li class="lx" lang="ja">ハーネスの他と同じく fail-open。マシンに SQLite や FTS5 がなければ、既存の検索経路がそのまま動き続ける。</li>
+    <li class="lx" lang="ja">ハーネスの他と同じく fail-open（ある手段が使えなくても、次の手段へ自動で切り替わる設計）。マシンに SQLite や FTS5 がなければ、既存の検索経路がそのまま動き続ける。</li>
+    <li class="lx" lang="en">Fail-open on empty hits, too: a 0-result query relaxes automatically (OR across terms) instead of returning a silent 0 and stopping — a weak-model failure mode measured directly in R8 (11 questions abandoned across 2 clean runs before the redesign).</li>
+    <li class="lx" lang="ja">0 件でも fail-open：0 件を黙って返して止まるのではなく、自動で OR 緩和を試みる。再設計前の R8 では、弱いモデルが「黙って諦める」型の失点を出していた。汚染のない検証（以下「クリーン走行」）2 回で、11 問がこの型の失点だった。</li>
   </ul>
 </section>
 
@@ -199,61 +251,165 @@
 <section class="sec" id="measured">
   <div class="sec-head reveal">
     <span class="ghost">03</span>
-    <div class="sub">R5</div>
-    <h2><span class="lx" lang="en">Measured, honestly</span><span class="lx" lang="ja">実測 — 正直に</span></h2>
-    <p><span class="lx" lang="en">Prototype benchmark, 2026-07-02: same fixed 10 questions as prior rounds, two models, against the existing search.</span><span class="lx" lang="ja">プロトタイプ実測（2026-07-02）。先行ラウンドと同一の固定 10 問・2 モデルで、既存検索と突き合わせた。</span></p>
+    <h2><span class="lx" lang="en">Measured, honestly — four rounds, two of them unflattering</span><span class="lx" lang="ja">実測 — 正直に。4 ラウンドのうち 2 本は不利な数字</span></h2>
+    <p><span class="lx" lang="en">R7 and R8 measured grep against the index directly. The rebench and the model &times; effort matrix measured the fix that actually moved the needle.</span><span class="lx" lang="ja">R7・R8（ともに検証ラウンドの呼び名で、数字は実施順）は grep と索引を直接比較した。再ベンチとモデル × effort 行列は、そのあとで実際に効いた改善を計測した。</span></p>
   </div>
-  <p class="prose-p reveal lx" lang="en">Conditions: "FTS5" = section search + reading only the returned line ranges (whole-file reads forbidden). "Existing" = grep over the per-project combined text, whole-file reads allowed. Census questions (5) used filesystem scans in both conditions; the difference loads entirely onto the 5 content-investigation questions. Answer keys were fixed immediately before the runs.</p>
-  <p class="prose-p reveal lx" lang="ja">条件：「FTS5」= セクション検索 + 返された行範囲だけを読む（全文は読まない）。「既存」= プロジェクト別結合テキストの grep + 全文 Read 可。census 5 問は両条件ともファイル走査のため、条件差は内容調査 5 問にのみ載る。正解キーは走行直前に固定。</p>
+
+  <span class="sub">2026-07-04 &middot; rebench</span>
+  <h3 style="margin:6px 0 2px; font-size:20px"><span class="lx" lang="en">Arming the weak model: 4/10 &rarr; up to 10/10</span><span class="lx" lang="ja">弱いモデルを武装する：4/10 → 最高 10/10</span></h3>
+  <p class="prose-p reveal lx" lang="en">Same 10 R8 questions, same Store Search condition (index only, returned line ranges only, no grep, no whole-file reads), machine-scored (path match, binary). A redesigned search layer — graceful 0-hit OR relaxation, decision-weighted ranking, checkpoint exclusion from the index, and a <code>--related</code> follow — ran against haiku, 3 clean runs.</p>
+  <p class="prose-p reveal lx" lang="ja">R8 と同一の 10 問・同一の Store Search 条件（索引のみ・返却行範囲のみ・grep 禁止・全文 Read 禁止）で機械採点した（パス一致・二値）。検索層を再設計し（0 件時の段階的 OR 緩和・decision 重み付けランキング・checkpoint の索引除外・<code>--related</code> 追走）、haiku で 3 回のクリーン走行を実施した。</p>
 
   <div class="store-table-wrap reveal">
     <table class="store-table">
       <thead>
         <tr>
-          <th><span class="lx" lang="en">cell</span><span class="lx" lang="ja">セル</span></th>
+          <th><span class="lx" lang="en">run</span><span class="lx" lang="ja">走行</span></th>
           <th><span class="lx" lang="en">correct</span><span class="lx" lang="ja">正答</span></th>
-          <th><span class="lx" lang="en">tokens</span><span class="lx" lang="ja">トークン</span></th>
-          <th><span class="lx" lang="en">tool calls</span><span class="lx" lang="ja">tool 数</span></th>
-          <th><span class="lx" lang="en">seconds</span><span class="lx" lang="ja">秒</span></th>
+          <th><span class="lx" lang="en">miss breakdown</span><span class="lx" lang="ja">失点の内訳</span></th>
         </tr>
       </thead>
       <tbody>
-        <tr><td class="mono">FTS5 × opus</td><td>10/10</td><td>68,678</td><td><strong>14</strong></td><td>153.5</td></tr>
-        <tr><td class="mono">FTS5 × haiku</td><td>9/10</td><td>46,853</td><td><strong>17</strong></td><td>151.1</td></tr>
-        <tr><td class="mono"><span class="lx" lang="en">existing × opus</span><span class="lx" lang="ja">既存 × opus</span></td><td>10/10</td><td>68,731</td><td>18</td><td>143.3</td></tr>
-        <tr><td class="mono"><span class="lx" lang="en">existing × haiku</span><span class="lx" lang="ja">既存 × haiku</span></td><td>10/10</td><td>45,565</td><td>26</td><td>174.6</td></tr>
+        <tr><td class="mono">clean-1</td><td>8/10</td><td><span class="lx" lang="en">Q3 (adjacent decision), Q8 (adjacent same-day record)</span><span class="lx" lang="ja">Q3（隣接 decision）・Q8（同日の隣接記録）</span></td></tr>
+        <tr><td class="mono">clean-2</td><td>7/10</td><td><span class="lx" lang="en">Q2 (unknown) + same pattern as clean-1</span><span class="lx" lang="ja">Q2（不明）+ clean-1 と同型</span></td></tr>
+        <tr><td class="mono">clean-3</td><td>10/10</td><td>—</td></tr>
+        <tr class="hl-row"><td><strong><span class="lx" lang="en">total</span><span class="lx" lang="ja">計</span></strong></td><td><strong>25/30</strong></td><td></td></tr>
       </tbody>
     </table>
   </div>
 
   <ul class="obs-list reveal">
-    <li class="lx" lang="en">Accuracy is equal (39/40 overall) — while FTS5 searched a corpus 3.4x wider (1,471 documents across every project, vs. 433 in the per-project text) at the same cost. Cross-store reach came for free.</li>
-    <li class="lx" lang="ja">精度は同等（総計 39/40）。しかも FTS5 は 3.4 倍広いコーパス（全プロジェクト 1,471 doc、既存はプロジェクト内 433 doc）を同コストで検索している。横断到達力は無料でついてきた。</li>
-    <li class="lx" lang="en">Tokens did not drop (opus: −0.08%, haiku: +2.8%). The "read sections, save tokens" hypothesis did not materialize at this document size — decision records are only tens of lines, so section reads ≈ whole reads. This replicates, for the third time, the earlier finding that index type doesn't change content-investigation cost.</li>
-    <li class="lx" lang="ja">トークンは減らなかった（opus −0.08%・haiku +2.8%）。「セクション読みで token 削減」仮説は、この文書サイズでは成立しない — 決定記録は数十行で、セクション読み ≒ 全文読み。「索引の種類は内容調査のコストを変えない」という先行実測を三たび再現した。</li>
-    <li class="lx" lang="en">Tool calls did drop (14 vs 18 on opus, 17 vs 26 on haiku): ranked sections mean less grep juggling to find the right document.</li>
-    <li class="lx" lang="ja">tool 呼び出し数は確実に減った（opus 14 vs 18・haiku 17 vs 26）。順位付きセクションが返るため、正しい文書へ届くまでの grep の試行錯誤が減る。</li>
-    <li class="lx" lang="en">The single miss: the weak model stopped at a derived record that quoted the question itself instead of the primary source — a known weak-model failure mode observed in earlier rounds, not an index defect.</li>
-    <li class="lx" lang="ja">唯一の失点は、弱いモデルが一次資料でなく「質問文そのものを引用した派生記録」で停止したもの。先行ラウンドで観測済みの弱モデル固有の失敗型であり、索引の欠陥ではない。</li>
+    <li class="lx" lang="en">R8's clean baseline for the same cell was 4/10 and 4/10 (8/20) — run-by-run, 4, 4 became 7, 8, 10. "Silent 0-hit abandonment" (11 of 30 questions in R8's clean runs) disappeared entirely across all 3 runs.</li>
+    <li class="lx" lang="ja">同じ条件での R8 クリーン基準は 4/10・4/10（8/20）。走行ごとに見ると、4 点と 4 点が 7 点・8 点・10 点まで改善。「0 件を黙って諦める」失点（R8 のクリーン走行で 30 問中 11 問）は、3 走行とも消滅した。</li>
+    <li class="lx" lang="en">Disclosed contamination: the first 3 runs scored 10/10 across the board but were invalid — the store's docs/ still held R8's own result ledger and raw answers, naming the correct paths. Isolated both files, rebuilt the index, verified no correct-path leakage, then re-ran clean.</li>
+    <li class="lx" lang="ja">開示する汚染事故：初回 3 走行は全て 10/10 だったが無効。store の docs/ に R8 自身の結果台帳と生回答が残っており、正解パスを記載していた。両ファイルを隔離して索引を再構築し、正解パスの漏洩がないことを確認した。そのうえでクリーンに再走行した。</li>
+    <li class="lx" lang="en">Disclosed confounds: the store grew since R8 (not a strict same-corpus comparison), the run prompt included search guidance the R8 prompt likely lacked, and the same 10-question set was reused — improvement is code changes plus prompt guidance combined, on a question set that risks overfitting.</li>
+    <li class="lx" lang="ja">開示する交絡：store は R8 時点から成長しており厳密な同一コーパス比較ではない。走行プロンプトには R8 のものより丁寧な検索指導を含めた。同一 10 問セットを再利用しており、質問セットへの過適合リスクが残る。</li>
   </ul>
 
-  <p class="prose-p reveal lx" lang="en" style="margin-top:26px">So why adopt it? Because the case was never token savings — the measurements killed that claim before it shipped. The case is what the old design cannot do at all:</p>
-  <p class="prose-p reveal lx" lang="ja" style="margin-top:26px">では、なぜ採用するのか。根拠は最初から token 削減ではない — その主張は出荷前に実測が棄却した。根拠は、旧設計には原理的にできないこと：</p>
+  <span class="sub" style="margin-top:34px; display:block">2026-07-04 &middot; model &times; effort matrix</span>
+  <h3 style="margin:6px 0 2px; font-size:20px"><span class="lx" lang="en">Effort barely moves the score</span><span class="lx" lang="ja">effort を上げても、ほぼ変わらない</span></h3>
+  <p class="prose-p reveal lx" lang="en">Same 10 questions, same Store Search condition. 3 models &times; 3 effort levels (low / medium / high), 2 runs per cell, 18 runs total, machine-scored.</p>
+  <p class="prose-p reveal lx" lang="ja">同一 10 問・同一 Store Search 条件で検証。3 モデル × 3 effort（low / medium / high）の組み合わせごとに 2 走行、計 18 走行を機械採点した。</p>
 
-  <div class="mini-grid">
-    <div class="card reveal">
-      <h3><span class="step-n">a</span><span class="lx" lang="en">Cross-store reach</span><span class="lx" lang="ja">横断到達力</span></h3>
-      <p><span class="lx" lang="en">One query spans every project's memory. Per-project search text can never answer "where did we solve this before?"</span><span class="lx" lang="ja">クエリ 1 本が全プロジェクトの記憶に届く。プロジェクト別の検索テキストは「前にどこで解いた？」に永遠に答えられない。</span></p>
+  <div class="store-table-wrap reveal">
+    <table class="store-table">
+      <thead>
+        <tr>
+          <th><span class="lx" lang="en">model</span><span class="lx" lang="ja">モデル</span></th>
+          <th>low</th>
+          <th>medium</th>
+          <th>high</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">haiku</td><td><strong>9, 8</strong></td><td>8, 7</td><td>9, 8</td></tr>
+        <tr><td class="mono">sonnet</td><td>9, 9</td><td>10, 9</td><td>9, 9*</td></tr>
+        <tr><td class="mono">opus</td><td><strong>10, 10</strong></td><td>9, 10</td><td>9, 9*</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="fine reveal lx" lang="en">*Deviation, self-disclosed: sonnet high#2 used grep on 3 files mid-run; opus high#2 did one full-text read of multiple decisions plus <code>ls</code>. Excluding both runs does not change the ranking.</p>
+  <p class="fine reveal lx" lang="ja">*逸脱の自己申告：sonnet high#2 は走行中に grep を 3 ファイルへ使用。opus high#2 は複数 decision の全文 Read + ls を 1 回。両走行を除外しても順位は変わらない。</p>
+
+  <ul class="obs-list reveal">
+    <li class="lx" lang="en">Haiku at low effort (9, 8) lands within noise of opus at high effort (9, 9) — the cell this page's hero stat is drawn from. Opus's own best cell is low effort (10, 10), not high.</li>
+    <li class="lx" lang="ja">haiku の low effort（9 点と 8 点）は、opus の high effort（9 点と 9 点）と誤差の範囲で並ぶ。ヒーロー統計の元となった組み合わせ。opus 自身も、最高成績は low effort（10 点と 10 点）であり high ではない。</li>
+    <li class="lx" lang="en">Effort dependence is close to flat for every model. This search task does not reward spending more thinking budget.</li>
+    <li class="lx" lang="ja">effort 依存はどのモデルもほぼ平ら。この検索タスクは、思考予算を多く使っても報われない。</li>
+  </ul>
+
+  <span class="sub" style="margin-top:34px; display:block">R8 &middot; 2026-07-03</span>
+  <h3 style="margin:6px 0 2px; font-size:20px"><span class="lx" lang="en">The index alone doesn't beat grep</span><span class="lx" lang="ja">索引単独は grep に勝たない</span></h3>
+  <p class="prose-p reveal lx" lang="en">10 "find the file" questions, verified opaque (no title/filename match, checked by sqlite before the run) — 5 within-project, 5 cross-project. Path-match scoring, no human grader. "Store Search" = index only. "grep" = <code>grep -r</code> over the whole store, no index, same as any developer without this feature.</p>
+  <p class="prose-p reveal lx" lang="ja">「ファイル探し」10 問（タイトル・ファイル名と質問語が一致しないことを、走行前に sqlite で機械検証済み）。自プロジェクト 5 問・横断 5 問の内訳。パス一致による機械採点で、採点者なし。「Store Search」は索引のみを使う条件、「grep」は索引なしで store 全体へ <code>grep -r</code> をかける条件（本機能を持たない開発者と同じ状況）。</p>
+
+  <div class="store-table-wrap reveal">
+    <table class="store-table">
+      <thead>
+        <tr>
+          <th><span class="lx" lang="en">cell</span><span class="lx" lang="ja">条件</span></th>
+          <th><span class="lx" lang="en">correct (3 runs)</span><span class="lx" lang="ja">正答（3 走行）</span></th>
+          <th><span class="lx" lang="en">total</span><span class="lx" lang="ja">計</span></th>
+          <th><span class="lx" lang="en">cross-project</span><span class="lx" lang="ja">横断枠</span></th>
+          <th><span class="lx" lang="en">tools (median)</span><span class="lx" lang="ja">tools（中央値）</span></th>
+          <th><span class="lx" lang="en">seconds (median)</span><span class="lx" lang="ja">秒（中央値）</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">Store Search &times; opus</td><td>10, 10, 10</td><td>30/30</td><td>15/15</td><td>40</td><td>457</td></tr>
+        <tr><td class="mono">grep &times; opus</td><td>10, 10, 10</td><td>30/30</td><td>15/15</td><td><strong>15</strong></td><td><strong>229</strong></td></tr>
+        <tr><td class="mono">Store Search &times; haiku</td><td>4, 8*, 4</td><td>16/30</td><td>9/15</td><td>35</td><td>198</td></tr>
+        <tr><td class="mono">grep &times; haiku</td><td>7, 8, 8</td><td><strong>23/30</strong></td><td>13/15</td><td>27</td><td>133</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="fine reveal lx" lang="en">*Contaminated run (grep use self-disclosed). Excluding it, clean Store Search &times; haiku is 4, 4 (8/20) — the baseline the rebench above measured improvement against.</p>
+  <p class="fine reveal lx" lang="ja">*汚染走行（grep 使用を自己申告）。除外すると、クリーンな Store Search × haiku は 4 点と 4 点（8/20）。上の再ベンチが改善を測った基準はここ。</p>
+
+  <ul class="obs-list reveal">
+    <li class="lx" lang="en">Index alone doesn't beat grep. Opus ties, but at 2.7x the tool calls and roughly double the wall-clock time. Haiku gets meaningfully worse under the index-only rule — multi-word AND queries (trigram) silently return 0 hits, and the un-redesigned search layer can't relax the query, so it gives up.</li>
+    <li class="lx" lang="ja">索引単独は grep に勝たない。opus は同点だが、tool 呼び出しは 2.7 倍、所要時間もおおむね倍。haiku は索引縛りで有意に悪化する。原因は、多語 AND クエリ（trigram）が黙って 0 件を返し、再設計前の検索層がクエリを緩和できず諦めてしまうこと。</li>
+    <li class="lx" lang="en">The "cross-project search is structurally impossible without the index" claim does not hold against <code>grep -r</code> — it held only against the harness's earlier per-project search text (see § What it is above). grep &times; opus scored 15/15 on the cross-project questions.</li>
+    <li class="lx" lang="ja">「横断検索は索引なしでは構造上不可能」という主張は、grep -r には当てはまらない。成立していたのは、ハーネス旧来のプロジェクト別検索テキストと比べた場合だけ（上の「これは何か」節を参照）。grep × opus は横断問題で 15/15 だった。</li>
+  </ul>
+
+  <span class="sub" style="margin-top:34px; display:block">R7 &middot; 2026-07-03</span>
+  <h3 style="margin:6px 0 2px; font-size:20px"><span class="lx" lang="en">In production (with grep available), accuracy ties</span><span class="lx" lang="ja">本番（grep 併用）では精度が同点</span></h3>
+  <p class="prose-p reveal lx" lang="en">4 cells &times; 3 runs, binary scoring, blind double-judging on the 5 free-text questions (opus + sonnet independent scorers, model/condition hidden — 59/60 agreement, the one split call decided by "if in doubt, fail"). "Store Search" here means production wiring: index plus grep available, whole-file reads allowed — not the index-only restriction used in R8/rebench above.</p>
+  <p class="prose-p reveal lx" lang="ja">4 つの条件 × 3 走行を、二値採点した。自由記述 5 問は盲検の 2 重判定で採点（opus と sonnet が独立採点者、方式とモデルは非開示）。一致率は 59/60、割れた 1 件は「迷ったら FAIL」で裁定した。ここでの「Store Search」は本番配線を指す。索引と grep を併用でき、全文 Read も可能な条件で、上の R8・再ベンチで使った索引限定条件とは異なる。</p>
+
+  <div class="store-table-wrap reveal">
+    <table class="store-table">
+      <thead>
+        <tr>
+          <th><span class="lx" lang="en">cell</span><span class="lx" lang="ja">条件</span></th>
+          <th><span class="lx" lang="en">corpus searched</span><span class="lx" lang="ja">探索範囲</span></th>
+          <th><span class="lx" lang="en">correct</span><span class="lx" lang="ja">正答</span></th>
+          <th><span class="lx" lang="en">tools (median)</span><span class="lx" lang="ja">tools（中央値）</span></th>
+          <th><span class="lx" lang="en">seconds (median)</span><span class="lx" lang="ja">秒（中央値）</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">Store Search &times; opus</td><td>1,520 doc</td><td>9, 10, 10 (29/30)</td><td>22</td><td>267</td></tr>
+        <tr><td class="mono"><span class="lx" lang="en">regular</span><span class="lx" lang="ja">通常</span> &times; opus</td><td>452 doc</td><td>10, 10, 10 (30/30)</td><td>14</td><td>193</td></tr>
+        <tr><td class="mono">Store Search &times; haiku</td><td>1,520 doc</td><td>9, 8, 8 (25/30)</td><td>23</td><td>113</td></tr>
+        <tr><td class="mono"><span class="lx" lang="en">regular</span><span class="lx" lang="ja">通常</span> &times; haiku</td><td>452 doc</td><td>8, 8, 8 (24/30)</td><td>23</td><td>134</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul class="obs-list reveal">
+    <li class="lx" lang="en">Method totals tie: 54/60 vs. 54/60. Store Search searched a corpus 3.36&times; wider (1,520 vs. 452 documents) at equal accuracy — the reach came at no cost, but not at a token-count advantage either.</li>
+    <li class="lx" lang="ja">方式合計は同点：54/60 対 54/60。Store Search は 3.36 倍広いコーパス（1,520 doc 対 452 doc）を同精度で探索した。到達力は無償だが、トークン数の優位でもなかった。</li>
+    <li class="lx" lang="en">An earlier "fewer tool calls" claim died on re-measurement: median tool calls were 22 vs. 14 on opus (Store Search used <em>more</em>), 23 vs. 23 on haiku (no difference). The 1-run pilot that produced the earlier claim was noise.</li>
+    <li class="lx" lang="ja">先行していた「手数削減」の主張は再測定で棄却：tool 呼び出し中央値は opus で 22 対 14（Store Search の方が多い）・haiku で 23 対 23（差なし）。この主張の元になった 1 走行のパイロットは、ばらつきに過ぎなかった。</li>
+  </ul>
+
+  <span class="sub" style="margin-top:34px; display:block">2026-06</span>
+  <h3 style="margin:6px 0 2px; font-size:20px"><span class="lx" lang="en">Cost, grounded</span><span class="lx" lang="ja">コストの接地</span></h3>
+  <p class="prose-p reveal lx" lang="en">Published per-model pricing as of June 2026, per MTok (input / output).</p>
+  <p class="prose-p reveal lx" lang="ja">2026 年 6 月時点の公表単価・per MTok（入力 / 出力）。</p>
+
+  <div class="cost-bars reveal">
+    <div class="cost-bar-row">
+      <span class="cost-bar-label">haiku</span>
+      <div class="cost-bar-track"><div class="cost-bar-fill" style="width:10%"></div></div>
+      <span class="cost-bar-val">$1 / $5</span>
     </div>
-    <div class="card reveal">
-      <h3><span class="step-n">b</span><span class="lx" lang="en">Scale headroom</span><span class="lx" lang="ja">規模ヘッドルーム</span></h3>
-      <p><span class="lx" lang="en">The combined text grows linearly and is already megabytes; the index answers in sub-millisecond regardless, and section reads start paying off on long documents (hundreds of lines) the store keeps accumulating.</span><span class="lx" lang="ja">結合テキストは線形に育ち、すでに MB 級。索引は規模によらず 1ms 未満で答え、セクション読みは store に増え続ける長文（数百行級）で効き始める。</span></p>
+    <div class="cost-bar-row">
+      <span class="cost-bar-label">opus 4.8</span>
+      <div class="cost-bar-track"><div class="cost-bar-fill hi" style="width:50%"></div></div>
+      <span class="cost-bar-val">$5 / $25</span>
     </div>
-    <div class="card reveal">
-      <h3><span class="step-n">c</span><span class="lx" lang="en">One artifact, both jobs</span><span class="lx" lang="ja">1 生成物で 2 役</span></h3>
-      <p><span class="lx" lang="en">Counting and content search share the same file — and the same metadata enables deterministic consistency gates (e.g., "an accepted spec has a newer contradicting decision") in one SQL statement.</span><span class="lx" lang="ja">数える仕事と内容検索が同じファイルで済む。同じメタデータで「accepted の spec より新しい矛盾する決定がある」といった一貫性ゲートを SQL 1 本で張れる。</span></p>
+    <div class="cost-bar-row">
+      <span class="cost-bar-label">fable 5</span>
+      <div class="cost-bar-track"><div class="cost-bar-fill hi" style="width:100%"></div></div>
+      <span class="cost-bar-val">$10 / $50</span>
     </div>
   </div>
+  <p class="prose-p reveal lx" lang="en" style="margin-top:14px">Haiku runs at 1/5 opus 4.8's rate and 1/10 fable 5's — and in the effort matrix above, haiku at low effort matched opus at high effort within noise. No claim here about token counts dropping; the claim is that a much cheaper model reaches a much more expensive model's search accuracy.</p>
+  <p class="prose-p reveal lx" lang="ja" style="margin-top:14px">haiku の単価は opus 4.8 の 1/5、fable 5 の 1/10。上の行列ベンチでは、haiku の low effort が opus の high effort と誤差の範囲で並んだ。token 数が減るという主張ではない。主張は、はるかに安いモデルが、はるかに高いモデルの検索精度に届くこと。</p>
 </section>
 
 <!-- 04. TEAM -->
@@ -261,7 +417,7 @@
   <div class="sec-head reveal">
     <span class="ghost">04</span>
     <h2><span class="lx" lang="en">Git and team scale</span><span class="lx" lang="ja">git と複数人</span></h2>
-    <p><span class="lx" lang="en">The rule is one line: the index is never committed.</span><span class="lx" lang="ja">規律は 1 行 — 索引は絶対にコミットしない。</span></p>
+    <p><span class="lx" lang="en">The rule is one line: the index is never committed.</span><span class="lx" lang="ja">規律は 1 行：索引は絶対にコミットしない。</span></p>
   </div>
   <div class="method reveal">
     <ol>
@@ -282,12 +438,14 @@
   </div>
   <div class="lim-box reveal">
     <ul>
-      <li class="lx" lang="en">Numbers on this page are prototype measurements (2026-07-02, 1 run per cell); the production wiring ships the same mechanism with atomic swap and freshness checks.</li>
-      <li class="lx" lang="ja">本ページの数値はプロトタイプ実測（2026-07-02・各セル 1 走行）。本番配線は同じ機構に原子的差し替えと鮮度チェックを加えて出荷する。</li>
-      <li class="lx" lang="en">No token savings at current document sizes — adoption rests on reach, scale headroom, and fewer search steps, not cost.</li>
-      <li class="lx" lang="ja">現状の文書サイズでは token 削減なし。採用根拠は到達力・規模ヘッドルーム・検索手数の削減であり、コストではない。</li>
+      <li class="lx" lang="en">The index alone does not beat grep (R8: ties on opus at 2.7x the tool calls, loses on haiku) and the "fewer search steps" claim from an earlier 1-run pilot did not replicate under 3-run binary scoring (R7: median tool calls 22 vs. 14 on opus, 23 vs. 23 on haiku). No token-count claim is made anywhere on this page.</li>
+      <li class="lx" lang="ja">索引単独は grep に勝たない（R8：opus は同点だが tool 呼び出し 2.7 倍、haiku は負ける）。先行の 1 走行パイロットが出した「手数削減」の主張は、3 走行の二値採点で再現しなかった（R7：tool 呼び出し中央値 opus 22 対 14・haiku 23 対 23）。本ページのどこにも token 数削減の主張はない。</li>
+      <li class="lx" lang="en">The rebench's first 3 runs were invalidated by store contamination (the store held R8's own answer ledger); the reported 7, 8, 10 comes from 3 clean runs after isolating and rebuilding. The store also grew since R8 and reused the same 10-question set — not a strict same-corpus, non-overfit comparison.</li>
+      <li class="lx" lang="ja">再ベンチの初回 3 走行は、store 汚染（R8 自身の正解台帳が残存）で無効になった。報告している 7 点・8 点・10 点は、隔離・再構築後のクリーン 3 走行の数値。store は R8 時点から成長しており、同一 10 問セットも再利用している。厳密な同一コーパス比較でも、過適合なしの比較でもない。</li>
+      <li class="lx" lang="en">2–3 runs per cell (matrix: 2; rebench/R7/R8: 3) is enough to see a trend, not enough to test statistical significance.</li>
+      <li class="lx" lang="ja">各条件 2〜3 走行（行列ベンチは 2、再ベンチ・R7・R8 は 3）は、傾向の確認まで。統計的な検定には足りない。</li>
       <li class="lx" lang="en">The trigram index needs 3+ characters; shorter terms fall back to a sequential scan (16ms measured — acceptable, but a real asymmetry).</li>
-      <li class="lx" lang="ja">trigram 索引は 3 文字以上が必要。短い語は全走査フォールバック（実測 16ms — 実用上問題ないが、非対称は非対称）。</li>
+      <li class="lx" lang="ja">trigram 索引は 3 文字以上が必要。短い語は全走査へフォールバックする（実測 16ms）。実用上は問題ないが、非対称であることに変わりはない。</li>
       <li class="lx" lang="en">The index is ~7x the source text on disk (85.5MB for 12.4MB of markdown) — cheap for a local cache, disclosed anyway.</li>
       <li class="lx" lang="ja">索引はソースの約 7 倍のディスクを使う（markdown 12.4MB に対し 85.5MB）。ローカルキャッシュとしては安いが、開示はする。</li>
       <li class="lx" lang="en">A 10x-scale synthetic stress test has not been run yet; the linear-vs-logarithmic scale argument beyond current size is extrapolation.</li>
@@ -300,7 +458,7 @@
 <div class="cta-band reveal">
   <div class="cta-inner">
     <h2><span class="lx" lang="en">Adopted on evidence — including the evidence against it.</span><span class="lx" lang="ja">実測で採用した — 不利な実測も含めて。</span></h2>
-    <p><span class="lx" lang="en">The token-savings claim died in measurement before it could ship. What survived is what the old design could never do.</span><span class="lx" lang="ja">token 削減の主張は出荷前に実測で死んだ。生き残ったのは、旧設計には決してできないことだった。</span></p>
+    <p><span class="lx" lang="en">The "index beats grep" claim died in measurement (R7, R8). What survived: a redesigned search layer that lifts the cheapest model to within noise of the most expensive one.</span><span class="lx" lang="ja">「索引が grep に勝つ」という主張は実測（R7・R8）で死んだ。生き残ったのは、最安モデルを最高級モデルと誤差の範囲まで底上げした、再設計後の検索層。</span></p>
     <div style="display:flex;gap:14px;flex-wrap:wrap">
       <a class="btn btn-primary" href="evidence.html"><span class="lx" lang="en">All measurements →</span><span class="lx" lang="ja">実測レポートを見る →</span></a>
       <a class="btn btn-ghost" href="ai-context-store.html" style="color:var(--paper);border-color:rgba(245,240,230,.4)"><span class="lx" lang="en">How the store works</span><span class="lx" lang="ja">store の仕組み</span></a>

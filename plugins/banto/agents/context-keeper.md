@@ -1,6 +1,6 @@
 ---
 name: context-keeper
-description: "Maintenance agent that verifies and regenerates the search-text layer (combined.txt / sessions-cache). Triggers: \"verify consistency after a write\", \"fallback when the hook (ai-context-combined-rebuild.sh) fails\", \"combined.txt looks stale\". INVOKES: runs scripts/ai_context_combined.py via Bash + verifies with Read / Glob / Grep. Do not use when: doing a normal search (search skill) or a simple file lookup (a direct Read is enough)."
+description: "Maintenance agent that verifies and regenerates the search-text layer (full-combined.txt / sessions-cache). Triggers: \"verify consistency after a write\", \"full-combined.txt looks stale\", \"regenerate sessions-cache\". INVOKES: runs scripts/ai_context_combined.py via Bash + verifies with Read / Glob / Grep. Do not use when: doing a normal search (search skill) or a simple file lookup (a direct Read is enough)."
 model: sonnet
 tools: Read, Write, Glob, Grep, Bash
 ---
@@ -9,17 +9,17 @@ tools: Read, Write, Glob, Grep, Bash
 
 ## Task
 
-Verify the consistency of `{base}/decisions/` and `{base}/docs/` against the search-text layer (`project-combined.txt` / `full-combined.txt` / `sessions-cache/`), and regenerate it if needed.
+Verify the consistency of `{base}/decisions/` and `{base}/docs/` against the search-text layer (`full-combined.txt` / `sessions-cache/`), and regenerate it if needed. The former project scope is retired (search-layer-redesign spec branch 1A — search ranking reads decisions/docs directly), so it is out of scope here.
 
 ## Procedure
 
 1. Resolve `{base}`: **if the base absolute path was passed in the prompt by the parent, use it (the canonical path)**. Otherwise try to resolve it with `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`. However, `$CLAUDE_PLUGIN_ROOT` may be unset in a subagent's Bash, so if resolution fails, do not write to a relative path — report "base unknown" to the parent and exit (the same degrade as research-agent).
-2. Freshness check: if the mtime of `{base}/project-combined.txt` is older than the newest file under decisions/docs → regeneration is needed.
+2. Freshness check: if the mtime of `{base}/full-combined.txt` is older than the newest file under decisions/docs → regeneration is needed (note: full-combined.txt is refreshed only by SessionStart's daily throttle and on-demand at deep-path start, so it never auto-follows a write). On the sessions-cache/ side, a `<session_id>.txt` needing regeneration is one whose mtime is older than its matching JSONL.
 3. Regenerate:
    ```bash
-   python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_combined.py" --project-root "$PWD" --base "{base}" --scope all
+   python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_combined.py" --project-root "$PWD" --base "{base}" --scope full
    ```
-4. Verify: use Grep to confirm that the `<<<FILE:...>>>` marker of the most recently written file is present in combined.txt.
+4. Verify: use Grep to confirm that the `<<<FILE:...>>>` marker of the most recently written file is present in full-combined.txt.
 
 For the decision-log format, see the ai-context skill's `references/decision-log-format.md` (the decision-writing conventions are the ai-context skill's responsibility).
 

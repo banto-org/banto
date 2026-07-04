@@ -22,7 +22,7 @@ to stdout with exit `0` (used by `askuser-deny.sh` to disable AskUserQuestion, a
 A missing dependency must never break a user's session:
 
 - `jq` absent → every hook exits 0 silently (the plugin effectively disables itself)
-- `python3` absent → python-gated hooks (egress-guard, combined-rebuild) skip,
+- `python3` absent → python-gated hooks (egress-guard, index-rebuild) skip,
   with at most a one-line stderr note
 - optional config absent (name registry, `banto-ignore`, store mapping) → no-op
 

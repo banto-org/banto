@@ -89,7 +89,7 @@ compatibility: Claude Code (requires bash, git, jq)
 | `qa-tester` | web/desktop/mobile の E2E テスト | `Agent(subagent_type="qa-tester", ...)` で直接 |
 | `research-agent` | Web リサーチ（並列起動） | `/research` / research スキルから並列起動 |
 | `search-agent` | 内部検索の機械的実行（haiku、軽量） | search スキルの deep path から: 3〜5 並列 `Agent(subagent_type="search-agent", model="haiku", ...)` |
-| `context-keeper` | 検索テキスト層（combined.txt）の整合チェック / 再生成 | combined-rebuild hook 失敗時のフォールバック、あるいは直接 |
+| `context-keeper` | 検索テキスト層（full-combined.txt / sessions-cache）の整合チェック / 再生成 | full-combined.txt の鮮度疑い時のフォールバック、あるいは直接 |
 
 > コードレビューとセキュリティ監査は公式 Anthropic プラグインに委譲（`code-review` / `security-guidance`）。
 

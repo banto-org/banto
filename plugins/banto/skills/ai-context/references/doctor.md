@@ -59,6 +59,7 @@ Enumerate the expected buckets that do not exist (the canonical bucket list is [
 4. Stale (30+ days old) checkpoints inside `sessions/`
 5. A file directly under `docs/` that lacks a fixed prefix (see [`directory-structure.md`](directory-structure.md)) (README.md is an exception)
 6. An empty file (<100 bytes) in `decisions/`
+7. A leftover `{base}/project-combined.txt` (retired by search-layer-redesign spec branch 1A — safe to delete if present)
 
 **C. .gitignore inconsistency**
 Whether the store-side `.gitignore` (`sessions/` / `*-combined.txt` etc.) categorization has broken down (the canonical categorization is [`directory-structure.md`](directory-structure.md)).

@@ -122,9 +122,9 @@
         <strong>plugin-audit</strong> scores them on 15 quality axes, with the judgment calls delegated to a fresh agent so a skill never grades its own homework.
       </p>
       <p class="lede reveal lx" lang="ja">
-        Banto は、公開している本体と同じ規律で作られている。2 つの skill が、自分自身の、そしてあなたのプラグインの品質を保つ：
-        <strong>plugin-dev</strong> は skill / hook / plugin を公式ベストプラクティスに沿って scaffold・改修し、
-        <strong>plugin-audit</strong> は 15 の品質軸で採点する。判定は fresh agent に委ねるため、skill が自分の答案を自分で採点しない。
+        Banto は、公開している本体と同じ規律を自らにも課す。2 つの skill が、Banto 自身のプラグインと、あなたのプラグインの品質をともに保つ：
+        <strong>plugin-dev</strong> は skill / hook / plugin を公式ベストプラクティスに沿って生成・改修し、
+        <strong>plugin-audit</strong> は 15 の品質軸で採点する。判定は、本体とは別に新しく起動するエージェントに委ねるため、skill が自分の答案を自分で採点しない。
       </p>
     </div>
     <!-- animated diagram: the build <-> audit loop -->
@@ -168,48 +168,48 @@
     <span class="ghost">A</span>
     <div class="sub">/plugin-audit</div>
     <h2><span class="lx" lang="en">plugin-audit — 15-axis quality audit</span><span class="lx" lang="ja">plugin-audit — 15 軸品質監査</span></h2>
-    <p><span class="lx" lang="en">First an official-compliance pass (does it even work?), then a 15-axis quality audit. Read-only by design — fixes always need your approval.</span><span class="lx" lang="ja">まず公式準拠チェック（そもそも動くか）、次に 15 軸の品質監査。設計上 read-only — 修正は必ず承認を要する。</span></p>
+    <p><span class="lx" lang="en">First an official-compliance pass (does it even work?), then a 15-axis quality audit. Read-only by design — fixes always need your approval.</span><span class="lx" lang="ja">まず公式準拠チェックで、そもそも動くかを確かめる。次に 15 軸の品質監査に進む。設計上、読み取り専用に徹し、修正には必ず承認を要する。</span></p>
   </div>
 
   <div class="axes reveal">
     <div class="ax"><span class="bdg st">static</span><div class="n">Axis 1–3</div><div class="t"><span class="lx" lang="en">Structure</span><span class="lx" lang="ja">構造</span></div><div class="d"><span class="lx" lang="en">Is the skill built right — valid metadata, a lean body, and a description that actually routes?</span><span class="lx" lang="ja">作りが正しいかを見る — メタデータ・本文の軽さ・発火する description の 3 点。</span></div></div>
     <div class="ax"><span class="bdg ag">agent</span><div class="n">Axis 4–6</div><div class="t"><span class="lx" lang="en">Routing</span><span class="lx" lang="ja">ルーティング</span></div><div class="d"><span class="lx" lang="en">Does it fire when it should — and stay quiet when it shouldn't? Measured, not assumed.</span><span class="lx" lang="ja">発火すべき時に発火し、すべきでない時に黙るかを実測する。</span></div></div>
     <div class="ax"><span class="bdg st">static + agent</span><div class="n">Axis 7–8</div><div class="t"><span class="lx" lang="en">Generality</span><span class="lx" lang="ja">汎用性</span></div><div class="d"><span class="lx" lang="en">Would it still work on someone else's machine, in someone else's project?</span><span class="lx" lang="ja">他人の環境・他のプロジェクトでも、そのまま動くかを見る。</span></div></div>
-    <div class="ax"><span class="bdg st">static</span><div class="n">Axis 9–10</div><div class="t"><span class="lx" lang="en">Harness fit</span><span class="lx" lang="ja">ハーネス整合</span></div><div class="d"><span class="lx" lang="en">Are hard constraints enforced by hooks — not just written down and hoped for?</span><span class="lx" lang="ja">守らせたい制約が、文章でなく hook で強制されているかを見る。</span></div></div>
+    <div class="ax"><span class="bdg st">static</span><div class="n">Axis 9–10</div><div class="t"><span class="lx" lang="en">Harness fit</span><span class="lx" lang="ja">ハーネス整合</span></div><div class="d"><span class="lx" lang="en">Are hard constraints enforced by hooks — not just written down and hoped for?</span><span class="lx" lang="ja">本当に守らせたい制約を、文章でなく hook が強制しているかを見る。</span></div></div>
     <div class="ax"><span class="bdg st">static + agent</span><div class="n">Axis 11–12</div><div class="t"><span class="lx" lang="en">Use &amp; scope</span><span class="lx" lang="ja">使用度 &amp; 権限</span></div><div class="d"><span class="lx" lang="en">Is it actually used, and does it hold only the permissions it needs?</span><span class="lx" lang="ja">実際に使われているか、権限が必要最小限かを見る。</span></div></div>
     <div class="ax"><span class="bdg ag">agent + static</span><div class="n">Axis 13–14</div><div class="t"><span class="lx" lang="en">Containment &amp; hygiene</span><span class="lx" lang="ja">封じ込め &amp; 衛生</span></div><div class="d"><span class="lx" lang="en">Nothing dangerous in the hooks; nothing private — internal names, PII, pasted logs — in the text.</span><span class="lx" lang="ja">hook に危険な操作がないか、本文に内部名・個人情報・貼り込みログがないかを見る。</span></div></div>
     <div class="ax"><span class="bdg st">static</span><div class="n">Axis 15</div><div class="t"><span class="lx" lang="en">Cross-skill consistency</span><span class="lx" lang="ja">参照整合</span></div><div class="d"><span class="lx" lang="en">Do all skills point at the store the same way, with the same spelling?</span><span class="lx" lang="ja">全 skill がストアを同じ書き方で参照しているかを見る。</span></div></div>
   </div>
 
   <div class="why reveal">
-    <h4><span class="lx" lang="en">Why the score is trustworthy</span><span class="lx" lang="ja">なぜ採点が信頼できるか（＝正確さの根拠）</span></h4>
+    <h4><span class="lx" lang="en">Why the score is trustworthy</span><span class="lx" lang="ja">採点の正確さを支える仕組み</span></h4>
     <p class="s2"><span class="lx" lang="en">Accuracy here isn't a claim — it's a property the audit's own mechanics guarantee.</span><span class="lx" lang="ja">ここでの「正確さ」は主張ではなく、監査の仕組みが保証する性質。</span></p>
     <ol>
-      <li><b><span class="lx" lang="en">Reviewer = a fresh agent.</span><span class="lx" lang="ja">採点者は fresh agent。</span></b> <span class="lx" lang="en">Judgment axes go to an independent sub-agent, so a skill never grades its own homework — the main session's self-evaluation bias is removed. Votes are tiered (opus ×1 / sonnet ×3 / haiku ×5), which also surfaces cheap-model degradation.</span><span class="lx" lang="ja">判定軸は独立サブエージェントが下す — skill が自分の答案を自分で採点しない（メインの自己評価バイアスを排除）。投票は tier 別（opus ×1 / sonnet ×3 / haiku ×5）で、安いモデルでの劣化も浮き彫りにする。</span></li>
+      <li><b><span class="lx" lang="en">Reviewer = a fresh agent.</span><span class="lx" lang="ja">採点者は独立サブエージェント。</span></b> <span class="lx" lang="en">Judgment axes go to an independent sub-agent, so a skill never grades its own homework — the main session's self-evaluation bias is removed. Votes are tiered (opus ×1 / sonnet ×3 / haiku ×5), which also surfaces cheap-model degradation.</span><span class="lx" lang="ja">判定軸は独立したサブエージェントが下す。skill が自分の答案を自分で採点する事態を避け、メインセッションの自己評価の偏りを排除する。投票はモデルの階層別に集計し（opus ×1・sonnet ×3・haiku ×5）、安いモデルでの劣化も見えてくる。</span></li>
       <li><b><span class="lx" lang="en">Static axes are deterministic.</span><span class="lx" lang="ja">静的軸は決定論的。</span></b> <span class="lx" lang="en">Structure, paths, usage, permissions, hygiene are computed by scripts (regex / git log) — same input, same result, no model in the loop.</span><span class="lx" lang="ja">構造・パス・使用度・権限・衛生はスクリプト（regex / git log）が計算 — 同じ入力なら常に同じ結果・モデル不要。</span></li>
-      <li><b><span class="lx" lang="en">Routing precision is measured, not assumed.</span><span class="lx" lang="ja">ルーティング精度は実測。</span></b> <span class="lx" lang="en">Axis 4 runs an <code>eval-cases</code> set (positive / negative / boundary) and reports real Precision / Recall / Forbidden numbers.</span><span class="lx" lang="ja">Axis 4 は <code>eval-cases</code>（positive / negative / boundary）を回し、実数の Precision / Recall / Forbidden を出す。</span></li>
-      <li><b><span class="lx" lang="en">Tier sweep.</span><span class="lx" lang="ja">tier 横断検証。</span></b> <span class="lx" lang="en">Routing is re-measured per model tier (haiku / sonnet / opus) — since Banto delegates to cheaper models, their degradation is a real production risk.</span><span class="lx" lang="ja">routing をモデル tier 別（haiku / sonnet / opus）で再測定 — Banto は安いモデルへ委譲するため、その劣化が本番リスクになる。</span></li>
+      <li><b><span class="lx" lang="en">Routing precision is measured, not assumed.</span><span class="lx" lang="ja">ルーティング精度は実測。</span></b> <span class="lx" lang="en">Axis 4 runs an <code>eval-cases</code> set (positive / negative / boundary) and reports real Precision / Recall / Forbidden numbers.</span><span class="lx" lang="ja">Axis 4 は <code>eval-cases</code>（発火すべき例・発火してはいけない例・境界例）を実行する。適合率（Precision）・再現率（Recall）・禁止逸脱（Forbidden）の実数を報告する。</span></li>
+      <li><b><span class="lx" lang="en">Tier sweep.</span><span class="lx" lang="ja">モデル階層を横断して検証。</span></b> <span class="lx" lang="en">Routing is re-measured per model tier (haiku / sonnet / opus) — since Banto delegates to cheaper models, their degradation is a real production risk.</span><span class="lx" lang="ja">ルーティング精度を、モデルの階層別（haiku / sonnet / opus）に再測定する。Banto は安いモデルへ処理を委譲する設計のため、そこでの劣化がそのまま本番のリスクになる。</span></li>
       <li><b><span class="lx" lang="en">Boundary cases are weighted up.</span><span class="lx" lang="ja">境界ケースを重視。</span></b> <span class="lx" lang="en">The eval set fixes a high boundary ratio — accuracy historically drops exactly where two skills nearly overlap, so that's where it's tested hardest.</span><span class="lx" lang="ja">eval セットは境界比率を高く固定 — 精度は「2 つの skill がほぼ重なる」境界で落ちるため、そこを最も厳しく試す。</span></li>
     </ol>
   </div>
 
   <div class="card reveal" style="margin-top:18px">
     <h4 style="font-family:var(--serif);font-size:18px;margin:0 0 4px"><span class="lx" lang="en">What's a HeavySkill? (Axis 5)</span><span class="lx" lang="ja">HeavySkill とは？（Axis 5）</span></h4>
-    <p style="font-size:14px;color:var(--ink-2);margin:0;line-height:1.6"><span class="lx" lang="en">A skill structure for <strong>complex judgment</strong> — trade-offs, multi-perspective analysis — built on the parallel-reasoning + sequential-deliberation pattern of <a href="https://arxiv.org/abs/2605.02396" target="_blank" rel="noopener">arXiv 2605.02396</a>. Audited by Axis 5; generated by <code>plugin-dev</code>. Four required components:</span><span class="lx" lang="ja"><strong>複雑な判断</strong>（トレードオフ・多視点分析）向けの skill 構造。並列推論 + 逐次審議の <a href="https://arxiv.org/abs/2605.02396" target="_blank" rel="noopener">arXiv 2605.02396</a> パターンに基づく。Axis 5 が監査し、<code>plugin-dev</code> が生成する。必須の 4 要素：</span></p>
+    <p style="font-size:14px;color:var(--ink-2);margin:0;line-height:1.6"><span class="lx" lang="en">A skill structure for <strong>complex judgment</strong> — trade-offs, multi-perspective analysis — built on the parallel-reasoning + sequential-deliberation pattern of <a href="https://arxiv.org/abs/2605.02396" target="_blank" rel="noopener">arXiv 2605.02396</a>. Audited by Axis 5; generated by <code>plugin-dev</code>. Four required components:</span><span class="lx" lang="ja"><strong>複雑な判断</strong>（トレードオフ・多視点分析）向けの skill 構造。並列推論と逐次審議を組み合わせた <a href="https://arxiv.org/abs/2605.02396" target="_blank" rel="noopener">arXiv 2605.02396</a> のパターンに基づく。Axis 5 が監査し、<code>plugin-dev</code> が生成する。必須の 4 要素：</span></p>
     <div class="hs-grid">
       <div class="c4"><b>1 · Activation</b><span class="lx" lang="en">fires only on a real goal fork — not for routine work</span><span class="lx" lang="ja">真のゴール分岐のときだけ発火（routine では出ない）</span></div>
       <div class="c4"><b>2 · Parallel</b><span class="lx" lang="en">K=3–5 independent agents, each a distinct lens (not the same prompt ×K)</span><span class="lx" lang="ja">K=3–5 の独立エージェント・各々別の視点（同一プロンプト ×K ではない）</span></div>
       <div class="c4"><b>3 · Deliberation</b><span class="lx" lang="en">re-derive a new answer from the perspectives — not a majority vote</span><span class="lx" lang="ja">視点から新解を再導出 — 多数決ではない</span></div>
       <div class="c4"><b>4 · Output</b><span class="lx" lang="en">conclusion-first, options table, risks — no "it depends"</span><span class="lx" lang="ja">結論先行・選択肢表・リスク — 「場合による」禁止</span></div>
     </div>
-    <p style="font-size:13px;color:var(--ink-soft);margin:12px 0 0"><span class="lx" lang="en">Used only when the task earns it (complex + WORKFLOW + Agent tooling). A simple utility skill should stay simple — Axis 5 flags both missing <em>and</em> mis-applied HeavySkills.</span><span class="lx" lang="ja">task が要求するときだけ採用（複雑 + WORKFLOW + Agent ツール）。単純な utility skill は単純なまま — Axis 5 は「足りない」も「誤適用」も拾う。</span></p>
+    <p style="font-size:13px;color:var(--ink-soft);margin:12px 0 0"><span class="lx" lang="en">Used only when the task earns it (complex + WORKFLOW + Agent tooling). A simple utility skill should stay simple — Axis 5 flags both missing <em>and</em> mis-applied HeavySkills.</span><span class="lx" lang="ja">タスクが要求するときだけ採用（複雑 + WORKFLOW + Agent ツール）。単純な utility skill は単純なまま — Axis 5 は「足りない」も「誤適用」も拾う。</span></p>
   </div>
 
   <div class="sec-head reveal" style="margin-top:30px"><h2 style="font-size:clamp(18px,2.4vw,22px)"><span class="lx" lang="en">Four modes</span><span class="lx" lang="ja">4 つのモード</span></h2></div>
   <div class="modes reveal">
     <div class="mode"><span class="c lx" lang="en">seconds</span><span class="c lx" lang="ja">数秒</span><code>plugin-audit</code><p><span class="lx" lang="en">Default static + cheap checks.</span><span class="lx" lang="ja">既定の静的 + 安価チェック。</span></p></div>
     <div class="mode"><span class="c lx" lang="en">~tens of s</span><span class="c lx" lang="ja">数十秒</span><code>eval</code><p><span class="lx" lang="en">Routing precision sweep across model tiers.</span><span class="lx" lang="ja">モデル tier 横断のルーティング精度。</span></p></div>
-    <div class="mode"><span class="c lx" lang="en">minutes</span><span class="c lx" lang="ja">数分</span><code>verify</code><p><span class="lx" lang="en">Run the skill in a sandbox; does it produce what it claims?</span><span class="lx" lang="ja">sandbox で実行・claim 通りに生成するか。</span></p></div>
+    <div class="mode"><span class="c lx" lang="en">minutes</span><span class="c lx" lang="ja">数分</span><code>verify</code><p><span class="lx" lang="en">Run the skill in a sandbox; does it produce what it claims?</span><span class="lx" lang="ja">サンドボックスで実行し、説明どおりに生成するか確かめる。</span></p></div>
     <div class="mode"><span class="c lx" lang="en">~tens of s</span><span class="c lx" lang="ja">数十秒</span><code>fix</code><p><span class="lx" lang="en">Propose fixes + slimming; never auto-rewrites a description.</span><span class="lx" lang="ja">修正 + 軽量化を提案・description は自動では書き換えない。</span></p></div>
   </div>
   <div class="note reveal">
@@ -268,7 +268,7 @@
   </div>
   <div class="note reveal">
     <span class="seal" aria-hidden="true">番</span>
-    <div><span class="lx" lang="en"><strong>Lean by default.</strong> plugin-dev proposes the smallest thing that works and escalates to a trio or a HeavySkill only when the task earns it — the same anti-bloat discipline the audit enforces.</span><span class="lx" lang="ja"><strong>既定で lean。</strong>plugin-dev は「動く最小」を提案し、trio や HeavySkill へは task が要求するときだけ昇格する — 監査が強制するのと同じ、肥大させない設計規律。</span></div>
+    <div><span class="lx" lang="en"><strong>Lean by default.</strong> plugin-dev proposes the smallest thing that works and escalates to a trio or a HeavySkill only when the task earns it — the same anti-bloat discipline the audit enforces.</span><span class="lx" lang="ja"><strong>既定で lean。</strong>plugin-dev は「動く最小」を提案し、trio や HeavySkill へは、タスクが要求するときだけ昇格する — 監査が強制するのと同じ、肥大させない設計規律。</span></div>
   </div>
 </section>
 

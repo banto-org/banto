@@ -31,7 +31,10 @@ RECENT=$(ls -t "$DEC"/*.md 2>/dev/null | head -40)
 
 # stopwords (frequent but useless for the lexicon)
 # i18n: the JP tokens in STOP are filtering logic for JP decision docs — do not translate.
-STOP=" the and for that this with from have are was were will into not but skill skills hook hooks 設計 する した して これ それ ため "
+# The banto-domain terms below (decisions, store, owner, ...) recur in nearly every decision log
+# regardless of topic, so they drown out genuinely distinctive candidates (measured 2026-07-04:
+# sh lexicon-distill.sh <base> 15 surfaced only generic terms in the top 15 before this list).
+STOP=" the and for that this with from have are was were will into not but skill skills hook hooks 設計 する した して これ それ ため decisions decision store owner doc docs title scope status related accepted provisional agent agents opus haiku sonnet claude banto md file files grep i18n cold author date read find "
 
 CANDIDATES=$(printf '%s\n' "$RECENT" | xargs grep -hoE '[A-Za-z][A-Za-z0-9_.+-]{2,}' 2>/dev/null \
     | tr '[:upper:]' '[:lower:]' \

@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
-"""ai_context_combined.py — standalone generation of combined.txt (no SoftMatcha dependency, stdlib only)
+"""ai_context_combined.py — standalone generation of full-combined.txt (no SoftMatcha dependency, stdlib only)
 
 search-native-migration spec T1-1. Ports _build_combined_text / _parse_jsonl_sessions /
 _mask_secrets / _extract_tags from the old softmatcha-mcp/server.py, and changes the full
 scope to a per-session incremental cache (sessions-cache/<id>.txt, mtime comparison).
 
+search-layer-redesign spec branch 1A (2026-07-04): the project scope (formerly its own
+output file) is retired — search ranking (store-query.sh) reads decisions/docs directly
+and never read it. Only the full scope (full-combined.txt: decisions/docs + session
+history) remains.
+
 usage:
-  python3 ai_context_combined.py --project-root <dir> [--base <ai-context base>] [--scope project|full|all]
+  python3 ai_context_combined.py --project-root <dir> [--base <ai-context base>] [--scope full]
 
 When --base is omitted, resolves the central store via resolve-store-path.sh --store-dir,
 falling back to <project-root>/.ai-context (legacy) when unregistered.
@@ -199,7 +204,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--project-root", required=True)
     ap.add_argument("--base", default="")
-    ap.add_argument("--scope", choices=["project", "full", "all"], default="project")
+    ap.add_argument("--scope", choices=["full"], default="full")
     args = ap.parse_args()
 
     project_root = Path(args.project_root).resolve()
@@ -209,14 +214,11 @@ def main() -> int:
         return 1
     config = load_config(base)
 
-    scopes = ["project", "full"] if args.scope == "all" else [args.scope]
-    for scope in scopes:
-        parts = build_project_parts(base, config, project_root)
-        if scope == "full":
-            parts += build_session_parts(base, project_root)
-        out = base / f"{scope}-combined.txt"
-        out.write_text("\n".join(parts), encoding="utf-8")
-        print(f"{out} ({out.stat().st_size} bytes)")
+    parts = build_project_parts(base, config, project_root)
+    parts += build_session_parts(base, project_root)
+    out = base / "full-combined.txt"
+    out.write_text("\n".join(parts), encoding="utf-8")
+    print(f"{out} ({out.stat().st_size} bytes)")
     return 0
 
 

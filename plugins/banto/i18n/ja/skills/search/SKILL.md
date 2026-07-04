@@ -32,11 +32,10 @@ compatibility: Claude Code (requires bash, git, jq, python3)
 | パス | 内容 | 鮮度 |
 |---|---|---|
 | `{base}/decisions/` `{base}/docs/` | 設計判断、報告書、リサーチ | 生ファイルを直接検索 |
-| `{base}/project-combined.txt` | 上記を連結したテキスト | 保存時に hook が自動再生成（ai-context-combined-rebuild.sh） |
-| `{base}/full-combined.txt` + `sessions-cache/` | + 会話履歴（compact で失われた内容を含む） | 検索時にオンデマンドで更新（後述の deep パス参照） |
-| store ルートの `.store-index.db` | **store 横断 FTS5 セクション索引**（全プロジェクトの md・BM25 順位 + 行範囲） | SessionStart / store 書き込み時に hook が自動再生成（scripts/store_index_gen.py。コミットされない派生物） |
+| `{base}/full-combined.txt` + `sessions-cache/` | 上記 + 会話履歴（compact で失われた内容を含む）を連結したテキスト | SessionStart 日次（スロットル付き bg）+ deep 開始時オンデマンド |
+| store ルートの `.store-index.db` | **store 横断 FTS5 セクション索引**（全プロジェクトの md・BM25 順位 + 行範囲。`sessions/`（checkpoint）は索引対象外 — 会話履歴は deep パスの full-combined が担う） | SessionStart / store 書き込み時に hook が自動再生成（scripts/store_index_gen.py。コミットされない派生物） |
 | `{base}/search-lexicon.md` | **検索レキシコン**（概念 ↔ 訳語 / 同義語 / 略語） | deep パス成功時に追記（後述） |
-| プロジェクトの `docs/` `specs/` など | `{base}/config.json` の `extra_docs_dirs` で追加 | combined 生成に含まれる |
+| プロジェクトの `docs/` `specs/` など | `{base}/config.json` の `extra_docs_dirs` で追加 | full-combined 生成に含まれる |
 
 ## 検索手順
 
@@ -98,6 +97,18 @@ sh "$CLAUDE_PLUGIN_ROOT/scripts/store-query.sh" --all 認証 OAuth
 - exit 1（sqlite3 / 索引不在）→ そのまま Step 5 deep の cross-store 経路へ（fail-open）
 - 現プロジェクト内の絞り込み検索にも使える（`--all` を外すと既定でカレントプロジェクトに絞る）。3 文字未満の語は自動で LIKE 走査へ切り替わる
 
+### Step 2.8: 派生記録から一次文書へ（`--related` 芋づる）
+
+ヒットが派生記録（workspace 台帳・tasks・`[Index]`・`[Status]` など）なら、一次文書（decision）まで遡ってから答える：
+
+```bash
+sh "$CLAUDE_PLUGIN_ROOT/scripts/store-query.sh" --related <relpath の一意な断片>
+```
+
+- 出力は `→ 参照している（related:）` と `← 参照されている` の双方向エッジ
+- 芋づった先の decision を Read で検証してから Step 3 へ進む（派生記録の内容だけで答えない）
+- R8 実測の教訓：checkpoint / 台帳への誤着地から一次文書へ遡れず誤答した。派生記録で止めない。
+
 ### Step 3: 検証（Read して判断）
 
 上位 3〜5 ファイルを Read し、**関連性を自分で判断**する：
@@ -105,6 +116,8 @@ sh "$CLAUDE_PLUGIN_ROOT/scripts/store-query.sh" --all 認証 OAuth
 - 多義語の不一致を除外する（例：「harness」が配線を意味するドキュメント）
 - 自己参照を除外する（いま書いている当のドキュメント、クエリを引用しただけの評価表）
 - supersede 関係を確認する（古い決定が新しい決定に上書きされていないか？）
+- 派生記録に着地していないか確認する — 着地したら Step 2.8 の `--related` で一次文書へ遡る
+- ヒットが `[Ref]` カード（doc_type=ref）なら実体はリモート — 中身が要るときは `research` で本文を取り込む
 
 ### Step 4: ゼロヒット時の 2 巡目（1 回だけ）
 
@@ -136,6 +149,7 @@ deep パスが正解にたどり着いたら、効いた展開を 1 行として
 ```
 
 これにより**検索すればするほど次の fast パスが決定論的に賢くなる**（git 経由でチーム共有のリコール）。
+Step 7 の報告で追記の有無を必ず申告する（省略を可視化する）。
 
 ### Step 7: 報告フォーマット
 
@@ -157,6 +171,8 @@ deep パスが正解にたどり着いたら、効いた展開を 1 行として
 - {supersede relations, explicit "not confident", etc.}
 
 ### Search method: {fast (ranking vN) / fast+layered (index→timeline→full) / fts5 (store-query.sh, project|all) / deep (haiku xN parallel, wall time Xs) / cross-store: {store names,...}}
+
+### Lexicon: {追記済み — {追記した行} / 追記なし（deep 未実行 or 失敗）}
 ```
 
 **確信がない**場合（しきい値を下回って終わった場合）は、推測で埋めず「確信なし」と明示する。
@@ -172,6 +188,5 @@ deep パスまで尽くしても**ゼロ確信**（store に答えが無い）�
 
 ## データレイヤーの保守
 
-- `project-combined.txt` は decisions/docs への書き込み時に hook が自動再生成する（ミリ秒スケール、モデル不要）
-- 手動再生成：`python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_combined.py" --project-root "$PWD" --scope all`
+- 手動再生成：`python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_combined.py" --project-root "$PWD" --scope full`
 - `{base}/tmp/search/` 配下の一時ファイルは溜まったら削除してよい

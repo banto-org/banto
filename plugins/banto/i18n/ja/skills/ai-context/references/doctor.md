@@ -59,6 +59,7 @@ lint の出力をそのまま「health」セクションとして報告する。
 4. `sessions/` 内に古い（30 日以上前）チェックポイント
 5. `docs/` 直下で固定プレフィックス（[`directory-structure.md`](directory-structure.md) 参照）を持たないファイル（README.md は例外）
 6. `decisions/` に空ファイル（<100 bytes）
+7. `{base}/project-combined.txt` の残骸（search-layer-redesign 分岐 1A で廃止済み。存在すれば削除してよい）
 
 **C. .gitignore 不整合**
 store 側 `.gitignore`（`sessions/` / `*-combined.txt` 等）の区分が崩れていないか（区分の正本は [`directory-structure.md`](directory-structure.md)）。

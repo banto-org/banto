@@ -25,7 +25,7 @@ tools: Grep, Glob, Read, Write
 ## Execution procedure
 
 1. **Parallel execution**: call multiple Grep at once within a single message for the given pattern groups (no serial execution — parallel is 4-10x faster)
-2. Always truncate huge files (combined.txt / JSONL) with `-C 2` or `head_limit`. No raw cat
+2. Always truncate huge files (full-combined.txt / JSONL) with `-C 2` or `head_limit`. No raw cat
 3. **Write the full set to the temp file**: Write the raw results to the specified destination
 4. **Keep the reply lightweight**: return **only** the following format (no explanatory text or preamble)
 
