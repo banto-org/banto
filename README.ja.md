@@ -79,6 +79,38 @@ sh "$(ls -d ~/.claude/plugins/cache/*/banto/*/ | sort -V | tail -1)scripts/harne
 GitHub `ai-context-store` を登録するか／どの org に新規作成するか／ローカルのみか。選んだ org は以降の
 プロジェクトに再利用されます）。チーム運用時のみ store の git 同期を設定します。
 
+### 仮ローカル store（`~/ai-context-local`）からの移行
+
+中央 store がまだ無い時期に初回セッションを走らせたプロジェクト（またはローカルのみを選んだ
+プロジェクト）のナレッジは `~/ai-context-local/<project>/` に入っています。その後に中央
+`~/ai-context-store` の運用を始めると、パス解決は中央 mapping を優先します — 残った仮ローカル
+store は黙って隠され、新しい記録も入らなくなります。一度だけ移行して、片付けてください:
+
+```bash
+# 1. どのプロジェクトが仮ローカルに残っているか確認
+ls ~/ai-context-local
+
+# 2. ナレッジを中央 store へコピー（派生物は除外・既存ファイルは上書きしない）
+rsync -a --ignore-existing \
+  --exclude '*-combined.txt' --exclude 'project-index/' --exclude 'full-index/' --exclude '.obsidian/' \
+  ~/ai-context-local/<project>/ ~/ai-context-store/<project>/
+
+# 3. 中央 mapping に repo を登録（キーは repo の git toplevel の絶対パス）
+jq --arg top "/path/to/repo" --arg p "<project>" '.projects[$top] = {project: $p}' \
+  ~/ai-context-store/.mapping.json > /tmp/m.json && mv /tmp/m.json ~/ai-context-store/.mapping.json
+
+# 4. コピーを確認したら、仮ローカル側を撤去（mapping エントリ + project ディレクトリ）
+jq 'del(.projects["/path/to/repo"])' ~/ai-context-local/.mapping.json > /tmp/l.json \
+  && mv /tmp/l.json ~/ai-context-local/.mapping.json
+rm -rf ~/ai-context-local/<project>
+```
+
+repo で新しいセッションを開き、SessionStart の表示で注入 base が
+`~/ai-context-store/<project>` になっていれば完了です。コマンドを打たずに、その repo の
+セッションで Claude に「このプロジェクトの ai-context-local を中央 store へ移行して」と
+頼んでも構いません — 実行されるのは上の手順そのものです。（store 導入前の repo 内
+`.ai-context/` には別の案内付き経路があります: `/ai-context migrate`）
+
 ### 更新への追従
 
 `harness-setup.sh` は settings.json に Banto marketplace の `autoUpdate: true` も設定します

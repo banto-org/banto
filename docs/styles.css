@@ -113,6 +113,7 @@ code{ font-family:var(--mono); font-size:.86em; background:rgba(28,24,20,.05); p
 /* ===================== HERO ===================== */
 .hero{ padding:clamp(40px,7vw,86px) var(--pad) 30px; max-width:var(--maxw); margin:0 auto; }
 .hero-grid{ display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(24px,5vw,60px); align-items:center; }
+.hero-grid > *{ min-width:0; } /* nowrap の hero-install がカラムの縮小下限を押し上げ、375px で 67px はみ出すのを防ぐ */
 .eyebrow{ display:inline-flex; align-items:center; gap:9px; font-size:13.5px; font-weight:600; letter-spacing:.04em; color:var(--ink-soft); text-transform:uppercase; }
 .eyebrow .dot{ width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 0 4px rgba(74,124,89,.16); animation:pulse 2.4s ease-in-out infinite; }
 @keyframes pulse{ 50%{ box-shadow:0 0 0 7px rgba(74,124,89,0); } }

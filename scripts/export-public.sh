@@ -109,6 +109,12 @@ done
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
 
+## 0.2.1
+
+- **Stop-guard false positives fixed.** `verify-claim-guard` no longer trips on error-looking strings *inside* successful tool output (e.g. shell source code containing `fatal:`) — it now checks the actual `is_error` flag of the last 3 tool results structurally via jq, and treats an exploratory failure followed by successful calls as resolved. `model-claim-guard` no longer mistakes ordinary release/PR announcements for research-result claims: generic publish verbs now require a research noun (paper / eval / weights / arxiv / HF) in the same final message. Both guards ignore RED verify/eval state older than 4 hours, so leftovers from a previous work session can't block an unrelated one.
+- **Migration guide: local store → central store.** The README now documents how to move a project's knowledge from the GitHub-less local store (`~/ai-context-local/<project>/`) into the central store once you adopt one — copy, register the central mapping, retire the local side, verify at session start.
+- **Site.** The Store Search page now leads with what measurement showed to work — the cheapest model reaching the most expensive model's search accuracy at 1/10 the price — and links to the evidence report for the full data. Fixed a mobile horizontal-scroll bug on the landing page (a nowrap install command pushed the grid past 375px), a contradictory-looking hero stat layout, takeaway callouts rendering glued to their section headings on the evidence page, and several Japanese line-break and label polish items.
+
 ## 0.2.0
 
 - **Store Search — a cross-store full-text section index.** Every markdown document across all of your project stores is indexed locally into SQLite FTS5 (trigram tokenizer — Japanese works out of the box) at section granularity with line ranges. The search skill queries it via `scripts/store-query.sh` (BM25-ranked top hits, `--all` for cross-store reach, automatic LIKE fallback for short terms) and falls back to the combined-text path when SQLite is absent. The index is a derived local artifact: rebuilt from scratch in seconds at session start, never committed — canonical data stays in git-managed markdown.
@@ -176,7 +182,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.2.0"
+PUB_VERSION="0.2.1"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"
