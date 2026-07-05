@@ -264,7 +264,7 @@
     <h2><span class="lx" lang="en">Interrupt → resume: does "continue this" work?</span><span class="lx" lang="ja">中断 → 再開 —「続きを進めて」は通じるか</span></h2>
     <p><span class="lx" lang="en">2 conditions × 2 models, one two-word instruction, scoring fixed before the runs</span><span class="lx" lang="ja">2 条件 × 2 モデル・指示は一言だけ・採点基準は走行前に固定</span></p>
   </div>
-  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: settled design decisions survive a session boundary only if they are stored — 2/8 without the store, 8/8 with it, on the same models.</span><span class="lx" lang="ja">わかったこと：確定済みの設計判断は、store がなければセッション境界を 2/8 しか越えられない。store があれば 8/8 — 同じモデルで。</span></p>
+  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: settled design decisions survive a session boundary only if they are stored — 2/8 without the store, 8/8 with it, on the same models.</span><span class="lx" lang="ja">結論：確定済みの設計判断は、store がなければセッション境界を 2/8 しか越えられない。store があれば 8/8 — 同じモデルで。</span></p>
   <p class="prose-p reveal lx" lang="en">Setup: a notification API mid-implementation (2 of 5 tasks done). The previous session settled three decisions — sliding-window log (fixed window rejected for boundary bursts), Redis sorted set (in-memory rejected: replicas don't share it), and a frozen 429 response shape that client SDKs depend on — plus a 30 req/min limit. A fresh session gets the repo and exactly one instruction: "continue this". The bare condition sees only the repo; the harness condition also gets the store (decisions, task ledger, checkpoint). Code was inspected mechanically after each run.</p>
   <p class="prose-p reveal lx" lang="ja">題材：実装途中の通知 API（タスク 5 個中 2 完了）。前セッションで確定済みの判断は 3 つ — sliding window log の採用（fixed window は境界バーストで棄却）・Redis sorted set の採用（in-memory はレプリカ間で共有されず棄却）・429 応答形式は SDK 互換で変更不可。加えて上限は 30 req/分。新しいセッションに repo と一言「続きを進めて」だけを渡す。ハーネスなし条件は repo のみ、ハーネス条件は store（決定ログ・タスク台帳・チェックポイント）も見える。採点は走行後にコード実体を機械照合した。</p>
 
@@ -344,10 +344,10 @@ store/（ハーネス条件のみに見える）
   <div class="sec-head reveal">
     <span class="ghost">04</span>
     <div class="sub">R3-A</div>
-  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: project-specific knowledge comes from the store — or it doesn't come at all.</span><span class="lx" lang="ja">わかったこと：プロジェクト固有の知識は、store 以外のどこからも出てこない。</span></p>
     <h2><span class="lx" lang="en">Knowledge benchmark</span><span class="lx" lang="ja">知識ベンチ</span></h2>
     <p><span class="lx" lang="en">8 questions answerable only by reading the document content</span><span class="lx" lang="ja">文書の中身を読まないと答えられない 8 問</span></p>
   </div>
+  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: project-specific knowledge comes from the store — or it doesn't come at all.</span><span class="lx" lang="ja">結論：プロジェクト固有の知識は、store 以外のどこからも出てこない。</span></p>
   <p class="prose-p reveal lx" lang="en">Subject: the store of a different project (development of a MoE inference / training engine on Apple Silicon). 8 questions on measured values, design decisions, and reasons for discarded approaches (example: "explain, at the level of GPU buffer generation, why one implementation's 14.5 tok/s was a fake benchmark").</p>
   <p class="prose-p reveal lx" lang="ja">題材: 別プロジェクト（Apple Silicon 上の MoE 推論・学習エンジン開発）の store。実測値・設計判断・捨てた案の理由を問う 8 問（例:「ある実装の 14.5 tok/s がなぜ偽ベンチだったか、GPU バッファ生成レベルで説明せよ」）。</p>
 
@@ -447,10 +447,10 @@ store/（ハーネス条件のみに見える）
   <div class="sec-head reveal">
     <span class="ghost">05</span>
     <div class="sub">R3-B</div>
-  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: coding skill no longer separates the models. What separates them is judging what must not be published.</span><span class="lx" lang="ja">わかったこと：コードの腕前ではもう差がつかない。差がつくのは「何を公開しないか」の判断。</span></p>
     <h2><span class="lx" lang="en">Development benchmark</span><span class="lx" lang="ja">開発ベンチ</span></h2>
     <p><span class="lx" lang="en">Implementing a store-browsing site generator</span><span class="lx" lang="ja">store 閲覧サイト生成器を実装させる</span></p>
   </div>
+  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: coding skill no longer separates the models. What separates them is judging what must not be published.</span><span class="lx" lang="ja">結論：コードの腕前ではもう差がつかない。差がつくのは「何を公開しないか」の判断。</span></p>
   <p class="prose-p reveal lx" lang="en">Task: write a CLI tool that scans the real store (577 files, 9 buckets) and generates a static site (language: Python, standard library only). Bare = the canonical structure spec is off-limits (infer from raw files) / harness = the canonical structure reference (buckets, scope, naming rules) and the ledger are available. Scoring: mechanical inspection by a fresh scoring agent, out of 10 points (execution 2 / coverage 2 / classification 2 / confidentiality boundary 2 / metadata extraction 1 / links 1).</p>
   <p class="prose-p reveal lx" lang="ja">課題: 実 store（577 ファイル・9 バケット）を走査して静的サイトを生成する CLI ツールを書く（言語は Python・標準ライブラリのみ）。ハーネスなし = 構造仕様の参照禁止（生ファイルから推定）。ハーネス = 構造の正本（バケット・scope・命名規則）と台帳を参照可。採点は fresh エージェントの機械検査 10 点満点（実行 2 / カバレッジ 2 / 分類 2 / 機密境界 2 / メタ抽出 1 / リンク 1）。</p>
 
@@ -516,10 +516,10 @@ store/（ハーネス条件のみに見える）
   <div class="sec-head reveal">
     <span class="ghost">06</span>
     <div class="sub">R4</div>
-  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: re-reading what you already researched is about 33% cheaper from the store than from the web — but the store can go stale.</span><span class="lx" lang="ja">わかったこと：一度調べたことは、web で調べ直すより store から引く方が約 33% 安い。ただし store は古くなり得る。</span></p>
     <h2><span class="lx" lang="en">Web search vs. the store</span><span class="lx" lang="ja">web 検索 vs store</span></h2>
     <p><span class="lx" lang="en">Which cuts cost more?</span><span class="lx" lang="ja">どちらが安いか</span></p>
   </div>
+  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: re-reading what you already researched is about 33% cheaper from the store than from the web — but the store can go stale.</span><span class="lx" lang="ja">結論：一度調べたことは、web で調べ直すより store から引く方が約 33% 安い。ただし store は古くなり得る。</span></p>
   <p class="prose-p reveal lx" lang="en">Subject: information about a recent model that also exists on the web (NVIDIA Nemotron-3 Ultra 550B). The store holds a research document fetched 26 days earlier. Same model (sonnet), same 6 questions, comparing web-only vs. store-only.</p>
   <p class="prose-p reveal lx" lang="ja">題材: web にも存在する最新モデル情報（NVIDIA Nemotron-3 Ultra 550B）。store には 26 日前に取得した research 文書がある。同一モデル（sonnet）・同一 6 問で、web のみ vs store のみを比較。</p>
 
@@ -572,10 +572,10 @@ store/（ハーネス条件のみに見える）
   <div class="sec-head reveal">
     <span class="ghost">07</span>
     <div class="sub">R1</div>
-  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: for counting and enumerating, the ledger wins big. For reading content, the kind of index stops mattering.</span><span class="lx" lang="ja">わかったこと：「数える・列挙する」質問では台帳が圧勝する。内容を読む質問では、索引の種類は効かない。</span></p>
     <h2><span class="lx" lang="en">What the ledger (ontology index) is good for</span><span class="lx" lang="ja">台帳（ontology 索引）は何に効くか</span></h2>
     <p><span class="lx" lang="en">3 conditions × 4 models (10 questions × 12 cells)</span><span class="lx" lang="ja">3 条件 × 4 モデル（10 問 × 12 セル）</span></p>
   </div>
+  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: for counting and enumerating, the ledger wins big. For reading content, the kind of index stops mattering.</span><span class="lx" lang="ja">結論：「数える・列挙する」質問では台帳が圧勝する。内容を読む質問では、索引の種類は効かない。</span></p>
   <p class="prose-p reveal lx" lang="en">Questions: 5 census-type questions against the store (counting, enumerating) + 5 find-type questions (content investigation). Conditions: cold (no index) / full-text search (combined text) / ledger (jq query).</p>
   <p class="prose-p reveal lx" lang="ja">質問：store に対する census 型 5 問（数える・列挙する）+ find 型 5 問（内容調査）。条件：cold（索引なし）/ 全文検索（combined テキスト）/ 台帳（jq クエリ）。</p>
 
@@ -611,10 +611,10 @@ store/（ハーネス条件のみに見える）
   <div class="sec-head reveal">
     <span class="ghost">08</span>
     <div class="sub">R2</div>
-  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: at this scale, strong models score the same in any condition. The risk is the model that doesn't notice its own failure.</span><span class="lx" lang="ja">わかったこと：この規模では、強いモデルの正答率は条件に左右されない。危ういのは、自分の失敗に気づけないモデル。</span></p>
     <h2><span class="lx" lang="en">Bare vs. harness</span><span class="lx" lang="ja">ハーネスなし vs ハーネスあり</span></h2>
     <p><span class="lx" lang="en">Accuracy; haiku run 3 times per condition</span><span class="lx" lang="ja">精度・haiku は各条件 3 走行</span></p>
   </div>
+  <p class="takeaway reveal"><span class="lx" lang="en">Takeaway: at this scale, strong models score the same in any condition. The risk is the model that doesn't notice its own failure.</span><span class="lx" lang="ja">結論：この規模では、強いモデルの正答率は条件に左右されない。危ういのは、自分の失敗に気づけないモデル。</span></p>
 
   <div class="store-table-wrap reveal">
     <table class="store-table">

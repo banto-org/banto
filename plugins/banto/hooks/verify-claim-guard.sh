@@ -38,9 +38,11 @@ printf '%s' "$LAST_ASSISTANT" | grep -iqE "$CLAIM" || exit 0
 
 # (B1) build-and-verify: 直近のフル verify（verify-run.sh）が RED なら、green になる前の
 #      完了断定を止める。最新の verify-last-* を mtime で辿る（session_id 不一致に強い）。
+#      4 時間より古い状態は無視する — 別作業の残骸 RED が現セッションを塞ぐ誤検知を防ぐ。
 VSTATE_DIR="${ODD_STATE_DIR:-$HOME/.cache/banto}"
 VSTATE=$(ls -t "$VSTATE_DIR"/verify-last-* 2>/dev/null | head -1)
-if [ -n "$VSTATE" ] && head -1 "$VSTATE" 2>/dev/null | grep -q '^red'; then
+if [ -n "$VSTATE" ] && [ -z "$(find "$VSTATE" -mmin +240 2>/dev/null)" ] \
+   && head -1 "$VSTATE" 2>/dev/null | grep -q '^red'; then
     cat >&2 <<'MSG'
 ⚠ verify-before-claim: the final response claims completion, but the last full verify
 (verify-run) is RED. Fix the failure and re-run verify-run until it is GREEN before claiming done.
@@ -49,10 +51,21 @@ MSG
     exit 2
 fi
 
-# (B2) 直近 tool 出力に未解決の error / truncation / 中断の痕跡があるか
-#     raw grep（JSON 妥当性に依存せず堅牢）。is_error:true が最強シグナル。
-ERR='"is_error":[[:space:]]*true|tool_use_error|ran without output or errored|was (cancelled|canceled|interrupted)|Request interrupted|output was truncated|\[truncated\]|Response truncated|No such file or directory|command not found|Traceback \(most recent|npm ERR!|fatal:'
-printf '%s\n' "$TAIL" | grep -iqE "$ERR" || exit 0
+# (B2) 直近 tool 出力に未解決の error があるか — jq で tool_result の is_error フラグを
+#     構造的に判定する。旧実装の raw grep は、ファイル内容に含まれる "fatal:" や
+#     "No such file or directory"（このリポジトリの hook ソースに常在）にも反応する
+#     主要な誤検知源だったため廃止。末尾 3 件の tool_result に限定する — それより前の
+#     error は後続の成功呼び出しで解消済みとみなす（探索的な失敗コマンドは正常な作業）。
+RECENT_ERR=$(printf '%s\n' "$TAIL" | jq -R -s '
+    [split("\n")[] | select(length > 0) | (fromjson? // empty)]
+    | map(select(.type == "user") | .message.content
+          | if type == "array" then .[] else empty end
+          | select(.type? == "tool_result"))
+    | .[-3:]
+    | map(select(.is_error == true))
+    | length
+' 2>/dev/null)
+[ "${RECENT_ERR:-0}" -gt 0 ] 2>/dev/null || exit 0
 
 # A ∧ B 成立 → 断定の前に実体確認を促す
 cat >&2 <<'MSG'

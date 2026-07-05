@@ -85,6 +85,38 @@ SessionStart hook asks (instead of silently creating a local store) whether you 
 `ai-context-store` to register, want to create one (and in which org), or prefer local-only — the
 chosen org is remembered for later projects. git-sync the store when working as a team.
 
+### Migrating from a local store (`~/ai-context-local`)
+
+If a project's first session ran before any central store existed (or you chose local-only), its
+knowledge lives in `~/ai-context-local/<project>/`. Once you adopt a central `~/ai-context-store`,
+path resolution prefers the central mapping — a leftover local store is silently shadowed and stops
+receiving new records. Migrate it once, then remove it:
+
+```bash
+# 1. see which projects are still local
+ls ~/ai-context-local
+
+# 2. copy the knowledge into the central store (derived artifacts excluded; never overwrites)
+rsync -a --ignore-existing \
+  --exclude '*-combined.txt' --exclude 'project-index/' --exclude 'full-index/' --exclude '.obsidian/' \
+  ~/ai-context-local/<project>/ ~/ai-context-store/<project>/
+
+# 3. register the repo in the central mapping (key = the repo's git toplevel path)
+jq --arg top "/path/to/repo" --arg p "<project>" '.projects[$top] = {project: $p}' \
+  ~/ai-context-store/.mapping.json > /tmp/m.json && mv /tmp/m.json ~/ai-context-store/.mapping.json
+
+# 4. after verifying the copy, drop the local side (mapping entry + project dir)
+jq 'del(.projects["/path/to/repo"])' ~/ai-context-local/.mapping.json > /tmp/l.json \
+  && mv /tmp/l.json ~/ai-context-local/.mapping.json
+rm -rf ~/ai-context-local/<project>
+```
+
+Start a new session in the repo and check the SessionStart banner: the injected base should now be
+`~/ai-context-store/<project>`. Or skip the commands and ask Claude in that repo's session —
+*"migrate this project's ai-context-local into the central store"* — these steps are exactly what it
+runs. (In-repo `.ai-context/` directories from pre-store versions have their own guided path:
+`/ai-context migrate`.)
+
 ### Staying up to date
 
 `harness-setup.sh` also sets `autoUpdate: true` for the Banto marketplace in your `settings.json`

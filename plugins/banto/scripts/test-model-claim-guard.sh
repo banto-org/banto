@@ -60,5 +60,20 @@ ALLV="$FIX/ledger_allv.jsonl"; printf '%s\n' '{"claim":"acc +5%","run_id":"abc",
 # no eval state, no ledger -> pass (no false positive)
 [ "$(guard "$CLAIM_T")" = "0" ] && ok "guard: claim, no eval state, no ledger -> pass" || no "clean claim should pass"
 
+# false-positive regression: generic "公開しました" WITHOUT research nouns -> pass even if eval RED
+PRPUB_T="$FIX/prpub.jsonl"
+printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"リリース PR を公開しました。マージは owner 操作です"}]}}' > "$PRPUB_T"
+rm -f "$FIX"/state/eval-last-*; printf 'red:acc\n' > "$FIX/state/eval-last-t"
+[ "$(guard "$PRPUB_T")" = "0" ] && ok "guard: PR publish claim (no research noun) -> pass" || no "PR publish should not block"
+
+# publish claim WITH research noun -> still blocks on eval RED
+HFPUB_T="$FIX/hfpub.jsonl"
+printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"モデルの重みを HF に公開しました"}]}}' > "$HFPUB_T"
+[ "$(guard "$HFPUB_T")" = "2" ] && ok "guard: HF weights publish + eval RED -> block" || no "HF publish + RED should block"
+
+# false-positive regression: stale eval RED (>4h) + paper claim -> pass
+touch -t "$(date -v-5H +%Y%m%d%H%M 2>/dev/null || date -d '5 hours ago' +%Y%m%d%H%M)" "$FIX/state/eval-last-t"
+[ "$(guard "$CLAIM_T")" = "0" ] && ok "guard: stale (>4h) eval RED -> pass" || no "stale eval RED should not block"
+
 echo "model-claim-guard tests: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]

@@ -25,14 +25,25 @@ LAST_ASSISTANT=$(printf '%s\n' "$TAIL" | jq -R -s '
 ' 2>/dev/null)
 [ -z "$LAST_ASSISTANT" ] && exit 0
 
-# (A) a research RESULT / PAPER completion or publication claim
-CLAIM='論文.*(完成|完了|書け?た|ドラフト)|paper.*(done|ready|complete|written)|SOTA|state-of-the-art|新記録|達成しました|publish(ed)?|公開しました|提出しました|submitted'
-printf '%s' "$LAST_ASSISTANT" | grep -iqE "$CLAIM" || exit 0
+# (A) a research RESULT / PAPER completion or publication claim.
+#     強い主張（論文完成 / SOTA / 新記録）は単独で発火。汎用の公開・提出・達成動詞は
+#     研究名詞（論文 / eval / HF / arxiv 等）が同じ最終応答に共起する場合のみ発火する —
+#     旧実装は「PR を公開しました」等のプラグイン運用報告にも反応する誤検知源だった。
+CLAIM='論文.*(完成|完了|書け?た|ドラフト)|paper.*(done|ready|complete|written)|SOTA|state-of-the-art|新記録'
+PUB='(公開|提出|達成)しました|publish(ed)?|submitted'
+NOUN='論文|paper|arxiv|checkpoint|重み|weights|eval|ベンチ|benchmark|HF|Hugging ?Face|hf\.co|蒸留|distill|pruning|fine-?tune|事前学習|pretrain'
+if ! printf '%s' "$LAST_ASSISTANT" | grep -iqE "$CLAIM"; then
+    printf '%s' "$LAST_ASSISTANT" | grep -iqE "$PUB" || exit 0
+    printf '%s' "$LAST_ASSISTANT" | grep -iqE "$NOUN" || exit 0
+fi
 
 # (B) latest eval state RED → block (mirror verify-claim-guard's verify-last)
+#     4 時間より古い状態は無視 — 過去の model-lab 走行の残骸 RED が無関係な
+#     セッションを塞ぐ誤検知を防ぐ。
 ESTATE_DIR="${ODD_STATE_DIR:-$HOME/.cache/banto}"
 ESTATE=$(ls -t "$ESTATE_DIR"/eval-last-* 2>/dev/null | head -1)
-if [ -n "$ESTATE" ] && head -1 "$ESTATE" 2>/dev/null | grep -q '^red'; then
+if [ -n "$ESTATE" ] && [ -z "$(find "$ESTATE" -mmin +240 2>/dev/null)" ] \
+   && head -1 "$ESTATE" 2>/dev/null | grep -q '^red'; then
     cat >&2 <<'MSG'
 ⚠ model-claim-guard: the response claims a result/paper is done, but the latest eval is RED.
 Re-run eval (scripts/eval-stats.sh) until GREEN, and confirm each claim is backed, before claiming done.

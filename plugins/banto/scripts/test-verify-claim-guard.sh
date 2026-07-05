@@ -22,6 +22,17 @@ printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"
 ERR_T="$FIX/err.jsonl"
 { printf '%s\n' '{"type":"user","message":{"content":[{"type":"tool_result","is_error":true,"content":"boom"}]}}'
   printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"修正しました"}]}}'; } > "$ERR_T"
+# 誤検知回帰 1: 成功した tool_result の「内容」に fatal: 等の文字列 → error ではない
+CONTENT_T="$FIX/content.jsonl"
+{ printf '%s\n' '{"type":"user","message":{"content":[{"type":"tool_result","is_error":false,"content":"grep result: fatal: No such file or directory command not found [truncated]"}]}}'
+  printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"実装が完了しました"}]}}'; } > "$CONTENT_T"
+# 誤検知回帰 2: 探索的な失敗のあと成功が 3 件続いて解消済み
+RECOVERED_T="$FIX/recovered.jsonl"
+{ printf '%s\n' '{"type":"user","message":{"content":[{"type":"tool_result","is_error":true,"content":"ls: no match"}]}}'
+  printf '%s\n' '{"type":"user","message":{"content":[{"type":"tool_result","is_error":false,"content":"ok1"}]}}'
+  printf '%s\n' '{"type":"user","message":{"content":[{"type":"tool_result","is_error":false,"content":"ok2"}]}}'
+  printf '%s\n' '{"type":"user","message":{"content":[{"type":"tool_result","is_error":false,"content":"ok3"}]}}'
+  printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"実装が完了しました"}]}}'; } > "$RECOVERED_T"
 
 guard() { printf '{"transcript_path":"%s","stop_hook_active":false,"session_id":"t"}' "$1" | sh "$GUARD" >/dev/null 2>&1; echo $?; }
 
@@ -44,6 +55,17 @@ rm -f "$FIX"/state/verify-last-*
 # clean claim, no verify state, no error trace -> pass (no false positive)
 rm -f "$FIX"/state/verify-last-*
 [ "$(guard "$CLAIM_T")" = "0" ] && ok "clean claim (no verify, no error) -> pass" || no "clean claim should pass"
+
+# false-positive regression: error strings inside a SUCCESSFUL tool_result content -> pass
+[ "$(guard "$CONTENT_T")" = "0" ] && ok "claim + 'fatal:' in successful content -> pass" || no "content-only error strings should not block"
+
+# false-positive regression: old error already recovered by 3 later successes -> pass
+[ "$(guard "$RECOVERED_T")" = "0" ] && ok "claim + recovered error (3 successes after) -> pass" || no "recovered error should not block"
+
+# false-positive regression: stale RED verify state (>4h) -> pass
+rm -f "$FIX"/state/verify-last-*; printf 'red:test\n' > "$FIX/state/verify-last-t"
+touch -t "$(date -v-5H +%Y%m%d%H%M 2>/dev/null || date -d '5 hours ago' +%Y%m%d%H%M)" "$FIX/state/verify-last-t"
+[ "$(guard "$CLAIM_T")" = "0" ] && ok "claim + stale (>4h) verify RED -> pass" || no "stale verify RED should not block"
 
 echo "verify-claim-guard tests: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]
