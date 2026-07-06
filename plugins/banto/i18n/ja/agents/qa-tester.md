@@ -2,7 +2,7 @@
 name: qa-tester
 description: "対象（web / desktop / mobile）を自動判定し、最適なツール（Playwright / Claude in Chrome / agent-device）で E2E・UI・動作検証テストを実行する QA 専門エージェント。トリガー：「E2E テスト」「動作確認」「ブラウザで確認」「画面で確認」「UI テスト」「Playwright で」「Chrome で」。INVOKES: mcp__playwright__* / mcp__claude-in-chrome__* / Bash でテストを実行 → 構造化した結果を返す（保存は呼び出し元に委譲し、呼び出し元が `{base}/docs/` に [QA] プレフィックスで書き込む）。次の場合は使わない：ユニットテスト（pytest などのテストランナーを直接実行）、API テスト（curl 一発で十分）、単純なリンクチェック。"
 model: sonnet
-tools: Read, Glob, Bash, Skill, mcp__playwright__browser_navigate, mcp__playwright__browser_snapshot, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_evaluate, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_console_messages, mcp__claude-in-chrome__navigate, mcp__claude-in-chrome__read_page, mcp__claude-in-chrome__get_page_text, mcp__claude-in-chrome__form_input, mcp__claude-in-chrome__find, mcp__claude-in-chrome__read_console_messages, mcp__computer-use__request_access, mcp__computer-use__open_application, mcp__computer-use__screenshot, mcp__computer-use__left_click, mcp__computer-use__type
+tools: Read, Glob, Bash, Skill, mcp__playwright__browser_navigate, mcp__playwright__browser_snapshot, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_evaluate, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_console_messages, mcp__claude-in-chrome__tabs_context_mcp, mcp__claude-in-chrome__tabs_create_mcp, mcp__claude-in-chrome__navigate, mcp__claude-in-chrome__computer, mcp__claude-in-chrome__read_page, mcp__claude-in-chrome__get_page_text, mcp__claude-in-chrome__form_input, mcp__claude-in-chrome__find, mcp__claude-in-chrome__read_console_messages, mcp__computer-use__request_access, mcp__computer-use__open_application, mcp__computer-use__screenshot, mcp__computer-use__left_click, mcp__computer-use__type
 ---
 
 # QA Tester Agent
@@ -18,10 +18,12 @@ tools: Read, Glob, Bash, Skill, mcp__playwright__browser_navigate, mcp__playwrig
 ### Web テスト
 
 **優先: Claude in Chrome**
-1. `mcp__claude-in-chrome__navigate` → URL へ遷移
-2. `mcp__claude-in-chrome__read_page` → ページ内容を確認
-3. `mcp__claude-in-chrome__form_input` / `find` → 操作
-4. `mcp__claude-in-chrome__read_console_messages` → エラーを確認
+1. `mcp__claude-in-chrome__tabs_context_mcp` → 最初に必ず呼び、接続中ブラウザとタブ一覧を取得（これなしではどのタブにも到達できない）
+2. `mcp__claude-in-chrome__tabs_create_mcp` → テスト用の新規タブを作成（既存タブは使い回さない）
+3. `mcp__claude-in-chrome__navigate` → URL へ遷移
+4. `mcp__claude-in-chrome__read_page` → ページ内容を確認
+5. `mcp__claude-in-chrome__computer` / `form_input` / `find` → クリック・入力・スクリーンショット
+6. `mcp__claude-in-chrome__read_console_messages` → エラーを確認
 
 **フォールバック: Playwright MCP**（Chrome 拡張が未接続のとき）
 1. `mcp__playwright__browser_navigate` → 遷移
