@@ -16,9 +16,9 @@
       "ja_sha256": "37d1c6fa8ebbc9f225fa21b0c5c54ed4c16f1faa39e30d6ceb69f64fe96d312b"
     },
     "agents/qa-tester.md": {
-      "en_sha256": "28bbefdd4d522e2db51dd7035c6b047d541f4e8ee53dde8f122ed4a1a3803f14",
+      "en_sha256": "c87c8abd4d994ef9bd7399d33345b7d924cf8e90df2900197085e35650b5919d",
       "generated_at": "2026-06-20T15:08:37Z",
-      "ja_sha256": "5767afb8163c6a3af4e8387ffbf397de6b87b9405a4fd165f917019bcf94ba94"
+      "ja_sha256": "2881a8031249e1f6e07a73bdbe4c9293ccfc28c228aaa76fc02e82e793c1b5df"
     },
     "agents/research-agent.md": {
       "en_sha256": "776a292e7d9773fe241810516391fb213602a7838a752d5162864e0d415c9699",
@@ -421,6 +421,6 @@
       "ja_sha256": "bf9f0a8b0293210ffdd4cc44b2885c15968ab316bf454e0d7dd60ae6bd54de12"
     }
   },
-  "generated_at": "2026-07-04T04:47:33Z",
-  "source_commit": "7f1d238"
+  "generated_at": "2026-07-06T07:05:17Z",
+  "source_commit": "ecadec2"
 }

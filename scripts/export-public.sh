@@ -109,6 +109,10 @@ done
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
 
+## 0.2.2
+
+- **Fixed: the qa-tester agent could not reach any browser via Claude in Chrome.** Its tool allowlist had the page-interaction tools (`navigate` / `read_page` / `form_input`) but not `tabs_context_mcp` — the tool that lists connected browsers and tabs — so the Claude in Chrome path was structurally unreachable. The agent now carries `tabs_context_mcp` / `tabs_create_mcp` / `computer` (click, type, screenshot), and its web-test procedure starts by getting the tab context and creating a fresh tab before navigating.
+
 ## 0.2.1
 
 - **Stop-guard false positives fixed.** `verify-claim-guard` no longer trips on error-looking strings *inside* successful tool output (e.g. shell source code containing `fatal:`) — it now checks the actual `is_error` flag of the last 3 tool results structurally via jq, and treats an exploratory failure followed by successful calls as resolved. `model-claim-guard` no longer mistakes ordinary release/PR announcements for research-result claims: generic publish verbs now require a research noun (paper / eval / weights / arxiv / HF) in the same final message. Both guards ignore RED verify/eval state older than 4 hours, so leftovers from a previous work session can't block an unrelated one.
@@ -182,7 +186,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.2.1"
+PUB_VERSION="0.2.2"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"
