@@ -8,6 +8,11 @@
 # jq でユーザーメッセージのテキストのみを抽出してチェックする。
 
 INPUT=$(cat)
+
+# banto 起動のヘッドレス fork（idle-checkpoint 等）では decision 催促をしない
+# （無人セッションに exit 2 で追加ターンを強制し bot 起草の decision を書かせない）
+[ "${BANTO_HEADLESS:-0}" = "1" ] && exit 0
+
 CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)
 TRANSCRIPT=$(printf '%s' "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
 

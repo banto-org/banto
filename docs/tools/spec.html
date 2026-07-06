@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>spec — Banto</title>
+<meta name="description" content="Interactively generate an industry-standard specification document before implementation — Spec Kit, PRD, Design Doc, RFC, ADR, or Scope Doc." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="../index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="../evidence.html" class="lx" lang="en">Evidence</a><a href="../evidence.html" class="lx" lang="ja">実測</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="../index.html" class="lx" lang="en">← Home</a><a href="../index.html" class="lx" lang="ja">← ホーム</a><span> / </span><a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a><span> / </span><span>spec</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Pipeline (SDD)</span><span class="lx" lang="ja">パイプライン（SDD）</span></div>
+  <h1><span class="lx" lang="en">spec — interactive design docs</span><span class="lx" lang="ja">spec — 対話で設計書</span></h1>
+  <p class="lede lx" lang="en">spec generates an industry-standard specification through dialogue before a single line of code is written. It picks from 6 templates — Spec Kit, PRD, Design Doc, RFC, ADR, Scope Doc — and stops the moment design is done, unless told to keep going into implementation.</p>
+  <p class="lede lx" lang="ja">spec は、コードを書く前に業界標準の仕様書を対話で生成する skill。Spec Kit・PRD・Design Doc・RFC・ADR・Scope Doc の 6 種から選び、設計が終わった時点で止まる。実装まで進めるのは、続行の指示があったときだけ。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">01</span>
+    <h2><span class="lx" lang="en">What it does</span><span class="lx" lang="ja">何をするか</span></h2>
+  </div>
+  <div class="twocol">
+    <div class="card">
+      <h4><span class="lx" lang="en">6 industry-standard formats</span><span class="lx" lang="ja">業界標準 6 種</span></h4>
+      <p class="lx" lang="en">Spec Kit (3-file set, the AI-coding era standard) / PRD / Design Doc / RFC / ADR / Scope Doc. Formats can combine — "1 + 5" produces Spec Kit plus an ADR for the key technical decision.</p>
+      <p class="lx" lang="ja">Spec Kit（3 ファイルセット、AI コーディング時代の標準）/ PRD / Design Doc / RFC / ADR / Scope Doc。組み合わせも可能で、「1 + 5」なら Spec Kit と重要判断の ADR を両方生成する。</p>
+    </div>
+    <div class="card">
+      <h4><span class="lx" lang="en">Explicit AI boundaries</span><span class="lx" lang="ja">AI 境界の明示</span></h4>
+      <p class="lx" lang="en">Every generated spec carries a mandatory ✅ Always / ⚠️ Ask first / 🚫 Never section, so the AI never fills an ambiguity gap by guessing. Goal-fork ambiguity is confirmed in advance; everything else proceeds as an adopted interpretation, disclosed in the final report.</p>
+      <p class="lx" lang="ja">生成する spec には必須の ✅ Always / ⚠️ Ask first / 🚫 Never 節が入り、AI が推測で穴を埋めない。ゴール分岐級の曖昧さは事前確認、それ以外は採用解釈で進めて最終報告に開示する。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">02</span>
+    <h2><span class="lx" lang="en">When it fires</span><span class="lx" lang="ja">いつ動くか</span></h2>
+  </div>
+  <div class="trig">
+    <span><span class="lx" lang="en">"write a spec"</span><span class="lx" lang="ja">「仕様書作って」</span></span>
+    <span><span class="lx" lang="en">"design only first"</span><span class="lx" lang="ja">「まず設計だけして」</span></span>
+    <span><span class="lx" lang="en">"plan"</span><span class="lx" lang="ja">「plan」</span></span>
+    <span><span class="lx" lang="en">"organize the requirements"</span><span class="lx" lang="ja">「要件整理」</span></span>
+    <span class="no"><span class="lx" lang="en">starting from ideology (use concept)</span><span class="lx" lang="ja">思想から始める場合（concept を使う）</span></span>
+    <span class="no"><span class="lx" lang="en">design + implementation both wanted (run spec, then self-drive)</span><span class="lx" lang="ja">設計と実装の両方（spec を回してそのまま自走）</span></span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">03</span>
+    <h2><span class="lx" lang="en">How to use</span><span class="lx" lang="ja">使い方</span></h2>
+  </div>
+  <div class="invoke">
+<span class="p">$</span> /spec auth-redesign
+<span class="c"># or natural language / 自然文でも:</span>
+"まず設計だけして"
+"1 + 5 で（Spec Kit + ADR）お願い"
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">04</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+  </div>
+  <div class="flow">
+    <span class="fnode"><span class="lx" lang="en">Format dialogue</span><span class="lx" lang="ja">フォーマット選択</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Requirements analysis</span><span class="lx" lang="ja">要件分析</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Apply template</span><span class="lx" lang="ja">テンプレート適用</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">AI boundaries</span><span class="lx" lang="ja">AI 境界明示</span></span>
+    <span class="arr">→</span>
+    <span class="fnode hot"><span class="lx" lang="en">Adopted-interpretation report</span><span class="lx" lang="ja">採用解釈レポート</span></span>
+  </div>
+  <div class="note">
+    <span class="seal" aria-hidden="true">番</span>
+    <span><span class="lx" lang="en">Heavy impact analysis (5+ related files, cross-module) is delegated to the architect agent, which checks past decisions in the store before reporting the impact surface — code untouched.</span><span class="lx" lang="ja">関連ファイル 5 個超・複数モジュール跨りの重い分析は architect agent に委譲。ストアの過去決定を確認したうえで影響範囲を報告する — コードは触らない。</span></span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">05</span>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="concept.html"><b>concept</b><span class="lx" lang="en">upstream ideology</span><span class="lx" lang="ja">上流の思想</span></a>
+    <a href="dev-loop.html"><b>dev-loop</b><span class="lx" lang="en">downstream self-driving build</span><span class="lx" lang="ja">下流の自走ビルド</span></a>
+    <a href="ai-context.html"><b>ai-context</b><span class="lx" lang="en">task ledger &amp; next</span><span class="lx" lang="ja">タスク台帳と next</span></a>
+    <a href="architect.html"><b>architect</b><span class="lx" lang="en">delegated impact analysis</span><span class="lx" lang="ja">委譲先の影響分析</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span>© 2026 Banto</span>
+  <span><a href="../index.html#toolset" class="lx" lang="en">← Back to the toolset</a><a href="../index.html#toolset" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="../app.js" defer></script>
+</body>
+</html>

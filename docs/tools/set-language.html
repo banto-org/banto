@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>set-language — Banto</title>
+<meta name="description" content="set-language switches Banto between its JA-canonical and auto-generated EN skill sets, persists the choice across plugin updates, and requires one restart to load." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="../index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="../evidence.html" class="lx" lang="en">Evidence</a><a href="../evidence.html" class="lx" lang="ja">実測</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="../index.html" class="lx" lang="en">← Home</a><a href="../index.html" class="lx" lang="ja">← ホーム</a><span> / </span><a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a><span> / </span><span>set-language</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Workspace &amp; meta</span><span class="lx" lang="ja">ワークスペース &amp; メタ</span></div>
+  <h1><span class="lx" lang="en">set-language — Switch Banto between Japanese and English, stickily</span><span class="lx" lang="ja">set-language — 日本語と英語を切替、選択は永続</span></h1>
+  <p class="lede lx" lang="en">Banto ships JA-canonical skills plus an auto-generated EN set. set-language makes one of them active, writes the preference to user scope so it survives every future plugin update, and re-materializes it automatically after each update — the only thing left to the user is one restart.</p>
+  <p class="lede lx" lang="ja">Banto は日本語を正本とする skill 一式と、自動生成した英語版一式の両方を同梱する。set-language はどちらかを有効化し、選択をユーザースコープへ書き込むため、以後のプラグイン更新をまたいで保持される。更新後は同じ言語が自動で再展開されるため、ユーザーに残る作業は再起動のみ。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">1</span>
+    <h2><span class="lx" lang="en">What it does</span><span class="lx" lang="ja">何をするか</span></h2>
+  </div>
+  <div class="card">
+    <p class="lx" lang="en">This is the one deliberately bilingual skill in Banto — it must be discoverable in either language, so a user on the EN set can switch to JA and vice versa. Running it writes the preference to <code>~/.claude/banto-language</code>, copies <code>i18n/&lt;lang&gt;/{skills,agents}</code> onto the active <code>skills/</code> and <code>agents/</code>, stamps the version, and syncs the JA-specific <code>writing-ja</code> rule (deployed for Japanese, removed for English).</p>
+    <p class="lx" lang="ja">Banto の中で唯一、意図的に日英両対応にした skill。EN 版を使っている人が JA へ切り替え、その逆もできるよう、どちらの言語でも発見できる必要がある。実行すると、選択を <code>~/.claude/banto-language</code> に書き込み、<code>i18n/&lt;lang&gt;/{skills,agents}</code> を有効な <code>skills/</code>・<code>agents/</code> へコピーし、バージョンを刻印し、日本語専用の <code>writing-ja</code> ルールを同期する（日本語なら配備、英語なら削除）。</p>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">2</span>
+    <h2><span class="lx" lang="en">When it fires</span><span class="lx" lang="ja">いつ動くか</span></h2>
+  </div>
+  <div class="trig">
+    <span class="lx" lang="en">set language to japanese</span><span class="lx" lang="ja">言語を日本語にして</span>
+    <span class="lx" lang="en">switch to english</span><span class="lx" lang="ja">英語に切り替えて</span>
+    <span class="lx" lang="en">make banto japanese/english</span><span class="lx" lang="ja">言語設定</span>
+    <span class="no lx" lang="en">changing the output language of a single document — just write it in that language</span><span class="no lx" lang="ja">単一ドキュメントの出力言語を変えるだけ（その言語で直接書く）</span>
+    <span class="no lx" lang="en">editing one skill's wording — direct Edit</span><span class="no lx" lang="ja">1 つの skill の文言修正（直接 Edit）</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">3</span>
+    <h2><span class="lx" lang="en">How to use</span><span class="lx" lang="ja">使い方</span></h2>
+  </div>
+  <div class="invoke">
+<span class="p">$</span> /set-language ja
+<span class="p">$</span> /set-language en
+
+<span class="c"># </span><span class="lx" lang="en">natural language works too</span><span class="lx" lang="ja">自然文でも到達できる</span>
+<span class="p">&gt;</span> "switch to english"
+<span class="p">&gt;</span> "言語を日本語にして"
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">4</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+  </div>
+  <div class="flow">
+    <span class="fnode"><span class="lx" lang="en">resolve argument → ja/en</span><span class="lx" lang="ja">引数を ja/en に解決</span></span>
+    <span class="arr">→</span>
+    <span class="fnode hot"><span class="lx" lang="en">run set-language.sh</span><span class="lx" lang="ja">set-language.sh 実行</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">write preference (user scope)</span><span class="lx" lang="ja">選択を書き込み（ユーザースコープ）</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">copy i18n set onto active skills/agents</span><span class="lx" lang="ja">i18n セットを有効な skills/agents へコピー</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">sync writing-ja rule</span><span class="lx" lang="ja">writing-ja ルールを同期</span></span>
+  </div>
+  <div class="note">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="lx" lang="en">A future <code>claude plugin update</code> triggers the SessionStart hook <code>i18n-reconcile.sh</code>, which reads the saved preference and re-materializes the same language automatically — the choice stays sticky without the user repeating the command.</span>
+    <span class="lx" lang="ja">以後の <code>claude plugin update</code> では SessionStart hook の <code>i18n-reconcile.sh</code> が保存済みの選択を読み、同じ言語を自動で再展開する。ユーザーが再度コマンドを打つ必要はない。</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">5</span>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="kit.html"><b>kit</b><span class="lx" lang="en">the full command catalog, in whichever language is active</span><span class="lx" lang="ja">有効な言語で表示される全機能カタログ</span></a>
+    <a href="plugin-dev.html"><b>plugin-dev</b><span class="lx" lang="en">generates the JA-canonical skills that get translated</span><span class="lx" lang="ja">翻訳元となる日本語正本 skill を生成</span></a>
+    <a href="plugin-audit.html"><b>plugin-audit</b><span class="lx" lang="en">checks generality across languages (Axis 7)</span><span class="lx" lang="ja">言語をまたぐ汎用性を点検（Axis 7）</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span>© 2026 Banto</span>
+  <span><a href="../index.html#toolset" class="lx" lang="en">← Back to the toolset</a><a href="../index.html#toolset" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="../app.js" defer></script>
+</body>
+</html>

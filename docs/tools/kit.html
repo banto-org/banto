@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>kit — Banto</title>
+<meta name="description" content="kit displays a formatted catalog of every skill, agent, and command banto ships — the natural-language discovery hub so users never need to know a command exists." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="../index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="../evidence.html" class="lx" lang="en">Evidence</a><a href="../evidence.html" class="lx" lang="ja">実測</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="../index.html" class="lx" lang="en">← Home</a><a href="../index.html" class="lx" lang="ja">← ホーム</a><span> / </span><a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a><span> / </span><span>kit</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Workspace &amp; meta</span><span class="lx" lang="ja">ワークスペース &amp; メタ</span></div>
+  <h1><span class="lx" lang="en">kit — The full feature catalog, one natural-language question away</span><span class="lx" lang="ja">kit — 一言で開ける全機能カタログ</span></h1>
+  <p class="lede lx" lang="en">kit prints every command, natural-language trigger, custom agent, and user rule banto ships, exactly as written — no summarizing, no editing. It exists so a user never has to memorize which command does what: asking "what can banto do" surfaces the same catalog a person reading the source would see.</p>
+  <p class="lede lx" lang="ja">kit は banto が持つ全コマンド・自然文トリガー・カスタムエージェント・ユーザールールを、書かれたまま（要約も編集もせず）表示する。「banto で何ができる」と聞くだけで、ソースを直接読んだときと同じカタログが見える。ユーザーがどのコマンドが何をするか覚える必要をなくすための skill。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">1</span>
+    <h2><span class="lx" lang="en">What it does</span><span class="lx" lang="ja">何をするか</span></h2>
+  </div>
+  <div class="card">
+    <p class="lx" lang="en">Displays a static, pre-written catalog covering: commands grouped by search/research, context management, document creation, development flow, and tooling; skills that auto-fire from natural language with their example triggers; the 6 custom agents and their invocation paths; the subagent-delegation rubric (when to hand work to Explore, general-purpose, research-agent, architect, debugger, or qa-tester instead of doing it inline); and the user-scope global rules. Nothing here is computed — it is the same reference every time.</p>
+    <p class="lx" lang="ja">静的な事前作成カタログを表示する。内容は、検索・リサーチ / コンテキスト管理 / ドキュメント作成 / 開発フロー / ツール群でグルーピングしたコマンド、自然文から自動発火する skill とその例トリガー、6 つのカスタムエージェントと起動経路、subagent 委譲ルーブリック（Explore・general-purpose・research-agent・architect・debugger・qa-tester のどれに任せるか）、そしてユーザースコープのグローバルルール。ここに計算はなく、毎回同じ参照が返る。</p>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">2</span>
+    <h2><span class="lx" lang="en">When it fires</span><span class="lx" lang="ja">いつ動くか</span></h2>
+  </div>
+  <div class="trig">
+    <span class="lx" lang="en">what can banto do</span><span class="lx" lang="ja">banto で何ができる</span>
+    <span class="lx" lang="en">list the features</span><span class="lx" lang="ja">機能一覧</span>
+    <span class="lx" lang="en">list the commands</span><span class="lx" lang="ja">コマンド一覧</span>
+    <span class="lx" lang="en">what skills are there</span><span class="lx" lang="ja">どんなスキルがある</span>
+    <span class="lx" lang="en">how do I ... (looking for a banto feature)</span><span class="lx" lang="ja">〜ってどうやるの（banto の機能を探している時）</span>
+    <span class="no lx" lang="en">checking the details of one skill — Read its SKILL.md directly</span><span class="no lx" lang="ja">個別スキルの詳細確認（その SKILL.md を直接 Read）</span>
+    <span class="no lx" lang="en">auditing a plugin — plugin-audit</span><span class="no lx" lang="ja">プラグインの監査（plugin-audit の役割）</span>
+    <span class="no lx" lang="en">creating a new plugin — plugin-dev</span><span class="no lx" lang="ja">新規プラグインの作成（plugin-dev の役割）</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">3</span>
+    <h2><span class="lx" lang="en">How to use</span><span class="lx" lang="ja">使い方</span></h2>
+  </div>
+  <div class="invoke">
+<span class="p">$</span> /kit
+
+<span class="c"># </span><span class="lx" lang="en">natural language works too</span><span class="lx" lang="ja">自然文でも到達できる</span>
+<span class="p">&gt;</span> "what can banto do"
+<span class="p">&gt;</span> "banto の機能一覧を見せて"
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">4</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+  </div>
+  <div class="flow">
+    <span class="fnode"><span class="lx" lang="en">commands table</span><span class="lx" lang="ja">コマンド表</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">natural-language trigger table</span><span class="lx" lang="ja">自然文トリガー表</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">custom agents table</span><span class="lx" lang="ja">カスタムエージェント表</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">subagent-delegation rubric</span><span class="lx" lang="ja">subagent 委譲ルーブリック</span></span>
+    <span class="arr">→</span>
+    <span class="fnode hot"><span class="lx" lang="en">user global-rules table</span><span class="lx" lang="ja">ユーザーグローバルルール表</span></span>
+  </div>
+  <div class="note">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="lx" lang="en">If the user converses in English the same catalog may render in English; commands and trigger phrases are kept intact either way — kit is a display skill, never a summarizer.</span>
+    <span class="lx" lang="ja">ユーザーが英語で会話していれば、同じカタログを英語で表示してよい。コマンドとトリガー語はどちらの言語でも保持する — kit は表示専用の skill であり、要約はしない。</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">5</span>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="plugin-audit.html"><b>plugin-audit</b><span class="lx" lang="en">one of the entries kit surfaces</span><span class="lx" lang="ja">kit が表示する項目のひとつ</span></a>
+    <a href="plugin-dev.html"><b>plugin-dev</b><span class="lx" lang="en">another entry kit surfaces</span><span class="lx" lang="ja">kit が表示するもうひとつの項目</span></a>
+    <a href="ws.html"><b>ws</b><span class="lx" lang="en">the workspace orchestrator kit's development-flow table lists</span><span class="lx" lang="ja">kit の開発フロー表に載るワークスペース・オーケストレータ</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span>© 2026 Banto</span>
+  <span><a href="../index.html#toolset" class="lx" lang="en">← Back to the toolset</a><a href="../index.html#toolset" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="../app.js" defer></script>
+</body>
+</html>

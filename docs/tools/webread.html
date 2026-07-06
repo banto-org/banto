@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>webread — Banto</title>
+<meta name="description" content="webread fetches a URL's full body as clean Markdown via trafilatura, with no LLM summarization step, so the main model reads the real text instead of a small model's summary." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="../index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="../evidence.html" class="lx" lang="en">Evidence</a><a href="../evidence.html" class="lx" lang="ja">実測</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="../index.html" class="lx" lang="en">← Home</a><a href="../index.html" class="lx" lang="ja">← ホーム</a><span> / </span><a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a><span> / </span><span>webread</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Knowledge &amp; context</span><span class="lx" lang="ja">知識 &amp; コンテキスト</span></div>
+  <h1><span class="lx" lang="en">webread — full text, no summary</span><span class="lx" lang="ja">webread — 要約なし全文取得</span></h1>
+  <p class="lede lx" lang="en">A utility skill that replaces WebFetch. WebFetch hands the fetched page to a small model for summarization, so the main model never reads the raw body and can silently lose critical details. webread extracts the full text locally with trafilatura — no LLM in the loop — and the main model reads it directly.</p>
+  <p class="lede lx" lang="ja">WebFetch の代替となる utility skill。WebFetch は取得したページを小型モデルに要約させるため、本体モデルが生の本文を一度も読まず、重要な詳細を気づかず落とすことがある。webread はローカルの trafilatura（LLM 不使用）で全文を抽出し、本体モデルが直接それを読む。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">01</span>
+    <h2><span class="lx" lang="en">What it does</span><span class="lx" lang="ja">何をするか</span></h2>
+  </div>
+  <div class="twocol">
+    <div class="card">
+      <p class="lx" lang="en"><strong>Static-page fetch, full text.</strong> Runs <code>webread.sh &lt;URL&gt;</code>, extracts the article body with trafilatura, and returns clean Markdown that the main model reads in full — never a summary standing in for the source.</p>
+      <p class="lx" lang="ja"><strong>静的ページの全文取得。</strong><code>webread.sh &lt;URL&gt;</code> を実行し、trafilatura で本文を抽出したクリーンな Markdown を返す。本体モデルが全文を読み、要約が原文の代わりになることはない。</p>
+    </div>
+    <div class="card">
+      <p class="lx" lang="en"><strong>SPA fallback.</strong> When trafilatura can't extract a body from a JS-rendered page, it falls back to a 2-step path: render via Claude in Chrome or Playwright, save the HTML, then run <code>webread.sh --html</code> on the saved file.</p>
+      <p class="lx" lang="ja"><strong>SPA フォールバック。</strong>JS レンダリングのページで trafilatura が本文を抽出できない場合は、Claude in Chrome か Playwright でレンダリング後の HTML を保存し、<code>webread.sh --html</code> で本文を抽出する 2 段階に切り替える。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">02</span>
+    <h2><span class="lx" lang="en">When it fires</span><span class="lx" lang="ja">いつ動くか</span></h2>
+  </div>
+  <div class="trig">
+    <span class="lx" lang="en">a URL with "read this"</span><span class="lx" lang="ja">URL とともに「読んで」</span>
+    <span class="lx" lang="en">"check the contents"</span><span class="lx" lang="ja">「中身見て」</span>
+    <span class="lx" lang="en">"summarize this"</span><span class="lx" lang="ja">「要約して」</span>
+    <span class="lx" lang="en">close-reading a doc/article/blog/GitHub page</span><span class="lx" lang="ja">ドキュメント・記事・ブログ・GitHub ページの精読</span>
+    <span class="no lx" lang="en">searching for a URL → WebSearch / research</span><span class="no lx" lang="ja">URL を探す → WebSearch / research</span>
+    <span class="no lx" lang="en">a local file → Read directly</span><span class="no lx" lang="ja">ローカルファイル → 直接 Read</span>
+    <span class="no lx" lang="en">a direct .md link → Read/curl, not WebFetch</span><span class="no lx" lang="ja">.md への直接リンク → Read/curl（WebFetch ではない）</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">03</span>
+    <h2><span class="lx" lang="en">How to use</span><span class="lx" lang="ja">使い方</span></h2>
+  </div>
+  <div class="invoke">
+<span class="p">$</span> /webread https://example.com/release-notes
+<span class="c"># fetch, extract full text with trafilatura, Read the whole body</span>
+<span class="p">$</span> sh "$CLAUDE_PLUGIN_ROOT/scripts/webread.sh" --html saved.html
+<span class="c"># fallback path: extract from an already-rendered HTML file</span>
+  </div>
+  <p class="lx" lang="en" style="margin-top:14px">"read this page and check the actual contents" with a URL fires the same procedure.</p>
+  <p class="lx" lang="ja" style="margin-top:14px">URL とともに「このページを読んで中身を確認して」でも同じ手順が動く。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">04</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+  </div>
+  <div class="flow">
+    <div class="fnode lx" lang="en">webread.sh &lt;URL&gt;</div><div class="fnode lx" lang="ja">webread.sh &lt;URL&gt;</div>
+    <span class="arr">→</span>
+    <div class="fnode lx" lang="en">trafilatura extracts body</div><div class="fnode lx" lang="ja">trafilatura が本文抽出</div>
+    <span class="arr">→</span>
+    <div class="fnode hot lx" lang="en">main model Reads full text</div><div class="fnode hot lx" lang="ja">本体モデルが全文を Read</div>
+    <span class="arr">→</span>
+    <div class="fnode lx" lang="en">summarize only if needed</div><div class="fnode lx" lang="ja">必要な時だけ要約</div>
+  </div>
+  <div class="note">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="lx" lang="en">If trafilatura isn't installed (<code>pip install --user trafilatura</code>), <code>webread.sh</code> falls back to raw HTML via curl — tags included, but the main model still reads it directly rather than a summary.</span>
+    <span class="lx" lang="ja">trafilatura が未導入（<code>pip install --user trafilatura</code>）の場合、<code>webread.sh</code> は curl による生 HTML へフォールバックする。タグ込みではあるが、本体モデルは要約ではなくそれを直接読む。</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">05</span>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="research.html"><b>research</b><span class="lx" lang="en">where webread gets its URLs</span><span class="lx" lang="ja">webread に URL を渡す側</span></a>
+    <a href="search.html"><b>search</b><span class="lx" lang="en">internal search, no web</span><span class="lx" lang="ja">内部検索（web なし）</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span>© 2026 Banto</span>
+  <span><a href="../index.html#toolset" class="lx" lang="en">← Back to the toolset</a><a href="../index.html#toolset" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="../app.js" defer></script>
+</body>
+</html>

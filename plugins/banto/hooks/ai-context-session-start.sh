@@ -117,6 +117,11 @@ esac
 # ベース未作成（未登録 repo の subdir 等）→ 注入内容なしで終了
 [ ! -d "$AI_BASE" ] && exit 0
 
+# banto 起動のヘッドレス fork（idle-checkpoint 等）にはベースパス注入のみ行い、
+# checkpoint の消費（consumed/ への退避）・ダッシュボード・タスク注入はしない。
+# fork が他セッション向けの pending checkpoint を横取り消費するのを防ぐ
+[ "${BANTO_HEADLESS:-0}" = "1" ] && exit 0
+
 DECISIONS="$AI_BASE/decisions"
 SESSIONS="$AI_BASE/sessions"
 # 実効 tasks: 新 layout（workspaces/<author>/<topic>/tasks.md）→ legacy active.md フォールバック

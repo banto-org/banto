@@ -5,6 +5,10 @@
 # exit 0 で常に終了（ブロックしない）。次セッションの SessionStart で通知される。
 
 INPUT=$(cat)
+
+# banto 起動のヘッドレス fork（idle-checkpoint 等）では learnings ドラフトを作らない
+[ "${BANTO_HEADLESS:-0}" = "1" ] && exit 0
+
 CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)
 TRANSCRIPT=$(printf '%s' "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
 

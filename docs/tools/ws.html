@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ws — Banto</title>
+<meta name="description" content="ws is Banto's workspace + git-town orchestrator for the 3-tier branch model (main ← epic ← task worktree), driven entirely by natural-language intent detection." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="../index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="../evidence.html" class="lx" lang="en">Evidence</a><a href="../evidence.html" class="lx" lang="ja">実測</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="../index.html" class="lx" lang="en">← Home</a><a href="../index.html" class="lx" lang="ja">← ホーム</a><span> / </span><a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a><span> / </span><span>ws</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Workspace &amp; meta</span><span class="lx" lang="ja">ワークスペース &amp; メタ</span></div>
+  <h1><span class="lx" lang="en">ws — Workspace + git-town orchestrator for the 3-tier branch model</span><span class="lx" lang="ja">ws — ワークスペースと git-town を束ねる 3 階層ブランチオーケストレータ</span></h1>
+  <p class="lede lx" lang="en">ws manages topic-based workspaces and drives a 3-tier branch model — main, epic, and task worktrees — through git-town. It detects intent straight from natural language, so starting a large scope, splitting off parallel work, finishing a task, or shipping to main never requires memorizing a command.</p>
+  <p class="lede lx" lang="ja">ws はトピック単位のワークスペースを管理し、main・epic・task worktree の 3 階層ブランチ運用を git-town で駆動する。自然文からインテントを直接検出するため、大枠スコープの開始・並列作業の切り出し・完了・main への反映まで、コマンドを覚える必要はない。帳簿系の操作（sync・cleanup）は自動実行、構造を作る操作（epic 新設）は採用解釈つきで提案し、PR や main のような不可逆な操作だけ確認を挟む。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">1</span>
+    <h2><span class="lx" lang="en">What it does</span><span class="lx" lang="ja">何をするか</span></h2>
+  </div>
+  <div class="twocol">
+    <div class="card">
+      <h3><span class="lx" lang="en">3-tier branch operation</span><span class="lx" lang="ja">3 階層ブランチ運用</span></h3>
+      <p class="lx" lang="en">Four operations map onto git-town: <b>epic</b> (<code>git town hack</code> + workspace creation), <b>task</b> (<code>git town append</code> + a physically separate worktree), <b>done</b> (test → <code>git town merge</code> → sync → worktree cleanup), and <b>ship</b> (<code>git town propose</code>, a PR). Drift from an epic propagates to every child task via <code>git town sync</code>.</p>
+      <p class="lx" lang="ja">4 つの操作を git-town にマッピングする。<b>epic</b>（<code>git town hack</code> + ワークスペース作成）、<b>task</b>（<code>git town append</code> + 物理分離した worktree）、<b>done</b>（テスト → <code>git town merge</code> → sync → worktree 削除）、<b>ship</b>（<code>git town propose</code> による PR 作成）の 4 つ。epic の更新は <code>git town sync</code> で全 task へ連鎖する。</p>
+    </div>
+    <div class="card">
+      <h3><span class="lx" lang="en">Self-initiated parallel proposals</span><span class="lx" lang="ja">並列の自発提案</span></h3>
+      <p class="lx" lang="en">Even without the user saying "in parallel", ws judges whether work splits into independent subtasks (no shared files, no sequential dependency) and proposes parallelizing them — choosing between a short-lived fan-out Agent and a longer-running task worktree.</p>
+      <p class="lx" lang="ja">ユーザーが「並行で」と言わなくても、独立した複数サブタスク（同一ファイル非接触・直列依存なし）に分割できると判断すれば、並列化を自発的に提案する。判断基準は、短命な fan-out Agent か、並走ブランチとなる task worktree かの二択。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">2</span>
+    <h2><span class="lx" lang="en">When it fires</span><span class="lx" lang="ja">いつ動くか</span></h2>
+  </div>
+  <div class="trig">
+    <span class="lx" lang="en">workspace</span><span class="lx" lang="ja">ワークスペース</span>
+    <span class="lx" lang="en">switch work</span><span class="lx" lang="ja">作業切り替え</span>
+    <span class="lx" lang="en">run in parallel</span><span class="lx" lang="ja">並走</span>
+    <span class="lx" lang="en">split off a branch</span><span class="lx" lang="ja">ブランチ分けて</span>
+    <span class="lx" lang="en">worktree</span><span class="lx" lang="ja">worktree</span>
+    <span class="lx" lang="en">epic</span><span class="lx" lang="ja">epic</span>
+    <span class="lx" lang="en">this work is done</span><span class="lx" lang="ja">この作業終わった</span>
+    <span class="lx" lang="en">merge it</span><span class="lx" lang="ja">マージして</span>
+    <span class="lx" lang="en">release it / ship it</span><span class="lx" lang="ja">リリースして / 出して</span>
+    <span class="no lx" lang="en">a small one-off edit on the current branch</span><span class="no lx" lang="ja">現在ブランチ上の小さな単発編集</span>
+    <span class="no lx" lang="en">"at the same time" alone → parallel fan-out Agents, not a new workspace</span><span class="no lx" lang="ja">「同時に」だけ → 新規ワークスペースでなく並列 Agent</span>
+    <span class="no lx" lang="en">advancing the next tasks.md item (that's ai-context)</span><span class="no lx" lang="ja">tasks.md の次項目を進める（ai-context の役割）</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">3</span>
+    <h2><span class="lx" lang="en">How to use</span><span class="lx" lang="ja">使い方</span></h2>
+  </div>
+  <div class="invoke">
+<span class="c"># </span><span class="lx" lang="en">command aliases</span><span class="lx" lang="ja">コマンドのエイリアス</span>
+<span class="p">$</span> /ws epic payment-redesign
+<span class="p">$</span> /ws task api-endpoint
+<span class="p">$</span> /ws done
+<span class="p">$</span> /ws ship
+
+<span class="c"># </span><span class="lx" lang="en">natural language reaches every alias</span><span class="lx" lang="ja">自然文からもすべて到達できる</span>
+<span class="p">&gt;</span> "let's start the payment redesign"
+<span class="p">&gt;</span> "決済のリデザインを始める"
+<span class="p">&gt;</span> "put the API in a separate worktree"
+<span class="p">&gt;</span> "この作業終わった、epic に戻して"
+<span class="p">&gt;</span> "ship it"
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">4</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+  </div>
+  <div class="flow">
+    <span class="fnode hot"><span class="lx" lang="en">intent detection</span><span class="lx" lang="ja">インテント検出</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">epic (hack + WS)</span><span class="lx" lang="ja">epic（hack + WS）</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">task (append + worktree)</span><span class="lx" lang="ja">task（append + worktree）</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">done (merge + sync)</span><span class="lx" lang="ja">done（merge + sync）</span></span>
+    <span class="arr">→</span>
+    <span class="fnode hot"><span class="lx" lang="en">ship (PR, human gate)</span><span class="lx" lang="ja">ship（PR・人間ゲート）</span></span>
+  </div>
+  <div class="note">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="lx" lang="en">Judgment is split by risk: bookkeeping (sync, cleanup, done detection) runs silently; structure-creating moves (a new epic) come with a disclosed adopted interpretation; only irreversible, outward-facing moves — a PR, a merge into main — pass through a human confirmation, exactly once.</span>
+    <span class="lx" lang="ja">判断はリスクで分担する。帳簿系（sync・cleanup・done 検出）は黙って自動実行し、構造を作る操作（epic 新設）は採用解釈を開示して提案し、PR や main への反映のような不可逆で外向きの操作だけ、1 度だけ人間の確認を挟む。</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">5</span>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="ai-context.html"><b>ai-context</b><span class="lx" lang="en">next-task navigation lives here, not in ws</span><span class="lx" lang="ja">次タスク進行はこちら（ws の役割ではない）</span></a>
+    <a href="dev-loop.html"><b>dev-loop</b><span class="lx" lang="en">self-driving build inside a scope ws carved out</span><span class="lx" lang="ja">ws が切り出したスコープ内での自走ビルド</span></a>
+    <a href="save-checkpoint.html"><b>save-checkpoint</b><span class="lx" lang="en">snapshot session state before a switch</span><span class="lx" lang="ja">切り替え前にセッション状態を保存</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span>© 2026 Banto</span>
+  <span><a href="../index.html#toolset" class="lx" lang="en">← Back to the toolset</a><a href="../index.html#toolset" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="../app.js" defer></script>
+</body>
+</html>

@@ -280,6 +280,11 @@
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/model-claim-guard.sh",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/idle-checkpoint.sh",
+            "timeout": 5
           }
         ]
       }
@@ -334,6 +339,11 @@
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/odd-state-cleanup.sh",
             "timeout": 3
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/idle-checkpoint.sh",
+            "timeout": 5
           }
         ]
       }

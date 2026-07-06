@@ -54,16 +54,18 @@ fi
 # (B2) 直近 tool 出力に未解決の error があるか — jq で tool_result の is_error フラグを
 #     構造的に判定する。旧実装の raw grep は、ファイル内容に含まれる "fatal:" や
 #     "No such file or directory"（このリポジトリの hook ソースに常在）にも反応する
-#     主要な誤検知源だったため廃止。末尾 3 件の tool_result に限定する — それより前の
-#     error は後続の成功呼び出しで解消済みとみなす（探索的な失敗コマンドは正常な作業）。
+#     主要な誤検知源だったため廃止。判定は「最後の tool_result が error」のみ —
+#     error の後に 1 件でも成功呼び出しがあれば、失敗はリトライで解消済みとみなす
+#     （探索的な失敗 → 即リトライして完了報告、は正常な作業で、旧・末尾 3 件窓の
+#     主要な誤検知源だった）。実失敗の後に無関係な成功 1 件で逃げるケースは
+#     B1（verify-run の red/green）が受け持つ。本ガードは narrow・fail-open を優先。
 RECENT_ERR=$(printf '%s\n' "$TAIL" | jq -R -s '
     [split("\n")[] | select(length > 0) | (fromjson? // empty)]
     | map(select(.type == "user") | .message.content
           | if type == "array" then .[] else empty end
           | select(.type? == "tool_result"))
-    | .[-3:]
-    | map(select(.is_error == true))
-    | length
+    | (.[-1] // {})
+    | if .is_error == true then 1 else 0 end
 ' 2>/dev/null)
 [ "${RECENT_ERR:-0}" -gt 0 ] 2>/dev/null || exit 0
 

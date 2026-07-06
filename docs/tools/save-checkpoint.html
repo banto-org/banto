@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>save-checkpoint — Banto</title>
+<meta name="description" content="save-checkpoint snapshots the current session under {base}/sessions/ and recommends exactly one of compact or clear, backed by an idle-timeout hook that fires it automatically." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="../index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="../evidence.html" class="lx" lang="en">Evidence</a><a href="../evidence.html" class="lx" lang="ja">実測</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="../index.html" class="lx" lang="en">← Home</a><a href="../index.html" class="lx" lang="ja">← ホーム</a><span> / </span><a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a><span> / </span><span>save-checkpoint</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Knowledge &amp; context</span><span class="lx" lang="ja">知識 &amp; コンテキスト</span></div>
+  <h1><span class="lx" lang="en">save-checkpoint — session snapshot</span><span class="lx" lang="ja">save-checkpoint — セッション保存</span></h1>
+  <p class="lede lx" lang="en">Snapshots the current session — what's being worked on, how it got there, confirmed decisions, open issues, and next steps — under <code>{base}/sessions/</code>, then recommends exactly one of <code>compact</code> or <code>clear</code>. It never runs either command itself; the user always decides.</p>
+  <p class="lede lx" lang="ja">現在のセッション — 何に取り組んでいるか、経緯、確定した決定、未解決の論点、次の手順 — を <code>{base}/sessions/</code> 配下へ保存し、<code>compact</code> か <code>clear</code> のどちらか一方だけを推奨する。/compact・/clear 自体は決して自分で実行せず、判断は常にユーザーに委ねる。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">01</span>
+    <h2><span class="lx" lang="en">What it does</span><span class="lx" lang="ja">何をするか</span></h2>
+  </div>
+  <div class="twocol">
+    <div class="card">
+      <p class="lx" lang="en"><strong>Collects diagnostics</strong> before writing: total decision logs, today's decisions, existing checkpoints, research count, and spec files — then writes <code>{base}/sessions/checkpoint-{YYYY-MM-DD}-{HHMM}.md</code> with what's being worked on, how it got there, decisions, open issues, changed files, and next steps.</p>
+      <p class="lx" lang="ja"><strong>診断情報を先に収集する</strong>：決定ログ総数、今日の決定数、既存チェックポイント数、リサーチ数、spec ファイルを確認したうえで、<code>{base}/sessions/checkpoint-{YYYY-MM-DD}-{HHMM}.md</code> に、現在の作業内容・経緯・決定・未解決論点・変更ファイル・次の手順を書く。</p>
+    </div>
+    <div class="card">
+      <p class="lx" lang="en"><strong>Never presents both options.</strong> If decision logs and the checkpoint are both saved with nothing left unwritten, it recommends <code>clear</code> (reclaim the full context window). Otherwise it recommends <code>compact</code> with a concrete reason.</p>
+      <p class="lx" lang="ja"><strong>両論併記は絶対にしない。</strong>決定ログとチェックポイントが保存済みで未保存の重要情報がなければ <code>clear</code>（コンテキストを丸ごと取り戻せる）を推奨し、そうでなければ具体的な理由とともに <code>compact</code> を推奨する。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">02</span>
+    <h2><span class="lx" lang="en">When it fires</span><span class="lx" lang="ja">いつ動くか</span></h2>
+  </div>
+  <div class="trig">
+    <span class="lx" lang="en">"save a checkpoint"</span><span class="lx" lang="ja">「チェックポイント保存」</span>
+    <span class="lx" lang="en">"save the state"</span><span class="lx" lang="ja">「状態保存して」</span>
+    <span class="lx" lang="en">"save before clear"</span><span class="lx" lang="ja">「clear前に保存」</span>
+    <span class="lx" lang="en">"save before compact"</span><span class="lx" lang="ja">「compact前に保存」</span>
+    <span class="no lx" lang="en">a bare mention of compact/clear, no save request</span><span class="no lx" lang="ja">保存を求めない単なる compact/clear への言及</span>
+    <span class="no lx" lang="en">recording a design decision → ai-context</span><span class="no lx" lang="ja">設計判断の記録 → ai-context</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">03</span>
+    <h2><span class="lx" lang="en">How to use</span><span class="lx" lang="ja">使い方</span></h2>
+  </div>
+  <div class="invoke">
+<span class="p">$</span> /save-checkpoint
+<span class="c"># collects diagnostics, writes the checkpoint, recommends compact or clear</span>
+  </div>
+  <p class="lx" lang="en" style="margin-top:14px">"save the state before I clear" fires the same procedure as the explicit command.</p>
+  <p class="lx" lang="ja" style="margin-top:14px">「clear する前に状態を保存して」のような自然文でも、明示コマンドと同じ手順が動く。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">04</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+  </div>
+  <div class="flow">
+    <div class="fnode lx" lang="en">Collect diagnostics</div><div class="fnode lx" lang="ja">診断情報を収集</div>
+    <span class="arr">→</span>
+    <div class="fnode lx" lang="en">Write checkpoint.md</div><div class="fnode lx" lang="ja">checkpoint.md を書く</div>
+    <span class="arr">→</span>
+    <div class="fnode lx" lang="en">Recommend one option</div><div class="fnode lx" lang="ja">一方だけ推奨</div>
+    <span class="arr">→</span>
+    <div class="fnode hot lx" lang="en">Wait for the user</div><div class="fnode hot lx" lang="ja">ユーザーの判断を待つ</div>
+  </div>
+  <div class="note">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="lx" lang="en">An <code>idle-checkpoint</code> hook arms a watcher on every response and, after 5 minutes of no operation — matching the prompt-cache TTL — fires <code>/save-checkpoint</code> automatically via a headless <code>claude -p --resume --fork-session</code> run, so an idle session never re-reads a huge context at cold pricing when it resumes.</span>
+    <span class="lx" lang="ja"><code>idle-checkpoint</code> hook が応答完了ごとにウォッチャーをアームし、無操作 5 分（プロンプトキャッシュの TTL に一致）が経過すると、ヘッドレスの <code>claude -p --resume --fork-session</code> 実行で <code>/save-checkpoint</code> を自動発火する。放置後の再開時に巨大コンテキストをコールド価格で読み直す事態を防ぐ。</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">05</span>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="ai-context.html"><b>ai-context</b><span class="lx" lang="en">decision logs &amp; task file</span><span class="lx" lang="ja">決定ログ・タスクファイル</span></a>
+    <a href="search.html"><b>search</b><span class="lx" lang="en">find a past checkpoint's context</span><span class="lx" lang="ja">過去のチェックポイントを検索</span></a>
+    <a href="ws.html"><b>ws</b><span class="lx" lang="en">workspace &amp; branch scope</span><span class="lx" lang="ja">ワークスペース・ブランチ切替</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span>© 2026 Banto</span>
+  <span><a href="../index.html#toolset" class="lx" lang="en">← Back to the toolset</a><a href="../index.html#toolset" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="../app.js" defer></script>
+</body>
+</html>

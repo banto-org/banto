@@ -26,7 +26,51 @@
     <a href="#flagships" class="lx" lang="en">Flagships</a><a href="#flagships" class="lx" lang="ja">目玉</a>
     <a href="#pipeline" class="lx" lang="en">Pipeline</a><a href="#pipeline" class="lx" lang="ja">パイプライン</a>
     <a href="#safety" class="lx" lang="en">Safety</a><a href="#safety" class="lx" lang="ja">安全</a>
-    <a href="#toolset" class="lx" lang="en">Toolset</a><a href="#toolset" class="lx" lang="ja">道具一式</a>
+    <div class="nav-item has-menu">
+      <a href="#toolset" class="lx" lang="en" aria-haspopup="true">Toolset</a><a href="#toolset" class="lx" lang="ja" aria-haspopup="true">道具一式</a>
+      <div class="nav-menu">
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Pipeline (SDD)</span><span class="nav-menu-head lx" lang="ja">パイプライン（SDD）</span>
+          <a href="tools/concept.html"><b>concept</b><span class="lx" lang="en">forge the ideology</span><span class="lx" lang="ja">思想を鍛える</span></a>
+          <a href="tools/spec.html"><b>spec</b><span class="lx" lang="en">interactive design docs</span><span class="lx" lang="ja">対話で設計書</span></a>
+          <a href="tools/dev-loop.html"><b>dev-loop</b><span class="lx" lang="en">self-driving build</span><span class="lx" lang="ja">自走ビルド</span></a>
+          <a href="tools/ai-build.html"><b>ai-build</b><span class="lx" lang="en">AI feature flow · eval</span><span class="lx" lang="ja">AI 構築フロー · eval</span></a>
+          <a href="tools/model-lab.html"><b>model-lab</b><span class="lx" lang="en">train models · verify · paper</span><span class="lx" lang="ja">モデル学習 · 検証 · 論文</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Knowledge &amp; context</span><span class="nav-menu-head lx" lang="ja">知識 &amp; コンテキスト</span>
+          <a href="tools/ai-context.html"><b>ai-context</b><span class="lx" lang="en">decisions · memo · knowledge · store</span><span class="lx" lang="ja">決定 · メモ · 知識 · ストア</span></a>
+          <a href="tools/search.html"><b>search</b><span class="lx" lang="en">internal search, no web</span><span class="lx" lang="ja">内部検索（web なし）</span></a>
+          <a href="tools/research.html"><b>research</b><span class="lx" lang="en">external, saved to store</span><span class="lx" lang="ja">外部調査 → ストア</span></a>
+          <a href="tools/save-checkpoint.html"><b>save-checkpoint</b><span class="lx" lang="en">session snapshot</span><span class="lx" lang="ja">セッション保存</span></a>
+          <a href="tools/webread.html"><b>webread</b><span class="lx" lang="en">full-text, no summary</span><span class="lx" lang="ja">要約なし全文取得</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Workspace &amp; meta</span><span class="nav-menu-head lx" lang="ja">ワークスペース &amp; メタ</span>
+          <a href="tools/ws.html"><b>ws</b><span class="lx" lang="en">workspace &amp; fleet</span><span class="lx" lang="ja">ワークスペース &amp; 艦隊</span></a>
+          <a href="tools/set-language.html"><b>set-language</b><span class="lx" lang="en">JA ⇄ EN, sticky</span><span class="lx" lang="ja">日英切替（永続）</span></a>
+          <a href="tools/plugin-dev.html"><b>plugin-dev</b><span class="lx" lang="en">scaffold &amp; refactor</span><span class="lx" lang="ja">生成 &amp; 改修</span></a>
+          <a href="tools/plugin-audit.html"><b>plugin-audit</b><span class="lx" lang="en">15-axis quality audit</span><span class="lx" lang="ja">15 軸品質監査</span></a>
+          <a href="tools/kit.html"><b>kit</b><span class="lx" lang="en">discover everything</span><span class="lx" lang="ja">全機能カタログ</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Agents</span><span class="nav-menu-head lx" lang="ja">エージェント</span>
+          <a href="tools/architect.html"><b>architect</b><span class="lx" lang="en">design &amp; tradeoffs</span><span class="lx" lang="ja">設計 &amp; トレードオフ</span></a>
+          <a href="tools/debugger.html"><b>debugger</b><span class="lx" lang="en">reproduce · fix · verify</span><span class="lx" lang="ja">再現 · 修正 · 検証</span></a>
+          <a href="tools/qa-tester.html"><b>qa-tester</b><span class="lx" lang="en">E2E across web/desktop/mobile</span><span class="lx" lang="ja">web/desktop/mobile 横断 E2E</span></a>
+          <a href="tools/research-agent.html"><b>research-agent</b><span class="lx" lang="en">parallel web research</span><span class="lx" lang="ja">並列 web 調査</span></a>
+          <a href="tools/search-agent.html"><b>search-agent</b><span class="lx" lang="en">parallel internal grep (haiku)</span><span class="lx" lang="ja">並列内部検索（haiku）</span></a>
+          <a href="tools/context-keeper.html"><b>context-keeper</b><span class="lx" lang="en">search-index maintenance</span><span class="lx" lang="ja">検索インデックス保守</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Under the hood</span><span class="nav-menu-head lx" lang="ja">仕組み</span>
+          <a href="hooks.html"><b>hooks</b><span class="lx" lang="en">deterministic guard rails</span><span class="lx" lang="ja">決定論ガードレール</span></a>
+          <a href="odd.html"><b>odd</b><span class="lx" lang="en">autonomy by declaration</span><span class="lx" lang="ja">自律性の宣言と強制</span></a>
+          <a href="plugin-tools.html"><b>plugin tools</b><span class="lx" lang="en">audit &amp; scaffold, in depth</span><span class="lx" lang="ja">監査 &amp; 生成の詳説</span></a>
+          <a href="ai-context-store.html"><b>context store</b><span class="lx" lang="en">the memory architecture</span><span class="lx" lang="ja">記憶のアーキテクチャ</span></a>
+        </div>
+      </div>
+    </div>
     <a href="evidence.html" class="lx" lang="en">Evidence</a><a href="evidence.html" class="lx" lang="ja">実測</a>
   </nav>
   <div class="nav-right">
@@ -589,6 +633,11 @@
         監査が、宣言と実体の乖離を見張る — ドキュメントが嘘をつかない。
       </p>
     </div>
+
+    <div class="reveal" style="text-align:center; margin-top:26px; display:flex; gap:26px; justify-content:center; flex-wrap:wrap;">
+      <a class="flag-more" style="color:var(--paper); border-color:rgba(237,230,214,.35);" href="hooks.html"><span class="lx" lang="en">How the flagship hooks work →</span><span class="lx" lang="ja">目玉 hook の解説 →</span></a>
+      <a class="flag-more" style="color:var(--paper); border-color:rgba(237,230,214,.35);" href="odd.html"><span class="lx" lang="en">ODD — autonomy by declaration →</span><span class="lx" lang="ja">ODD — 自律性の宣言と強制 →</span></a>
+    </div>
   </div>
 </section>
 
@@ -612,33 +661,33 @@
     <div class="tool-group reveal">
       <h4 class="tg-head"><span class="lx" lang="en">Pipeline (SDD)</span><span class="lx" lang="ja">パイプライン（SDD）</span></h4>
       <div class="chips">
-        <span class="chip"><b>concept</b><i class="lx" lang="en">forge the ideology</i><i class="lx" lang="ja">思想を鍛える</i></span>
-        <span class="chip"><b>spec</b><i class="lx" lang="en">interactive design docs</i><i class="lx" lang="ja">対話で設計書</i></span>
-        <span class="chip"><b>dev-loop</b><i class="lx" lang="en">self-driving build</i><i class="lx" lang="ja">自走ビルド</i></span>
-        <span class="chip"><b>ai-build</b><i class="lx" lang="en">AI feature flow · eval</i><i class="lx" lang="ja">AI 構築フロー · eval</i></span>
-        <span class="chip"><b>model-lab</b><i class="lx" lang="en">train models · verify · paper</i><i class="lx" lang="ja">モデル学習 · 検証 · 論文</i></span>
+        <a class="chip" href="tools/concept.html"><b>concept</b><i class="lx" lang="en">forge the ideology</i><i class="lx" lang="ja">思想を鍛える</i></a>
+        <a class="chip" href="tools/spec.html"><b>spec</b><i class="lx" lang="en">interactive design docs</i><i class="lx" lang="ja">対話で設計書</i></a>
+        <a class="chip" href="tools/dev-loop.html"><b>dev-loop</b><i class="lx" lang="en">self-driving build</i><i class="lx" lang="ja">自走ビルド</i></a>
+        <a class="chip" href="tools/ai-build.html"><b>ai-build</b><i class="lx" lang="en">AI feature flow · eval</i><i class="lx" lang="ja">AI 構築フロー · eval</i></a>
+        <a class="chip" href="tools/model-lab.html"><b>model-lab</b><i class="lx" lang="en">train models · verify · paper</i><i class="lx" lang="ja">モデル学習 · 検証 · 論文</i></a>
       </div>
     </div>
 
     <div class="tool-group reveal">
       <h4 class="tg-head"><span class="lx" lang="en">Knowledge &amp; context</span><span class="lx" lang="ja">知識 &amp; コンテキスト</span></h4>
       <div class="chips">
-        <span class="chip star"><b>ai-context</b><i class="lx" lang="en">decisions · memo · knowledge · store</i><i class="lx" lang="ja">決定 · メモ · 知識 · ストア</i></span>
-        <span class="chip"><b>search</b><i class="lx" lang="en">internal search, no web</i><i class="lx" lang="ja">内部検索（web なし）</i></span>
-        <span class="chip"><b>research</b><i class="lx" lang="en">external, saved to store</i><i class="lx" lang="ja">外部調査 → ストア</i></span>
-        <span class="chip"><b>save-checkpoint</b><i class="lx" lang="en">session snapshot</i><i class="lx" lang="ja">セッション保存</i></span>
-        <span class="chip"><b>webread</b><i class="lx" lang="en">full-text, no summary</i><i class="lx" lang="ja">要約なし全文取得</i></span>
+        <a class="chip star" href="tools/ai-context.html"><b>ai-context</b><i class="lx" lang="en">decisions · memo · knowledge · store</i><i class="lx" lang="ja">決定 · メモ · 知識 · ストア</i></a>
+        <a class="chip" href="tools/search.html"><b>search</b><i class="lx" lang="en">internal search, no web</i><i class="lx" lang="ja">内部検索（web なし）</i></a>
+        <a class="chip" href="tools/research.html"><b>research</b><i class="lx" lang="en">external, saved to store</i><i class="lx" lang="ja">外部調査 → ストア</i></a>
+        <a class="chip" href="tools/save-checkpoint.html"><b>save-checkpoint</b><i class="lx" lang="en">session snapshot</i><i class="lx" lang="ja">セッション保存</i></a>
+        <a class="chip" href="tools/webread.html"><b>webread</b><i class="lx" lang="en">full-text, no summary</i><i class="lx" lang="ja">要約なし全文取得</i></a>
       </div>
     </div>
 
     <div class="tool-group reveal">
       <h4 class="tg-head"><span class="lx" lang="en">Workspace &amp; meta</span><span class="lx" lang="ja">ワークスペース &amp; メタ</span></h4>
       <div class="chips">
-        <span class="chip star"><b>ws</b><i class="lx" lang="en">workspace &amp; fleet</i><i class="lx" lang="ja">ワークスペース &amp; 艦隊</i></span>
-        <span class="chip star"><b>set-language</b><i class="lx" lang="en">JA ⇄ EN, sticky</i><i class="lx" lang="ja">日英切替（永続）</i></span>
-        <span class="chip"><b>plugin-dev</b><i class="lx" lang="en">scaffold &amp; refactor</i><i class="lx" lang="ja">生成 &amp; 改修</i></span>
-        <span class="chip"><b>plugin-audit</b><i class="lx" lang="en">15-axis quality audit</i><i class="lx" lang="ja">15 軸品質監査</i></span>
-        <span class="chip"><b>kit</b><i class="lx" lang="en">discover everything</i><i class="lx" lang="ja">全機能カタログ</i></span>
+        <a class="chip star" href="tools/ws.html"><b>ws</b><i class="lx" lang="en">workspace &amp; fleet</i><i class="lx" lang="ja">ワークスペース &amp; 艦隊</i></a>
+        <a class="chip star" href="tools/set-language.html"><b>set-language</b><i class="lx" lang="en">JA ⇄ EN, sticky</i><i class="lx" lang="ja">日英切替（永続）</i></a>
+        <a class="chip" href="tools/plugin-dev.html"><b>plugin-dev</b><i class="lx" lang="en">scaffold &amp; refactor</i><i class="lx" lang="ja">生成 &amp; 改修</i></a>
+        <a class="chip" href="tools/plugin-audit.html"><b>plugin-audit</b><i class="lx" lang="en">15-axis quality audit</i><i class="lx" lang="ja">15 軸品質監査</i></a>
+        <a class="chip" href="tools/kit.html"><b>kit</b><i class="lx" lang="en">discover everything</i><i class="lx" lang="ja">全機能カタログ</i></a>
       </div>
       <a class="flag-more" href="plugin-tools.html"><span class="lx" lang="en">How plugin-audit &amp; plugin-dev work →</span><span class="lx" lang="ja">plugin-audit &amp; plugin-dev の解説 →</span></a>
     </div>
@@ -646,12 +695,12 @@
     <div class="tool-group reveal">
       <h4 class="tg-head"><span class="lx" lang="en">Agents (fan out in parallel)</span><span class="lx" lang="ja">エージェント（並列展開）</span></h4>
       <div class="chips">
-        <span class="chip ag"><b>architect</b></span>
-        <span class="chip ag"><b>debugger</b></span>
-        <span class="chip ag"><b>qa-tester</b></span>
-        <span class="chip ag"><b>research-agent</b></span>
-        <span class="chip ag"><b>search-agent</b></span>
-        <span class="chip ag"><b>context-keeper</b></span>
+        <a class="chip ag" href="tools/architect.html"><b>architect</b></a>
+        <a class="chip ag" href="tools/debugger.html"><b>debugger</b></a>
+        <a class="chip ag" href="tools/qa-tester.html"><b>qa-tester</b></a>
+        <a class="chip ag" href="tools/research-agent.html"><b>research-agent</b></a>
+        <a class="chip ag" href="tools/search-agent.html"><b>search-agent</b></a>
+        <a class="chip ag" href="tools/context-keeper.html"><b>context-keeper</b></a>
       </div>
     </div>
   </div>

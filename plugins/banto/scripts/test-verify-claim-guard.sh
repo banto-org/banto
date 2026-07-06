@@ -62,6 +62,14 @@ rm -f "$FIX"/state/verify-last-*
 # false-positive regression: old error already recovered by 3 later successes -> pass
 [ "$(guard "$RECOVERED_T")" = "0" ] && ok "claim + recovered error (3 successes after) -> pass" || no "recovered error should not block"
 
+# false-positive regression: error immediately retried and resolved by ONE success -> pass
+# （実運用の主要誤検知: 失敗 → 即リトライ成功 → 完了報告。旧・末尾 3 件窓はこれを block した）
+RETRY_T="$FIX/retry.jsonl"
+{ printf '%s\n' '{"type":"user","message":{"content":[{"type":"tool_result","is_error":true,"content":"sed: No such file or directory"}]}}'
+  printf '%s\n' '{"type":"user","message":{"content":[{"type":"tool_result","is_error":false,"content":"ok after cd"}]}}'
+  printf '%s\n' '{"type":"assistant","message":{"content":[{"type":"text","text":"実装が完了しました"}]}}'; } > "$RETRY_T"
+[ "$(guard "$RETRY_T")" = "0" ] && ok "claim + error resolved by one retry -> pass" || no "retried-and-resolved error should not block"
+
 # false-positive regression: stale RED verify state (>4h) -> pass
 rm -f "$FIX"/state/verify-last-*; printf 'red:test\n' > "$FIX/state/verify-last-t"
 touch -t "$(date -v-5H +%Y%m%d%H%M 2>/dev/null || date -d '5 hours ago' +%Y%m%d%H%M)" "$FIX/state/verify-last-t"
