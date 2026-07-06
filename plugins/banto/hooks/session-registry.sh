@@ -17,6 +17,10 @@ set -u
 command -v jq >/dev/null 2>&1 || exit 0
 command -v git >/dev/null 2>&1 || exit 0
 
+# banto 起動のヘッドレス fork（idle-checkpoint 等）は艦隊に登録しない
+# （Fleet 表示の汚染と偽の branch 衝突警告を防ぐ）
+[ "${BANTO_HEADLESS:-0}" = "1" ] && exit 0
+
 PAYLOAD=$(cat 2>/dev/null || echo '{}')
 SESSION_ID=$(printf "%s" "$PAYLOAD" | jq -r '.session_id // empty')
 [ -z "$SESSION_ID" ] && exit 0

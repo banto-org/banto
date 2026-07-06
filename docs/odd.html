@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>odd — Banto / 自律性の設計領域</title>
+<meta name="description" content="Banto's ODD (Operational Design Domain): each skill declares in odd.yaml how far it may drive itself — and deterministic hooks, not promises, enforce the boundary." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="subpage.css" />
+<style>
+  .lvl-table{ width:100%; border-collapse:collapse; margin-top:6px; font-size:14px; }
+  .lvl-table th,.lvl-table td{ border:1px solid var(--line); padding:10px 13px; text-align:left; vertical-align:top; line-height:1.55; }
+  .lvl-table th{ background:var(--paper-2); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); }
+  .lvl-table td.lv{ font-family:var(--mono); font-weight:700; color:var(--accent-d); white-space:nowrap; }
+  .lvl-table tr.out td{ color:var(--ink-soft); }
+  .field-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:14px; }
+  .field-grid .fd{ background:var(--card); border:1px solid var(--line); border-radius:11px; padding:13px 15px; box-shadow:var(--shadow); }
+  .field-grid .fd b{ font-family:var(--mono); font-size:13px; color:var(--accent-d); }
+  .field-grid .fd p{ font-size:13px; color:var(--ink-2); margin:6px 0 0; line-height:1.5; }
+  .ks-list{ margin:14px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px; }
+  .ks-list li{ background:var(--card); border:1px solid var(--line); border-radius:11px; padding:12px 16px; font-size:14px; color:var(--ink-2); line-height:1.6; box-shadow:var(--shadow); }
+  .ks-list li b{ color:var(--ink); }
+  .ks-list li .hk{ display:inline-block; margin-top:4px; font-family:var(--mono); font-size:12px; color:var(--accent-d); }
+  .ks-list li.soft{ border-style:dashed; }
+</style>
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="#levels" class="lx" lang="en">Autonomy levels</a><a href="#levels" class="lx" lang="ja">自律性レベル</a>
+    <a href="#yaml" class="lx" lang="en">odd.yaml</a><a href="#yaml" class="lx" lang="ja">odd.yaml</a>
+    <a href="#enforce" class="lx" lang="en">Enforcement</a><a href="#enforce" class="lx" lang="ja">強制</a>
+    <a href="hooks.html" class="lx" lang="en">hooks →</a><a href="hooks.html" class="lx" lang="ja">hooks →</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="index.html" class="lx" lang="en">← Home</a><a href="index.html" class="lx" lang="ja">← ホーム</a><span> / </span><span class="lx" lang="en">Under the hood</span><span class="lx" lang="ja">仕組み</span><span> / </span><span>odd</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">ODD — Operational Design Domain</span><span class="lx" lang="ja">ODD — 運転設計領域</span></div>
+  <h1><span class="lx" lang="en">Autonomy by declaration, enforced by hooks</span><span class="lx" lang="ja">自律性は宣言し、hook が強制する</span></h1>
+  <p class="lede lx" lang="en">Banto borrows the term ODD from self-driving cars (SAE J3016) and applies it to skills: autonomy isn't uniform across a plugin, so each skill declares its own operational range in an <code>odd.yaml</code> — what it may do, what it must not, and where the kill switch sits.</p>
+  <p class="lede lx" lang="ja">自動運転の ODD（Operational Design Domain・SAE J3016）を skill に移植した仕組み。プラグイン全体で自律性は一律ではなく、skill ごとに <code>odd.yaml</code> が運転可能な範囲を宣言する — 何をしてよいか・何をしてはいけないか・どこで止まるか。</p>
+  <p class="lede lx" lang="en">The declaration alone would be a paper promise. What makes it real is the split: <code>odd.yaml</code> states the boundary, and separate deterministic hooks enforce it — a skill can't talk its way past a hook.</p>
+  <p class="lede lx" lang="ja">宣言だけなら紙の上の約束で終わる。実効性を持たせるのは分離の構造：<code>odd.yaml</code> が境界を述べ、別の決定論的 hook がそれを強制する。skill が言葉で hook を説得することはできない。</p>
+</section>
+
+<!-- WHY -->
+<section class="sec" id="why">
+  <div class="sec-head">
+    <span class="ghost">A</span>
+    <div class="sub">Why ODD</div>
+    <h2><span class="lx" lang="en">Not every skill drives the same way</span><span class="lx" lang="ja">skill ごとに運転可能な範囲は違う</span></h2>
+    <p><span class="lx" lang="en">A one-click utility (kit) and a multi-file autonomous loop (dev-loop) can't share one autonomy rule. ODD makes the difference explicit per skill instead of leaving it implicit.</span><span class="lx" lang="ja">ワンショットの utility（kit）と、複数ファイルを跨ぐ自走ループ（dev-loop）を、同じ自律性ルールで扱うことはできない。ODD はその違いを skill ごとに明示し、暗黙のままにしない。</span></p>
+  </div>
+  <div class="card">
+    <ul class="tight">
+      <li><span class="lx" lang="en"><b>Declaration</b> lives in <code>plugins/banto/skills/&lt;name&gt;/odd.yaml</code>, validated against <code>templates/odd/odd.schema.yaml</code> (JSON Schema, pure validation — no enforcement logic).</span><span class="lx" lang="ja"><b>宣言</b>は <code>plugins/banto/skills/&lt;name&gt;/odd.yaml</code> に置き、<code>templates/odd/odd.schema.yaml</code>（JSON Schema・純粋な検証のみで強制ロジックは持たない）で妥当性を確認する。</span></li>
+      <li><span class="lx" lang="en"><b>Enforcement</b> lives outside the skill entirely — in hooks (<a href="#enforce">below</a>) that fire regardless of which skill is active, or even when no skill is active at all.</span><span class="lx" lang="ja"><b>強制</b>は skill の外側にある — どの skill が動いていても、あるいは skill が何も起動していなくても発火する hook（<a href="#enforce">後述</a>）が担う。</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- LEVELS -->
+<section class="sec" id="levels">
+  <div class="sec-head">
+    <span class="ghost">B</span>
+    <div class="sub">autonomy_level</div>
+    <h2><span class="lx" lang="en">L0 – L4+, and what each permits</span><span class="lx" lang="ja">L0〜L4+ と、それぞれが許す範囲</span></h2>
+    <p><span class="lx" lang="en">Each odd.yaml declares one <code>autonomy_level</code>. The schema defines six levels (L0–L5, per SAE J3016 / arXiv 2506.12469); Banto only ships L0–L3 — L4 and L5 belong to a separate, not-yet-public plugin (banto-autonomy).</span><span class="lx" lang="ja">odd.yaml は <code>autonomy_level</code> を 1 つ宣言する。スキーマ自体は 6 段階（L0〜L5・SAE J3016 / arXiv 2506.12469 準拠）を定義するが、Banto が実装するのは L0〜L3 のみ。L4・L5 は別プラグイン（banto-autonomy・未公開）の領域。</span></p>
+  </div>
+  <table class="lvl-table">
+    <thead>
+      <tr>
+        <th><span class="lx" lang="en">Level</span><span class="lx" lang="ja">レベル</span></th>
+        <th><span class="lx" lang="en">Meaning</span><span class="lx" lang="ja">意味</span></th>
+        <th><span class="lx" lang="en">Adopted interpretations (spec-fidelity)</span><span class="lx" lang="ja">採用解釈の扱い（spec-fidelity）</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="lv">L0</td><td><span class="lx" lang="en">Manual — information display only</span><span class="lx" lang="ja">Manual — 情報表示のみ</span></td><td><span class="lx" lang="en">May proceed, disclosed in the final report</span><span class="lx" lang="ja">採用解釈で進行可・最終報告で開示</span></td></tr>
+      <tr><td class="lv">L1</td><td><span class="lx" lang="en">Suggest — user approves each output</span><span class="lx" lang="ja">Suggest — 出力ごとにユーザーが承認</span></td><td><span class="lx" lang="en">May proceed, disclosed in the final report</span><span class="lx" lang="ja">採用解釈で進行可・最終報告で開示</span></td></tr>
+      <tr><td class="lv">L2</td><td><span class="lx" lang="en">Copilot — partial execution, per-step approval</span><span class="lx" lang="ja">Copilot — 部分実行・手順ごとに承認</span></td><td><span class="lx" lang="en">May proceed, disclosed in the final report</span><span class="lx" lang="ja">採用解釈で進行可・最終報告で開示</span></td></tr>
+      <tr><td class="lv">L3</td><td><span class="lx" lang="en">Autopilot — continuous execution, owner is asked only on exceptions</span><span class="lx" lang="ja">Autopilot — 継続実行・例外時のみ owner へ確認</span></td><td><span class="lx" lang="en">May proceed, but medium scale or larger MUST disclose interpretation / alternatives / verification</span><span class="lx" lang="ja">進行可。ただし中規模以上は「採用解釈・代替案・検証内容」の開示が必須</span></td></tr>
+      <tr class="out"><td class="lv">L4+</td><td><span class="lx" lang="en">Supervised-Auto / Self-improving — explicit stop conditions, little to no human loop</span><span class="lx" lang="ja">Supervised-Auto / Self-improving — 明示停止条件・人間の関与がほぼ無い</span></td><td><span class="lx" lang="en">Advance confirmation required — adopted interpretations not allowed. Out of Banto's scope.</span><span class="lx" lang="ja">事前確認が必須・採用解釈は不可。Banto の対象外。</span></td></tr>
+    </tbody>
+  </table>
+  <p class="crumb" style="margin-top:10px"><span class="lx" lang="en">A skill with no odd.yaml at all is treated as provisional L0 until one is written.</span><span class="lx" lang="ja">odd.yaml が無い skill は、書かれるまで暫定的に L0 として扱う。</span></p>
+</section>
+
+<!-- YAML -->
+<section class="sec" id="yaml">
+  <div class="sec-head">
+    <span class="ghost">C</span>
+    <div class="sub">plugins/banto/skills/dev-loop/odd.yaml</div>
+    <h2><span class="lx" lang="en">A real odd.yaml, field by field</span><span class="lx" lang="ja">実例で見る odd.yaml の中身</span></h2>
+    <p><span class="lx" lang="en">dev-loop is Banto's autonomous implementation loop (L3), so its odd.yaml is the most exercised one in the tree. Six fields carry the actual declaration.</span><span class="lx" lang="ja">dev-loop は Banto の自走実装ループ（L3）で、ツリー内でも odd.yaml が最も実働している skill。宣言の本体は 6 つのフィールドが担う。</span></p>
+  </div>
+  <div class="field-grid">
+    <div class="fd"><b>in_scope</b><p><span class="lx" lang="en">What the skill owns: task decomposition, the implement → build-and-verify → fix loop, tasks.md progress, parallel fan-out judgment, exception detection.</span><span class="lx" lang="ja">skill が担う範囲：タスク分解、実装 → 検証 → 修正の周回、tasks.md の前進、並列 fan-out 判定、例外検知。</span></p></div>
+    <div class="fd"><b>out_of_scope</b><p><span class="lx" lang="en">Spec generation and branch/worktree ops are delegated elsewhere; push / PR / merge to main stay a human gate.</span><span class="lx" lang="ja">仕様生成やブランチ / worktree 操作は他 skill へ委譲。push・PR・main マージは人間ゲートのまま。</span></p></div>
+    <div class="fd"><b>safety_boundaries</b><p><span class="lx" lang="en">Commits stop at the branch; verification must reuse the existing verify-run.sh, never reimplement its detection logic; fan-out caps at 5 parallel workers.</span><span class="lx" lang="ja">commit はブランチ止まり。検証は既存の verify-run.sh を正本とし検出ロジックを再実装しない。並列 fan-out は最大 5 worker。</span></p></div>
+    <div class="fd"><b>kill_switch_conditions</b><p><span class="lx" lang="en">4 conditions that stop the loop and escalate to the owner — detailed in <a href="#enforce">Enforcement</a> below.</span><span class="lx" lang="ja">周回を止めて owner へ上げる 4 条件 — 詳細は下の「強制」節。</span></p></div>
+    <div class="fd"><b>approval_gates</b><p><span class="lx" lang="en">Before entering the loop, the decomposition plan (task list + parallel policy) is shown once for confirmation; an epic-scale target routes through ws epic first.</span><span class="lx" lang="ja">自走に入る前、分解プラン（タスク列 + 並列方針）を 1 度提示して確認。epic 規模なら先に ws epic 提案を経由。</span></p></div>
+    <div class="fd"><b>metrics</b><p><span class="lx" lang="en"><code>test_failure_threshold: 3</code>, <code>parallel_fanout_max: 5</code> — the numeric backing for the boundaries above, read by the schema's <code>metrics</code> object.</span><span class="lx" lang="ja"><code>test_failure_threshold: 3</code>、<code>parallel_fanout_max: 5</code> — 上記境界の数値的な裏付け。スキーマの <code>metrics</code> オブジェクトとして読む。</span></p></div>
+  </div>
+  <p class="note"><span class="seal" aria-hidden="true">番</span><span><span class="lx" lang="en">dev-loop's own <code>autonomy_level</code> line even names its enforcers inline: <em>"explicit stop is a deterministic hook (odd-gate / verify-claim-guard); the human gate is the Phase-0 decomposition-plan confirmation plus push/PR/main."</em> The declaration and its enforcement are cross-referenced from day one.</span><span class="lx" lang="ja">dev-loop の <code>autonomy_level</code> 行そのものが強制側の名前まで書いている：「<em>explicit stop は deterministic hook（odd-gate/verify-claim-guard）/ human gate は Phase0 分解プラン確認＋push/PR/main</em>」。宣言と強制は最初から相互参照している。</span></span></p>
+</section>
+
+<!-- ENFORCE -->
+<section class="sec" id="enforce">
+  <div class="sec-head">
+    <span class="ghost">D</span>
+    <div class="sub">kill_switch_conditions → hooks</div>
+    <h2><span class="lx" lang="en">Where the declaration meets a hook</span><span class="lx" lang="ja">宣言が hook と接続する場所</span></h2>
+    <p><span class="lx" lang="en">dev-loop's odd.yaml lists 4 kill-switch conditions. Two map to a named, deterministic hook; the other two rely on structural gates that aren't skill-specific.</span><span class="lx" lang="ja">dev-loop の odd.yaml は 4 つの kill switch 条件を挙げる。うち 2 つは名指しの決定論的 hook に対応し、残り 2 つは skill 固有ではない構造的なゲートに依る。</span></p>
+  </div>
+  <ul class="ks-list">
+    <li><b><span class="lx" lang="en">3 consecutive test failures</span><span class="lx" lang="ja">テスト 3 連続失敗</span></b><span class="lx" lang="en"> → stops the loop, escalates to the owner.</span><span class="lx" lang="ja"> → 周回を停止し owner へ。</span>
+      <div class="hk"><span class="lx" lang="en">Enforced by:</span><span class="lx" lang="ja">強制元：</span> <a href="hooks.html#odd-gate">odd-gate.sh</a> <span class="lx" lang="en">— a PreToolUse counter (default threshold 3, <code>ODD_TEST_FAILURE_THRESHOLD</code>), escape hatch <code>ODD_ALLOW_TEST_FAILURES=1</code>.</span><span class="lx" lang="ja">— PreToolUse のカウンタ（既定閾値 3・<code>ODD_TEST_FAILURE_THRESHOLD</code>）。エスケープは <code>ODD_ALLOW_TEST_FAILURES=1</code>。</span></div>
+    </li>
+    <li><b><span class="lx" lang="en">Claiming "done" while verify-last is red</span><span class="lx" lang="ja">verify-last が red のまま「完了」を主張</span></b><span class="lx" lang="en"> → blocked before the response goes out.</span><span class="lx" lang="ja"> → 応答が出る前にブロック。</span>
+      <div class="hk"><span class="lx" lang="en">Enforced by:</span><span class="lx" lang="ja">強制元：</span> <a href="hooks.html#verify-claim-guard">verify-claim-guard.sh</a> <span class="lx" lang="en">— a Stop hook, fail-open (no jq / no transcript → exit 0), fires at most once per stop. It requires both a completion claim in the last assistant text AND unresolved evidence: the last full verify-run state is red (within 4 hours), or the last tool_result reports an error.</span><span class="lx" lang="ja">— Stop hook。判定材料が無ければ黙って通す fail-open（jq 不在・transcript 不在 → exit 0）で、1 stop につき最大 1 回だけ発火。最終応答に「完了」断定があり、かつ未解決の根拠（4 時間以内の verify-run 状態が red、または直近 tool_result が error）が両方揃ったときのみブロックする。</span></div>
+    </li>
+    <li class="soft"><b><span class="lx" lang="en">A goal fork with no clear interpretation</span><span class="lx" lang="ja">ゴール分岐で採用解釈が立たない</span></b><span class="lx" lang="en"> → stop, ask the owner.</span><span class="lx" lang="ja"> → 停止し owner へ確認。</span>
+      <div class="hk"><span class="lx" lang="en">Enforced by: judgment, not a hook</span><span class="lx" lang="ja">強制元：hook ではなく判断による</span> — <span class="lx" lang="en">the spec-fidelity rule's stop triggers. A goal fork is not a pattern a deterministic script can reliably detect.</span><span class="lx" lang="ja">spec-fidelity ルールの stop trigger による。ゴール分岐は決定論的スクリプトが確実に検知できるパターンではない。</span></div>
+    </li>
+    <li><b><span class="lx" lang="en">Irreversible / outward operations (push, PR, delete, external post)</span><span class="lx" lang="ja">不可逆・外向き操作（push・PR・削除・外部投稿）</span></b><span class="lx" lang="en"> → stop, ask the owner.</span><span class="lx" lang="ja"> → 停止し owner へ確認。</span>
+      <div class="hk"><span class="lx" lang="en">Enforced by:</span><span class="lx" lang="ja">強制元：</span> <a href="hooks.html#odd-kill-switch">odd-kill-switch.sh</a> <span class="lx" lang="en">— 4 blocking rules, none dev-loop-specific: direct push to main/master, <code>--no-verify</code>, <code>--force</code> push, and <code>rm -rf</code> on root/home. Each has its own named escape variable, none default-on.</span><span class="lx" lang="ja">— 4 つのブロックルール（dev-loop 固有ではない）：main/master への直 push・<code>--no-verify</code>・<code>--force</code> push・root/home への <code>rm -rf</code>。各々に個別のエスケープ変数があり、既定では無効。</span></div>
+    </li>
+  </ul>
+  <p class="note"><span class="seal" aria-hidden="true">番</span><span><span class="lx" lang="en">Not every declared condition has a matching hook — and that gap is disclosed here on purpose. A kill switch that can't be mechanically detected still belongs in odd.yaml, as a human-readable boundary; it just needs a different kind of enforcement (a rule, a judgment call) than the ones a script can catch.</span><span class="lx" lang="ja">宣言した条件のすべてに対応する hook があるわけではない — その隙間をここであえて明示する。機械的に検知できない kill switch も、人が読める境界として odd.yaml に書く価値はある。ただしスクリプトが拾えるものとは違う種類の強制（ルール・判断）を要る。</span></span></p>
+</section>
+
+<!-- RELATED -->
+<section class="sec" id="related" style="padding-bottom:60px">
+  <div class="sec-head">
+    <span class="ghost">E</span>
+    <div class="sub">Related</div>
+    <h2><span class="lx" lang="en">Where to go next</span><span class="lx" lang="ja">関連ページ</span></h2>
+  </div>
+  <div class="rel">
+    <a href="hooks.html"><b>hooks</b><span class="lx" lang="en">the enforcement layer, in depth</span><span class="lx" lang="ja">強制側の詳説</span></a>
+    <a href="tools/dev-loop.html"><b>dev-loop</b><span class="lx" lang="en">the L3 skill used throughout this page</span><span class="lx" lang="ja">本ページの実例に使った L3 skill</span></a>
+    <a href="index.html#safety"><b>safety</b><span class="lx" lang="en">how safety fits Banto's bigger picture</span><span class="lx" lang="ja">安全設計の全体像</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span class="lx" lang="en">Banto — a self-driving harness for Claude Code. Enforced by deterministic hooks.</span>
+  <span class="lx" lang="ja">Banto — Claude Code のための自走ハーネス。決定論的な hook が強制する。</span>
+  <a href="https://github.com/banto-org/banto" target="_blank" rel="noopener">github.com/banto-org/banto</a>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

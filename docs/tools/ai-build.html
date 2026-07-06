@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ai-build — Banto</title>
+<meta name="description" content="Build flow for AI features — LLM, RAG, agent, prompting — from requirements through search, research, design, implementation, and LLM-as-judge eval." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="../index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="../evidence.html" class="lx" lang="en">Evidence</a><a href="../evidence.html" class="lx" lang="ja">実測</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="../index.html" class="lx" lang="en">← Home</a><a href="../index.html" class="lx" lang="ja">← ホーム</a><span> / </span><a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a><span> / </span><span>ai-build</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Pipeline (SDD)</span><span class="lx" lang="ja">パイプライン（SDD）</span></div>
+  <h1><span class="lx" lang="en">ai-build — AI feature flow · eval</span><span class="lx" lang="ja">ai-build — AI 構築フロー · eval</span></h1>
+  <p class="lede lx" lang="en">ai-build is dev-loop's AI-specialized sibling: the same skeleton — implement, verify, fix, iterate — but the verify stage becomes LLM-as-judge eval, and the design stage gains method selection (prompt / RAG / fine-tune) and model selection. An AI feature isn't done at "it ran"; quality has to be measured.</p>
+  <p class="lede lx" lang="ja">ai-build は dev-loop の AI 特化版。実装 → 検証 → 修正 → 反復という骨格は同じで、検証段が LLM-as-judge の eval に、設計段に手法選定（prompt / RAG / fine-tune）とモデル選定が加わる。AI 機能は「動いた」で終わらず、品質は測って初めて分かる。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">01</span>
+    <h2><span class="lx" lang="en">What it does</span><span class="lx" lang="ja">何をするか</span></h2>
+  </div>
+  <div class="twocol">
+    <div class="card">
+      <h4><span class="lx" lang="en">Wires together, doesn't reimplement</span><span class="lx" lang="ja">つなぐだけ。再実装しない</span></h4>
+      <p class="lx" lang="en">Internal search is delegated to search, freshness-critical lookups to research, and Claude's ids / pricing / params to claude-api. ai-build's own job is framing success criteria, choosing a method + model, and running the eval loop.</p>
+      <p class="lx" lang="ja">内部検索は search、鮮度が効く調査は research、Claude の id・価格・パラメータは claude-api skill へ委譲する。ai-build 自身の仕事は、成功基準の明確化と手法 + モデル選定、eval ループの実行に絞る。</p>
+    </div>
+    <div class="card">
+      <h4><span class="lx" lang="en">LLM-as-judge eval</span><span class="lx" lang="ja">LLM-as-judge の eval</span></h4>
+      <p class="lx" lang="en">A minimal <code>ai-eval-judge.sh</code> scores a JSONL case set 0–100 via <code>claude -p</code> (fail-open if claude/jq are absent). Green/red against a threshold reuses dev-loop's verify-claim skeleton — no false "done" while eval is red.</p>
+      <p class="lx" lang="ja">最小実装の <code>ai-eval-judge.sh</code> が JSONL のケース集を <code>claude -p</code> で 0–100 点採点する（claude/jq 不在は fail-open）。閾値での green/red は dev-loop の verify-claim 骨格を流用し、eval が red のまま「完了」を主張できない。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">02</span>
+    <h2><span class="lx" lang="en">When it fires</span><span class="lx" lang="ja">いつ動くか</span></h2>
+  </div>
+  <div class="trig">
+    <span><span class="lx" lang="en">"build a RAG"</span><span class="lx" lang="ja">「RAG を組みたい」</span></span>
+    <span><span class="lx" lang="en">"build an agent"</span><span class="lx" lang="ja">「エージェントを作る」</span></span>
+    <span><span class="lx" lang="en">"set up evals"</span><span class="lx" lang="ja">「eval を回したい」</span></span>
+    <span><span class="lx" lang="en">"LLM-as-judge"</span><span class="lx" lang="ja">「LLM-as-judge」</span></span>
+    <span><span class="lx" lang="en">"which model should I use"</span><span class="lx" lang="ja">「which model should I use」</span></span>
+    <span class="no"><span class="lx" lang="en">ordinary implementation with no AI element (dev-loop)</span><span class="lx" lang="ja">AI 要素のない通常実装（dev-loop）</span></span>
+    <span class="no"><span class="lx" lang="en">Claude id / pricing lookup only (claude-api skill)</span><span class="lx" lang="ja">Claude API の id・価格の参照のみ（claude-api skill）</span></span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">03</span>
+    <h2><span class="lx" lang="en">How to use</span><span class="lx" lang="ja">使い方</span></h2>
+  </div>
+  <div class="invoke">
+<span class="p">$</span> /ai-build "support-ticket RAG"
+<span class="c"># or natural language / 自然文でも:</span>
+"問い合わせ対応の RAG を組みたい"
+"fine-tune するか prompt で行くか、eval で決めたい"
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">04</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+  </div>
+  <div class="flow">
+    <span class="fnode"><span class="lx" lang="en">Frame (success criteria)</span><span class="lx" lang="ja">Frame（成功基準）</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">search</span><span class="lx" lang="ja">search</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">research</span><span class="lx" lang="ja">research</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Design (method + model, confirm)</span><span class="lx" lang="ja">Design（手法 + モデル、確認）</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Implement</span><span class="lx" lang="ja">実装</span></span>
+    <span class="arr">→</span>
+    <span class="fnode hot"><span class="lx" lang="en">EVAL → iterate</span><span class="lx" lang="ja">EVAL → 反復</span></span>
+  </div>
+  <div class="note">
+    <span class="seal" aria-hidden="true">番</span>
+    <span><span class="lx" lang="en">Method and model selection can be a goal fork — acceptance criteria, cost, or compliance meaning may shift — so Stage 4 presents the rationale once and confirms with the owner before running to convergence.</span><span class="lx" lang="ja">手法・モデル選定は受け入れ基準・コスト・コンプラ意味が変わりうるゴール分岐になるため、Stage 4 で選定根拠を 1 度提示して owner に確認してから収束まで自走する。</span></span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">05</span>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="search.html"><b>search</b><span class="lx" lang="en">internal search, no web</span><span class="lx" lang="ja">内部検索（web なし）</span></a>
+    <a href="research.html"><b>research</b><span class="lx" lang="en">freshness-critical lookups</span><span class="lx" lang="ja">鮮度が効く調査</span></a>
+    <a href="dev-loop.html"><b>dev-loop</b><span class="lx" lang="en">general-purpose sibling loop</span><span class="lx" lang="ja">汎用版の兄弟ループ</span></a>
+    <a href="ai-context.html"><b>ai-context</b><span class="lx" lang="en">where eval decisions land</span><span class="lx" lang="ja">eval 決定の記録先</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span>© 2026 Banto</span>
+  <span><a href="../index.html#toolset" class="lx" lang="en">← Back to the toolset</a><a href="../index.html#toolset" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="../app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>architect — Banto</title>
+<meta name="description" content="architect is a read-only design and architecture analysis agent for Claude Code: it investigates existing code and returns a structured proposal, without touching a single file." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="../index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="../evidence.html" class="lx" lang="en">Evidence</a><a href="../evidence.html" class="lx" lang="ja">実測</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="../index.html" class="lx" lang="en">← Home</a><a href="../index.html" class="lx" lang="ja">← ホーム</a><span> / </span><a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a><span> / </span><span>architect</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Agents</span><span class="lx" lang="ja">エージェント</span></div>
+  <h1><span class="lx" lang="en">architect — the read-only design advisor</span><span class="lx" lang="ja">architect — コードを変えない設計顧問</span></h1>
+  <p class="lede lx" lang="en">architect investigates the existing code, weighs the trade-offs, and returns a structured proposal inside the conversation. It never edits a file and never writes an artifact — the proposal itself is the deliverable. It runs on the opus model.</p>
+  <p class="lede lx" lang="ja">architect は既存コードを調査し、トレードオフを整理して、会話の中で構造化した提案を返す。ファイルは一切変更せず、成果物ファイルも作らない。提案そのものが成果物であり、opus モデルで動く。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">01</span>
+    <h2><span class="lx" lang="en">Allowed tools</span><span class="lx" lang="ja">許可ツール</span></h2>
+  </div>
+  <div class="trig">
+    <span>Read</span><span>Grep</span><span>Glob</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">02</span>
+    <h2><span class="lx" lang="en">What it does</span><span class="lx" lang="ja">何をするか</span></h2>
+  </div>
+  <div class="twocol">
+    <div class="card">
+      <p class="lx" lang="en">The analysis runs through a fixed framework: a <strong>reversibility lens</strong> (high — refactoring, renaming / medium — DB schema or API changes / low — data deletion, retiring a public API), a <strong>minimal-change principle</strong>, and a <strong>design quality check</strong> (single responsibility, circular dependencies, abstraction level, testability).</p>
+      <p class="lx" lang="ja">分析は固定のフレームワークに沿う。<strong>可逆性の観点</strong>（高＝リファクタリング・リネーム／中＝DB スキーマや API 変更／低＝データ削除・公開 API の廃止）、<strong>最小変更の原則</strong>、<strong>設計品質チェック</strong>（単一責任・循環依存・抽象化レベル・テスタビリティ）で構成する。</p>
+    </div>
+    <div class="card">
+      <p class="lx" lang="en">The proposal always comes back in the same six-heading format: Current state, Issues, Proposal, Trade-offs, Risks, Next actions. Before analyzing, it greps the ai-context base's <code>{base}/decisions/</code> for conflicting prior decisions and folds any conflict into "Current state" and "Risks".</p>
+      <p class="lx" lang="ja">提案は常に同じ 6 見出し（現状・課題・提案・トレードオフ・リスク・次のアクション）で返る。分析に入る前に ai-context ベースの <code>{base}/decisions/</code> を Grep し、現テーマと矛盾する既存決定があれば「現状」と「リスク」に必ず反映する。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">03</span>
+    <h2><span class="lx" lang="en">When it fires</span><span class="lx" lang="ja">いつ動くか</span></h2>
+  </div>
+  <div class="trig">
+    <span>review the design</span><span>architecture decision</span><span>technology selection</span><span>dependency design</span><span>design discussion</span>
+    <span class="no">changing the implementation</span><span class="no">generating a spec document</span><span class="no">"design it and just implement"</span><span class="no">simple naming / placement</span>
+  </div>
+  <p class="lx" lang="en" style="margin-top:12px">Changing the implementation routes to <code>debugger</code> or self-driving implementation; generating a specification document routes to the <code>spec</code> skill; simple naming or placement proceeds with an adopted interpretation instead of a design review.</p>
+  <p class="lx" lang="ja" style="margin-top:12px">実装を変更する用件は debugger か自走実装へ、仕様書を生成する用件は spec skill へ回る。単純な命名・配置は設計レビューを挟まず、採用した解釈でそのまま進む。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">04</span>
+    <h2><span class="lx" lang="en">Invocation</span><span class="lx" lang="ja">呼ばれ方</span></h2>
+    <p class="lx" lang="en">architect is launched from the main session with the Agent tool — it is not called directly by the user, and it never fires on its own.</p>
+    <p class="lx" lang="ja">architect は本体セッションから Agent ツールで起動する。ユーザーが直接呼ぶものではなく、単独で動き出すこともない。</p>
+  </div>
+  <div class="invoke"><span class="c">// example invocation from the main session</span><br/>
+Agent({<br/>
+&nbsp;&nbsp;subagent_type: <span class="p">"architect"</span>,<br/>
+&nbsp;&nbsp;description: <span class="p">"Review the session store split"</span>,<br/>
+&nbsp;&nbsp;prompt: <span class="p">"ai-context base: {base}. Review whether splitting sessions/ by workspace is sound. Check {base}/decisions/ for conflicting prior calls first."</span><br/>
+})</div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">05</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+  </div>
+  <div class="flow">
+    <div class="fnode hot">0. Grep decisions/</div><div class="arr">→</div>
+    <div class="fnode">1. investigate code</div><div class="arr">→</div>
+    <div class="fnode">2. weigh trade-offs</div><div class="arr">→</div>
+    <div class="fnode">3. return structured proposal</div><div class="arr">→</div>
+    <div class="fnode">4. record patterns to memory</div>
+  </div>
+  <div class="note"><span class="seal" aria-hidden="true">番</span>
+    <p class="lx" lang="en">If no ai-context base was passed in the prompt, architect skips the decisions check and states in its result that the check was not performed — it never guesses at a base path.</p>
+    <p class="lx" lang="ja">プロンプトに ai-context ベースが渡されていない場合、architect は decisions チェックを省略し、実施しなかった旨を結果に明記する。ベースパスを推測することはない。</p>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">06</span>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="spec.html"><b>spec</b><span class="lx" lang="en">writes the spec after the design is settled</span><span class="lx" lang="ja">設計が固まった後に仕様書を書く</span></a>
+    <a href="dev-loop.html"><b>dev-loop</b><span class="lx" lang="en">implements what architect proposed</span><span class="lx" lang="ja">architect の提案を実装に落とす</span></a>
+    <a href="debugger.html"><b>debugger</b><span class="lx" lang="en">changes code; architect never does</span><span class="lx" lang="ja">コードを変更する側、architect は変更しない</span></a>
+    <a href="ai-context.html"><b>ai-context</b><span class="lx" lang="en">owns the decisions/ log architect greps</span><span class="lx" lang="ja">architect が Grep する decisions/ の所有者</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span>© 2026 Banto</span>
+  <span><a href="../index.html#toolset" class="lx" lang="en">← Back to the toolset</a><a href="../index.html#toolset" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="../app.js" defer></script>
+</body>
+</html>

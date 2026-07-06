@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>model-lab — Banto</title>
+<meta name="description" content="A verification-centric research flow to pretrain, fine-tune, distill, or prune a model, through to a reproducible paper, Hugging Face, and GitHub publish." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="../index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="../evidence.html" class="lx" lang="en">Evidence</a><a href="../evidence.html" class="lx" lang="ja">実測</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="../index.html" class="lx" lang="en">← Home</a><a href="../index.html" class="lx" lang="ja">← ホーム</a><span> / </span><a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a><span> / </span><span>model-lab</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Pipeline (SDD)</span><span class="lx" lang="ja">パイプライン（SDD）</span></div>
+  <h1><span class="lx" lang="en">model-lab — train models · verify · paper</span><span class="lx" lang="ja">model-lab — モデル学習 · 検証 · 論文</span></h1>
+  <p class="lede lx" lang="en">model-lab is the research-layer sibling of dev-loop and ai-build: pretraining, full fine-tune, PEFT/LoRA, distillation, pruning, and architecture search, run through a verification-centric autopilot all the way to a paper, a Hugging Face model card, and a GitHub release.</p>
+  <p class="lede lx" lang="ja">model-lab は dev-loop / ai-build の研究層の兄弟。事前学習・フル fine-tune・PEFT / LoRA・蒸留・pruning・アーキ探索を、検証中心の自走で回し、論文 + Hugging Face model card + GitHub 公開まで一貫させる。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">01</span>
+    <h2><span class="lx" lang="en">What it does</span><span class="lx" lang="ja">何をするか</span></h2>
+  </div>
+  <div class="twocol">
+    <div class="card">
+      <h4><span class="lx" lang="en">A thin verification spine, not a training framework</span><span class="lx" lang="ja">学習フレームワークではなく薄い検証スパイン</span></h4>
+      <p class="lx" lang="en">Training delegates to Unsloth / Axolotl / TRL / nanotron / Megatron-LM, tracking to ClearML, config to Hydra, data versioning to DVC, eval to lm-evaluation-harness / lighteval. model-lab supplies only the deterministic gates for reproducibility, evidence, and cost — plus the orchestration between them.</p>
+      <p class="lx" lang="ja">学習は Unsloth / Axolotl / TRL / nanotron / Megatron-LM、追跡は ClearML、設定は Hydra、データ版は DVC、eval は lm-evaluation-harness / lighteval に委譲する。model-lab が持つのは、再現性・裏づけ・コストの決定論ゲートとオーケストレーションのみ。</p>
+    </div>
+    <div class="card">
+      <h4><span class="lx" lang="en">Statistical rigor is mandatory</span><span class="lx" lang="ja">統計的厳密性を必須化</span></h4>
+      <p class="lx" lang="en">≥3 seeds (5–10 recommended), BCa bootstrap 95% CI, and a permutation test back every claim. A "no degradation" claim resting on perplexity alone is forbidden — compression methods are checked on reasoning, multilingual, IFEval, and latency together.</p>
+      <p class="lx" lang="ja">≥3 seed（推奨 5–10）+ BCa bootstrap 95%CI + permutation test で主張を裏づける。perplexity 単体での「劣化なし」主張は禁止。圧縮手法は推論・多言語・IFEval・レイテンシを多軸で確認する。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">02</span>
+    <h2><span class="lx" lang="en">When it fires</span><span class="lx" lang="ja">いつ動くか</span></h2>
+  </div>
+  <div class="trig">
+    <span><span class="lx" lang="en">"train a model"</span><span class="lx" lang="ja">「モデルを学習」</span></span>
+    <span><span class="lx" lang="en">"pretrain"</span><span class="lx" lang="ja">「事前学習」</span></span>
+    <span><span class="lx" lang="en">"distill"</span><span class="lx" lang="ja">「蒸留」</span></span>
+    <span><span class="lx" lang="en">"run ablations"</span><span class="lx" lang="ja">「ablation を回す」</span></span>
+    <span><span class="lx" lang="en">"publish to HF"</span><span class="lx" lang="ja">「HF に公開」</span></span>
+    <span class="no"><span class="lx" lang="en">an app feature using an existing model (ai-build)</span><span class="lx" lang="ja">既存モデルを使うだけのアプリ層 AI 機能（ai-build）</span></span>
+    <span class="no"><span class="lx" lang="en">Claude id / pricing lookup (claude-api skill)</span><span class="lx" lang="ja">Claude API の id・価格の参照（claude-api skill）</span></span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">03</span>
+    <h2><span class="lx" lang="en">How to use</span><span class="lx" lang="ja">使い方</span></h2>
+  </div>
+  <div class="invoke">
+<span class="p">$</span> /model-lab "layer-adaptive expert pruning"
+<span class="c"># or natural language / 自然文でも:</span>
+"MoE の expert pruning を検証込みで回したい"
+"ablation を回して論文まで書きたい"
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">04</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+  </div>
+  <div class="flow">
+    <span class="fnode"><span class="lx" lang="en">Frame</span><span class="lx" lang="ja">Frame</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Survey</span><span class="lx" lang="ja">Survey</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Design (confirm)</span><span class="lx" lang="ja">Design（確認）</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Implement</span><span class="lx" lang="ja">実装</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Run (paid gate)</span><span class="lx" lang="ja">Run（有料ゲート）</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Verify</span><span class="lx" lang="ja">Verify</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Analyze</span><span class="lx" lang="ja">Analyze</span></span>
+    <span class="arr">→</span>
+    <span class="fnode hot"><span class="lx" lang="en">Paper &amp; Publish (human gate)</span><span class="lx" lang="ja">Paper &amp; Publish（人間ゲート）</span></span>
+  </div>
+  <div class="note">
+    <span class="seal" aria-hidden="true">番</span>
+    <span><span class="lx" lang="en">Every paid-compute launch (cloud / cluster, Spot included) stops at compute-cost-gate.sh for owner budget approval. A "done / paper-ready" claim with no verified entry in the experiment ledger is blocked by model-claim-guard.sh — the research version of verify-claim-guard.</span><span class="lx" lang="ja">有料計算の起動（クラウド / クラスタ・Spot 含む）はすべて compute-cost-gate.sh が止め、owner の予算承認を待つ。実験台帳に verified が無い「完了 / 論文化」の主張は model-claim-guard.sh が遮断する — verify-claim-guard の研究版。</span></span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">05</span>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="ai-build.html"><b>ai-build</b><span class="lx" lang="en">app-layer AI features</span><span class="lx" lang="ja">アプリ層の AI 機能</span></a>
+    <a href="research.html"><b>research</b><span class="lx" lang="en">SOTA &amp; related work</span><span class="lx" lang="ja">SOTA と関連研究</span></a>
+    <a href="dev-loop.html"><b>dev-loop</b><span class="lx" lang="en">general-purpose autopilot</span><span class="lx" lang="ja">汎用自走</span></a>
+    <a href="ai-context.html"><b>ai-context</b><span class="lx" lang="en">where the experiment ledger lands</span><span class="lx" lang="ja">実験台帳の記録先</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span>© 2026 Banto</span>
+  <span><a href="../index.html#toolset" class="lx" lang="en">← Back to the toolset</a><a href="../index.html#toolset" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="../app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>search-agent — Banto</title>
+<meta name="description" content="search-agent is the lightweight parallel worker behind the search skill's deep path: it runs regex groups mechanically and returns only the top candidates. Not called directly by the user." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="../index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="../evidence.html" class="lx" lang="en">Evidence</a><a href="../evidence.html" class="lx" lang="ja">実測</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="../index.html" class="lx" lang="en">← Home</a><a href="../index.html" class="lx" lang="ja">← ホーム</a><span> / </span><a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a><span> / </span><span>search-agent</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Agents</span><span class="lx" lang="ja">エージェント</span></div>
+  <h1><span class="lx" lang="en">search-agent — mechanical grep, in parallel</span><span class="lx" lang="ja">search-agent — 機械的な grep を並列で</span></h1>
+  <p class="lede lx" lang="en">search-agent is not called directly by the user. The search skill's deep path launches 3-5 of them in parallel on the haiku model, each running a handed-over regex group and returning only the top candidates — relevance judgment and summarization stay with the orchestrator.</p>
+  <p class="lede lx" lang="ja">search-agent はユーザーが直接呼ぶものではない。search skill の deep path が haiku モデルで 3〜5 体を並列起動し、渡された regex グループをそれぞれ機械的に実行して、トップ候補だけを返す。関連度判定や要約はオーケストレーター側が担う。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">01</span>
+    <h2><span class="lx" lang="en">Allowed tools</span><span class="lx" lang="ja">許可ツール</span></h2>
+  </div>
+  <div class="trig">
+    <span>Grep</span><span>Glob</span><span>Read</span><span>Write</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">02</span>
+    <h2><span class="lx" lang="en">What it does</span><span class="lx" lang="ja">何をするか</span></h2>
+  </div>
+  <div class="twocol">
+    <div class="card">
+      <p class="lx" lang="en">It receives search patterns, a target (directory or file), a per-category limit N (default: top 15 files per pattern, snippets under 120 chars), and a temp-file destination. It runs every Grep call in a single message — never serially, since parallel is 4-10x faster — and truncates huge files like <code>full-combined.txt</code> with <code>-C 2</code> or a head limit rather than a raw cat.</p>
+      <p class="lx" lang="ja">受け取るのは検索パターン、対象（ディレクトリまたはファイル）、カテゴリごとの上限 N（既定：パターンあたり上位 15 ファイル、スニペット 120 字以内）、一時ファイルの出力先。複数の Grep は 1 メッセージ内で一度に呼ぶ（逐次実行はしない — 並列は 4〜10 倍速い）。巨大ファイル（full-combined.txt など）は生 cat をせず、<code>-C 2</code> か行数上限で切り詰める。</p>
+    </div>
+    <div class="card">
+      <p class="lx" lang="en">All hits go into the temp file; the reply stays lightweight, capped at the given N, in a fixed machine-parseable format — a run reference, top candidates as <code>file:line | matched_term | snippet</code>, and any zero-hit patterns. Returning everything "to be helpful" is explicitly wrong — it would pollute the orchestrator's context.</p>
+      <p class="lx" lang="ja">全ヒットは一時ファイルへ書き、返信は上限 N までに絞った軽量な形式（run 参照・トップ候補を <code>file:line | matched_term | snippet</code>・ヒット 0 件のパターン一覧）に固定する。「全部返した方が親切」は明確に誤りで、オーケストレーターのコンテキストを汚染する。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">03</span>
+    <h2><span class="lx" lang="en">When it fires</span><span class="lx" lang="ja">いつ動くか</span></h2>
+  </div>
+  <div class="trig">
+    <span>launched from search skill's deep path</span><span>fan out internal search in parallel</span>
+    <span class="no">judging relevance or summarizing</span><span class="no">external web research</span><span class="no">editing files</span>
+  </div>
+  <p class="lx" lang="en" style="margin-top:12px">Relevance judgment and summarization stay with the orchestrator (opus); external web research routes to <code>research-agent</code>; this agent never edits files.</p>
+  <p class="lx" lang="ja" style="margin-top:12px">関連度判定・要約はオーケストレーター（opus）が行う。外部 web リサーチは research-agent へ回る。このエージェントはファイル編集を行わない。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">04</span>
+    <h2><span class="lx" lang="en">Invocation</span><span class="lx" lang="ja">呼ばれ方</span></h2>
+    <p class="lx" lang="en">Only the search skill's deep path launches search-agent, 3-5 at a time in a single message, each on the haiku model, with a regex group, a target, a limit N, and a temp-file path already assigned.</p>
+    <p class="lx" lang="ja">search-agent を起動するのは search skill の deep path のみで、1 メッセージ内に 3〜5 体、それぞれ haiku モデル・regex グループ・対象・上限 N・一時ファイルパスをあらかじめ割り当てて起動する。</p>
+  </div>
+  <div class="invoke"><span class="c">// search skill fans this out across 3-5 pattern groups, in parallel</span><br/>
+Agent({<br/>
+&nbsp;&nbsp;subagent_type: <span class="p">"search-agent"</span>,<br/>
+&nbsp;&nbsp;model: <span class="p">"haiku"</span>,<br/>
+&nbsp;&nbsp;description: <span class="p">"Grep decisions for checkpoint-related terms"</span>,<br/>
+&nbsp;&nbsp;prompt: <span class="p">"Patterns: [checkpoint, save-checkpoint, idle.?checkpoint]. Target: {base}/decisions/. Limit N=15. Temp file: {base}/tmp/search/run3-a.txt."</span><br/>
+})</div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">05</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+  </div>
+  <div class="flow">
+    <div class="fnode hot">1. receive pattern group</div><div class="arr">→</div>
+    <div class="fnode">2. Grep in parallel</div><div class="arr">→</div>
+    <div class="fnode">3. write all hits to temp file</div><div class="arr">→</div>
+    <div class="fnode">4. return top N candidates</div>
+  </div>
+  <div class="note"><span class="seal" aria-hidden="true">番</span>
+    <p class="lx" lang="en">When launched with a schema (StructuredOutput) from a Workflow, it returns the same information as an array of <code>{file, line, snippet, matched_term}</code> instead of formatted text — the schema validates it.</p>
+    <p class="lx" lang="ja">Workflow から schema（StructuredOutput）付きで起動された場合は、テキスト整形の代わりに <code>{file, line, snippet, matched_term}</code> の配列で同じ情報を返す（schema が検証する）。</p>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">06</span>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="search.html"><b>search</b><span class="lx" lang="en">the orchestrator that launches this agent</span><span class="lx" lang="ja">この agent を起動するオーケストレーター</span></a>
+    <a href="research.html"><b>research</b><span class="lx" lang="en">external web research, not internal grep</span><span class="lx" lang="ja">外部 web リサーチ、内部 grep ではない</span></a>
+    <a href="ai-context.html"><b>ai-context</b><span class="lx" lang="en">owns the decisions/docs search-agent greps</span><span class="lx" lang="ja">search-agent が Grep する decisions/docs の所有者</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span>© 2026 Banto</span>
+  <span><a href="../index.html#toolset" class="lx" lang="en">← Back to the toolset</a><a href="../index.html#toolset" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="../app.js" defer></script>
+</body>
+</html>

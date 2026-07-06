@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>dev-loop — Banto</title>
+<meta name="description" content="A self-driving development loop: decompose a big task, implement, verify, fix, and repeat until tasks.md is green — escalating only exceptions." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="../styles.css" />
+<link rel="stylesheet" href="../subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="../index.html" aria-label="Banto home">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a>
+    <a href="../evidence.html" class="lx" lang="en">Evidence</a><a href="../evidence.html" class="lx" lang="ja">実測</a>
+  </nav>
+  <div class="nav-right">
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="../index.html" class="lx" lang="en">← Home</a><a href="../index.html" class="lx" lang="ja">← ホーム</a><span> / </span><a href="../index.html#toolset" class="lx" lang="en">Toolset</a><a href="../index.html#toolset" class="lx" lang="ja">道具一式</a><span> / </span><span>dev-loop</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Pipeline (SDD)</span><span class="lx" lang="ja">パイプライン（SDD）</span></div>
+  <h1><span class="lx" lang="en">dev-loop — self-driving build</span><span class="lx" lang="ja">dev-loop — 自走ビルド</span></h1>
+  <p class="lede lx" lang="en">dev-loop takes a big task — a spec, a document, a large backlog item — and decomposes it into small tasks, then implements, verifies, fixes, and re-verifies each one until tasks.md is exhausted. Only exceptions come back to the owner: the bantō contract, applied to the build itself.</p>
+  <p class="lede lx" lang="ja">dev-loop は、spec やドキュメント、大きめのタスクといった大玉を小型タスクへ分解し、実装 → 検証 → 修正 → 再検証を tasks.md が尽きるまで回す skill。上がってくるのは例外だけ — 番頭の契約を、ビルドそのものに適用したもの。</p>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">01</span>
+    <h2><span class="lx" lang="en">What it does</span><span class="lx" lang="ja">何をするか</span></h2>
+  </div>
+  <div class="twocol">
+    <div class="card">
+      <h4><span class="lx" lang="en">Decompose, then loop</span><span class="lx" lang="ja">分解して周回</span></h4>
+      <p class="lx" lang="en">Independent small tasks (no shared file, no sequential dependency) get flagged for parallel fan-out. The decomposition plan is confirmed with the owner once, up front — the one human gate before the loop runs unattended.</p>
+      <p class="lx" lang="ja">同一ファイルに触れず直列依存も無い独立タスクは、並列 fan-out の候補としてフラグを立てる。分解プランは最初に一度だけ owner へ提示し確認する — 以後を無人で回す前の唯一の人間ゲート。</p>
+    </div>
+    <div class="card">
+      <h4><span class="lx" lang="en">Reuses every existing part</span><span class="lx" lang="ja">既存部品の再利用</span></h4>
+      <p class="lx" lang="en">No new scripts get created. Verification aggregates build → test → API through the existing verify-run.sh; a red result routes to the debugger agent for root-cause fixes; a green result gets audited by a fresh opus-model agent before commit.</p>
+      <p class="lx" lang="ja">新規スクリプトは作らない。検証は既存の verify-run.sh が build → test → API を集約し、red なら debugger agent が root cause を修正、green なら opus モデルの別コンテキスト監査エージェントが spec 適合を確認してから commit する。</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">02</span>
+    <h2><span class="lx" lang="en">When it fires</span><span class="lx" lang="ja">いつ動くか</span></h2>
+  </div>
+  <div class="trig">
+    <span><span class="lx" lang="en">"self-drive the development"</span><span class="lx" lang="ja">「自走で開発」</span></span>
+    <span><span class="lx" lang="en">"decompose this big task and run it"</span><span class="lx" lang="ja">「大玉を分解して回して」</span></span>
+    <span><span class="lx" lang="en">"dev loop"</span><span class="lx" lang="ja">「dev loop」</span></span>
+    <span><span class="lx" lang="en">"auto-implement and test it"</span><span class="lx" lang="ja">「自動で実装してテストまで」</span></span>
+    <span class="no"><span class="lx" lang="en">a small one-off edit (edit directly)</span><span class="lx" lang="ja">単発の小さな編集（直接 Edit）</span></span>
+    <span class="no"><span class="lx" lang="en">advancing just the next task (ai-context next)</span><span class="lx" lang="ja">次の 1 タスクだけ（ai-context next）</span></span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">03</span>
+    <h2><span class="lx" lang="en">How to use</span><span class="lx" lang="ja">使い方</span></h2>
+  </div>
+  <div class="invoke">
+<span class="p">$</span> /dev-loop start
+<span class="c"># or natural language / 自然文でも:</span>
+"大玉を分解して回して"
+"/dev-loop status" <span class="c"># 進捗と直近の verify 結果を確認</span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">04</span>
+    <h2><span class="lx" lang="en">How it works</span><span class="lx" lang="ja">仕組み</span></h2>
+  </div>
+  <div class="flow">
+    <span class="fnode"><span class="lx" lang="en">Decompose + confirm</span><span class="lx" lang="ja">分解 + 確認</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Implement</span><span class="lx" lang="ja">実装</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">Verify (build/test/api)</span><span class="lx" lang="ja">検証</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">red → debugger</span><span class="lx" lang="ja">red → debugger</span></span>
+    <span class="arr">→</span>
+    <span class="fnode hot"><span class="lx" lang="en">green → audit + commit</span><span class="lx" lang="ja">green → 監査 + commit</span></span>
+  </div>
+  <div class="note">
+    <span class="seal" aria-hidden="true">番</span>
+    <span><span class="lx" lang="en">Three consecutive test failures trip odd-gate.sh and auto-block edits — the loop stops and escalates rather than churning. A "done" claim while verify-last is red is blocked outright by verify-claim-guard.sh.</span><span class="lx" lang="ja">テスト 3 連続失敗で odd-gate.sh が edit を自動停止 — 周回を止めて owner に上げる（churn しない）。verify-last が red のまま「完了」と主張するのは verify-claim-guard.sh が遮断する。</span></span>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="sec-head">
+    <span class="ghost">05</span>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="spec.html"><b>spec</b><span class="lx" lang="en">upstream decomposition source</span><span class="lx" lang="ja">分解元の設計書</span></a>
+    <a href="ai-context.html"><b>ai-context</b><span class="lx" lang="en">task ledger &amp; next</span><span class="lx" lang="ja">タスク台帳と next</span></a>
+    <a href="ws.html"><b>ws</b><span class="lx" lang="en">proposes parallel fan-out</span><span class="lx" lang="ja">並列の自発提案</span></a>
+    <a href="debugger.html"><b>debugger</b><span class="lx" lang="en">root-cause fixes on red</span><span class="lx" lang="ja">red 時の root cause 修正</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span>© 2026 Banto</span>
+  <span><a href="../index.html#toolset" class="lx" lang="en">← Back to the toolset</a><a href="../index.html#toolset" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="../app.js" defer></script>
+</body>
+</html>

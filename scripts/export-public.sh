@@ -109,6 +109,12 @@ done
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
 
+## 0.3.0
+
+- **New: idle-checkpoint — automatic session checkpoints when you step away.** After 5 minutes without API activity (matching the prompt cache's default 5-minute TTL, measured from the last API call), a Stop-armed watcher fires `/save-checkpoint` via a headless forked session, so returning to a cold-cache session costs a cheap `/clear` + checkpoint re-injection instead of a full cold re-read. The fork runs on a low-cost model by default (`BANTO_IDLE_CHECKPOINT_MODEL`), never touches the original transcript, skips small sessions (below 10% context usage or a 256KB transcript), accumulates only awake idle time so opening your laptop doesn't misfire, and runs with a read-only tool allowlist. Threshold tunable via `BANTO_IDLE_CHECKPOINT_MIN`; disable with `BANTO_IDLE_CHECKPOINT=0`.
+- **Fixed: verify-claim-guard fired on already-resolved failures.** The completion-claim guard's error check now looks only at the *last* tool result — a failure immediately retried and resolved by a successful call no longer blocks a truthful completion report. Real failures remain covered by the verify-run RED/GREEN check.
+- **Site.** Every skill and agent now has its own explainer page, reachable from a hover mega-menu in the header and from the toolset chips. New in-depth pages for the deterministic hook guard rails and for ODD (the per-skill autonomy declaration) — linked from the safety section.
+
 ## 0.2.2
 
 - **Fixed: the qa-tester agent could not reach any browser via Claude in Chrome.** Its tool allowlist had the page-interaction tools (`navigate` / `read_page` / `form_input`) but not `tabs_context_mcp` — the tool that lists connected browsers and tabs — so the Claude in Chrome path was structurally unreachable. The agent now carries `tabs_context_mcp` / `tabs_create_mcp` / `computer` (click, type, screenshot), and its web-test procedure starts by getting the tab context and creating a fresh tab before navigating.
@@ -186,7 +192,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.2.2"
+PUB_VERSION="0.3.0"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"

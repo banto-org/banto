@@ -449,6 +449,32 @@ section[id], article[id]{ scroll-margin-top:80px; }
 /* loop-diagram point labels (index autonomous loop) */
 .diagram .loop-lbl{ font-size:12px; font-weight:700; fill:var(--ink-2); text-anchor:middle; }
 
+/* ===================== CHIPS AS LINKS (toolset → tools/*.html) ===================== */
+.chip{ color:inherit; text-decoration:none; cursor:pointer; }
+.chip:hover{ border-color:var(--accent); transform:translateY(-1px); }
+
+/* ===================== NAV TOOLSET MEGA MENU ===================== */
+.nav-item{ position:relative; display:inline-flex; }
+.nav-menu{
+  position:absolute; top:100%; left:50%;
+  transform:translateX(-50%) translateY(6px);
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  box-shadow:var(--shadow); padding:18px; margin-top:8px;
+  display:grid; grid-template-columns:repeat(4,168px); gap:22px;
+  z-index:70; opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease, visibility .18s;
+}
+.nav-item.has-menu:hover .nav-menu,
+.nav-item.has-menu:focus-within .nav-menu{
+  opacity:1; visibility:visible; transform:translateX(-50%) translateY(0); pointer-events:auto;
+}
+.nav-menu-col{ display:flex; flex-direction:column; gap:2px; }
+.nav-menu-head{ font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); font-weight:700; margin-bottom:6px; }
+.nav-menu-col a{ display:flex; flex-direction:column; gap:1px; padding:6px 8px; margin:0 -8px; border-radius:8px; color:var(--ink); text-decoration:none; transition:background .15s; }
+.nav-menu-col a:hover{ background:rgba(28,24,20,.05); }
+.nav-menu-col a b{ font-family:var(--mono); font-size:13px; }
+.nav-menu-col a span{ font-size:11.5px; color:var(--ink-soft); }
+
 /* ===================== REDUCED MOTION ===================== */
 @media (prefers-reduced-motion: reduce){
   html{ scroll-behavior:auto; }

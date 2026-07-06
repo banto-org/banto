@@ -1,0 +1,53 @@
+/* Banto docs — shared styles for tool/agent subpages (docs/tools/*.html).
+   Extracted from plugin-tools.html's inline block so 21 generated pages
+   share one source of truth. Load AFTER styles.css. */
+
+.doc-hero{ padding:clamp(40px,7vw,80px) var(--pad) 10px; max-width:var(--maxw); margin:0 auto; }
+.doc-hero .kicker{ display:inline-flex; align-items:center; gap:9px; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-d); }
+.doc-hero .kicker::before{ content:""; width:30px; height:3px; background:var(--accent); border-radius:2px; }
+.doc-hero h1{ font-size:clamp(30px,4.6vw,48px); margin:16px 0 0; letter-spacing:-.02em; }
+.doc-hero .lede{ max-width:38em; }
+.crumb{ font-size:13.5px; color:var(--ink-soft); margin-top:18px; }
+.crumb a{ color:var(--accent-d); }
+
+.sec{ max-width:var(--maxw); margin:0 auto; padding:clamp(36px,5.5vw,64px) var(--pad) 0; position:relative; }
+.sec-head{ position:relative; margin:0 0 22px; }
+.sec-head .ghost{ position:absolute; left:-4px; top:-.55em; font-family:var(--serif); font-weight:700; font-size:clamp(70px,11vw,128px); color:var(--accent); opacity:.07; line-height:1; pointer-events:none; z-index:0; }
+.sec-head h2{ position:relative; z-index:1; font-size:clamp(22px,3.2vw,32px); }
+.sec-head .sub{ font-family:var(--mono); font-size:13px; color:var(--accent-d); position:relative; z-index:1; }
+.sec-head p{ position:relative; z-index:1; color:var(--ink-2); max-width:42em; margin:10px 0 0; font-size:16.5px; }
+
+.card{ background:var(--card); border:1px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:22px 24px; }
+.twocol{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media(max-width:760px){ .twocol{ grid-template-columns:1fr; } }
+
+/* trigger phrases */
+.trig{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.trig span{ background:var(--paper-2); border:1px solid var(--line); border-radius:999px; padding:.35em .85em; font-size:13.5px; color:var(--ink-2); }
+.trig span.no{ border-style:dashed; color:var(--ink-soft); text-decoration:line-through; text-decoration-color:rgba(192,57,43,.45); }
+
+/* invocation / example block */
+.invoke{ background:var(--ink); color:#EDE6D6; border-radius:12px; padding:16px 20px; font-family:var(--mono); font-size:13.5px; line-height:1.7; overflow-x:auto; box-shadow:var(--shadow); }
+.invoke .p{ color:#B8A98C; }
+.invoke .c{ color:#8C9E8C; }
+
+/* step flow */
+.flow{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:6px; }
+.flow .fnode{ background:var(--card); border:1px solid var(--line-2); border-radius:10px; padding:10px 15px; font-size:14px; font-weight:600; box-shadow:var(--shadow); }
+.flow .fnode.hot{ border-color:var(--accent); color:var(--accent-d); }
+.flow .arr{ color:var(--accent); font-weight:700; }
+
+.note{ display:flex; gap:12px; padding:15px 18px; border-radius:11px; background:var(--paper-2); border:1px solid var(--line); margin:16px 0 0; font-size:14.5px; color:var(--ink-2); }
+.note .seal{ width:26px; height:26px; font-size:15px; flex:none; }
+ul.tight{ margin:10px 0 0; padding-left:18px; }
+ul.tight li{ font-size:14px; color:var(--ink-2); padding:3px 0; line-height:1.5; }
+ul.tight code{ color:var(--accent-d); }
+
+/* related tools */
+.rel{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+.rel a{ display:inline-flex; align-items:center; gap:7px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:9px 14px; font-size:13.5px; color:var(--ink); box-shadow:var(--shadow); transition:border-color .2s, transform .2s; }
+.rel a:hover{ border-color:var(--accent); transform:translateY(-1px); }
+.rel a b{ font-family:var(--mono); font-size:12.5px; color:var(--accent-d); }
+
+.doc-foot{ max-width:var(--maxw); margin:40px auto 0; padding:26px var(--pad) 48px; border-top:1px solid var(--line); color:var(--ink-soft); font-size:14px; display:flex; gap:18px; flex-wrap:wrap; justify-content:space-between; }
+.doc-foot a{ color:var(--accent-d); }
