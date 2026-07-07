@@ -21,8 +21,9 @@
 #   BANTO_IDLE_CHECKPOINT_MIN_BYTES=N  % が取れないときの代替: transcript の最小バイト数
 #                                      （既定 262144 = 256KB。小さいセッションは
 #                                       キャッシュ切れコストも小さく checkpoint 不要）
-#   BANTO_IDLE_CHECKPOINT_MODEL=NAME   fork のモデル（既定 sonnet。checkpoint 要約に
-#                                      高額モデルは不要。"inherit" でユーザー既定を継承）
+#   BANTO_IDLE_CHECKPOINT_MODEL=NAME   fork のモデルを明示上書き。未指定なら
+#                                      model-policy.json の roles.summarize（正）を読む。
+#                                      "inherit" でユーザー既定を継承
 #   BANTO_IDLE_CHECKPOINT_POLL=N       最小監視間隔（秒、既定 60。テスト用）
 
 SESSION_ID=$1
@@ -123,8 +124,19 @@ PROMPT='/save-checkpoint 自動発火（無操作検知によるバックグラ�
 
 cd "$CWD" 2>/dev/null || exit 0
 
-# モデル: checkpoint 要約に高額モデルは不要なので既定 sonnet（コストが動機の機能のため）
-MODEL=${BANTO_IDLE_CHECKPOINT_MODEL:-sonnet}
+# モデル解決（ハードコード回避・単一の真実源）:
+#   1. BANTO_IDLE_CHECKPOINT_MODEL   明示上書き
+#   2. model-policy.json の roles.summarize   正（要約向けの安価な tier）
+#   3. sonnet                        policy 欠落 / jq 無し時の最終フォールバック
+# この機能の動機はコスト削減なので要約向けの安価な tier を使う。"inherit" はユーザー既定を継承。
+MODEL=$BANTO_IDLE_CHECKPOINT_MODEL
+if [ -z "$MODEL" ]; then
+    POLICY="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)}/templates/model-policy.json"
+    if command -v jq >/dev/null 2>&1 && [ -f "$POLICY" ]; then
+        MODEL=$(jq -r '.roles.summarize // empty' "$POLICY" 2>/dev/null)
+    fi
+    [ -z "$MODEL" ] && MODEL=sonnet
+fi
 if [ "$MODEL" = "inherit" ]; then
     set --
 else

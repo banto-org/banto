@@ -1,9 +1,10 @@
 {
   "schema_version": 1,
-  "_note": "Role -> model policy (single source of truth). Skills reference these defaults instead of hardcoding model names. Rationale: decisions/2026-07-02-100946 (12-cell measurement: sonnet 10/10 in all conditions; haiku sole misses). design=inherit keeps the session model (fable/opus) for conversation, design, and exception judgment.",
+  "_note": "Role -> model policy (single source of truth). Skills and hooks reference these defaults instead of hardcoding model names. Rationale: decisions/2026-07-02-100946 (12-cell measurement: sonnet 10/10 in all conditions; haiku sole misses). design=inherit keeps the session model (fable/opus) for conversation, design, and exception judgment. summarize=sonnet for faithful transcript->template summarization (the idle-checkpoint background fork): the cost motive rules out opus, and sonnet is measured to pass where haiku is the sole miss.",
   "roles": {
     "design": "inherit",
     "implement": "sonnet",
+    "summarize": "sonnet",
     "audit": "opus",
     "audit_alt": "fable",
     "mechanical": "haiku"
