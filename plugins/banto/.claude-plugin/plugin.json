@@ -1,6 +1,6 @@
 {
   "name": "banto",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Self-driving harness for Claude Code — concept → spec → autonomous implementation, an AI context store (decisions / docs / tasks / sessions / workspaces), Claude-native internal search, fleet awareness for parallel sessions, and deterministic safety hooks (kill-switch / egress guard / ODD autonomy governance). Security and code review are delegated to Anthropic official plugins.",
   "author": {
     "name": "Banto Project"

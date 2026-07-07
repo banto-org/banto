@@ -512,6 +512,79 @@
   </div>
 </section>
 
+<!-- ===================== CHECKPOINT & IDLE ===================== -->
+<section class="band" id="checkpoint">
+  <div class="container">
+    <p class="kicker reveal"><span class="lx" lang="en">Folding a session</span><span class="lx" lang="ja">セッションを畳む</span></p>
+    <h2 class="reveal">
+      <span class="lx" lang="en">save-checkpoint — fold a long session without losing the thread</span>
+      <span class="lx" lang="ja">save-checkpoint — 長い会話を、筋を失わずに畳む</span>
+    </h2>
+    <p class="section-lede reveal lx" lang="en">
+      A long session bloats context and gets expensive. <code>save-checkpoint</code> writes a
+      structured, resumable snapshot to the store, then recommends exactly one of <code>compact</code>
+      or <code>clear</code> — never both, and never runs either itself.
+    </p>
+    <p class="section-lede reveal lx" lang="ja">
+      会話が伸びるとコンテキストが膨らみ、コストも上がる。<code>save-checkpoint</code> は再開できる
+      構造化スナップショットを store に書き、<code>compact</code> か <code>clear</code> の
+      どちらか一方だけを推奨する — 両論併記はせず、どちらも自分では実行しない。
+    </p>
+
+    <!-- compare: plain compact vs checkpoint + clear -->
+    <div class="lang-steps" style="margin-top:30px">
+      <div class="lstep reveal">
+        <h4 class="lx" lang="en">Plain /compact</h4><h4 class="lx" lang="ja">通常の /compact</h4>
+        <p class="lx" lang="en">An in-session LLM summary that compresses the transcript in place. Lossy and opaque — drops happen silently and the summary is whatever the summarizer produced. Nothing lands on disk; you stay inside the same, partly-reclaimed window.</p>
+        <p class="lx" lang="ja">会話内で LLM が要約し、その場で圧縮する。欠落は静かに起き、要約の中身は選べない。ディスクには何も残らず、一部しか戻らない同じ窓の中に居続ける。</p>
+      </div>
+      <div class="lstep reveal">
+        <h4 class="lx" lang="en">save-checkpoint + /clear</h4><h4 class="lx" lang="ja">save-checkpoint + /clear</h4>
+        <p class="lx" lang="en">A purpose-built, structured checkpoint written to the store — durable and reviewable. Then <code>/clear</code> reclaims the full 1M window, and the next session's SessionStart re-injects the checkpoint. You resume from a curated summary, not a lossy one.</p>
+        <p class="lx" lang="ja">再開のために設計した構造化チェックポイントを store に書く — 永続で、あとから読み返せる。その後 <code>/clear</code> で 1M の窓を丸ごと取り戻し、次のセッションの SessionStart が再注入する。欠落した要約ではなく、整えた要約から再開できる。</p>
+      </div>
+    </div>
+
+    <!-- idle-checkpoint sub-block -->
+    <article class="flagship reveal" id="f-idle" style="margin-top:34px">
+      <div class="flag-head">
+        <div>
+          <h3><span class="lx" lang="en">Idle? It folds itself, in the background</span><span class="lx" lang="ja">放置したら、裏で自動的に畳む</span></h3>
+          <p class="flag-tag lx" lang="en">An idle-detection hook cuts the checkpoint for you — not on session end, but when you walk away.</p>
+          <p class="flag-tag lx" lang="ja">放置検知の hook が、代わりにチェックポイントを切る — セッション終了時ではなく、離席したとき。</p>
+        </div>
+      </div>
+      <div class="lang-steps" style="margin-top:22px">
+        <div class="lstep reveal">
+          <span class="lstep-n">A</span>
+          <h4 class="lx" lang="en">Armed on every turn</h4><h4 class="lx" lang="ja">応答ごとにアーム</h4>
+          <p class="lx" lang="en">Each finished response arms a watcher on the transcript. It measures idle time, not wall-clock — only time you are actually away counts toward the threshold.</p>
+          <p class="lx" lang="ja">応答が終わるたび transcript のウォッチャーをアームする。測るのは無操作時間で、覚醒中に離れていた分だけをしきい値に数える。</p>
+        </div>
+        <div class="lstep reveal">
+          <span class="lstep-n">B</span>
+          <h4 class="lx" lang="en">Fires at the cache TTL</h4><h4 class="lx" lang="ja">キャッシュ TTL で発火</h4>
+          <p class="lx" lang="en">After 5 minutes idle — matching the prompt-cache TTL — it runs <code>/save-checkpoint</code> through a headless <code>claude -p --resume --fork-session</code>. Being a fork, it never writes back to your live session.</p>
+          <p class="lx" lang="ja">無操作 5 分 — プロンプトキャッシュの TTL に一致 — で、ヘッドレスの <code>claude -p --resume --fork-session</code> が <code>/save-checkpoint</code> を回す。fork なので現行セッションには一切書き戻さない。</p>
+        </div>
+        <div class="lstep reveal">
+          <span class="lstep-n">C</span>
+          <h4 class="lx" lang="en">Guarded, not on clean exit</h4><h4 class="lx" lang="ja">ガード付き・正常終了では動かない</h4>
+          <p class="lx" lang="en">A cleanly ended session disarms the watcher — no checkpoint. It fires only on substantial sessions (context &gt;10% or transcript &gt;256KB) and is sleep-aware, so reopening a closed laptop does not trip it.</p>
+          <p class="lx" lang="ja">正常に終えたセッションはウォッチャーを解除する — 発火しない。中身のあるセッション（コンテキスト &gt;10% か transcript &gt;256KB）だけが対象で、スリープも考慮するため、閉じたラップトップを開いた瞬間には動かない。</p>
+        </div>
+      </div>
+      <div class="callout reveal" style="margin-top:22px">
+        <p class="lx" lang="en"><strong>Why it fires cheap:</strong> the whole feature exists to save money — resuming a huge context after the cache expires re-reads it at cold pricing. So the background fork runs on an inexpensive model (<code>sonnet</code>, which resolves to the latest Sonnet), not an expensive one. Filling a fixed checkpoint template from a transcript is faithful-summary work, measured to pass on sonnet; spending opus here would defeat the very motive the feature was built for.</p>
+        <p class="lx" lang="ja"><strong>安く発火する理由:</strong> この機能はコスト削減のために在る — キャッシュ失効後に巨大コンテキストを再開すると、コールド価格で読み直す。だから裏の fork は高額モデルではなく安価な <code>sonnet</code>（最新の Sonnet に解決される）で回す。transcript から定型のチェックポイントテンプレを埋める作業は忠実な要約であり、実測で sonnet が通過する。ここに opus を使えば、機能の動機そのものを裏切る。</p>
+      </div>
+      <p class="reveal" style="margin-top:18px; font-size:15px;">
+        <a href="tools/save-checkpoint.html" class="lx" lang="en">Full save-checkpoint page →</a><a href="tools/save-checkpoint.html" class="lx" lang="ja">save-checkpoint の詳細ページ →</a>
+      </p>
+    </article>
+  </div>
+</section>
+
 <!-- ===================== SDD PIPELINE ===================== -->
 <section class="band" id="pipeline">
   <div class="container">

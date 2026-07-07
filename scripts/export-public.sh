@@ -109,6 +109,12 @@ done
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
 
+## 0.3.1
+
+- **Site: the Evidence page, rebuilt around one spine.** The measured report now leads with a single claim — same models, one has your project's memory — and three pillars (memory / boundary / cost), each backed by a numbered proof in importance order. Method and terms moved to a collapsible appendix, the honest null results were demoted to a "where the store does not change the outcome" aside, and only Banto-condition advantages are highlighted. No measured number changed.
+- **Site: a "folding a session" section on the landing page.** The home page now covers `save-checkpoint` directly below the i18n flagship — how it writes a structured, resumable snapshot to the store and recommends exactly one of `compact` or `clear`, how that differs from a plain in-session `/compact`, and how the idle-checkpoint hook cuts one for you in the background when you step away.
+- **idle-checkpoint's default model now resolves from the model-policy source of truth.** The background fork reads its model from `templates/model-policy.json` (`roles.summarize`, Sonnet) instead of a hardcoded literal, keeping the model tiers in one place. Behavior is unchanged; `BANTO_IDLE_CHECKPOINT_MODEL` still overrides per run.
+
 ## 0.3.0
 
 - **New: idle-checkpoint — automatic session checkpoints when you step away.** After 5 minutes without API activity (matching the prompt cache's default 5-minute TTL, measured from the last API call), a Stop-armed watcher fires `/save-checkpoint` via a headless forked session, so returning to a cold-cache session costs a cheap `/clear` + checkpoint re-injection instead of a full cold re-read. The fork runs on a low-cost model by default (`BANTO_IDLE_CHECKPOINT_MODEL`), never touches the original transcript, skips small sessions (below 10% context usage or a 256KB transcript), accumulates only awake idle time so opening your laptop doesn't misfire, and runs with a read-only tool allowlist. Threshold tunable via `BANTO_IDLE_CHECKPOINT_MIN`; disable with `BANTO_IDLE_CHECKPOINT=0`.
@@ -192,7 +198,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.3.0"
+PUB_VERSION="0.3.1"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"
