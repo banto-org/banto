@@ -13,7 +13,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # Dev-Loop — 自走開発ループ（decompose → implement → verify → fix → loop）
 
-> **保存ベース（store-first）**: `tasks.md` / 決定など `.ai-context/...` への Read/Write は、SessionStart/PreCompact hook が注入する「ai-context ベース: &lt;絶対パス&gt;」の配下で行う。不明なら `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`。
+> **保存ベース（store-first）**: `tasks.md` / 決定などは `{base}/...` 配下。`{base}` は SessionStart/PreCompact hook が注入する ai-context ベースの絶対パス（不明なら `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`）。
 
 owner が大玉を渡す → 小型タスクへ分解 → 各タスクを実装し ② build-and-verify で検証、red なら修正して再検証、green なら次へ。tasks.md が尽きるまで自走し、**例外だけ owner に上げる**（番頭契約）。部品はすべて既存 ── **新規スクリプトは作らない**。
 
@@ -63,7 +63,8 @@ odd.yaml = **L3（Autopilot＝継続実行＋例外時のみ owner 要求）**�
 | churn 停止 | `odd-gate.sh`（PreToolUse） | テスト 3 連続失敗で edit をブロック → root cause へ |
 | 偽 green 防止 | `verify-claim-guard.sh`（Stop） | verify-last が red のとき「完了」主張をブロック |
 | 外部流出 | `egress-guard.sh` ＋ ⑤ sandbox | 秘匿 / 他案件名の client 流出を遮断 |
-| 不可逆操作 | safety rule | push / PR / main / 削除は人間ゲート |
+
+不可逆操作（push / PR / main / 削除）は `safety` rule に従い人間ゲート。
 
 ## ML 学習ループ（派生）
 

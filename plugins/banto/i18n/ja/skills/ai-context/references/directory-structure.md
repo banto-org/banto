@@ -84,8 +84,7 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
   `tasks/`（legacy 読取フォールバックのみ・新規生成なし）/ `WORKSPACE.md`（非 git 環境のポインタ fallback。
   本体は `<git-dir>/banto-ws-pointer.md`）。旧 `refs/`（doc-import）は 5.75.10 で廃止。
 
-- **grandfather（legacy）**: 既存の repo 内 `.ai-context/` を持つ案件は、移行（`/ai-context migrate`）
-  まで同じバケット構造を repo 内 base で使い続ける（読み書き従来どおり）。新規生成はされない。
+- **in-repo `.ai-context/` の扱い**: resolver は解決対象にせず、scaffold が検知時に同じバケット構造で store へ非破壊自動移行する（原本は消さない）。新規生成はされない。
 - store の gitignore 区分は `<store_root>/.gitignore` で一元管理（per-project .gitignore なし）。
 
 **プロジェクトの本筋ドキュメント（`docs/requirements.md` 等）には触れない。**

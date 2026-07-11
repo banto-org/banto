@@ -52,13 +52,16 @@ m2=$( . "$PATHS"; _ai_context_mode /work/unknown )
 check "unregistered → central (derive)" "central" "$m2"
 b2=$( . "$PATHS"; _ai_context_base_dir /work/unknown )
 check "derive base = store/<dirname>" "$TMP/store/unknown" "$b2"
-# grandfather (existing in-repo .ai-context wins over derive)
+# in-repo .ai-context is ABOLISHED (2026-07-08 abolish-in-repo-ai-context): it no longer wins over
+# derive. An in-repo .ai-context is never a resolution target — the scaffold auto-migrates it into
+# the store, and the resolver falls through to the central derive.
 LEG="$TMP/leg-proj"
 mkdir -p "$LEG/.ai-context"
 m3=$( . "$PATHS"; _ai_context_mode "$LEG" )
-check "grandfather → legacy" "legacy" "$m3"
+check "in-repo .ai-context → central (grandfather abolished)" "central" "$m3"
 b3=$( . "$PATHS"; _ai_context_base_dir "$LEG" )
-check "grandfather base = cwd/.ai-context" "$LEG/.ai-context" "$b3"
+case "$b3" in */.ai-context) b3got=inrepo ;; *) b3got=store ;; esac
+check "in-repo .ai-context ignored → resolves to store, not the in-repo path" "store" "$b3got"
 
 echo "== ai-context-local (non-blocking local store, spec 2026-06-24) =="
 # A repo registered ONLY in the local store mapping resolves into ~/ai-context-local/<project>,
@@ -95,5 +98,33 @@ echo "== local:true pin (mapping marker) =="
 ( . "$PATHS"; _ai_context_is_local_pinned "$TMP/pinned" );   check_rc "pinned repo (local:true) → pinned" 0 "$?"
 ( . "$PATHS"; _ai_context_is_local_pinned "$LP" );           check_rc "local:false repo → not pinned" 1 "$?"
 ( . "$PATHS"; _ai_context_is_local_pinned "/work/proj-b" );  check_rc "central repo → not pinned" 1 "$?"
+
+echo "== grants (_ai_context_grant, time-boxed object form) =="
+GTMP="$TMP/grants"
+mkdir -p "$GTMP/store/grantrepo/meta"
+GMAP="$GTMP/.mapping.json"
+cat > "$GMAP" <<JSON
+{"version":2,"store_root":"$GTMP/store","projects":{"$GTMP/repo":{"project":"grantrepo"}}}
+JSON
+GFILE="$GTMP/store/grantrepo/meta/grants.json"
+TODAY=$(date +%Y-%m-%d)
+FUTURE=$(date -v+7d +%Y-%m-%d 2>/dev/null || date -d "+7 days" +%Y-%m-%d)
+PAST=$(date -v-7d +%Y-%m-%d 2>/dev/null || date -d "-7 days" +%Y-%m-%d)
+
+# subshell (not `sh -c`) so $0 stays the test script's own path — same trick the mapping-hit
+# tests above rely on for resolve-store-path.sh to be found relative to $0's dirname.
+_grant_with() {  # $1=grants.json content $2=key
+    printf '%s' "$1" > "$GFILE"
+    ( AI_CONTEXT_MAPPING="$GMAP"; export AI_CONTEXT_MAPPING; . "$PATHS"; _ai_context_grant "$2" "$GTMP/repo" )
+}
+
+g=$(_grant_with "{\"grants\":{\"prod_ops\":{\"value\":\"allow\",\"until\":\"$FUTURE\"}}}" prod_ops)
+check "future until → allow still in effect" "allow" "$g"
+
+g=$(_grant_with "{\"grants\":{\"prod_ops\":{\"value\":\"allow\",\"until\":\"$PAST\"}}}" prod_ops)
+check "past until → decays to confirm" "confirm" "$g"
+
+g=$(_grant_with '{"grants":{"prod_ops":{"value":"allow","until":"not-a-date"}}}' prod_ops)
+check "malformed until → fail-open to confirm" "confirm" "$g"
 
 if [ "$fail" = "0" ]; then echo "ALL GREEN"; exit 0; else echo "FAILED"; exit 1; fi

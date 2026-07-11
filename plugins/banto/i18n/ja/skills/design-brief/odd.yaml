@@ -1,0 +1,25 @@
+# ODD Spec for design-brief
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: design-brief
+autonomy_level: L1  # Suggest — 対話でブリーフを提案、確定は呼び出し元（spec/実装）に委ねる
+
+in_scope:
+  - 曖昧な UI / デザイン依頼を 14 観点のデザインブリーフへ変換する対話
+  - ターゲット（人物像・状況・感情）の確定を起点にした観点間の波及の提示
+  - ビジュアルスタイル・トーン&マナーの組み合わせ指定の提示
+
+out_of_scope:
+  - HTML / コードの生成そのもの（html-doc skill や実装フェーズ）
+  - 文章の受け手レベル調整（ja-writing skill の audience-levels.md）
+  - デザインブリーフの永続保存（呼び出し元 / spec skill が判断）
+  - 図の作成（diagram skill）
+
+safety_boundaries:
+  - 本 skill 自体はファイルを書かない（reference を Read し、ブリーフは会話内で提示する）
+  - ターゲット未確定のまま他観点を確定しない
+
+kill_switch_conditions: []
+
+approval_gates: []

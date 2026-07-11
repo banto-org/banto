@@ -13,7 +13,7 @@ compatibility: Claude Code (requires bash, git, jq; PyTorch 系学習スタッ�
 
 # model-lab — モデル研究フロー（frame → survey → design → implement → run → verify → analyze → paper → iterate）
 
-> **保存ベース（store-first）**: 決定・実験台帳・eval 結果など `{base}/...` への Read/Write は、SessionStart/PreCompact hook が注入する「ai-context ベース: &lt;絶対パス&gt;」の配下で行う。不明なら `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`。
+> **保存ベース（store-first）**: 決定・実験台帳・eval 結果は `{base}/...` 配下。`{base}` は SessionStart/PreCompact hook が注入する ai-context ベースの絶対パス（不明なら `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`）。
 
 モデル研究は「動いた」では終わらない。品質は eval・ablation・統計で測り、主張は再現可能な実験で裏づける。本 skill は dev-loop の骨格（実装 → 検証 → 修正 → 反復）を研究向けに拡張し、**検証段を eval + ablation + 統計 + 再現性**に、設計段に**手法/アーキ選定と計算計画**を、出力段に**論文 + 公開**を足す。
 
@@ -87,7 +87,8 @@ eval の green/red と再現性チェックは閾値で deterministic に回す�
 | 再現性欠落 | `repro-gate.sh`（PreToolUse） | seed 固定・決定性フラグ / 結果の std・CI の欠落を検出（escape: `BANTO_ALLOW_UNREPRO=1`） |
 | 計算コスト | `compute-cost-gate.sh`（PreToolUse） | 有料計算の launch（クラウド / クラスタ起動・Spot 含む）を一律停止 → owner が予算確認、認可後 `BANTO_ALLOW_COMPUTE=1`（ローカル実行は対象外） |
 | 外部流出 | `egress-guard.sh`（既存） | eval / 学習データへの client 本番データ・PII 混入を遮断 |
-| 不可逆操作 | safety rule（既存） | push / PR / main / 削除 / 外部投稿は人間ゲート |
+
+不可逆操作（push / PR / main / 削除 / 外部投稿）は `safety` rule に従い人間ゲート。
 
 ## 使い方（インテント検出 — コマンド暗記は不要）
 

@@ -11,7 +11,7 @@
 ## Directory layout (new layout)
 
 ```
-{base}/                            (store: ~/ai-context-store/<project>/, grandfather legacy: .ai-context/ inside the repo)
+{base}/                            (store: ~/ai-context-store/<project>/ or ~/ai-context-local/<project>/)
 ├── WORKSPACE.md                   ← lightweight pointer (per-checkout local, gitignore. WS name + branch + entity path)
 ├── WORKSPACE-refs.md              ← exists only during /ws multi (list of reference WS, local)
 ├── DASHBOARD.md                   ← hook-managed bird's-eye view (local, gitignore)

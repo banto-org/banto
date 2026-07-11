@@ -13,7 +13,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # Concept — 思想形成（対話による製品哲学）
 
-> **保存ベース（store-first）**: この skill が保存する `.ai-context/concept/...` パスは ai-context ベースを指す。SessionStart/PreCompact hook が 「ai-context ベース: &lt;absolute path&gt;」 として注入する絶対パスの配下に Read/Write すること。相対の `.ai-context/` には決して書き込まない（旧来のレガシーリポジトリにしか存在しない。不明なら `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決する）。
+> **保存ベース（store-first）**: 保存先は `{base}/concept/CONCEPT.md`。`{base}` は SessionStart/PreCompact hook が注入する ai-context ベースの絶対パス（不明なら `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決する）。
 
 生成するドキュメントはユーザーの会話言語で書く（日本語で会話していれば日本語）。テンプレートのラベルはあくまで例示。
 
@@ -127,7 +127,7 @@ CONCEPT.md を**すべてのエージェントの判断フィルター**にす�
 > 「CONCEPT を CLAUDE.md に @import で常駐させますか？（リポジトリの CLAUDE.md に 1 行入ります）」
 
 - **yes** → プロジェクトルートの CLAUDE.md の先頭付近に 1 行追加（Claude Code は `@import` を 5 ホップまで解決する）:
-  `@{base}/concept/CONCEPT.md`（または旧来のレガシーリポジトリでは相対の `@.ai-context/concept/CONCEPT.md`）。CLAUDE.md が無ければ作成を提案（ネイティブ /init 連携）。
+  `@{base}/concept/CONCEPT.md`。CLAUDE.md が無ければ作成を提案（ネイティブ /init 連携）。
 - **no** → **CLAUDE.md には触らない**。CONCEPT は毎セッション効く: SessionStart hook がストアの `concept/CONCEPT.md` を自動注入し、エージェントが North Star として参照する — リポジトリには何も書き込まない。
 
 つまりリポジトリに触りたくないユーザーは **no** を選べ、CONCEPT は hook 注入で毎セッション自走する。**yes** を選べば加えて CLAUDE.md にピン留めされ、明示的でバージョン管理された記録になる。いずれにせよエージェントは常に「この実装は WHY に沿っているか / 反NG に触れていないか」を自己チェックする。
@@ -147,6 +147,7 @@ CONCEPT.md を**すべてのエージェントの判断フィルター**にす�
 ## パイプライン接続（次のステップ）
 
 思想が固まったら:
+- 画面や UI が絡む場合は、先に design-brief skill でデザインブリーフを作ってから進む
 - `/spec {topic}` → 思想を仕様へ翻訳する
 - spec の後、そのまま実装へ進む（自走: 実装 + テスト + レビュー）
 - CONCEPT.md の 5 要素は spec の判断軸（反NG、North Star）として引き継がれる
@@ -154,6 +155,5 @@ CONCEPT.md を**すべてのエージェントの判断フィルター**にす�
 ## 禁止
 
 - ❌ AI が人間の持っていない思想を捏造する（仕事は引き出すこと）
-- ❌ `AskUserQuestion` を使う（プレーンテキストで問う — このプラグインのポリシー）
 - ❌ 5 要素のいずれかを「後で」と残す（採用解釈で埋め、最後に開示する）
 - ❌ 共感ゲート（倫理を含む）を通さずに CONCEPT.md を確定する

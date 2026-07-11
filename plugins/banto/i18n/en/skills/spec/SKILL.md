@@ -13,9 +13,9 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # Spec — Interactive Spec-Driven Design (Specification Generation)
 
-> **Position in the pipeline**: `concept (ideology) → **spec (this skill, design doc)** → implementation (self-driving)`. If there is no ideology yet, run `/concept` first. If CONCEPT.md exists, carry over its "anti-goals" and "North Star" as the spec's decision axes.
+> **Position in the pipeline**: `concept (ideology) → **spec (this skill, design doc)** → implementation (self-driving)`. If there is no ideology yet, run `/concept` first. If CONCEPT.md exists, carry over its "anti-goals" and "North Star" as the spec's decision axes. If a screen or UI is involved, build a design brief with the design-brief skill first.
 
-> **Storage base (store-first)**: the `.ai-context/...` paths this skill saves to refer to the ai-context base. Read/Write under the absolute path injected by the SessionStart/PreCompact hooks as 「ai-context ベース: &lt;absolute path&gt;」 — never write to a relative `.ai-context/` (it exists only in grandfathered legacy repos; if unknown, resolve with `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
+> **Storage base (store-first)**: saves go to `{base}/docs/specs/...` (ADRs only to `{base}/decisions/`). `{base}` is the absolute ai-context base path injected by the SessionStart/PreCompact hooks (if unknown, resolve with `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
 
 Generate an **industry-standard specification document** through dialogue before writing any code. Per the `spec-fidelity` rule, confirm in advance only on "goal forks"; otherwise proceed with adopted interpretations.
 
@@ -23,18 +23,7 @@ Write the generated document in the user's conversation language (Japanese if th
 
 ## Premise: 6 template types
 
-`${CLAUDE_PLUGIN_ROOT}/templates/specs/` provides 6 industry standards. Claude **decides which to use through dialogue**:
-
-| # | Format | Suited for | Effort |
-|---|---|---|---|
-| 1 | **Spec Kit** (spec.md + plan.md + tasks.md, 3-file set) | The standard of the AI-agent era, pairs well with Claude Code/Cursor, TDD recommended | Medium |
-| 2 | **PRD** (Product Requirements Document) | Business-side view, PM-driven, product feature definition | Medium |
-| 3 | **Design Doc** (Google style) | Detailed engineering design, architecture review | Large |
-| 4 | **RFC** (HashiCorp style) | Technical change proposals, team consensus, alternatives included | Large |
-| 5 | **ADR** (Architecture Decision Record) | Short post-decision record, single file | Small |
-| 6 | **Scope Doc** | Project boundary agreement, rework prevention | Medium |
-
-See `${CLAUDE_PLUGIN_ROOT}/templates/specs/README.md` for details.
+`${CLAUDE_PLUGIN_ROOT}/templates/specs/` provides 6 industry standards (Spec Kit / PRD / Design Doc / RFC / ADR / Scope Doc). Each format's fit, effort, and tier is canonically defined by the Step 2 option text and `${CLAUDE_PLUGIN_ROOT}/templates/specs/README.md`. Claude **decides which to use through dialogue**.
 
 ## Dialogue flow (standard)
 
@@ -101,7 +90,12 @@ Criteria: more than **5 related files** / spans multiple modules / possible conf
 
 Detailed steps: [`references/claude-design-handoff.md`](references/claude-design-handoff.md)
 
-Essentials: prototype in Claude Design (claude.ai/design) → "Hand off to Claude Code" produces a bundle ZIP (README.md + prototype.html + assets/). Pro/Max only / Research Preview / powered by the latest Opus. Fallbacks: v0.dev / Figma + Figma MCP / textual UI in a Design Doc.
+Minimal procedure when UI is involved:
+1. Confirm in text whether Claude Design (claude.ai/design, Pro/Max only, Research Preview) is available
+2. Yes → have the user fill in the 4 elements (Goal / Layout / Content / Audience) and build a prototype in Claude Design
+3. Once the prototype is done, "Hand off to Claude Code" produces a bundle ZIP (README.md + prototype.html + assets/) → save it under `docs/specs/designs/{topic}/`
+4. Read the bundle's README.md and implement following the existing codebase conventions
+5. No / below Pro → fall back (v0.dev / Figma + Figma MCP / textual UI in a Design Doc)
 
 ### Step 5: Apply the template
 
@@ -180,14 +174,7 @@ When the user selects multiple (e.g. "1 + 5" = Spec Kit + ADR):
 
 ## Recommendation by tier
 
-| Tier | Scale | Recommendation |
-|---|---|---|
-| 1 | Personal / prototype | Spec Kit + ADR (for important decisions) |
-| 2 | Small team | + PRD |
-| 3 | Mid-size company | + Design Doc + RFC + Scope |
-| 4 | Enterprise | All formats + Threat Model + Runbooks |
-
-If no tier is specified, recommend Spec Kit and ask for the user's call.
+The recommended combination per tier (personal through enterprise) is canonically defined in `${CLAUDE_PLUGIN_ROOT}/templates/specs/README.md`. If no tier is specified, recommend Spec Kit and ask for the user's call.
 
 ## Prohibited
 

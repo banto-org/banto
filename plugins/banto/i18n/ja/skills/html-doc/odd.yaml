@@ -1,0 +1,27 @@
+# ODD Spec for html-doc
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: html-doc
+autonomy_level: L2  # 中規模ワークフロー（雛形 Read → 組み立て → 単一 HTML の生成・保存まで自走）
+
+in_scope:
+  - 自己完結な単一 HTML 資料（報告書 / 手順書 / 説明資料 / 提案書）の雛形からの生成
+  - カラーテーマ 7 種の適用とブランド色からのカスタム導出
+  - mermaid / draw.io 経由の図の事前レンダとインライン SVG 埋め込み
+  - 受け手レベル（L1/L2/L3）に応じた文体・構成の調整（audience-levels.md）
+
+out_of_scope:
+  - アプリ / 画面の UI 実装（ui-design skill があればそちら）
+  - B2B 提案の章立て・pptx 生成の判断（b2b-docs skill）
+  - 図の記法そのものの選択と作法（diagram skill）
+  - 内部メモ・decision 記録（Markdown で十分）
+
+safety_boundaries:
+  - 外部リクエストゼロを保つ（CDN フォント・外部 CSS・トラッキング禁止。フォールバックで CDN を使う場合は必ず明示）
+  - クライアント向け成果物では内部名・他社名・PII をマスクする（pii-protection ルール / egress-guard 準拠）
+  - 生成物の上書きは既存ファイルを Read してから（Write 規約に従う）
+
+kill_switch_conditions: []
+
+approval_gates: []

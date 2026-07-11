@@ -86,6 +86,41 @@ _ai_context_skeleton() {
         2>/dev/null
 }
 
+# legacy な in-repo .ai-context/ を store base へ**非破壊コピー**で自動移行する
+# （decision 2026-07-08 abolish-in-repo-ai-context: in-repo .ai-context の完全廃止）。
+# 同名は上書きせず・元 .ai-context/ は消さない（削除は人手）。再生成物 / VCS / per-machine は除外。
+# 完了マーカーは store 側（<base>/meta/.migrated-from-inrepo）に置き repo を汚さない。1 回だけ実行。
+# Usage: _ai_context_migrate_inrepo <repo_top> <base>
+_ai_context_migrate_inrepo() {
+    _aim_top="$1"
+    _aim_base="$2"
+    [ -n "$_aim_top" ] && [ -n "$_aim_base" ] || { unset _aim_top _aim_base; return 0; }
+    [ -d "$_aim_top/.ai-context" ] || { unset _aim_top _aim_base; return 0; }
+    _aim_marker="$_aim_base/meta/.migrated-from-inrepo"
+    [ -f "$_aim_marker" ] && { unset _aim_top _aim_base _aim_marker; return 0; }  # 移行済み
+
+    # 非破壊コピー（除外は migrate-to-store.sh と同一: 再生成物 / VCS / per-machine / .gitignore）
+    ( cd "$_aim_top/.ai-context" 2>/dev/null || exit 0
+      find . -type f 2>/dev/null | while IFS= read -r _rel; do
+          _rel=${_rel#./}
+          case "$_rel" in
+              project-index/*|full-index/*|*-combined.txt|.obsidian/*|*/.obsidian/*|.git/*|*/.git/*|.DS_Store|*/.DS_Store|.gitignore) continue ;;
+          esac
+          _dst="$_aim_base/$_rel"
+          [ -f "$_dst" ] && continue          # 同名は上書きしない
+          mkdir -p "$(dirname "$_dst")" 2>/dev/null
+          cp "$_aim_top/.ai-context/$_rel" "$_dst" 2>/dev/null
+      done )
+
+    mkdir -p "$_aim_base/meta" 2>/dev/null
+    {
+        echo "migrated from in-repo .ai-context at $(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null)"
+        echo "source: $_aim_top/.ai-context"
+    } > "$_aim_marker" 2>/dev/null
+    echo "[AI Context] Migrated in-repo .ai-context/ → $_aim_base (non-destructive copy; originals kept). The in-repo .ai-context/ is now unused and can be deleted after you verify the store copy."
+    unset _aim_top _aim_base _aim_marker _rel _dst
+}
+
 # store 解決を検知し、未解決なら**ブロックせず**ローカル仮置き（~/ai-context-local/<project>/）を
 # 作成・登録して 1 行だけ通知する（spec 2026-06-24 ai-context-subsystem-redesign が A1 を上書き）。
 # repo 側（local .ai-context / .gitignore）には一切書かない。central / local-store の resolver hit で
@@ -118,12 +153,9 @@ _ai_context_scaffold() {
     fi
     unset _ais_phys
 
-    # grandfather: 既存の repo 内 .ai-context/ はそのまま尊重（store 登録しない）。
-    # 移行は人間ゲート（/ai-context migrate / SessionStart の 1 行提案）。
-    if [ -d "$_ais_top/.ai-context" ]; then
-        unset _ais_cwd _ais_top
-        return 0
-    fi
+    # in-repo .ai-context/ grandfather は 2026-07-08 廃止（decision abolish-in-repo-ai-context）。
+    # 以前は「その場で尊重・store 登録しない」だったが、いまは通常どおり store base を解決・登録し、
+    # 末尾で legacy .ai-context/ を store へ自動移行する（非破壊）。in-repo は参照しない。
 
     # mapping 解決には jq が必要（banto の必須要件。無ければ静かに何もしない＝fail-open）
     command -v jq >/dev/null 2>&1 || { unset _ais_cwd _ais_top; return 0; }
@@ -137,42 +169,31 @@ _ai_context_scaffold() {
     fi
     command -v _ai_context_derive_dir >/dev/null 2>&1 || { unset _ais_cwd _ais_top; return 0; }
 
-    # 中央 store に登録済み（mapping / worktree / remote のいずれかで resolver hit）なら
-    # store 側 skeleton を冪等に確保するだけ。
+    # base を解決（各分岐は early-return せず _ais_dir に集約。末尾で skeleton + legacy 自動移行を共通実行）。
     _ais_dir=""
+    # (a) 中央 store に登録済み（mapping / worktree / remote のいずれかで resolver hit）
     if [ -f "$_AIS_SCRIPTS_DIR/resolve-store-path.sh" ]; then
         _ais_dir=$(sh "$_AIS_SCRIPTS_DIR/resolve-store-path.sh" --store-dir "$_ais_top" 2>/dev/null) || _ais_dir=""
     fi
-    if [ -n "$_ais_dir" ]; then
-        _ai_context_skeleton "$_ais_dir"
-        unset _ais_cwd _ais_top _ais_dir
-        return 0
-    fi
-
-    # ローカル仮置き store に登録済み（bootstrap 前 / local 固定）なら local 側 skeleton を冪等確保。
-    if command -v _ai_context_local_lookup >/dev/null 2>&1; then
+    # (b) ローカル仮置き store に登録済み（bootstrap 前 / local 固定）
+    if [ -z "$_ais_dir" ] && command -v _ai_context_local_lookup >/dev/null 2>&1; then
         _ais_dir=$(_ai_context_local_lookup "$_ais_top") || _ais_dir=""
-        if [ -n "$_ais_dir" ]; then
-            _ai_context_skeleton "$_ais_dir"
-            unset _ais_cwd _ais_top _ais_dir
-            return 0
+    fi
+    # (c) 未登録: ブロックせず ~/ai-context-local/<project>/ を作成・登録（local:false）して 1 行通知
+    #     spec 2026-06-24 ai-context-subsystem-redesign（A1 prompt-only を上書き）。GitHub backing は後追い:
+    #     /ai-context bootstrap で本物 store へ移行、/ai-context local でローカル固定（mapping local:true）。
+    #     repo 側には一切書かない（store-first）。fail-open: jq / mkdir 失敗で no-op。
+    if [ -z "$_ais_dir" ]; then
+        command -v _ai_context_local_root >/dev/null 2>&1 || { unset _ais_cwd _ais_top _ais_dir; return 0; }
+        _ais_root=$(_ai_context_local_root)
+        _ais_map=$(_ai_context_local_mapping)
+        mkdir -p "$_ais_root" 2>/dev/null || { unset _ais_cwd _ais_top _ais_dir _ais_root _ais_map; return 0; }
+        [ -f "$_ais_root/.ai-context-local" ] || touch "$_ais_root/.ai-context-local" 2>/dev/null
+        if [ ! -f "$_ais_map" ]; then
+            printf '{\n  "version": 2,\n  "store_root": "%s",\n  "projects": {}\n}\n' "$_ais_root" > "$_ais_map" 2>/dev/null
         fi
-    fi
-
-    # === 未登録: ブロックせず ~/ai-context-local/<project>/ を作成・登録（local:false）して 1 行通知 ===
-    # spec 2026-06-24 ai-context-subsystem-redesign（A1 prompt-only を上書き）。GitHub backing は後追い:
-    # /ai-context bootstrap で本物 store へ移行、/ai-context local でローカル固定（mapping local:true）。
-    # repo 側には一切書かない（store-first）。fail-open: jq / mkdir 失敗で no-op。
-    command -v _ai_context_local_root >/dev/null 2>&1 || { unset _ais_cwd _ais_top _ais_dir; return 0; }
-    _ais_root=$(_ai_context_local_root)
-    _ais_map=$(_ai_context_local_mapping)
-    mkdir -p "$_ais_root" 2>/dev/null || { unset _ais_cwd _ais_top _ais_dir _ais_root _ais_map; return 0; }
-    [ -f "$_ais_root/.ai-context-local" ] || touch "$_ais_root/.ai-context-local" 2>/dev/null
-    if [ ! -f "$_ais_map" ]; then
-        printf '{\n  "version": 2,\n  "store_root": "%s",\n  "projects": {}\n}\n' "$_ais_root" > "$_ais_map" 2>/dev/null
-    fi
-    if [ ! -f "$_ais_root/.gitignore" ]; then
-        cat > "$_ais_root/.gitignore" <<'AI_LOCAL_GITIGNORE'
+        if [ ! -f "$_ais_root/.gitignore" ]; then
+            cat > "$_ais_root/.gitignore" <<'AI_LOCAL_GITIGNORE'
 .mapping.json
 project-index/
 full-index/
@@ -188,32 +209,37 @@ WORKSPACE.md
 WORKSPACE-refs.md
 DASHBOARD.md
 AI_LOCAL_GITIGNORE
+        fi
+        # derive はローカル root に対して算出する（衝突時 -2/-3 suffix。AI_CONTEXT_STORE_ROOT /
+        # AI_CONTEXT_MAPPING をローカル側へ一時的に向けて derive を流用する＝サブシェルで隔離）。
+        _ais_proj=$(
+            AI_CONTEXT_STORE_ROOT="$_ais_root" AI_CONTEXT_MAPPING="$_ais_map" \
+            _ai_context_derive_dir "$_ais_top"
+        )
+        _ais_proj=$(basename "$_ais_proj")
+        _ais_dir="$_ais_root/$_ais_proj"
+        if jq --arg top "$_ais_top" --arg p "$_ais_proj" \
+              '.projects[$top] = {"project": $p, "local": false}' "$_ais_map" > "$_ais_map.tmp" 2>/dev/null; then
+            mv "$_ais_map.tmp" "$_ais_map"
+        else
+            rm -f "$_ais_map.tmp" 2>/dev/null
+            unset _ais_cwd _ais_top _ais_dir _ais_root _ais_map _ais_proj; return 0
+        fi
+        # 通知は user-scope marker で 1 回だけ（毎回 nag しない。fail-open）。
+        _ais_asked_dir="$HOME/.claude/banto-bootstrap-asked"
+        _ais_slug=$(printf '%s' "$_ais_top" | sed 's#[^A-Za-z0-9._-]#_#g')
+        _ais_marker="$_ais_asked_dir/$_ais_slug"
+        if [ ! -f "$_ais_marker" ]; then
+            mkdir -p "$_ais_asked_dir" 2>/dev/null
+            touch "$_ais_marker" 2>/dev/null || true
+            echo "[AI Context] Using a temporary local store at $_ais_dir (the repo stays clean). Run /ai-context bootstrap to back it with GitHub, or /ai-context local to keep it local-only."
+        fi
     fi
-    # derive はローカル root に対して算出する（衝突時 -2/-3 suffix。AI_CONTEXT_STORE_ROOT /
-    # AI_CONTEXT_MAPPING をローカル側へ一時的に向けて derive を流用する＝サブシェルで隔離）。
-    _ais_proj=$(
-        AI_CONTEXT_STORE_ROOT="$_ais_root" AI_CONTEXT_MAPPING="$_ais_map" \
-        _ai_context_derive_dir "$_ais_top"
-    )
-    _ais_proj=$(basename "$_ais_proj")
-    _ais_dir="$_ais_root/$_ais_proj"
-    if jq --arg top "$_ais_top" --arg p "$_ais_proj" \
-          '.projects[$top] = {"project": $p, "local": false}' "$_ais_map" > "$_ais_map.tmp" 2>/dev/null; then
-        mv "$_ais_map.tmp" "$_ais_map"
-    else
-        rm -f "$_ais_map.tmp" 2>/dev/null
-        unset _ais_cwd _ais_top _ais_dir _ais_root _ais_map _ais_proj; return 0
-    fi
+
+    # 共通末尾: skeleton 冪等生成 + legacy in-repo .ai-context/ の自動移行（非破壊・store 側マーカーで 1 回だけ）
+    [ -n "$_ais_dir" ] || { unset _ais_cwd _ais_top _ais_dir _ais_root _ais_map _ais_proj _ais_asked_dir _ais_slug _ais_marker; return 0; }
     _ai_context_skeleton "$_ais_dir"
-    # 通知は user-scope marker で 1 回だけ（毎回 nag しない。fail-open）。
-    _ais_asked_dir="$HOME/.claude/banto-bootstrap-asked"
-    _ais_slug=$(printf '%s' "$_ais_top" | sed 's#[^A-Za-z0-9._-]#_#g')
-    _ais_marker="$_ais_asked_dir/$_ais_slug"
-    if [ ! -f "$_ais_marker" ]; then
-        mkdir -p "$_ais_asked_dir" 2>/dev/null
-        touch "$_ais_marker" 2>/dev/null || true
-        echo "[AI Context] Using a temporary local store at $_ais_dir (the repo stays clean). Run /ai-context bootstrap to back it with GitHub, or /ai-context local to keep it local-only."
-    fi
+    _ai_context_migrate_inrepo "$_ais_top" "$_ais_dir"
     unset _ais_cwd _ais_top _ais_dir _ais_root _ais_map _ais_proj _ais_asked_dir _ais_slug _ais_marker
     return 0
 }

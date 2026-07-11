@@ -75,8 +75,22 @@ for f in $(find "$JA" -type f | LC_ALL=C sort); do
     if [ "$MODE" = auto ]; then
         if [ "$ja_hash" != "$prev_ja" ] || [ ! -f "$enf" ]; then
             mkdir -p "$(dirname "$enf")"
+            gen_tmp=$(mktemp)
             # shellcheck disable=SC2086
-            $TRANSLATE_CMD "$RULES$(cat "$f")" > "$enf"
+            if ! $TRANSLATE_CMD "$RULES$(cat "$f")" > "$gen_tmp" 2>/dev/null; then
+                rm -f "$gen_tmp"
+                echo "i18n-gen: ERROR — translate command failed for $rel (existing EN left untouched)" >&2
+                rm -f "$tmp"; exit 1
+            fi
+            # Guard against the hang-then-empty-write failure mode: only replace the
+            # existing EN file once the fresh output is non-empty and looks like markdown
+            # (starts with frontmatter or a heading), never in place.
+            if [ ! -s "$gen_tmp" ] || ! grep -qE '^(---|#)' "$gen_tmp"; then
+                rm -f "$gen_tmp"
+                echo "i18n-gen: ERROR — translate output for $rel is empty or not valid markdown (existing EN left untouched)" >&2
+                rm -f "$tmp"; exit 1
+            fi
+            mv "$gen_tmp" "$enf"
             generated=$((generated+1))
             prev_ts=""   # force fresh timestamp
         fi

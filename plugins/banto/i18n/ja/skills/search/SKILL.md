@@ -14,7 +14,7 @@ compatibility: Claude Code (requires bash, git, jq, python3)
 
 > **検索ベース（store-first）**：本スキルでの `{base}` は ai-context ベースを指す。SessionStart/PreCompact hook が「ai-context ベース: &lt;absolute path&gt;」として注入する絶対パス配下を検索する（不明な場合は `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決する）。
 
-ユーザーが日本語で会話している場合は、日本語で応答する（検索レポートも日本語で書く）。
+出力言語: 応答・検索レポートとも会話言語で書く（日本語なら `writing-ja.md` 準拠）。
 
 ## search vs research
 

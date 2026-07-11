@@ -76,6 +76,26 @@ Self-driving implementation verifies before claiming done (Option A — explicit
 - `verify-claim-guard.sh` (Stop) blocks a completion claim while the most-recent
   `verify-last-*` is red (in addition to its error-trace heuristic; one-shot via `stop_hook_active`).
 
+## Warn-only guard hooks
+
+These never block (always exit 0); they surface a one-line stderr note and let the tool call proceed:
+
+- `drift-commit-guard.sh` (PreToolUse Bash, `git commit` segments) — warns when `plugins/banto/`
+  has staged changes but `plugin.json` is not part of the same commit (a possible missed version
+  bump). No-op outside the banto repo itself (detected via the `plugin.json` marker) and when
+  `jq`/`git` are missing.
+- `model-role-guard.sh` (PreToolUse Task|Agent) — warns once per session when a subagent is
+  launched without an explicit `model`, since it silently inherits the parent model at higher cost.
+  Role defaults (implement/mechanical/audit) come from `templates/model-policy.json`.
+- `ja-lint.sh` + `ja-lint.py` (PostToolUse Write|Edit on `.md`) — flags Japanese writes that
+  deviate from `writing-ja.md` conventions. `ja-lint.sh` is the registered hook; the Unicode-range
+  detection itself lives in `ja-lint.py` (python3-gated, same delegation pattern as
+  `egress-guard.py`).
+- `checkpoint-autofire.sh` (unregistered helper — not invoked directly; detached from both
+  `idle-checkpoint-watch.sh` and `checkpoint-recommend.sh`) — shared auto-fire logic for
+  `/save-checkpoint`, holding the per-session exclusive lock in one place so the two triggers can't
+  double-fire.
+
 ## Identifiers other tools may rely on
 
 - store marker: a `.ai-context-store` file at the store root (kill-switch / push-policy checks)
@@ -84,3 +104,14 @@ Self-driving implementation verifies before claiming done (Option A — explicit
 - pre-push check convention: if a repo contains `scripts/pre-push-check.sh`,
   `release-guard.sh` runs it before any `git push` and blocks on non-zero exit
   (opt-in per repo; the repo owns its check content; escape: `BANTO_SKIP_PUSH_CHECK=1`)
+- `prod-guard.sh` (PreToolUse Bash, deterministic block) — blocks production-environment operations
+  (kubectl against a `prod` context/namespace, `terraform apply`/`destroy`, `vercel --prod`,
+  `flyctl deploy`, `gcloud app deploy`, `aws --profile *prod*`, `npm/pnpm/yarn/bun run` deploy
+  scripts named with `prod`, `ssh` to a `prod` host; extend via `BANTO_PROD_PATTERNS`). Escape:
+  `BANTO_ALLOW_PROD=1` (also honored as an in-command prefix assignment on the same segment).
+  Fail-open on jq absence / undetected patterns.
+- grants file convention: `{base}/meta/grants.json` (`.grants.<key>` = `allow`/`deny`/`confirm`)
+  records standing per-repo approvals, resolved deterministically via `_ai_context_grant`
+  (`scripts/_ai-context-paths.sh`). `release-guard.sh` reads `pr_create`; `prod-guard.sh` reads
+  `prod_ops`. `allow` passes without the env escape, `deny` blocks with no escape guidance, and a
+  missing/unset key falls back to `confirm` (today's escape-gated behavior, unchanged).

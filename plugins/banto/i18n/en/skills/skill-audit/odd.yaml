@@ -1,0 +1,30 @@
+# ODD Spec for skill-audit
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: skill-audit
+autonomy_level: L1  # Suggest (read-only audit; remediations are proposals only. Destructive operations require separate user confirmation)
+
+in_scope:
+  - Context-engineering audit of a single skill (information minimality / leakage of human-only information / division of labor in structure / appropriateness of the execution model directive / context efficiency / stated-AI disclosure and consistency / division of labor with determinism)
+  - read-only inspection (Read / Grep / Glob / Bash readonly commands + scripts/skill-audit-metrics.sh)
+  - Delegating subjective axes (e.g. stated-AI consistency) to a general-purpose agent
+  - Reporting the audit result in conversation (per-axis PASS/WARN/FAIL + fix proposals)
+
+out_of_scope:
+  - Auditing a plugin's overall structure (plugin-audit)
+  - Auditing the whole harness as a system (harness-audit)
+  - Generating or reworking skills / plugins (plugin-dev)
+  - Destructive fixes of detected issues (applying them follows safety.md and requires separate user confirmation)
+
+safety_boundaries:
+  - "Write target: reports are shown in conversation by default; if saved, only under {base}/docs/"
+  - Bash is for readonly inspection only (skill-audit-metrics.sh / grep / wc / jq). Mutating commands forbidden
+  - Never raw-print files containing secrets (per safety.md)
+
+kill_switch_conditions:
+  - Re-running the audit on the same target 3 times in a row
+  - When asked to run a mutating command via Bash (rm / mv / git push)
+
+approval_gates:
+  - "Executing a remediation action (the audit only proposes; applying happens after user approval)"

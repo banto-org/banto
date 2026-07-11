@@ -6,12 +6,11 @@ from the start** — the only optional part is "whether to git-sync as a team".
 
 ## Resolution order (where the hook picks the base)
 
-1. **mapping hit**: already registered in `<store>/.mapping.json` → that project dir
-2. **grandfather**: only legacy repos that have an existing `.ai-context/` actually present in the repo → keep working in-repo
-   (can migrate to the store with `/ai-context migrate`)
+1. **central mapping hit**: already registered in `<store>/.mapping.json` → that project dir
+2. **local mapping hit**: `~/ai-context-local/<project>/` (repos pinned to `local`)
 3. **derive**: if unregistered, auto-number `<store>/<dirname of git toplevel>/` (with a `-2` suffix on collision) + auto-register
 
-Nothing is created on the repo side (CONTRACT.md "zero footprint exceptions").
+An existing in-repo `.ai-context/` is never a resolution target even if present. Scaffold non-destructively auto-migrates it to the store on detection (originals are kept). Nothing is created on the repo side (CONTRACT.md "zero footprint exceptions").
 
 ---
 

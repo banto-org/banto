@@ -13,7 +13,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # Concept — ideology formation (product philosophy through dialogue)
 
-> **Store-first**: the `.ai-context/concept/...` paths this skill saves to refer to the ai-context base. Read/Write under the absolute path the SessionStart/PreCompact hook injects as "ai-context base: &lt;absolute path&gt;". Never write to a relative `.ai-context/` (it exists only in old legacy repos; when unknown, resolve it with `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
+> **Store-first**: saves to `{base}/concept/CONCEPT.md`. `{base}` is the absolute ai-context base path injected by the SessionStart/PreCompact hook (when unknown, resolve it with `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
 
 Write the generated document in the user's conversation language (Japanese if conversing in Japanese). The template labels are merely illustrative.
 
@@ -127,7 +127,7 @@ Make CONCEPT.md **the judgment filter for every agent**. Two elements — one in
 > "Shall I keep CONCEPT resident in CLAUDE.md via @import? (one line goes into the repo's CLAUDE.md)"
 
 - **yes** → add one line near the top of the project-root CLAUDE.md (Claude Code resolves `@import` up to 5 hops):
-  `@{base}/concept/CONCEPT.md` (or, in an old legacy repo, the relative `@.ai-context/concept/CONCEPT.md`). If there is no CLAUDE.md, propose creating one (native /init integration).
+  `@{base}/concept/CONCEPT.md`. If there is no CLAUDE.md, propose creating one (native /init integration).
 - **no** → **do not touch CLAUDE.md**. CONCEPT takes effect every session: the SessionStart hook auto-injects the store's `concept/CONCEPT.md` and agents reference it as the North Star — nothing is written to the repo.
 
 In short, a user who does not want to touch the repo chooses **no**, and CONCEPT self-drives every session via hook injection. Choosing **yes** additionally pins it into CLAUDE.md, making it an explicit, version-controlled record. Either way, agents always self-check "is this implementation aligned with the WHY / does it violate the anti-goals".
@@ -147,6 +147,7 @@ Details: [`references/empathy-and-ethics.md`](references/empathy-and-ethics.md).
 ## Pipeline connection (next steps)
 
 Once the ideology is set:
+- If a screen or UI is involved, build a design brief with the design-brief skill first
 - `/spec {topic}` → translate the ideology into a spec
 - After the spec, proceed straight to implementation (self-driving: implement + test + review)
 - The 5 elements of CONCEPT.md carry over as the spec's judgment axes (anti-goals, North Star)
@@ -154,6 +155,5 @@ Once the ideology is set:
 ## Forbidden
 
 - ❌ The AI fabricating an ideology the human does not hold (the job is to elicit)
-- ❌ Using `AskUserQuestion` (ask in plain text — this plugin's policy)
 - ❌ Leaving any of the 5 elements as "later" (fill with an adopted interpretation and disclose at the end)
 - ❌ Finalizing CONCEPT.md without passing the empathy gate (including ethics)

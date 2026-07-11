@@ -1,8 +1,8 @@
 ---
 name: ai-context
 description: |
-  AI コンテキスト管理: 決定ログ / チェックポイント / タスクファイル（tasks.md）編集 + 次タスクナビ + Phase 完了 / ドキュメント振り分け / メモ / ナレッジ昇格 / store ブートストラップ + 健全性診断。内部検索は `search` skill が所有する。
-  トリガー: 「決定」「設計判断」「保存」「チェックポイント」「compact」「clear」「タスク」「TODO」「Phase」「続き」「次のタスク」「続きやって」「ドキュメント整理」「散らかってる」「除外」「動かさないで」「無効化」「メモして」「メモに残して」「書き留めて」「この会話を要約して保存」「ナレッジにして」「ナレッジ昇格」「下書き一覧見せて」「教訓として残して」「store を作って」「ローカル固定」「健康診断」
+  AI コンテキスト管理: 決定ログ / チェックポイント / タスクファイル（tasks.md）編集 + 次タスクナビ + Phase 完了 / ドキュメント振り分け / メモ / ナレッジ昇格 / store ブートストラップ + 健全性診断 + 常設許可（grants）管理。内部検索は `search` skill が所有する。
+  トリガー: 「決定」「設計判断」「保存」「チェックポイント」「compact」「clear」「タスク」「TODO」「Phase」「続き」「次のタスク」「続きやって」「ドキュメント整理」「散らかってる」「除外」「動かさないで」「無効化」「メモして」「メモに残して」「書き留めて」「この会話を要約して保存」「ナレッジにして」「ナレッジ昇格」「下書き一覧見せて」「教訓として残して」「store を作って」「ローカル固定」「健康診断」「常設許可」「許可設定」
   使わない場面: 既に格納済みのコンテキスト検索（`search` skill を使う）や外部ソースの調査（`research` を使う）。実装中の素の「やって」「進めて」は自走（直接動く）を意味し、タスク修飾付きのフレーズ（「次のタスク」「続きやって」）のみが次タスクナビへルーティングされる。セッション状態の保存は `save-checkpoint`、スコープ用に git worktree / ブランチを切り替えるのは `ws` であって本 skill ではない。
 allowed-tools: Read Write Edit Glob Grep Bash Agent
 argument-hint: "[bootstrap|local|doctor|sort|next|phase-done|ignore|tasks|migrate|memo|knowledge]"
@@ -11,13 +11,9 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # AI Context
 
-> **格納ベースについて（store-first）**: この skill 中の `{base}/...` パスはすべて **ai-context ベースディレクトリ** —
-> SessionStart / PreCompact hook が 「ai-context ベース: &lt;絶対パス&gt;」 として注入する絶対パス — を指す。常に
-> **その注入された絶対パス配下**を Read/Write し、相対の `.ai-context/` には絶対に書き込まない（repo 内 `.ai-context/` は
-> grandfather された legacy repo にのみ存在し、`/ai-context migrate` で移行するまでベースとして動き続ける）。
-> ベースが不明なら 1 行で解決する: `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`。
-
-> **出力言語**: 生成する成果物（決定ログ / tasks.md / チェックポイント / ステータス報告 / メモ / ナレッジ など）はユーザーの会話言語で書く。`references/` の日本語テンプレートは構造的な雛形にすぎない — 見出し/ラベルは会話言語に合わせて翻訳する。
+> **保存ベース（store-first）**: `{base}` は SessionStart/PreCompact hook が注入する ai-context ベースの絶対パス。常にその配下へ Read/Write する（in-repo `.ai-context/` は廃止済み — 検知時に store へ非破壊自動移行される。手動では使わない）。不明なら `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決する。
+>
+> **出力言語**: 生成する成果物はユーザーの会話言語で書く。`references/` の日本語テンプレートは雛形にすぎず、見出し/ラベルは会話言語へ翻訳する。
 
 ## サブコマンドルーター（明示的なユーザー呼び出し）
 
@@ -41,21 +37,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 引数が空または不明な場合は使い方を表示する。
 
-### 後方互換エイリアス（1 リリース限定・警告付き受理）
-
-旧サブコマンド / 旧 skill 名は**受理しつつ非推奨警告を 1 行出し、新形へ誘導**する（次リリースで削除予定）:
-
-| 旧形 | 受理して誘導する新形 |
-|---|---|
-| `/ai-context init` | `bootstrap`（store 作成 / 登録 + 仮ローカル移行に統合） |
-| `/ai-context status` | `doctor`（status を統合。健全性診断が状態表示も兼ねる） |
-| `/ai-context prune` | （廃止）空 / 移行済み legacy / 誤生成フォルダの掃除は hook が自動化する。手動の掃除が要れば `doctor` の報告に従う |
-| `/memo ...` / 「メモして」 | `ai-context memo [text]`（同手順で実行） |
-| `/knowledge ...` / 「ナレッジにして」 | `ai-context knowledge [list\|promote\|<topic>]`（同手順で実行） |
-
-警告例: 「`init` は `bootstrap` に統合された（このエイリアスは次リリースで削除）。bootstrap として続行する。」 — 警告を出したら**そのまま新形の手順で続行**する（作業はブロックしない）。
-
-**自然言語からの発火**: 明示サブコマンドに加えて、文脈から自動ルーティングする: 「続き」「次」「次のタスク」「進めて」 / "continue", "next", "next task", "go ahead" → `next`; 「ドキュメント整理」「散らかってる」 / "organize the docs", "it's a mess" → `sort project`; 「Phase 完了」 / "phase done" → `phase-done`; 「メモして」「書き留めて」「この会話を要約して保存」 → `memo`; 「ナレッジにして」「ナレッジ昇格」「下書き一覧」「教訓として残して」 → `knowledge`; 「store を作って」「ai-context-store をセットアップ」「GitHub に上げたい」・SessionStart hook の bootstrap 案内 → `bootstrap`; 「この repo はローカルだけで」「GitHub に上げないで」「ローカル固定」 → `local`; 「健康診断」「健全性チェック」「状態を見せて」「何があるか教えて」 → `doctor`。
+**自然言語からの発火**: 明示サブコマンドに加えて、文脈から自動ルーティングする: 「続き」「次」「次のタスク」「進めて」 / "continue", "next", "next task", "go ahead" → `next`; 「ドキュメント整理」「散らかってる」 / "organize the docs", "it's a mess" → `sort project`; 「Phase 完了」 / "phase done" → `phase-done`; 「メモして」「書き留めて」「この会話を要約して保存」 → `memo`; 「ナレッジにして」「ナレッジ昇格」「下書き一覧」「教訓として残して」 → `knowledge`; 「store を作って」「ai-context-store をセットアップ」「GitHub に上げたい」・SessionStart hook の bootstrap 案内 → `bootstrap`; 「この repo はローカルだけで」「GitHub に上げないで」「ローカル固定」 → `local`; 「健康診断」「健全性チェック」「状態を見せて」「何があるか教えて」 → `doctor`; 「このリポジトリでは PR 作成を許可して」「本番作業を許可」「push を常設許可」「常設許可」「許可設定」 → 「常設許可（grants）」。
 
 **中央 store 運用（チーム / 複数プロジェクト）**: 中央 store の集約・同期・チーム運用（セットアップ → 移行 `migrate` → 参照 → push）の end-to-end 手順は [`references/central-store-guide.md`](references/central-store-guide.md) にある。
 
@@ -77,7 +59,7 @@ SessionStart hook は未登録・中央 store 無しの repo で、ブロック�
 
 > **interface（WT-A）**: `ai-context-store-init.sh bootstrap [<org/name>|<org>]` が register-or-create + 仮ローカル移行を内包。ローカル固定は `local` サブコマンド。legacy フラグ `--create` / `--register` / `--org` も利用可。
 
-いずれの分岐でも、登録が済めば次回 SessionStart から「ai-context ベース: &lt;絶対パス&gt;」が store 側の絶対パスとして注入され、decisions / docs / tasks を store へ書けるようになる。org を保存だけしたい時は `--org <org>`、既存の repo 内 `.ai-context/` を store へ移すなら `bootstrap` ではなく `migrate`（読み取り互換は維持されるため急がなくてよい）。
+いずれの分岐でも、登録が済めば次回 SessionStart から「ai-context ベース: &lt;絶対パス&gt;」が store 側の絶対パスとして注入され、decisions / docs / tasks を store へ書けるようになる。org を保存だけしたい時は `--org <org>`。既存の repo 内 `.ai-context/` は resolver の解決対象ではなく、scaffold が検知時に store へ非破壊自動移行するため、`migrate` の明示実行は必須ではない（今すぐ揃えたいときだけ使う）。
 
 ## ローカル固定（`local`）
 
@@ -90,6 +72,18 @@ sh "$CLAUDE_PLUGIN_ROOT/scripts/ai-context-store-init.sh" local
 固定後はこの repo の ai-context が `~/ai-context-local/<project>/` のまま常駐し、`bootstrap`・移行はスキップされる。解除したくなったら `bootstrap` で改めて store へ移行する。
 
 > **interface（WT-A）**: `ai-context-store-init.sh local [--cwd <dir>]` が mapping の該当 project に `local:true` をセットする。
+
+## 常設許可（grants）
+
+repo 単位の常設承認を `{base}/meta/grants.json` に記録する（「このリポジトリでは PR 作成を許可して」「本番作業を許可」「push を常設許可」で発火）。書き込み後は変更を `decisions/` に 1 行記録することを推奨する。
+
+キーは `pr_create`（`gh pr create`）/ `push_feature`（feature ブランチへの push）/ `prod_ops`（本番環境操作）。値は `allow`（常設承認・以後確認不要）/ `deny`（常時 block・誤許可の明示的な拒否に使う）/ `confirm`（既定・毎回確認）。`allow`/`deny` は `release-guard.sh`（`pr_create`）と `prod-guard.sh`（`prod_ops`）が決定論で参照する。
+
+期限付き許可（例: 1 週間だけ許可）も書ける。値をオブジェクト `{"value": "allow", "until": "YYYY-MM-DD"}` にすると、`until` の翌日から自動的に `confirm`（毎回確認）へ戻る — `deny` へは倒れない。
+
+```json
+{"schema_version": 1, "grants": {"pr_create": "allow", "prod_ops": {"value": "allow", "until": "2026-07-17"}}}
+```
 
 ## 決定の保存（自動保存 / 形式 / シークレット）
 
@@ -130,117 +124,15 @@ related:
 
 ## メモ（`memo`）
 
-会話 / 指定内容を `[Memo]` プレフィックス付きドキュメントとして `{base}/docs/` に保存する（旧 `memo` skill の内包。「メモして」「書き留めて」「この会話を要約して保存」でも発火）。メモの*本文*はユーザーの会話言語で書く。セクション見出し（`## Content` / `## Topics discussed` 等）は固定の構造マーカーであり翻訳しない。
+会話 / 指定内容を `[Memo]` プレフィックス付きドキュメントとして `{base}/docs/` に保存する（「メモして」「書き留めて」「この会話を要約して保存」でも発火）。メモの*本文*はユーザーの会話言語で書く。セクション見出し（`## Content` / `## Topics discussed` 等）は固定の構造マーカーであり翻訳しない。
 
-### Mode 1: 引数なし（会話の要約）
-
-現在の会話を要約してメモにする。抽出する項目: 議論したトピック / 下した決定 / 未解決の論点 / 主要な発見・知見。
-保存先: `{base}/docs/[Memo] session-summary-{YYYY-MM-DD}.md`
-
-```markdown
-# [Memo] Session Summary
-
-- **Date**: {today's date}
-- **Author**: AI
-
-## Topics discussed
-- {topic 1}
-- {topic 2}
-
-## Decisions made
--
-
-## Open issues
--
-
-## Key findings / insights
--
-```
-
-Mode 1 では**要約をテキストで提示してから保存**する（事後開示 — store への保存は safety.md の「自由に実行してよい」非破壊操作。ユーザーは後から修正を依頼できる）。
-
-### Mode 2: 引数あり（指定内容をメモ化）
-
-`$ARGUMENTS` の内容をメモとして記録する。
-保存先: `{base}/docs/[Memo] {slugified argument}-{YYYY-MM-DD}.md`
-
-```markdown
-# [Memo] {title from the argument}
-
-- **Date**: {today's date}
-- **Author**: AI
-
-## Content
-
-{structured write-up of $ARGUMENTS}
-```
-
-保存・報告は共通パターン（`${CLAUDE_PLUGIN_ROOT}/templates/docs/_common-pattern.md` §2 パターン B / §3 命名規則 / §4 報告フォーマット / §1.6 文体規約）に従う。日本語のメモ本文は `~/.claude/rules/writing-ja.md` に従う（体言止め / 文末の だ・である・です・ます 不使用 / カタカナ英語を減らす / 英数字前後に半角スペース / 数字を丸めない）。
+引数なし → 会話要約を `{base}/docs/[Memo] session-summary-{YYYY-MM-DD}.md` へ。引数あり → `$ARGUMENTS` の内容を `{base}/docs/[Memo] {slugified argument}-{YYYY-MM-DD}.md` へ。穴埋めテンプレートと文体規約: [`references/doc-templates.md`](references/doc-templates.md)。
 
 ## ナレッジ（`knowledge`）
 
-ナレッジ下書き（`{base}/docs/knowledges/drafts/`）をレビュー・昇格し、正式なナレッジエントリへ整理する（旧 `knowledge` skill の内包。「ナレッジにして」「下書き一覧見せて」「教訓として残して」でも発火）。応答・記述はユーザーの会話言語で行う。
+ナレッジ下書き（`{base}/docs/knowledges/drafts/`）をレビュー・昇格し、正式なナレッジエントリへ整理する（「ナレッジにして」「下書き一覧見せて」「教訓として残して」でも発火）。応答・記述はユーザーの会話言語で行う。
 
-構造: 詳細は [`references/directory-structure.md`](references/directory-structure.md)。昇格先 = `{base}/docs/knowledges/{topic}.md`、下書き = `{base}/docs/knowledges/drafts/{topic}.md`。
-
-### モードを判定（`$ARGUMENTS` の最初のトークン）
-
-- **引数なし / `list`** → 下書き一覧
-- **数字 / `promote`** → 昇格モード
-- **トピック文字列** → ナレッジエントリを新規作成
-
-#### list（下書き一覧）
-
-1. `Glob("{base}/docs/knowledges/drafts/*.md")`
-2. 各ファイルの先頭 3 行（タイトル）を読む
-3. 一覧を表示し、昇格する番号（または "all"）を尋ねる:
-
-```
-## Knowledge drafts
-
-1. **PostToolUse JSON shell expansion issue** (drafts/posttooluse-json-shell-expansion.md)
-2. **search query expansion tuning** (drafts/search-query-expansion-tuning.md)
-
-Pick the ones to promote (number, or "all").
-```
-
-#### promote（昇格）
-
-1. 選択されたファイルを全文 Read して表示し、ユーザーに修正を尋ねる
-2. 確認が取れたら `drafts/` から `knowledges/` 直下へ移動する:
-   ```bash
-   git mv "{base}/docs/knowledges/drafts/{file}" "{base}/docs/knowledges/{file}"
-   ```
-   （store 内で git 管理外なら `mv`）
-3. 検索ランキングは decisions/docs を直接走査するため、移動後はそのまま検索対象になる（FTS5 セクション索引は Write を契機に PostToolUse hook が自動追従する）
-
-#### 新規作成
-
-`$ARGUMENTS` をトピックとして `knowledges/` 直下に保存する:
-
-```markdown
-# {topic}
-
-## Problem
-{what happened}
-
-## Cause
-{why it happened}
-
-## Solution
-{how it was solved}
-
-## Lesson
-{how to prevent the same problem}
-
-## Related
-- {related decisions/ files}
-- {related research/ files}
-```
-
-命名は knowledge exception（プレフィックスなし。タイトルがそのままファイル名）に従う（`_common-pattern.md` §3「knowledge exception」）。昇格済みナレッジは `search` skill（`/search <query>`）で横断検索できる。
-
-> **下書きの自動保存（hook）**: `ai-context-auto.sh` は「ハマった」「原因は」「解決した」「パターン」「分かった」「判明」「発見した」「気づ」「gotcha」「workaround」「notice」を検出すると下書き保存を促す。溜まった下書きは SessionStart hook（`knowledge-draft-review.sh`）が閾値超で提示し、この `knowledge` 手順で処理する。
+`$ARGUMENTS` の最初のトークンでモード判定: 引数なし/`list` → 下書き一覧、数字/`promote` → 昇格、トピック文字列 → 新規作成。手順・穴埋めテンプレート・下書き自動保存 hook の説明: [`references/doc-templates.md`](references/doc-templates.md)。構造の正本: [`references/directory-structure.md`](references/directory-structure.md)（昇格先 = `{base}/docs/knowledges/{topic}.md`、下書き = `{base}/docs/knowledges/drafts/{topic}.md`）。
 
 ## ディレクトリ構造 / プレフィックス
 
@@ -251,7 +143,9 @@ Pick the ones to promote (number, or "all").
 | 目的 | ツール |
 |------|-------|
 | セッション内の作業追跡 | `TaskCreate` `TaskUpdate`（Claude Code 組み込み） |
-| 永続的なプロジェクトタスク | 実効 tasks ファイル（SessionStart の「進行中タスク」見出し下のパス; 新 layout = `workspaces/<author>/<topic>/tasks.md`、legacy = `tasks/active.md`） |
+| 永続的なプロジェクトタスク | 実効 tasks ファイル（定義は下記） |
+
+**実効 tasks ファイルの定義**: SessionStart hook が注入する「進行中タスク」見出し下のパスを最優先で使う。hook 注入が無い環境（Claude Desktop / IDE 拡張など）では、現在の WS 実体 `workspaces/<author>/<topic>/tasks.md` を探し、無ければ legacy の `tasks/active.md` を使う。
 
 **タスクファイルの優先順位:**
 1. 既存の `tasks.md` `TODO.md` `ROADMAP.md` がある → それを使う
@@ -272,7 +166,7 @@ Pick the ones to promote (number, or "all").
 要旨:
 - **fallback**: hook の無い環境（Claude Desktop / IDE 拡張 / Web UI）では `bash "${CLAUDE_PLUGIN_ROOT}/hooks/_ai-context-scaffold.sh" "$PWD"` で store skeleton（または仮ローカル）を冪等に生成する（repo 内 `.ai-context/` は作らない）
 - **denylist**: `~/.claude/banto-ignore` に登録されたパスでは hook が早期 exit する。`/ai-context ignore add/list/remove` で管理する
-- **移行**: 既存の repo 内 `.ai-context/` を中央 store へ移すのは `/ai-context migrate`（読み取り互換は維持）
+- **移行**: 既存の repo 内 `.ai-context/` は scaffold が検知時に非破壊自動移行する。`/ai-context migrate` は今すぐ揃えたいときの明示実行手段
 
 ## 過去のコンテキスト検索
 

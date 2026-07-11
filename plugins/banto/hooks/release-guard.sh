@@ -14,11 +14,26 @@
 #   R3: パブリック公開系コマンド             → BANTO_ALLOW_PUBLISH=1 で escape（--dry-run は通過）
 #   R4: git push 時に repo の scripts/pre-push-check.sh を実行、fail で block
 #                                            → BANTO_SKIP_PUSH_CHECK=1 で escape
+#                                              スクリプト不在時は block せず warn のみ
+#   R5: gh pr create                         → BANTO_ALLOW_PR_CREATE=1 で escape（owner の確認を得てから設定する）
+#                                              または {base}/meta/grants.json の pr_create: allow で
+#                                              repo 単位の常設許可（deny なら escape 案内なしで block）
 #
 # 入力: stdin に hook payload JSON（tool_name / tool_input.command / cwd）
 # 出力: block 時 stderr + exit 2。fail-open: jq / git 不在・payload 不正は exit 0。
 
 set -u
+
+# grants リゾルバ（{base}/meta/grants.json）。サブシェルで呼び、release-guard 自身の
+# 変数（set -u 下）を汚さない。解決不能時は "confirm" = 既存の確認必須動作を維持（fail-open）。
+_grant() {
+    _g_paths="${CLAUDE_PLUGIN_ROOT:+$CLAUDE_PLUGIN_ROOT/scripts}"
+    [ -z "$_g_paths" ] && _g_paths=$(cd "$(dirname "$0")/../scripts" 2>/dev/null && pwd)
+    [ -n "$_g_paths" ] && [ -f "$_g_paths/_ai-context-paths.sh" ] || { echo confirm; return 0; }
+    # AI_PATHS を明示: sourced 時は $0 が呼び出し元（本ファイル）のままなので、_ai-context-paths.sh
+    # 自身の $0 フォールバックでは scripts/ を指せない。ai-context-postcommit.sh と同じ作法で渡す。
+    ( AI_PATHS="$_g_paths/_ai-context-paths.sh"; . "$AI_PATHS"; _ai_context_grant "$1" "$2" )
+}
 
 PAYLOAD=$(cat 2>/dev/null || true)
 
@@ -48,6 +63,9 @@ _target_dir() {
 # セグメント単位判定（kill-switch と同じ: `; & |` で分割し誤検知を避ける）
 _commit=0
 _pr_merge=0
+_pr_merge_esc=0
+_pr_create=0
+_pr_create_esc=0
 _publish=0
 _publish_what=""
 _push=0
@@ -59,9 +77,22 @@ while IFS= read -r _seg; do
     case "$_padded" in
         *" git commit "*|*" git "*" commit "*) _commit=1 ;;
     esac
-    # R2: gh pr merge
-    case "$_padded" in
-        *" gh pr merge"*) _pr_merge=1 ;;
+    # R2: gh pr merge（R5 と同方式: 先頭トークン列のみ判定 — 引用文字列・heredoc 本文・
+    # ドキュメント中の言及を誤検知しない。先行する VAR=val 代入は読み飛ばし、代入列に
+    # BANTO_ALLOW_PR_MERGE=1 があれば escape として記録する — コマンド前置の代入は
+    # hook プロセスの環境には届かないため、ここで拾う）
+    _first3m=$(printf '%s\n' "$_seg" | awk '{i=1; while (i<=NF && $i ~ /^[A-Za-z_][A-Za-z0-9_]*=/) { if ($i == "BANTO_ALLOW_PR_MERGE=1") esc=1; i++ }; if (i+2<=NF) print ((esc)?"esc ":"") $i, $(i+1), $(i+2); exit}')
+    case "$_first3m" in
+        "gh pr merge")     _pr_merge=1 ;;
+        "esc gh pr merge") _pr_merge=1; _pr_merge_esc=1 ;;
+    esac
+    # R5: gh pr create（先頭トークン列のみ判定 — 引用文字列やコミットメッセージ内の言及を誤検知しない。
+    # 先行する VAR=val 代入は読み飛ばす。代入列に BANTO_ALLOW_PR_CREATE=1 があれば escape として
+    # 記録する — コマンド前置の代入は hook プロセスの環境には届かないため、ここで拾う）
+    _first3=$(printf '%s\n' "$_seg" | awk '{i=1; while (i<=NF && $i ~ /^[A-Za-z_][A-Za-z0-9_]*=/) { if ($i == "BANTO_ALLOW_PR_CREATE=1") esc=1; i++ }; if (i+2<=NF) print ((esc)?"esc ":"") $i, $(i+1), $(i+2); exit}')
+    case "$_first3" in
+        "gh pr create")     _pr_create=1 ;;
+        "esc gh pr create") _pr_create=1; _pr_create_esc=1 ;;
     esac
     # R3: パブリック公開系（--dry-run のみ通過。汎用 " -n " 許容は publish 系以外の -n を
     # 巻き込んで block を迂回させ得たため廃止 — 2026-07-02 監査）
@@ -119,7 +150,7 @@ fi
 
 # ---- R2: gh pr merge ---- (BLOCK)
 if [ "$_pr_merge" = "1" ]; then
-    if [ "${BANTO_ALLOW_PR_MERGE:-0}" = "1" ]; then
+    if [ "${BANTO_ALLOW_PR_MERGE:-0}" = "1" ] || [ "${_pr_merge_esc:-0}" = "1" ]; then
         warn "gh pr merge (allowed via BANTO_ALLOW_PR_MERGE=1 — your own PR only)"
     else
         cat >&2 << 'BLOCK_PR_MERGE'
@@ -134,6 +165,34 @@ Options:
        BANTO_ALLOW_PR_MERGE=1 gh pr merge ...
      (never use the escape for someone else's PR)
 BLOCK_PR_MERGE
+        exit 2
+    fi
+fi
+
+# ---- R5: gh pr create ---- (BLOCK, grants-aware)
+if [ "$_pr_create" = "1" ]; then
+    _g_pr_create=$(_grant pr_create "$DIR")
+    if [ "$_g_pr_create" = "deny" ]; then
+        printf '[release guard] `gh pr create` is blocked (grants: pr_create = deny in {base}/meta/grants.json).\n' >&2
+        exit 2
+    elif [ "$_g_pr_create" = "allow" ]; then
+        warn "gh pr create (allowed via grants: pr_create)"
+    elif [ "${BANTO_ALLOW_PR_CREATE:-0}" = "1" ] || [ "${_pr_create_esc:-0}" = "1" ]; then
+        warn "gh pr create (allowed via BANTO_ALLOW_PR_CREATE=1)"
+    else
+        cat >&2 << 'BLOCK_PR_CREATE'
+[release guard] `gh pr create` is blocked.
+
+Reason: creating a PR is outward-facing (safety.md: posting to external services requires
+        explicit confirmation first).
+
+Options:
+  1. Confirm with the user in text, then get the owner's approval before setting the escape:
+       BANTO_ALLOW_PR_CREATE=1 gh pr create ...
+  2. Ask the user to create the PR themselves
+  3. Standing per-repo approval: write "pr_create": "allow" to {base}/meta/grants.json
+     (managed by the ai-context skill)
+BLOCK_PR_CREATE
         exit 2
     fi
 fi
@@ -173,6 +232,8 @@ if [ "$_push" = "1" ] && [ "${BANTO_SKIP_PUSH_CHECK:-0}" != "1" ]; then
             exit 2
         fi
         warn "pre-push check passed ($_check)"
+    else
+        warn "no scripts/pre-push-check.sh found in $DIR — push proceeding without a pre-push check"
     fi
 fi
 

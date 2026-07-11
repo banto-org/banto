@@ -13,7 +13,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # Research — External Research Skill
 
-> **Store-first**: the `{base}/docs/research/...` paths this skill writes to refer to the ai-context base. Read/Write under the absolute path that the SessionStart/PreCompact hook injects as "ai-context base: &lt;absolute path&gt;" — never write to a relative `.ai-context/` (it only exists in legacy repos; when unsure, resolve it with `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
+> **Store-first**: writes go to `{base}/docs/research/...`. `{base}` is the absolute ai-context base path injected by the SessionStart/PreCompact hook (when unsure, resolve it with `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
 
 Write in the user's conversation language (Japanese if the user is conversing in Japanese): this applies to the response, the findings you report, **and the research documents you save**. Pass that language to research-agent in the launch prompt (subagents do not inherit the conversation language).
 

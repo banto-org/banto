@@ -3,6 +3,12 @@
 # token-monitor.sh statusline が書き出した tmp file から context % を読み、
 # 70%/80%/90% のしきい値で /save-checkpoint 推奨メッセージを stdout に注入する。
 # 同セッション内で同じしきい値の再通知を防ぐため、last-warned-pct も別ファイルに記録。
+#
+# S4 自動化ギャップ: 最上位ティア（90%）へ新規到達した瞬間は「推奨表示」ではなく、
+# checkpoint-autofire.sh（idle-checkpoint-watch.sh と共有）を detach fork で起動して
+# 実際に /save-checkpoint を自動発火する。二重発火防止（idle 経路との排他・同一セッション内の
+# 再発火抑制）はヘルパー側のセッション単位ロックに集約されている。claude CLI が無い環境 /
+# transcript_path・cwd が取れない環境では、従来どおりの手動推奨メッセージへ fail-open する。
 # POSIX互換: macOS / Linux / WSL
 
 INPUT=$(cat)
@@ -74,9 +80,40 @@ After saving, a diagnosis will indicate whether clear or compact is safer.
 CHECKPOINT_80
         ;;
     90)
-        cat <<'CHECKPOINT_90'
+        # 自動発火を試みる。claude CLI / transcript_path / cwd のいずれかが欠けていれば
+        # AUTOFIRED=0 のまま残り、下の case で従来どおりの手動推奨メッセージへ fail-open する。
+        AUTOFIRED=0
+        CLAUDE_BIN=$(command -v claude 2>/dev/null)
+        if [ -n "$CLAUDE_BIN" ]; then
+            TRANSCRIPT=$(printf '%s' "$INPUT" | jq -r '.transcript_path // empty' 2>/dev/null)
+            CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)
+            HOOKS_DIR="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)}/hooks"
+            AUTOFIRE="$HOOKS_DIR/checkpoint-autofire.sh"
+            if [ -n "$TRANSCRIPT" ] && [ -n "$CWD" ] && [ -f "$TRANSCRIPT" ] && [ -f "$AUTOFIRE" ]; then
+                LOG_DIR="$HOME/.cache/banto"
+                mkdir -p "$LOG_DIR" 2>/dev/null
+                LOG="$LOG_DIR/checkpoint-autofire-${SESSION_ID}.log"
+                find "$LOG_DIR" -name 'checkpoint-autofire-*.log' -mtime +7 -delete 2>/dev/null
+                if command -v perl >/dev/null 2>&1; then
+                    perl -MPOSIX -e 'POSIX::setsid(); exec @ARGV' -- \
+                        sh "$AUTOFIRE" "$SESSION_ID" "$TRANSCRIPT" "$CWD" "$CLAUDE_BIN" context \
+                        </dev/null >>"$LOG" 2>&1 &
+                else
+                    ( nohup sh "$AUTOFIRE" "$SESSION_ID" "$TRANSCRIPT" "$CWD" "$CLAUDE_BIN" context \
+                        </dev/null >>"$LOG" 2>&1 & )
+                fi
+                AUTOFIRED=1
+            fi
+        fi
+        if [ "$AUTOFIRED" = "1" ]; then
+            cat <<'CHECKPOINT_90_AUTO'
+[Checkpoint AUTO-FIRING — context 90%] auto-compact is about to fire. A background /save-checkpoint has been triggered automatically (forked from this session). After compact, the checkpoint is re-injected by the SessionStart hook, so you can continue without losing context.
+CHECKPOINT_90_AUTO
+        else
+            cat <<'CHECKPOINT_90'
 [Checkpoint URGENT — context 90%] auto-compact is about to fire. **Run /save-checkpoint right now**. After compact, the checkpoint is re-injected by the SessionStart hook, so you can continue without losing context.
 CHECKPOINT_90
+        fi
         ;;
 esac
 

@@ -1,0 +1,22 @@
+# ODD Spec for ja-writing
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: ja-writing
+autonomy_level: L1  # 軽量ユーティリティ（reference 参照のみ。書き込みは呼び出し元の成果物へ）
+
+in_scope:
+  - 日本語の文書型資料（報告書 / 提案書 / 手順書）・Excel セル・チャット応答 / PR 説明 / commit メッセージの実務パターン提示
+  - 受け手レベル（L1 非技術 / L2 半技術 / L3 技術）別の書き分け例の提示
+
+out_of_scope:
+  - writing-ja ルールそのものの定義（正本は `~/.claude/rules/writing-ja.md`）
+  - HTML 資料の生成（html-doc skill）
+  - 英語や他言語のライティング
+
+safety_boundaries:
+  - 本 skill 自体はファイルを書かない（reference を Read し、呼び出し元が成果物に反映する）
+
+kill_switch_conditions: []
+
+approval_gates: []

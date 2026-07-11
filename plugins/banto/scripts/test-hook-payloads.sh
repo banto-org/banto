@@ -1,7 +1,7 @@
 #!/bin/sh
 # test-hook-payloads.sh — block 系 hook の合成 payload テスト（コンテナ不要・jq のみ依存）
 # 対象:
-#   - safety-guard.sh: .env 生読み / env dump / shell trace の 3 分類 + escape + 負例
+#   - safety-guard.sh: .env 生読み / env dump / shell trace / git add・commit の secret-commit + escape + 負例
 #   - lint-guard.sh:   lockfile / build 成果物 block + 通過負例
 #   - agent-guard.sh:  短プロンプト block + 通過負例
 #   - H-08 リグレッション: 複数行 content / バックスラッシュ入り command の payload が
@@ -51,6 +51,36 @@ bash_payload 'cat .env' | env BANTO_ALLOW_SECRET_READ=1 sh "$SG" >/dev/null 2>&1
 bash_payload 'echo "step1\nstep2" > log.txt
 cat .env' | sh "$SG" >/dev/null 2>&1; [ $? -eq 2 ] \
     && ok "safety: multiline+backslash payload still detected (H-08)" || bad "safety: H-08 regression (fail-open on multiline)"
+
+# --- safety-guard.sh: secret-commit ガード（git add / git commit(-a) の .env 系 staged 検出) ---
+bash_payload 'git add .env' | sh "$SG" >/dev/null 2>&1; [ $? -eq 2 ] \
+    && ok "safety: git add .env blocked" || bad "safety: git add .env not blocked"
+bash_payload 'git add .env.local' | sh "$SG" >/dev/null 2>&1; [ $? -eq 2 ] \
+    && ok "safety: git add .env.local blocked" || bad "safety: git add .env.local not blocked"
+bash_payload 'git add .env.example' | sh "$SG" >/dev/null 2>&1; [ $? -eq 0 ] \
+    && ok "safety: git add .env.example passes" || bad "safety: git add .env.example blocked"
+bash_payload 'git add src/app.js README.md' | sh "$SG" >/dev/null 2>&1; [ $? -eq 0 ] \
+    && ok "safety: git add normal files passes" || bad "safety: git add normal files blocked"
+bash_payload 'git add .env' | env BANTO_ALLOW_SECRET_COMMIT=1 sh "$SG" >/dev/null 2>&1; [ $? -eq 0 ] \
+    && ok "safety: git add .env escape via BANTO_ALLOW_SECRET_COMMIT" || bad "safety: secret-commit escape broken"
+
+if command -v git >/dev/null 2>&1; then
+    SG_TMP=$(mktemp -d "${TMPDIR:-/tmp}/safety-guard-secret-test.XXXXXX")
+    git init -q -b main "$SG_TMP"
+    ( cd "$SG_TMP" && git -c user.email=t@t -c user.name=t commit -q --allow-empty -m init )
+    printf 'SECRET=x' > "$SG_TMP/.env"
+    ( cd "$SG_TMP" && git add .env )
+    jq -c -n --arg c "git commit -m x" --arg cwd "$SG_TMP" \
+        '{tool_name:"Bash", tool_input:{command:$c}, cwd:$cwd}' | sh "$SG" >/dev/null 2>&1; [ $? -eq 2 ] \
+        && ok "safety: git commit with staged .env blocked (via git diff --cached)" || bad "safety: staged .env commit not blocked"
+    ( cd "$SG_TMP" && git restore --staged .env )
+    jq -c -n --arg c "git commit -m x" --arg cwd "$SG_TMP" \
+        '{tool_name:"Bash", tool_input:{command:$c}, cwd:$cwd}' | sh "$SG" >/dev/null 2>&1; [ $? -eq 0 ] \
+        && ok "safety: git commit with unstaged .env passes (not staged)" || bad "safety: unstaged .env falsely blocked"
+    rm -rf "$SG_TMP"
+else
+    echo "SKIP: git not found (secret-commit staged-diff cases)"
+fi
 
 # === lint-guard.sh ===
 LG="$HOOKS/lint-guard.sh"

@@ -61,4 +61,16 @@ if [ -n "$WORKSPACE" ]; then
     fi
 fi
 
-printf "%s%s%s%s\n" "$MODEL_DISPLAY" "$DIR_DISPLAY" "$TASK_DISPLAY" "$PCT_DISPLAY"
+# 💾 チェックポイント保存済み表示。checkpoint-autofire.sh が保存成功時に
+# ${TMPDIR}/banto-checkpoint-saved-${SESSION_ID} へ HH:MM を書き、ここで読む
+# （token % と同じ tmp file 連携の逆向き）。セッション単位なので他セッションと混ざらない。
+CKPT_DISPLAY=""
+if [ -n "$SESSION_ID" ]; then
+    CKPT_FILE="${TMPDIR:-/tmp}/banto-checkpoint-saved-${SESSION_ID}"
+    if [ -f "$CKPT_FILE" ]; then
+        CKPT_AT=$(head -c 16 "$CKPT_FILE" 2>/dev/null | tr -cd '0-9:')
+        [ -n "$CKPT_AT" ] && CKPT_DISPLAY=" | 💾 ${CKPT_AT}"
+    fi
+fi
+
+printf "%s%s%s%s%s\n" "$MODEL_DISPLAY" "$DIR_DISPLAY" "$TASK_DISPLAY" "$CKPT_DISPLAY" "$PCT_DISPLAY"

@@ -118,40 +118,12 @@ else
     esac
 fi
 
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] idle ${THRESHOLD_MIN}min reached — firing /save-checkpoint (fork of ${SESSION_ID})"
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] idle ${THRESHOLD_MIN}min reached — handing off to checkpoint-autofire.sh (fork of ${SESSION_ID})"
 
-PROMPT='/save-checkpoint 自動発火（無操作検知によるバックグラウンド実行）。ユーザーは不在のため Step 4 の確認は行わず、チェックポイントファイルの作成と clear/compact の推奨判定の出力までで終了すること。/compact・/clear は絶対に実行しない。'
-
-cd "$CWD" 2>/dev/null || exit 0
-
-# モデル解決（ハードコード回避・単一の真実源）:
-#   1. BANTO_IDLE_CHECKPOINT_MODEL   明示上書き
-#   2. model-policy.json の roles.summarize   正（要約向けの安価な tier）
-#   3. sonnet                        policy 欠落 / jq 無し時の最終フォールバック
-# この機能の動機はコスト削減なので要約向けの安価な tier を使う。"inherit" はユーザー既定を継承。
-MODEL=$BANTO_IDLE_CHECKPOINT_MODEL
-if [ -z "$MODEL" ]; then
-    POLICY="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)}/templates/model-policy.json"
-    if command -v jq >/dev/null 2>&1 && [ -f "$POLICY" ]; then
-        MODEL=$(jq -r '.roles.summarize // empty' "$POLICY" 2>/dev/null)
-    fi
-    [ -z "$MODEL" ] && MODEL=sonnet
-fi
-if [ "$MODEL" = "inherit" ]; then
-    set --
-else
-    set -- --model "$MODEL"
-fi
-
-# BANTO_IDLE_CHECKPOINT=0: fork 側の Stop hook が再アームして連鎖発火するのを防ぐ
-# BANTO_HEADLESS=1: fork 側で対話前提の hook（checkpoint 消費 / fleet 登録 /
-#                   decision 催促 / learnings ドラフト）を無効化する
-# --allowedTools: 無人実行なので Bash は skill の診断に必要な read-only コマンドに限定
-#                 （裸の Bash はプロンプトインジェクション時の任意実行経路になる）
-BANTO_IDLE_CHECKPOINT=0 BANTO_HEADLESS=1 "$CLAUDE_BIN" -p "$PROMPT" \
-    --resume "$SESSION_ID" --fork-session "$@" \
-    --allowedTools "Read" "Glob" "Grep" "Write" \
-        "Bash(find:*)" "Bash(ls:*)" "Bash(date:*)" "Bash(wc:*)"
-RC=$?
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] done (exit ${RC})"
+# 実際の fork 起動（モデル解決・実行・workspace マーカー刻印）は checkpoint-autofire.sh に集約。
+# checkpoint-recommend.sh（コンテキスト 90% 到達）からも同じヘルパーが呼ばれ、セッション単位の
+# 排他ロックをヘルパー側 1 箇所で共有することで、2 経路間の二重発火を防ぐ。
+AUTOFIRE="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)}/hooks/checkpoint-autofire.sh"
+[ -f "$AUTOFIRE" ] || exit 0
+sh "$AUTOFIRE" "$SESSION_ID" "$TRANSCRIPT" "$CWD" "$CLAUDE_BIN" idle
 exit 0

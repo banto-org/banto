@@ -97,16 +97,20 @@ repo_clean "$R2" "criterion 1: subdir session leaves repo clean"
 repo_clean "$R2/deep/inside" "criterion 1: subdir itself stays clean"
 [ ! -e "$STORE/subrepo" ] && [ ! -e "$LOCAL_STORE/subrepo" ] && ok "criterion 5: subdir does not register/create either store" || bad "criterion 5: subdir created a store dir"
 
-# === 基準 3: 既存 legacy repo は grandfather + 移行提案 1 行 ===
+# === 基準 3: in-repo .ai-context は廃止（2026-07-08）→ その場読みをやめ store へ自動移行（非破壊）+ 登録 ===
 G="$TMP/leg"
 mkdir -p "$G/.ai-context/decisions"
+printf '# legacy\n' > "$G/.ai-context/decisions/legacy-note.md"
 git -C "$G" init -q
 OUT=$(run_hook "$SS" "{\"cwd\":\"$G\",\"source\":\"startup\"}")
 case "$OUT" in
-    *"/ai-context migrate"*) ok "criterion 3: migration proposal injected" ;;
-    *) bad "criterion 3: migration proposal missing" ;;
+    *"Migrated in-repo .ai-context"*) ok "criterion 3: legacy .ai-context auto-migrated (notice injected)" ;;
+    *) bad "criterion 3: migration notice missing" ;;
 esac
-[ ! -e "$STORE/leg" ] && [ ! -e "$LOCAL_STORE/leg" ] && ok "criterion 3: legacy repo not registered to either store" || bad "criterion 3: legacy repo registered"
+GTOP=$(git -C "$G" rev-parse --show-toplevel)
+GPROJ=$(jq -r --arg t "$GTOP" '.projects[$t].project // empty' "$LMAP" 2>/dev/null)
+{ [ -n "$GPROJ" ] && [ -f "$LOCAL_STORE/$GPROJ/decisions/legacy-note.md" ]; } && ok "criterion 3: in-repo decision migrated into the local store" || bad "criterion 3: content not migrated (proj=$GPROJ)"
+[ -d "$G/.ai-context" ] && ok "criterion 3: in-repo .ai-context kept intact (non-destructive)" || bad "criterion 3: in-repo .ai-context removed"
 
 # === 基準 4: dirname 衝突する 2 repo → 決定論 suffix で別々の local store dir ===
 C1="$TMP/a/dup"; C2="$TMP/b/dup"

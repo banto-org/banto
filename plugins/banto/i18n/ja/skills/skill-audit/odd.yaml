@@ -1,0 +1,30 @@
+# ODD Spec for skill-audit
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: skill-audit
+autonomy_level: L1  # Suggest（read-only 監査、是正は提案。破壊操作は別途ユーザー確認）
+
+in_scope:
+  - skill 単体のコンテキストエンジニアリング監査（情報の最小性 / 人間専用情報の混入 / 構成の分担 / 実行モデル指定の適切さ / コンテキスト効率 / 想定 AI の明示と整合 / 決定論との分担）
+  - read-only 検査（Read / Grep / Glob / Bash の readonly コマンド + scripts/skill-audit-metrics.sh）
+  - 主観の入る軸（想定 AI との整合等）の general-purpose agent 委譲
+  - 監査結果の会話内報告（軸ごとの PASS/WARN/FAIL + 修正案）
+
+out_of_scope:
+  - plugin 全体の構造監査（plugin-audit）
+  - ハーネス全体のシステム監査（harness-audit）
+  - skill / plugin の生成・改修（plugin-dev）
+  - 検出した問題の破壊的修正（適用は safety.md に従い別途ユーザー確認）
+
+safety_boundaries:
+  - "書き込み先: 監査結果は会話内報告が既定。保存する場合のみ {base}/docs/ 配下"
+  - Bash は readonly 検査のみ（skill-audit-metrics.sh / grep / wc / jq）。変更系コマンド禁止
+  - シークレットを含むファイルを生出力しない（safety.md 準拠）
+
+kill_switch_conditions:
+  - 同一対象の監査を 3 回続けて再生成
+  - Bash で変更系コマンド（rm / mv / git push）を要求された場合
+
+approval_gates:
+  - 是正アクションの「実行」（監査は指摘まで。適用はユーザー承認後）

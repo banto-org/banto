@@ -12,7 +12,7 @@ compatibility: Claude Code (requires bash, git, jq; git-town 推奨)
 
 # Workspace Manager
 
-> **保存ベース（store-first）**: この skill 内のすべての `.ai-context/...` パス（workspaces/ を含む）は ai-context ベースを指す。中央 store 利用時は、SessionStart/PreCompact hook が注入する 「ai-context ベース: &lt;絶対パス&gt;」 の配下に Read/Write すること（不明なら `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`）。
+> **保存ベース（store-first）**: `workspaces/...` を含む保存先はすべて `{base}` 配下。`{base}` は SessionStart/PreCompact hook が注入する ai-context ベースの絶対パス（不明なら `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`）。
 
 トピックベースの workspace 管理 + 3 階層ブランチ運用: **main ← epic（大枠スコープ）← task（小枠 worktree）**。
 

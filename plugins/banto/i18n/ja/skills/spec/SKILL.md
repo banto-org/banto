@@ -13,9 +13,9 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # Spec — 対話的スペック駆動設計（仕様書生成）
 
-> **パイプライン上の位置**: `concept（思想） → **spec（この skill、設計書）** → 実装（自走）`。思想がまだ無ければ、先に `/concept` を回す。CONCEPT.md があれば、その「アンチゴール」と「北極星」を spec の判断軸として引き継ぐ。
+> **パイプライン上の位置**: `concept（思想） → **spec（この skill、設計書）** → 実装（自走）`。思想がまだ無ければ、先に `/concept` を回す。CONCEPT.md があれば、その「アンチゴール」と「北極星」を spec の判断軸として引き継ぐ。画面や UI が絡む場合は、先に design-brief skill でデザインブリーフを作ってから進む。
 
-> **保存ベース（store-first）**: この skill が保存する `.ai-context/...` パスは ai-context ベースを指す。SessionStart/PreCompact hook が「ai-context ベース: &lt;絶対パス&gt;」として注入する絶対パスの配下で Read/Write する — 相対 `.ai-context/` には絶対に書かない（旧来の legacy repo にしか存在しない。不明なときは `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決）。
+> **保存ベース（store-first）**: 保存先は `{base}/docs/specs/...`（ADR のみ `{base}/decisions/`）。`{base}` は SessionStart/PreCompact hook が注入する ai-context ベースの絶対パス（不明なときは `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決）。
 
 コードを書く前に、対話を通じて**業界標準の仕様書**を生成する。`spec-fidelity` ルールに従い、「ゴール分岐」のときだけ事前確認し、それ以外は採用解釈で進める。
 
@@ -23,18 +23,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 ## 前提: 6 種のテンプレート
 
-`${CLAUDE_PLUGIN_ROOT}/templates/specs/` が業界標準 6 種を提供する。Claude が**対話を通じてどれを使うか決める**:
-
-| # | フォーマット | 適する用途 | 工数 |
-|---|---|---|---|
-| 1 | **Spec Kit**（spec.md + plan.md + tasks.md の 3 ファイルセット） | AI エージェント時代の標準、Claude Code/Cursor と相性良、TDD 推奨 | 中 |
-| 2 | **PRD**（Product Requirements Document） | ビジネス側視点、PM 主導、プロダクト機能定義 | 中 |
-| 3 | **Design Doc**（Google スタイル） | 詳細なエンジニアリング設計、アーキテクチャレビュー | 大 |
-| 4 | **RFC**（HashiCorp スタイル） | 技術変更提案、チーム合意、代替案を含む | 大 |
-| 5 | **ADR**（Architecture Decision Record） | 決定後の短い記録、単一ファイル | 小 |
-| 6 | **Scope Doc** | プロジェクト境界の合意、手戻り防止 | 中 |
-
-詳細は `${CLAUDE_PLUGIN_ROOT}/templates/specs/README.md` を参照。
+`${CLAUDE_PLUGIN_ROOT}/templates/specs/` が業界標準 6 種（Spec Kit / PRD / Design Doc / RFC / ADR / Scope Doc）を提供する。各フォーマットの用途・工数・対応 Tier は Step 2 の選択肢文言、および `${CLAUDE_PLUGIN_ROOT}/templates/specs/README.md` が正本。Claude が**対話を通じてどれを使うか決める**。
 
 ## 対話フロー（標準）
 
@@ -101,7 +90,12 @@ Agent(
 
 詳細手順: [`references/claude-design-handoff.md`](references/claude-design-handoff.md)
 
-要点: Claude Design（claude.ai/design）でプロトタイプ → "Hand off to Claude Code" でバンドル ZIP（README.md + prototype.html + assets/）を生成。Pro/Max 限定 / Research Preview / 最新 Opus 駆動。フォールバック: v0.dev / Figma + Figma MCP / Design Doc 内のテキスト UI。
+対象が UI を含む場合の最小手順:
+1. Claude Design（claude.ai/design、Pro/Max 限定・Research Preview）の使用可否をテキストで確認する
+2. Yes → Goal / Layout / Content / Audience の 4 要素をユーザーに入力させ、Claude Design でプロトタイプを作る
+3. プロトタイプ完成後 "Hand off to Claude Code" でバンドル ZIP（README.md + prototype.html + assets/）を生成 → `docs/specs/designs/{topic}/` に保存
+4. バンドルの README.md を Read し、既存コードベース規約に沿って実装する
+5. No / Pro 未満 → フォールバック（v0.dev / Figma + Figma MCP / Design Doc 内のテキスト UI）へ
 
 ### Step 5: テンプレートを適用
 
@@ -179,14 +173,7 @@ spec 生成が完了したら、以下を提示する:
 
 ## ティアごとの推奨
 
-| Tier | 規模 | 推奨 |
-|---|---|---|
-| 1 | 個人 / プロトタイプ | Spec Kit + ADR（重要な判断に） |
-| 2 | 小規模チーム | + PRD |
-| 3 | 中堅企業 | + Design Doc + RFC + Scope |
-| 4 | エンタープライズ | 全フォーマット + Threat Model + Runbooks |
-
-ティアが指定されなければ、Spec Kit を推奨してユーザーの判断を仰ぐ。
+Tier 別の推奨組み合わせ（個人〜エンタープライズ）は `${CLAUDE_PLUGIN_ROOT}/templates/specs/README.md` が正本。ティアが指定されなければ、Spec Kit を推奨してユーザーの判断を仰ぐ。
 
 ## 禁止事項
 

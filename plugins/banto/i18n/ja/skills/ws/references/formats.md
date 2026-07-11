@@ -27,7 +27,7 @@ per-checkout（**git-dir 内** = コミットされない、worktree ごとに�
 ```
 
 - 作業サマリは書かない（drift する）
-- 関連ドキュメント（「## 関連ドキュメント」 セクション）は hook（workspace-check / auto）が未登録を通知し、AI が add/replace/skip を判断して実体側に書く
+- 関連ドキュメント（「## 関連ドキュメント」 セクション）は、機械判定できる保守的ケース（single モードでファイル名 / 先頭行が WS トピックを含む）は hook が自動追記し、判定不能のときだけ AI が add/replace/skip を判断して実体側に書く
 - 「ブランチ:」 行は `/ws switch` の自動ブランチ切替を駆動する（main などの共有名ではスキップ）。ポインタと実体の両方に存在し、switch 時に同期される
 - タスクは同一 dir の `tasks.md` に置く（旧 `tasks/active.md` 相当）；Phase アーカイブは `tasks-old/` へ
 

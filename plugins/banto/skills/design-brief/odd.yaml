@@ -1,0 +1,25 @@
+# ODD Spec for design-brief
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: design-brief
+autonomy_level: L1  # Suggest — proposes the brief through dialogue; confirmation is left to the caller (spec/implementation)
+
+in_scope:
+  - Converting a vague UI/design request into a 14-dimension design brief through dialogue
+  - Presenting how each dimension ripples out once the target audience (persona, situation, emotion) is fixed
+  - Presenting combined visual-style and tone-and-manner specifications
+
+out_of_scope:
+  - Generating HTML/code itself (html-doc skill or the implementation phase)
+  - Adjusting prose for a reader's technical level (ja-writing skill's audience-levels.md)
+  - Persisting the design brief (left to the caller / spec skill)
+  - Creating diagrams (diagram skill)
+
+safety_boundaries:
+  - This skill never writes files itself (it reads references and presents the brief in conversation)
+  - Never settle other dimensions before the target audience is fixed
+
+kill_switch_conditions: []
+
+approval_gates: []

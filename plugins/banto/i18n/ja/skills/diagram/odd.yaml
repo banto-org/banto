@@ -1,0 +1,23 @@
+# ODD Spec for diagram
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: diagram
+autonomy_level: L1  # 軽量ユーティリティ（reference 参照のみ。レンダ実行は html-doc skill 側）
+
+in_scope:
+  - mermaid / draw.io / 手描き SVG のどれを選ぶかの判断基準の提示
+  - AWS 構成図の記法（アイコンセット・VPC/サブネット/AZ の入れ子）の提示
+  - mermaid で崩れるレイアウトに対する手描き SVG の作法（viewBox・グリッド・配色）の提示
+
+out_of_scope:
+  - HTML 資料全体の生成・レンダ手順そのもの（html-doc skill）
+  - Figma 上での図表作成（figma-generate-diagram skill）
+  - 図の自動レンダリング実行（呼び出し元が html-doc skill の render-diagram.sh を使う）
+
+safety_boundaries:
+  - 本 skill 自体はファイルを書かない（reference を Read し、呼び出し元が成果物に反映する）
+
+kill_switch_conditions: []
+
+approval_gates: []

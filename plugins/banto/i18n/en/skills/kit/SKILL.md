@@ -26,17 +26,15 @@ Display the following **as-is** (without editing). If the user is conversing in 
 | Command | Description |
 |---------|------|
 | `/save-checkpoint` | Save session state as a checkpoint. Recommends compact/clear |
-| `/ai-context [bootstrap/local/doctor/sort/ignore/migrate/memo/knowledge]` | Management commands for `{base}/` (subsumes store creation & registration / local pinning / health check / tidy-up / suppression / migration / memo / knowledge. `init` and `status` are legacy-name aliases kept for one release of backward compatibility) |
+| `/ai-context [bootstrap/local/doctor/sort/ignore/migrate/memo/knowledge]` | Management commands for `{base}/` (subsumes store creation & registration / local pinning / health check / tidy-up / suppression / migration / memo / knowledge) |
 
 ### Document creation
 Pattern shared by the document-creation skills: `${CLAUDE_PLUGIN_ROOT}/templates/docs/_common-pattern.md` (Pattern A: agent-launching / Pattern B: fill-in-the-blank template)
 
 | Command | Description | Pattern |
 |---------|------|----------|
-| `/ai-context memo [content]` | No args: save a conversation summary. With args: turn the given content into a memo (the old `/memo` is kept for one release of backward compatibility) | B |
-| `/ai-context knowledge [list/promote]` | Review / promote / create knowledge drafts (the old `/knowledge` is kept for one release of backward compatibility)| B (exception: no prefix) |
-
-> Code review and security audit are **delegated to the official Anthropic plugins** (`code-review` / `security-guidance` / `/security-review`).
+| `/ai-context memo [content]` | No args: save a conversation summary. With args: turn the given content into a memo | B |
+| `/ai-context knowledge [list/promote]` | Review / promote / create knowledge drafts | B (exception: no prefix) |
 
 ### Development flow
 | Command | Description |
@@ -51,11 +49,10 @@ Pattern shared by the document-creation skills: `${CLAUDE_PLUGIN_ROOT}/templates
 | `/init` + `harness-setup.sh` | First-time setup of CLAUDE.md (native /init) + rules / settings / store (deterministic script) |
 | `/plugin-dev {description}` | Scaffold a new plugin / refactor an existing skill |
 | `/plugin-audit [path]` | Audit an existing plugin / single skill against official best practices |
+| `/skill-audit [path]` | Audit a single skill from a context-engineering angle (7 axes: information minimality / leakage of human-only information / division of labor in structure, etc. plugin-audit covers the whole plugin) |
 | `/set-language [ja/en]` | Switch Banto's language between Japanese and English. The choice persists (survives plugin updates). A Claude Code restart is required to apply it |
 | `/ai-context sort project` | Tidy up documents scattered across the whole project |
 | `/kit` | Display this catalog |
-
-> Security audit and code review are delegated to the official Anthropic plugins (`security-guidance` / `code-review` / `/security-review`).
 
 ## Skills that auto-fire from natural language
 
@@ -66,15 +63,21 @@ Pattern shared by the document-creation skills: `${CLAUDE_PLUGIN_ROOT}/templates
 | `research` | "look into this", "the latest ...", "best practice", "compare", "paper", "research" (external research; `/research` works too) |
 | `ai-context` (next) | "continue", "what's next", "next task", "keep going", "do it" |
 | `concept` | "ideology", "concept", "worldview", "vision", "philosophy", "north star", "why build this" |
+| `design-brief` | "spec out this design", "give me UI direction", "I need a design brief", "make it look stylish" (upstream of concept/spec, converts a request into a 14-dimension brief anchored on the target audience) |
 | `spec` | "spec", "write a spec", "just do the design", "plan", "don't implement it" |
 | `dev-loop` | "develop autonomously", "break the big item down and run it", "develop in a loop", "dev loop", "learning loop" (one-off implementation goes directly via self-driving) |
 | `ai-build` | "I want to build a RAG", "build an agent", "set up evals", "improve the prompt", "which model should I use" (AI-feature build flow; an AI-specialized version of dev-loop, through eval) |
 | `model-lab` | "train a model", "pretrain", "fine-tune this", "distill", "pruning", "run ablations", "write the paper", "publish to HF" (model-building research flow; verification-centered, through paper/HF/GitHub publishing — the research layer to ai-build's application layer) |
-| `ai-context` (memo) | "make a memo", "jot this down", "summarize and save the conversation" (subsumed into ai-context; the old `memo` kept for backward compatibility) |
+| `ai-context` (memo) | "make a memo", "jot this down", "summarize and save the conversation" (subsumed into ai-context) |
 | `ai-context` (knowledge) | "turn this into knowledge", "promote it", "record this as a lesson" (subsumed into ai-context) |
-| `plugin-audit` | "check this skill's quality", "review it on the 14 axes", "compare SKILL.md against best practice" |
+| `plugin-audit` | "check this skill's quality", "review it on the 15 axes", "compare SKILL.md against best practice" |
+| `skill-audit` | "audit this skill", "context-engineering audit this skill" (plugin-audit covers the whole plugin; skill-audit covers one skill's context efficiency) |
 | `ws` | "workspace", "switch work", "run in parallel", "split off a branch", "worktree", "epic", "this work is done", "merge it", "release it" |
 | `set-language` | "set the language to Japanese", "switch to English", "language settings", "make banto japanese/english" (persistent; applied on restart) |
+| `ja-writing` | "write a report", "a Japanese document", "write it in Excel", "a PR description", "write it for this audience" (practical patterns by audience level) |
+| `diagram` | "make a diagram", "a sequence diagram", "an architecture diagram", "in mermaid", "in draw.io" (notation choice and practical patterns) |
+| `b2b-docs` | "write a proposal", "a sales deck", "in PowerPoint", "as a pptx" (chapter structure and choosing HTML vs. PowerPoint) |
+| `html-doc` | "make an HTML report", "write a runbook", "turn this into a document", "proposal", "explainer" (self-contained single-HTML deliverables from templates; 4 document types × EN/JA × 7 color themes, diagrams pre-rendered to inline SVG) |
 
 > **Intent-first applied across the board**: the skills above have had the old `disable-model-invocation` lifted so they can be discovered and launched from natural language (north star: "humans never think about invocation"). Commands are kept as deterministic aliases.
 
@@ -91,7 +94,7 @@ Pattern shared by the document-creation skills: `${CLAUDE_PLUGIN_ROOT}/templates
 | `search-agent` | Mechanical execution of internal search (haiku, lightweight) | From the search skill's deep path: 3–5 in parallel, `Agent(subagent_type="search-agent", model="haiku", ...)` |
 | `context-keeper` | Consistency check / regeneration of the search text layer (full-combined.txt / sessions-cache) | Fallback when full-combined.txt looks stale, or directly |
 
-> Code review and security audit are delegated to the official Anthropic plugins (`code-review` / `security-guidance`).
+Code review and security audit are delegated to the official Anthropic plugins (see the delegation rubric below).
 
 ## Subagent delegation rubric — when to delegate
 

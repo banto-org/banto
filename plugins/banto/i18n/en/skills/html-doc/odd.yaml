@@ -1,0 +1,27 @@
+# ODD Spec for html-doc
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: html-doc
+autonomy_level: L2  # Medium-sized workflow (self-drives from template Read → assembly → single-HTML generation and save)
+
+in_scope:
+  - Generating a self-contained single HTML document (report / runbook / explainer / proposal) from a template
+  - Applying one of 7 color themes and deriving custom themes from brand colors
+  - Pre-rendering diagrams via mermaid / draw.io and embedding them as inline SVG
+  - Adjusting writing style and structure for the audience level (L1/L2/L3) (audience-levels.md)
+
+out_of_scope:
+  - Implementing an app/screen UI (use the ui-design skill instead if available)
+  - Deciding B2B proposal chapter structure or pptx generation (b2b-docs skill)
+  - Choosing the diagram notation itself and how to draft it (diagram skill)
+  - Internal memos and decision records (Markdown suffices)
+
+safety_boundaries:
+  - Maintain zero external requests (no CDN fonts, external CSS, or tracking; if a CDN fallback is used, always disclose it)
+  - Mask internal names, other companies' names, and PII in client-facing deliverables (per the pii-protection rule / egress-guard)
+  - Read any existing file before overwriting generated output (per the Write convention)
+
+kill_switch_conditions: []
+
+approval_gates: []

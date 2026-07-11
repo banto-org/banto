@@ -9,7 +9,7 @@ allowed-tools: Read Write Glob Bash
 compatibility: Claude Code (requires bash, git, jq)
 ---
 
-> **Store-first**: every `.ai-context/...` path in this skill refers to the ai-context base. Read/Write under the absolute path the SessionStart/PreCompact hook injects as "ai-context base: &lt;absolute path&gt;" — never write to a relative `.ai-context/` (it exists only in old legacy repos; when unknown, resolve it with `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
+> **Store-first**: saves go to `{base}/sessions/...`. `{base}` is the absolute ai-context base path injected by the SessionStart/PreCompact hook (when unknown, resolve it with `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
 
 Save the current work state as a checkpoint file.
 
@@ -30,7 +30,13 @@ Save to: `{base}/sessions/checkpoint-{YYYY-MM-DD}-{HHMM}.md`
 
 Save with the Write tool in the following format:
 
+Put a workspace address marker on the first line (reuse the value of the injected
+"# Workspace: <topic>" line verbatim; omit the line if there is none). SessionStart uses this
+marker to deliver only checkpoints addressed to this workspace on /clear, preventing
+misdelivery to an unrelated session (decision 2026-07-08 idle-checkpoint-delivery).
+
 ```markdown
+<!-- banto-ws: <current workspace topic; omit this whole line if none> -->
 # Checkpoint - YYYY-MM-DD HH:MM
 
 ## What is being worked on now

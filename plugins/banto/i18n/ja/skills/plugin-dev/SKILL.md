@@ -14,7 +14,7 @@ compatibility: Claude Code (requires bash, git, jq)
 # Plugin Dev — Claude Code プラグイン開発支援
 
 詳細なリファレンス資料は `references/` にある。必要なときだけ読むこと。
-ユーザーが日本語で会話している場合は日本語で応答する。
+出力言語: 応答は会話言語で書く（日本語なら `writing-ja.md` 準拠）。
 
 公式の根拠: https://code.claude.com/docs/en/plugins-reference （[`references/sources.md`](references/sources.md) も参照）。
 
@@ -147,7 +147,7 @@ claude plugin install <plugin>[@marketplace] [--scope user|project|local]
 - 変更の反映: `/reload-plugins`（skills / agents / hooks / MCP / LSP をすべて再読込）
 - semver 必須（`MAJOR.MINOR.PATCH`）、`CHANGELOG.md` に記録。バージョンを上げないとキャッシュで既存ユーザーに更新が届かない
 - 公式提出: https://claude.ai/settings/plugins/submit
-- 開発後の監査: 公式準拠は `/plugin-audit`（Phases 1-8.5）+ 14 軸品質監査（Phase 9、[`references/quality-scoring.md`](references/quality-scoring.md) 参照）
+- 開発後の監査: 公式準拠は `/plugin-audit`（Phases 1-8.5）+ 15 軸品質監査（Phase 9、[`references/quality-scoring.md`](references/quality-scoring.md) 参照）
 
 ## よくある間違い
 

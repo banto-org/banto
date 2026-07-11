@@ -86,6 +86,59 @@
     });
   }
 
+  /* ---------- dropdown menus: grace-timer close (hover alone is fragile) ---------- */
+  var navEl = document.getElementById('nav');
+  var burger = document.querySelector('.nav-burger');
+  function burgerMode() {
+    return burger && getComputedStyle(burger).display !== 'none';
+  }
+  var menuItems = document.querySelectorAll('.nav-item.has-menu');
+  menuItems.forEach(function (item) {
+    var timer = null;
+    function openThis() {
+      clearTimeout(timer);
+      menuItems.forEach(function (o) { if (o !== item) o.classList.remove('open'); });
+      item.classList.add('open');
+    }
+    item.addEventListener('mouseenter', function () { if (!burgerMode()) openThis(); });
+    item.addEventListener('mouseleave', function () {
+      if (burgerMode()) return;
+      clearTimeout(timer);
+      timer = setTimeout(function () { item.classList.remove('open'); }, 280);
+    });
+    // touch (wide screens only): first tap opens the menu, second tap follows the link.
+    // In burger mode every submenu is already expanded, so links navigate directly.
+    item.querySelectorAll(':scope > a').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        if (!burgerMode() && window.matchMedia('(hover: none)').matches && !item.classList.contains('open')) {
+          e.preventDefault();
+          openThis();
+        }
+      });
+    });
+  });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.nav-item.has-menu')) {
+      menuItems.forEach(function (o) { o.classList.remove('open'); });
+    }
+  });
+
+  /* ---------- hamburger drawer (narrow screens) ---------- */
+  if (burger && navEl) {
+    burger.addEventListener('click', function () {
+      var open = navEl.classList.toggle('menu-open');
+      burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.querySelectorAll('.nav-links a').forEach(function (a) {
+      a.addEventListener('click', function () {
+        if (burgerMode()) {
+          navEl.classList.remove('menu-open');
+          burger.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+  }
+
   /* ---------- reading progress + nav state ---------- */
   var bar = document.getElementById('progressBar');
   var nav = document.getElementById('nav');

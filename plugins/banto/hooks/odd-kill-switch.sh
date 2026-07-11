@@ -18,11 +18,12 @@
 #   - main 直 commit / gh pr merge / 公開系コマンド / push 時検査 → release-guard.sh (block)
 #   - 当ファイル → 上記でカバーされない横断 kill switch のみ
 #
-# **ステータス**: 4 ルール全 block（全 escape ハッチ付き）
+# **ステータス**: 4 ルール全 block（全 escape ハッチ付き）+ 1 ルール warn のみ
 #   - git push origin main/master   → ODD_ALLOW_MAIN_PUSH=1 で escape
 #   - --no-verify                   → ODD_ALLOW_NO_VERIFY=1 で escape
 #   - --force push (--force-with-lease は通過) → ODD_ALLOW_FORCE_PUSH=1 で escape
 #   - rm -rf root/home/$HOME        → ODD_ALLOW_RM_RF_ROOT=1 で escape
+#   - rm が git 管理下ファイルを対象とする → warn のみ（block しない。escape 不要）
 #
 # Sibling: odd-gate.sh is the test-failure circuit breaker; this hook blocks dangerous git / secret / destructive actions.
 #
@@ -53,11 +54,14 @@ if command -v jq >/dev/null 2>&1; then
     TOOL_NAME=$(printf '%s' "$PAYLOAD" | jq -r '.tool_name // empty' 2>/dev/null)
     CMD=$(printf '%s' "$PAYLOAD" | jq -r '.tool_input.command // empty' 2>/dev/null)
     FILE_PATH=$(printf '%s' "$PAYLOAD" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
+    HOOK_CWD=$(printf '%s' "$PAYLOAD" | jq -r '.cwd // empty' 2>/dev/null)
 else
     TOOL_NAME=$(extract_field "$PAYLOAD" "tool_name")
     CMD=$(extract_command "$PAYLOAD")
     FILE_PATH=$(extract_field "$PAYLOAD" "file_path")
+    HOOK_CWD=$(extract_field "$PAYLOAD" "cwd")
 fi
+[ -z "$HOOK_CWD" ] && HOOK_CWD=$PWD
 
 # 注: 以前は「odd.yaml が一つも無ければ早期 exit」していたが、本 hook の 4 ルールは
 # odd.yaml を実際には読まない横断安全ルール（safety.md 由来）であり、プラグインルート解決の
@@ -208,6 +212,44 @@ Options:
   3. Temporary escape: ODD_ALLOW_RM_RF_ROOT=1 rm -rf /target
 BLOCK_RM_RF
         exit 2
+    fi
+fi
+
+# ---- 検出ルール 5: rm が git 管理下ファイルを対象にしている ---- (WARN only, no block)
+# 削除自体は git 履歴から復元できるため block しない。誤って追跡ファイルを rm した際の
+# 気づきを与える通知のみ。判定できるのは literal パス（引用符除去後）のみ — グロブ
+# （*?[）や変数展開（$）を含むトークンは判定不能として黙って通す（安全側の fail-open）。
+if command -v git >/dev/null 2>&1; then
+    _rm_hit=""
+    _rm_segments=$(printf '%s\n' "$CMD" | tr ';&|' '\n')
+    while IFS= read -r _rmseg; do
+        _rmrest=${_rmseg#"${_rmseg%%[![:space:]]*}"}
+        _rmfirst=${_rmrest%% *}
+        case "$_rmfirst" in
+            sudo|command|nohup|time)
+                _rmrest=${_rmrest#"$_rmfirst"}
+                _rmrest=${_rmrest#"${_rmrest%%[![:space:]]*}"}
+                _rmfirst=${_rmrest%% *}
+                ;;
+        esac
+        [ "$_rmfirst" = "rm" ] || continue
+        _rmargs=${_rmrest#rm}
+        for _rmtok in $_rmargs; do
+            case "$_rmtok" in
+                -*) continue ;;
+                *'*'*|*'?'*|*'['*|*'$'*) continue ;;
+            esac
+            _rmtok_noq=$(printf '%s' "$_rmtok" | tr -d '\042\047')
+            [ -z "$_rmtok_noq" ] && continue
+            if git -C "$HOOK_CWD" ls-files --error-unmatch -- "$_rmtok_noq" >/dev/null 2>&1; then
+                _rm_hit="$_rmtok_noq"
+            fi
+        done
+    done <<KILL_SWITCH_RM_SEGMENTS
+$_rm_segments
+KILL_SWITCH_RM_SEGMENTS
+    if [ -n "$_rm_hit" ]; then
+        warn "rm targets a git-tracked file ($_rm_hit). Deletion is recoverable from git history (checkout/reset), but double-check this was intentional. This is a warning only; the command was not blocked."
     fi
 fi
 

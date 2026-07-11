@@ -74,6 +74,7 @@ merge_settings() {  # $1 = plan|apply
     [ -f "$sj" ] || { [ "$act" = apply ] && { mkdir -p "$HOME/.claude"; echo '{}' > "$sj"; }; }
     have_sl=$(jq -r 'if .statusLine then "yes" else "no" end' "$sj" 2>/dev/null || echo no)
     echo "    permissions.allow += mcp__playwright__* / mcp__ide__* / Bash(git -C ~/ai-context-store:*)"
+    echo "                       + Bash(git push:*) / Bash(gh pr create:*)（会話承認で実行可 — main 直 push / force push / 未承認 PR 作成は hook が決定論で block）"
     echo "    permissions.deny  += AskUserQuestion（テキスト対話ポリシー）"
     echo "    env.CLAUDE_CODE_DISABLE_AUTO_MEMORY = \"1\""
     have_sb=$(jq -r 'if .sandbox then "yes" else "no" end' "$sj" 2>/dev/null || echo no)
@@ -106,7 +107,8 @@ merge_settings() {  # $1 = plan|apply
         ((.extraKnownMarketplaces["banto-marketplace"] // {source: $kmsrc}) + {autoUpdate: true}) |
       .permissions.allow = ((.permissions.allow // []) + [
         "mcp__playwright__*", "mcp__ide__*",
-        "Bash(git -C ~/ai-context-store:*)"
+        "Bash(git -C ~/ai-context-store:*)",
+        "Bash(git push:*)", "Bash(gh pr create:*)"
       ] | unique) |
       .permissions.deny = ((.permissions.deny // []) + ["AskUserQuestion"] | unique) |
       .env.CLAUDE_CODE_DISABLE_AUTO_MEMORY = "1" |
@@ -125,7 +127,7 @@ merge_settings() {  # $1 = plan|apply
         }
       end) |
       (if .statusLine then . else
-        .statusLine = {type:"command", command:"~/.claude/statuslines/token-monitor.sh", padding:0}
+        .statusLine = {type:"command", command:"~/.claude/statuslines/token-monitor.sh", padding:0, refreshInterval:10}
       end)
     ' "$sj" > "$tmp" && mv "$tmp" "$sj"
     # statusline 本体

@@ -12,7 +12,7 @@ compatibility: Claude Code (requires bash, git, jq; git-town recommended)
 
 # Workspace Manager
 
-> **store-first**: every `.ai-context/...` path in this skill (including workspaces/) points at the ai-context base. When using the central store, Read/Write under the "ai-context base: &lt;absolute path&gt;" injected by the SessionStart/PreCompact hook (if unsure, `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
+> **store-first**: everything under `workspaces/...`, and every other save target, lives under `{base}`. `{base}` is the absolute ai-context base path injected by the SessionStart/PreCompact hook (if unsure, `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
 
 Topic-based workspace management + 3-tier branch operation: **main ← epic (large scope) ← task (small-scope worktree)**.
 

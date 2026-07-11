@@ -6,7 +6,10 @@
 # candidates from accumulated decisions.
 #   spec: docs/specs/2026-06-10_harness-next-level (P2)
 #
-# Output (stdout): addition candidates for search-lexicon.md (applying them is a human / agent decision; never auto-appended).
+# Output (stdout): a notice once machine-qualified candidates (freq >= 3, not a stopword, not
+# already listed) have been appended directly to search-lexicon.md (S4 automation gap: this used
+# to only propose candidates for a human/agent to add by hand). If the append itself fails
+# (unwritable lexicon), falls back to the old candidate-list output so the exception is still visible.
 # Usage: lexicon-distill.sh [cwd] [top_n]
 # fail-open: decisions missing → no output, exit 0.
 
@@ -44,7 +47,8 @@ CANDIDATES=$(printf '%s\n' "$RECENT" | xargs grep -hoE '[A-Za-z][A-Za-z0-9_.+-]{
 [ -z "$CANDIDATES" ] && exit 0
 
 TODAY=$(date +%Y-%m-%d 2>/dev/null || echo "")
-PROPOSED=""
+LEX_LINES=""
+DISPLAY=""
 COUNT=0
 # IFS line loop (temp variable instead of a here-string, to avoid a subshell)
 OLD_IFS="$IFS"; IFS='
@@ -61,16 +65,27 @@ for line in $CANDIDATES; do
     if [ -f "$LEXICON" ] && grep -qiw -- "$term" "$LEXICON" 2>/dev/null; then
         continue
     fi
-    PROPOSED="${PROPOSED}- \`${term}\` (${freq} occurrences)
+    LEX_LINES="${LEX_LINES}${term}   <!-- auto-distilled from decisions, freq=${freq}, ${TODAY} -->
+"
+    DISPLAY="${DISPLAY}- \`${term}\` (${freq} occurrences)
 "
     COUNT=$((COUNT + 1))
     [ "$COUNT" -ge "$TOP_N" ] && break
 done
 IFS="$OLD_IFS"
 
-[ -z "$PROPOSED" ] && exit 0
+[ -z "$LEX_LINES" ] && exit 0
 
-echo "## 🔤 search-lexicon addition candidates (from recent decisions / ${TODAY})"
-echo "Frequent technical terms not yet in the lexicon. Adding them to \`${LEXICON#"$BASE"/}\` with translations, synonyms, and abbreviations improves search hit rate (applying is a judgment call)."
-printf '%s' "$PROPOSED"
+# Machine-qualified candidates go straight into the lexicon (no human step for these).
+if printf '%s' "$LEX_LINES" >> "$LEXICON" 2>/dev/null; then
+    echo "## 🔤 search-lexicon auto-applied (from recent decisions / ${TODAY})"
+    echo "Machine-qualified technical terms (freq >= 3, not a stopword, not yet listed) were appended directly to \`${LEXICON#"$BASE"/}\`."
+    printf '%s' "$DISPLAY"
+else
+    # Write failed (e.g. unwritable path) — fall back to the old propose-only output so the
+    # exception stays visible instead of silently disappearing.
+    echo "## 🔤 search-lexicon addition candidates (from recent decisions / ${TODAY})"
+    echo "Frequent technical terms not yet in the lexicon. Auto-append to \`${LEXICON#"$BASE"/}\` failed (unwritable?) — add them by hand."
+    printf '%s' "$DISPLAY"
+fi
 exit 0

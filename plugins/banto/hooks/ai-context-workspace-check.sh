@@ -1,6 +1,12 @@
 #!/bin/sh
 # AI Context Workspace Check Hook (PostToolUse: Write|Edit)
 # decisions/ または docs/ への書き込み時に WORKSPACE.md に未登録なら警告
+#
+# S4 自動化ギャップ: single（非 multi）モード限定で、スコープ一致が機械判定できる場合
+# （新ファイルのファイル名 or 先頭行が WORKSPACE.md の topic 文字列を含む・topic 3 文字以上）は
+# 「## 関連ドキュメント」へ自動追記し、実行結果のみ通知する。判定不能・multi モードは
+# 従来どおり add/replace/skip の確認を提示する（multi は primary/reference の判断が必要なため
+# 対象外のまま残す）。
 # POSIX互換: macOS / Linux / WSL
 
 command -v jq >/dev/null 2>&1 || exit 0
@@ -94,7 +100,34 @@ if [ "$MULTI_MODE" = "1" ]; then
     - To avoid cross-wiring, never write into WORKSPACE-refs.md itself
 WS_MULTI_MSG
 else
-    cat << WS_CHECK_MSG
+    # 機械判定によるスコープ一致チェック: WORKSPACE.md の topic 文字列が、新ファイルの
+    # ファイル名 or 先頭行に含まれているか（大小文字無視・topic 3 文字未満は誤爆防止で対象外）。
+    WS_TOPIC=$(grep -m1 '^# Workspace:' "$WS_FILE" 2>/dev/null | sed 's/^# Workspace:[[:space:]]*//' | sed 's/^\[[^]]*\][[:space:]]*//')
+    WS_TOPIC_LC=$(printf '%s' "$WS_TOPIC" | tr '[:upper:]' '[:lower:]')
+    BASENAME_LC=$(printf '%s' "$BASENAME" | tr '[:upper:]' '[:lower:]')
+    MATCH=0
+    if [ -n "$WS_TOPIC_LC" ] && [ "${#WS_TOPIC_LC}" -ge 3 ]; then
+        case "$BASENAME_LC" in *"$WS_TOPIC_LC"*) MATCH=1 ;; esac
+        if [ "$MATCH" != "1" ] && [ -f "$FILE_PATH" ]; then
+            HEAD1=$(head -1 "$FILE_PATH" 2>/dev/null | tr '[:upper:]' '[:lower:]')
+            case "$HEAD1" in *"$WS_TOPIC_LC"*) MATCH=1 ;; esac
+        fi
+    fi
+
+    if [ "$MATCH" = "1" ]; then
+        if grep -q '^## 関連ドキュメント' "$WS_FILE" 2>/dev/null; then
+            TMP_WS="$WS_FILE.tmp.$$"
+            awk -v rel="$REL_PATH" '
+                { print }
+                /^## 関連ドキュメント/ && !done { print "- " rel; done=1 }
+            ' "$WS_FILE" > "$TMP_WS" 2>/dev/null && mv "$TMP_WS" "$WS_FILE" 2>/dev/null || rm -f "$TMP_WS" 2>/dev/null
+        else
+            { printf '\n## 関連ドキュメント\n'; printf -- '- %s\n' "$REL_PATH"; } >> "$WS_FILE" 2>/dev/null
+        fi
+        echo "[Workspace] auto-registered a new file under 「## 関連ドキュメント」 (scope match: topic '${WS_TOPIC}'):"
+        echo "  File: $REL_PATH"
+    else
+        cat << WS_CHECK_MSG
 [Workspace] A new file is not registered in WORKSPACE.md:
   File: $REL_PATH
   Update WORKSPACE.md:
@@ -102,6 +135,7 @@ else
     - replace: swap it with an existing entry
     - skip: unrelated to this workspace (do not add)
 WS_CHECK_MSG
+    fi
 fi
 
 exit 0

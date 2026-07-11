@@ -99,20 +99,13 @@ fi
 # i18n: consumed-by skills/ai-context/references/central-store-guide.md, skills/status/SKILL.md,
 #       skills/ai-context/references/doctor.md, skills/ai-context/references/status.md
 #       （「ai-context ベース:」marker をドキュメントが逐語参照。T2.4/T4 で同時変更すること）
-case "$AI_BASE" in
-    */.ai-context)
-        # grandfather（repo 内 legacy base）: 読み書き従来どおり + 移行提案を 1 行
-        if [ -d "$AI_BASE" ]; then
-            echo "[AI Context] This repo uses the legacy in-repo .ai-context/. Migrating to the central store is recommended — run /ai-context migrate (the repo stays clean afterwards)."
-            echo ""
-        fi
-        ;;
-    *)
-        echo "[AI Context - 中央 store 運用] このプロジェクトの ai-context ベース: $AI_BASE"
-        echo "  Read/Write decisions / docs / tasks / sessions / workspaces under the base above (use the injected absolute path, not a relative .ai-context/)."
-        echo ""
-        ;;
-esac
+# store-first precedence（decision 2026-07-08 store-first-precedence-banner）: CLAUDE.md は静的な
+# ベースライン、store（decisions / workspace / tasks）が現在の正。CLAUDE.md を汚さず（元リポジトリ
+# 非改変の思想）hook 側で毎回この優先順を明示する。in-repo .ai-context は廃止済みなので grandfather 分岐は無い。
+echo "[AI Context - store-first] 作業開始や CLAUDE.md の記述で動く前に、下の ai-context store（decisions / workspace / tasks）を必ず先に参照する。store が現在の正であり、CLAUDE.md の静的記述と食い違う場合は store の最新 decision を優先する。"
+echo "[AI Context - 中央 store 運用] このプロジェクトの ai-context ベース: $AI_BASE"
+echo "  Read/Write decisions / docs / tasks / sessions / workspaces under the base above (use the injected absolute path, not a relative .ai-context/)."
+echo ""
 
 # ベース未作成（未登録 repo の subdir 等）→ 注入内容なしで終了
 [ ! -d "$AI_BASE" ] && exit 0
@@ -145,26 +138,81 @@ PENDING_FILE="$AI_BASE/sessions/pending/${AUTHOR}.md"
 echo "[AI Context - SessionStart: context restored via ${SOURCE:-unknown}]"
 echo ""
 
-# --- チェックポイントがあれば全文注入 → 注入後に削除（再注入防止） ---
+# --- チェックポイント配送（源別分岐 + workspace 宛先 + 有界化。decision 2026-07-08 idle-checkpoint-delivery） ---
+# 消費（consumed/ 退避）するのは source=clear のときだけ。/clear は「文脈を意図的に落として
+# 同じ作業を安く再開する」唯一の明示合図なので、そこを受け取り口に一本化する。
+# resume/startup/compact は消費せずヒントのみ: 巨大な再ロード文脈へ重ねて注入せず、別作業の
+# 空セッションへ dump もしない。これで「別セッション（startup/resume）が checkpoint を先に食う」
+# レースを構造的に断つ（旧実装は source を問わず無条件に注入 + 消費していた）。
+# 宛先キーは workspace トピック（/clear をまたいで安定。session_id は /clear で回るので不可）。
+# writer（idle-checkpoint-watch.sh）が `<!-- banto-ws: <topic> -->` を先頭行に刻む。未マーカーの
+# checkpoint は後方互換で「どの ws でも配送」。減衰: ≤24h=受動ヒスト表示 + /clear 配送 /
+# 1〜3日=明示 /clear でのみ配送・受動ヒントなし / >3日=consumed/ へ GC 退避。
 if [ -d "$SESSIONS" ]; then
     CHECKPOINT_FILES=$(ls -t "$SESSIONS"/checkpoint-*.md 2>/dev/null)
+    CONSUMED="$SESSIONS/consumed/${AUTHOR}"
     if [ -n "$CHECKPOINT_FILES" ]; then
-        echo "=== Checkpoint (user-confirmed) ==="
-        # 行単位で読む（unquoted for はスペース入りファイル名で分割され、注入に失敗した
-        # まま気づけない。2026-06-05 監査で実証された latent bug の修正）
-        # 消費後は rm でなく sessions/consumed/ へ退避する（旧実装は注入が文脈に届いたかに
-        # 関わらず無条件 rm しており、出力 drop 時に復元不能だった。14 日で自動掃除）。
-        CONSUMED="$SESSIONS/consumed/${AUTHOR}"
-        mkdir -p "$CONSUMED" 2>/dev/null
+        # 現在の workspace キー（無ければ空 = 未マーカーのみ対象になる）
+        WS_KEY=""
+        command -v _ai_context_ws_key >/dev/null 2>&1 && WS_KEY=$(_ai_context_ws_key "$AI_BASE" "$CWD" 2>/dev/null)
+
+        # このワークスペース宛て（マーカー一致）または未マーカーの checkpoint に絞る。ファイル名は
+        # スペースを含まない規約だが、2026-06-05 監査の教訓に従い read -r で行単位処理する。
+        _CK_MINE="${TMPDIR:-/tmp}/banto-ck-mine-$$"
+        : > "$_CK_MINE"
         printf '%s\n' "$CHECKPOINT_FILES" | while IFS= read -r f; do
             [ -f "$f" ] || continue
-            cat "$f"
-            echo ""
+            _m=$(grep -m1 '^<!-- banto-ws: ' "$f" 2>/dev/null | sed 's/^<!-- banto-ws: //; s/ -->$//')
+            if [ -z "$_m" ] || [ "$_m" = "$WS_KEY" ]; then
+                printf '%s\n' "$f" >> "$_CK_MINE"
+            fi
+        done
+        MINE=$(cat "$_CK_MINE" 2>/dev/null)
+        rm -f "$_CK_MINE" 2>/dev/null
+
+        if [ -n "$MINE" ]; then
+            if [ "$SOURCE" = "clear" ]; then
+                # 受け取り: 全文注入 → consumed/ へ退避（このワークスペース宛てのみ・年齢不問）。
+                # rm でなく退避（旧実装は無条件 rm で出力 drop 時に復元不能だった。14 日で自動掃除）。
+                echo "=== Checkpoint (user-confirmed) ==="
+                mkdir -p "$CONSUMED" 2>/dev/null
+                printf '%s\n' "$MINE" | while IFS= read -r f; do
+                    [ -f "$f" ] || continue
+                    cat "$f"
+                    echo ""
+                    mv -f "$f" "$CONSUMED/" 2>/dev/null || rm -f "$f"
+                done
+                echo "[Note: checkpoints were moved to sessions/consumed/${AUTHOR}/ after injection (kept for 14 days)]"
+                echo ""
+            else
+                # resume/startup/compact: 消費しない。24h 以内の新しいものがある時だけ 1 行ヒント。
+                # 「resume で戻った → /clear すれば安い」という本来導線を見える化する。
+                _now=$(date +%s 2>/dev/null)
+                _fresh=0
+                printf '%s\n' "$MINE" | while IFS= read -r f; do
+                    _mt=$(stat -c %Y "$f" 2>/dev/null || stat -f %m "$f" 2>/dev/null)
+                    case "$_mt" in ''|*[!0-9]*) echo Y; break ;; esac
+                    { [ -z "$_now" ] || [ $(( _now - _mt )) -le 86400 ]; } && { echo Y; break; }
+                done | grep -q Y && _fresh=1
+                if [ "$_fresh" = "1" ]; then
+                    echo "[idle-checkpoint あり: このプロジェクトに続きのセッションがあります。/clear すると checkpoint から軽い文脈で安く再開できます]"
+                    echo ""
+                fi
+            fi
+        fi
+
+        # GC(1): mailbox 直下で未消費のまま保持日数を越えた checkpoint を consumed/ へ退避（有界化）。
+        #        /clear で拾える「安く再開の窓」= この日数（既定 10 日）。別 ws 宛て・/clear されず
+        #        古びたものを mailbox から回収する。受動ヒントは別枠（24h）なので延ばしても増えない。
+        #        BANTO_IDLE_CHECKPOINT_RETAIN_DAYS で調整可（consumed 側 14 日削除より短くして復元余地を残す）。
+        _RETAIN_DAYS=${BANTO_IDLE_CHECKPOINT_RETAIN_DAYS:-10}
+        case "$_RETAIN_DAYS" in ''|*[!0-9]*) _RETAIN_DAYS=10 ;; esac
+        mkdir -p "$CONSUMED" 2>/dev/null
+        find "$SESSIONS" -maxdepth 1 -name 'checkpoint-*.md' -mtime +"$_RETAIN_DAYS" 2>/dev/null | while IFS= read -r f; do
+            [ -f "$f" ] || continue
             mv -f "$f" "$CONSUMED/" 2>/dev/null || rm -f "$f"
         done
-        echo "[Note: checkpoints were moved to sessions/consumed/${AUTHOR}/ after injection (kept for 14 days)]"
-        echo ""
-        # GC: 新 per-user パス + 旧フラット consumed/ 直下（移行前データ）の両方を掃除
+        # GC(2): 新 per-user パス + 旧フラット consumed/ 直下（移行前データ）を 14 日で削除
         find "$SESSIONS/consumed" -name 'checkpoint-*.md' -mtime +14 -delete 2>/dev/null
     fi
 fi
