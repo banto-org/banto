@@ -31,17 +31,33 @@ set -u
 
 PAYLOAD=$(cat 2>/dev/null || true)
 
-# command 抽出（jq 優先。grep fallback は \" 以降を読めない既知の限界 — kill-switch と同じ）
+# command / cwd 抽出（jq 優先。grep fallback は \" 以降を読めない既知の限界 — kill-switch と同じ）
 if command -v jq >/dev/null 2>&1; then
     CMD=$(printf '%s' "$PAYLOAD" | jq -r '.tool_input.command // empty' 2>/dev/null)
+    HOOK_CWD=$(printf '%s' "$PAYLOAD" | jq -r '.cwd // empty' 2>/dev/null)
 else
     CMD=$(printf "%s" "$PAYLOAD" | grep -oE '"command":[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"command":[[:space:]]*"([^"]*)".*/\1/')
+    HOOK_CWD=$(printf "%s" "$PAYLOAD" | grep -oE '"cwd":[[:space:]]*"[^"]*"' | head -1 | sed -E 's/.*"cwd":[[:space:]]*"([^"]*)".*/\1/')
 fi
 [ -z "$CMD" ] && exit 0
 
 _env_read=0      # .env 系の生読み出し
 _env_dump=0      # printenv / env / set / declare -p / export -p
 _trace=0         # bash -x / set -x
+_secret_commit=0    # git add / git commit(-a) が .env 系を staged にしようとしている
+_secret_commit_hint=""
+_git_commit_seg=0   # commit セグメントを検出したか（ループ後の git diff --cached 判定用）
+_git_commit_all=0   # commit -a / --all を検出したか（unstaged tracked も対象に含める）
+
+# .env 系判定（basename ベース。プレースホルダは除外。安全-guard の生読みガードと同一集合 +
+# .env.dist を追加し、本ファイル内での例外集合を統一）
+_is_secret_env_basename() {  # $1 = basename → 0: secret / 1: not
+    case "$1" in
+        .env.example|.env.sample|.env.template|.env.dist) return 1 ;;
+        .env|.env.*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
 
 _segments=$(printf '%s\n' "$CMD" | tr ';&|' '\n')
 while IFS= read -r _seg; do
@@ -94,9 +110,79 @@ while IFS= read -r _seg; do
                     _env_read=1 ;;
             esac ;;
     esac
+
+    # ---- 4) git add / git commit(-a) が .env 系を staged にしようとしていないか ----
+    if [ "$_first" = "git" ]; then
+        _padded=" $_seg "
+        case "$_padded" in
+            *" git add "*|*" git "*" add "*)
+                # add サブコマンド以降のトークンを走査（-A/-u 等のフラグは対象外）
+                _after_add=$(printf '%s' "$_seg" | sed -E 's/.* add //')
+                for _tok in $_after_add; do
+                    case "$_tok" in
+                        -*) continue ;;
+                    esac
+                    _tok_noq=$(printf '%s' "$_tok" | tr -d '\042\047')
+                    [ -z "$_tok_noq" ] && continue
+                    _b=$(basename "$_tok_noq" 2>/dev/null)
+                    if _is_secret_env_basename "$_b"; then
+                        _secret_commit=1
+                        _secret_commit_hint="git add: $_tok_noq"
+                    fi
+                done ;;
+        esac
+        case "$_padded" in
+            *" git commit "*|*" git "*" commit "*)
+                _git_commit_seg=1
+                case "$_padded" in
+                    *" -a "*|*" -a"|*"-am "*|*"-am"|*" --all "*|*" --all") _git_commit_all=1 ;;
+                esac ;;
+        esac
+    fi
 done <<SAFETY_GUARD_SEGMENTS
 $_segments
 SAFETY_GUARD_SEGMENTS
+
+# git commit(-a) セグメントがあれば、既に staged（-a なら unstaged tracked も）な .env 系を検査
+# （kill-switch / release-guard と同じ「明示 cwd / -C / cd がある時だけ判定」— 無ければ判定不能として素通り）
+if [ "$_git_commit_seg" = "1" ] && [ "$_secret_commit" = "0" ] && command -v git >/dev/null 2>&1; then
+    _dir=$(printf '%s' "$CMD" | grep -oE 'git -C +[^ ;&|]+' | head -1 | sed -E 's/^git -C +//')
+    [ -z "$_dir" ] && _dir=$(printf '%s' "$CMD" | grep -oE '(^|[;&|] *)cd +[^ ;&|]+' | head -1 | sed -E 's/.*cd +//')
+    _dir=${_dir#\"}; _dir=${_dir%\"}
+    _dir=${_dir#\'}; _dir=${_dir%\'}
+    [ -z "$_dir" ] && _dir="$HOOK_CWD"
+    if [ -n "$_dir" ] && [ -d "$_dir" ]; then
+        _staged=$(git -C "$_dir" diff --cached --name-only 2>/dev/null)
+        _unstaged=""
+        [ "$_git_commit_all" = "1" ] && _unstaged=$(git -C "$_dir" diff --name-only 2>/dev/null)
+        _commit_paths=$(printf '%s\n%s\n' "$_staged" "$_unstaged")
+        while IFS= read -r _p; do
+            [ -z "$_p" ] && continue
+            _b=$(basename "$_p" 2>/dev/null)
+            if _is_secret_env_basename "$_b"; then
+                _secret_commit=1
+                _secret_commit_hint="staged for commit: $_p"
+            fi
+        done <<SAFETY_GUARD_COMMIT_PATHS
+$_commit_paths
+SAFETY_GUARD_COMMIT_PATHS
+    fi
+fi
+
+if [ "$_secret_commit" = "1" ] && [ "${BANTO_ALLOW_SECRET_COMMIT:-0}" != "1" ]; then
+    cat >&2 << BLOCK_SECRET_COMMIT
+[safety guard] Blocked a git add/commit that would stage a .env-like secret file.
+
+Reason: safety.md — .env / credential files must never enter git history (secret protection).
+Detected: $_secret_commit_hint
+
+Options:
+  1. Unstage it first: git restore --staged <path>  (then add it to .gitignore)
+  2. If it really is a non-secret placeholder (.env.example etc.), rename it accordingly
+  3. Temporary escape (understanding the file enters git history): BANTO_ALLOW_SECRET_COMMIT=1 <command>
+BLOCK_SECRET_COMMIT
+    exit 2
+fi
 
 [ "$_env_read" = "0" ] && [ "$_env_dump" = "0" ] && [ "$_trace" = "0" ] && exit 0
 

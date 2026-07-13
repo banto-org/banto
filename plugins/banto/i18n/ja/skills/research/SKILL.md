@@ -13,7 +13,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # Research — 外部リサーチスキル
 
-> **保存ベース（store-first）**: この skill が保存する `{base}/docs/research/...` パスは ai-context ベースを指す。SessionStart/PreCompact hook が「ai-context ベース: &lt;絶対パス&gt;」として注入する絶対パスの配下で Read/Write する — 相対 `.ai-context/` には絶対に書かない（旧来の legacy repo にしか存在しない。不明なときは `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決）。
+> **保存ベース（store-first）**: 保存先は `{base}/docs/research/...`。`{base}` は SessionStart/PreCompact hook が注入する ai-context ベースの絶対パス（不明なときは `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決）。
 
 ユーザーの会話言語で記述する（ユーザーが日本語で会話していれば日本語）: これは応答、報告する発見事項、**そして保存するリサーチドキュメント**にも及ぶ。その言語を起動プロンプトで research-agent に渡すこと（サブエージェントは会話言語を継承しない）。
 

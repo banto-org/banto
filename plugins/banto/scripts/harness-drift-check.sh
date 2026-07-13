@@ -53,9 +53,34 @@ TODAY=$(date +%Y-%m-%d 2>/dev/null || echo "")
 OUT=""
 
 if [ "$DRIFT_VER" = "1" ] && [ "$EDIT_VER" != "$RUN_VER" ]; then
-    OUT="## ⚠️ harness drift (${TODAY})
+    # Live reflection half-automation (S4): a plain version mismatch (not the same-version
+    # different-content case below, which needs a human version bump first) is mechanically
+    # fixable by re-syncing the marketplace + plugin cache. Attempt it once per day; on success
+    # report "already applied", on failure fall back to the original manual instructions.
+    # No claude CLI on PATH → fail-open to the pre-existing manual-instruction behavior.
+    AUTOUPDATE_MARKER="${TMPDIR:-/tmp}/banto-harness-autoupdate-$(date +%Y%m%d 2>/dev/null)"
+    AUTOUPDATE_STATE=""
+    [ -f "$AUTOUPDATE_MARKER" ] && AUTOUPDATE_STATE=$(cat "$AUTOUPDATE_MARKER" 2>/dev/null)
+
+    if [ -z "$AUTOUPDATE_STATE" ] && command -v claude >/dev/null 2>&1; then
+        if claude plugin marketplace update banto-marketplace >/dev/null 2>&1 \
+           && claude plugin update banto@banto-marketplace >/dev/null 2>&1; then
+            AUTOUPDATE_STATE="applied"
+        else
+            AUTOUPDATE_STATE="failed"
+        fi
+        printf '%s' "$AUTOUPDATE_STATE" > "$AUTOUPDATE_MARKER" 2>/dev/null
+    fi
+
+    if [ "$AUTOUPDATE_STATE" = "applied" ]; then
+        OUT="## ✅ harness drift auto-applied (${TODAY})
+- Editing repo \`${EDIT_VER}\` / running plugin (cache) was \`${RUN_VER}\` → live reflection ran automatically (\`claude plugin marketplace update banto-marketplace && claude plugin update banto@banto-marketplace\`).
+- Reflection complete. Only a restart of Claude Code is needed to go live."
+    else
+        OUT="## ⚠️ harness drift (${TODAY})
 - Editing repo = \`${EDIT_VER}\` / running plugin (cache) = \`${RUN_VER}\` → **version mismatch**.
 - Fix: if the version was already bumped, run \`claude plugin marketplace update banto-marketplace && claude plugin update banto@banto-marketplace\`, then restart to go live."
+    fi
 fi
 
 # Declaration drift inside the editing repo: marketplace.json must carry the same version

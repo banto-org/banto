@@ -121,6 +121,11 @@
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/agent-guard.sh",
             "timeout": 3
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/model-role-guard.sh",
+            "timeout": 3
           }
         ]
       },
@@ -164,8 +169,18 @@
           },
           {
             "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/prod-guard.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/compute-cost-gate.sh",
             "timeout": 3
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/drift-commit-guard.sh",
+            "timeout": 5
           }
         ]
       },
@@ -233,6 +248,11 @@
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/auto-test.sh",
             "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/ja-lint.sh",
+            "timeout": 5
           },
           {
             "type": "command",

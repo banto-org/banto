@@ -1,6 +1,6 @@
 # skill / agent / rule の品質スコアリング基準
 
-品質スコアリングの正本は `skills/plugin-audit/references/scoring.md`（14 軸）。plugin-dev は scaffold 時にそこを参照する。14 軸スコアリング・description 文字数キャップ（1,024 / 1,536 字）・トークン予算（warn 500 / hard 1,000）はそちらが唯一の正本であり、本ファイルでは重複させない。
+品質スコアリングの正本は `skills/plugin-audit/references/scoring.md`（15 軸）。plugin-dev は scaffold 時にそこを参照する。15 軸スコアリング・description 文字数キャップ（1,024 / 1,536 字）・トークン予算（warn 500 / hard 1,000）はそちらが唯一の正本であり、本ファイルでは重複させない。
 
 本ファイルが持つのは、plugin-dev 自身の仕事である **authoring 補助** のみ：検出語彙の二言語対応表と、description テンプレ（日本語版 / 英語版）。
 

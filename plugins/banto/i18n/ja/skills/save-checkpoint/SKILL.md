@@ -9,7 +9,7 @@ allowed-tools: Read Write Glob Bash
 compatibility: Claude Code (requires bash, git, jq)
 ---
 
-> **保存ベース（store-first）**: この skill 内の `.ai-context/...` パスはすべて ai-context ベースを指す。SessionStart/PreCompact hook が「ai-context ベース: &lt;絶対パス&gt;」として注入する絶対パス配下で Read/Write すること — 相対 `.ai-context/` には絶対に書かない（これは旧来の legacy repo にのみ存在する。不明なときは `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決）。
+> **保存ベース（store-first）**: 保存先は `{base}/sessions/...`。`{base}` は SessionStart/PreCompact hook が注入する ai-context ベースの絶対パス（不明なときは `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"` で解決）。
 
 現在の作業状態をチェックポイントファイルとして保存する。
 
@@ -30,7 +30,12 @@ compatibility: Claude Code (requires bash, git, jq)
 
 Write ツールで以下のフォーマットで保存する:
 
+先頭行に workspace 宛先マーカーを 1 行置く（注入済みの「# Workspace: <topic>」行の値をそのまま使う。
+無ければ省略可）。SessionStart 側はこのマーカーで「このワークスペース宛て」の checkpoint だけを
+/clear 時に配送し、別作業セッションへの誤配送を防ぐ（decision 2026-07-08 idle-checkpoint-delivery）。
+
 ```markdown
+<!-- banto-ws: <現在の workspace topic。無ければこの行ごと省略> -->
 # Checkpoint - YYYY-MM-DD HH:MM
 
 ## What is being worked on now

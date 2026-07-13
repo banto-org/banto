@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Toolset — Banto / 道具一式</title>
+<meta name="description" content="Banto's full toolset in one page: 20 skills and 6 agents across the SDD pipeline, knowledge and context, documents and writing, workspace and meta, agents, and the meta-tools that audit the plugin itself." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="subpage.css" />
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="index.html" aria-label="Banto">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <div class="nav-item has-menu">
+      <a href="index.html" class="lx" lang="en" aria-haspopup="true">Home</a><a href="index.html" class="lx" lang="ja" aria-haspopup="true">ホーム</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="index.html#why"><span class="lx" lang="en">The contract</span><span class="lx" lang="ja">番頭の契約</span></a>
+          <a href="index.html#flagships"><span class="lx" lang="en">Flagships</span><span class="lx" lang="ja">3 つの目玉</span></a>
+          <a href="index.html#checkpoint"><span class="lx" lang="en">Folding a session</span><span class="lx" lang="ja">セッションを畳む</span></a>
+          <a href="index.html#pipeline"><span class="lx" lang="en">Pipeline</span><span class="lx" lang="ja">SDD パイプライン</span></a>
+          <a href="index.html#safety"><span class="lx" lang="en">Safety</span><span class="lx" lang="ja">決定論的な安全</span></a>
+          <a href="index.html#feel"><span class="lx" lang="en">How it feels</span><span class="lx" lang="ja">使い心地</span></a>
+          <a href="index.html#install"><span class="lx" lang="en">Install</span><span class="lx" lang="ja">インストール</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="toolset.html" class="lx" lang="en" aria-haspopup="true">Toolset</a><a href="toolset.html" class="lx" lang="ja" aria-haspopup="true">道具一式</a>
+      <div class="nav-menu">
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Pipeline (SDD)</span><span class="nav-menu-head lx" lang="ja">パイプライン（SDD）</span>
+          <a href="toolset.html#concept"><b>concept</b><span class="lx" lang="en">forge the ideology</span><span class="lx" lang="ja">思想を鍛える</span></a>
+          <a href="toolset.html#design-brief"><b>design-brief</b><span class="lx" lang="en">vague ask → design spec</span><span class="lx" lang="ja">曖昧な依頼をデザイン仕様へ</span></a>
+          <a href="toolset.html#spec"><b>spec</b><span class="lx" lang="en">interactive design docs</span><span class="lx" lang="ja">対話で設計書</span></a>
+          <a href="toolset.html#dev-loop"><b>dev-loop</b><span class="lx" lang="en">self-driving build</span><span class="lx" lang="ja">自走ビルド</span></a>
+          <a href="toolset.html#ai-build"><b>ai-build</b><span class="lx" lang="en">AI feature flow · eval</span><span class="lx" lang="ja">AI 構築フロー · eval</span></a>
+          <a href="toolset.html#model-lab"><b>model-lab</b><span class="lx" lang="en">train models · verify · paper</span><span class="lx" lang="ja">モデル学習 · 検証 · 論文</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Knowledge &amp; context</span><span class="nav-menu-head lx" lang="ja">知識 &amp; コンテキスト</span>
+          <a href="toolset.html#ai-context"><b>ai-context</b><span class="lx" lang="en">decisions · memo · store</span><span class="lx" lang="ja">決定 · メモ · ストア</span></a>
+          <a href="toolset.html#search"><b>search</b><span class="lx" lang="en">internal search, no web</span><span class="lx" lang="ja">内部検索（web なし）</span></a>
+          <a href="toolset.html#research"><b>research</b><span class="lx" lang="en">external, saved to store</span><span class="lx" lang="ja">外部調査 → ストア</span></a>
+          <a href="toolset.html#save-checkpoint"><b>save-checkpoint</b><span class="lx" lang="en">session snapshot</span><span class="lx" lang="ja">セッション保存</span></a>
+          <a href="toolset.html#webread"><b>webread</b><span class="lx" lang="en">full-text, no summary</span><span class="lx" lang="ja">要約なし全文取得</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Documents &amp; writing</span><span class="nav-menu-head lx" lang="ja">資料 &amp; 文章</span>
+          <a href="toolset.html#ja-writing"><b>ja-writing</b><span class="lx" lang="en">audience-tuned Japanese</span><span class="lx" lang="ja">受け手に合わせた日本語</span></a>
+          <a href="toolset.html#diagram"><b>diagram</b><span class="lx" lang="en">SVG · mermaid · draw.io</span><span class="lx" lang="ja">図解の実務パターン</span></a>
+          <a href="toolset.html#b2b-docs"><b>b2b-docs</b><span class="lx" lang="en">proposals &amp; decks</span><span class="lx" lang="ja">提案書 &amp; 営業資料</span></a>
+          <a href="toolset.html#html-doc"><b>html-doc</b><span class="lx" lang="en">self-contained HTML docs</span><span class="lx" lang="ja">自己完結 HTML 資料</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Workspace &amp; meta</span><span class="nav-menu-head lx" lang="ja">ワークスペース &amp; メタ</span>
+          <a href="toolset.html#ws"><b>ws</b><span class="lx" lang="en">workspace &amp; fleet</span><span class="lx" lang="ja">ワークスペース &amp; 艦隊</span></a>
+          <a href="toolset.html#set-language"><b>set-language</b><span class="lx" lang="en">JA ⇄ EN, sticky</span><span class="lx" lang="ja">日英切替（永続）</span></a>
+          <a href="toolset.html#plugin-dev"><b>plugin-dev</b><span class="lx" lang="en">scaffold &amp; refactor</span><span class="lx" lang="ja">生成 &amp; 改修</span></a>
+          <a href="toolset.html#plugin-audit"><b>plugin-audit</b><span class="lx" lang="en">15-axis quality audit</span><span class="lx" lang="ja">15 軸品質監査</span></a>
+          <a href="toolset.html#skill-audit"><b>skill-audit</b><span class="lx" lang="en">7-axis context audit</span><span class="lx" lang="ja">7 軸コンテキスト監査</span></a>
+          <a href="toolset.html#kit"><b>kit</b><span class="lx" lang="en">discover everything</span><span class="lx" lang="ja">全機能カタログ</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Agents</span><span class="nav-menu-head lx" lang="ja">エージェント</span>
+          <a href="toolset.html#architect"><b>architect</b><span class="lx" lang="en">design &amp; tradeoffs</span><span class="lx" lang="ja">設計 &amp; トレードオフ</span></a>
+          <a href="toolset.html#debugger"><b>debugger</b><span class="lx" lang="en">reproduce · fix · verify</span><span class="lx" lang="ja">再現 · 修正 · 検証</span></a>
+          <a href="toolset.html#qa-tester"><b>qa-tester</b><span class="lx" lang="en">E2E across web/desktop/mobile</span><span class="lx" lang="ja">web/desktop/mobile 横断 E2E</span></a>
+          <a href="toolset.html#research-agent"><b>research-agent</b><span class="lx" lang="en">parallel web research</span><span class="lx" lang="ja">並列 web 調査</span></a>
+          <a href="toolset.html#search-agent"><b>search-agent</b><span class="lx" lang="en">parallel internal grep (haiku)</span><span class="lx" lang="ja">並列内部検索（haiku）</span></a>
+          <a href="toolset.html#context-keeper"><b>context-keeper</b><span class="lx" lang="en">search-index maintenance</span><span class="lx" lang="ja">検索インデックス保守</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="mechanism.html" class="lx" lang="en" aria-haspopup="true">Mechanism</a><a href="mechanism.html" class="lx" lang="ja" aria-haspopup="true">仕組み</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="mechanism.html#hooks"><span class="lx" lang="en">The whole picture</span><span class="lx" lang="ja">全体像</span></a>
+          <a href="mechanism.html#flagship"><span class="lx" lang="en">The 7 flagship hooks</span><span class="lx" lang="ja">目玉 7 hook</span></a>
+          <a href="mechanism.html#principles"><span class="lx" lang="en">Design principles</span><span class="lx" lang="ja">設計原則</span></a>
+          <a href="mechanism.html#odd"><span class="lx" lang="en">ODD — declared autonomy</span><span class="lx" lang="ja">ODD — 自律性の宣言</span></a>
+          <a href="mechanism.html#enforce"><span class="lx" lang="en">Declaration → enforcement</span><span class="lx" lang="ja">宣言 → 強制</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="store.html" class="lx" lang="en" aria-haspopup="true">Store</a><a href="store.html" class="lx" lang="ja" aria-haspopup="true">ストア</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="store.html#store"><span class="lx" lang="en">What accumulates</span><span class="lx" lang="ja">何が貯まるか</span></a>
+          <a href="store.html#search"><span class="lx" lang="en">Cross-store search</span><span class="lx" lang="ja">横断検索</span></a>
+          <a href="store.html#team"><span class="lx" lang="en">Git &amp; teams</span><span class="lx" lang="ja">git &amp; 複数人</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="evidence.html" class="lx" lang="en" aria-haspopup="true">Evidence</a><a href="evidence.html" class="lx" lang="ja" aria-haspopup="true">実測</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="evidence.html#claim"><span class="lx" lang="en">The claim</span><span class="lx" lang="ja">主張と実測</span></a>
+          <a href="evidence.html#resume"><span class="lx" lang="en">Resume</span><span class="lx" lang="ja">「続き」は通じるか</span></a>
+          <a href="evidence.html#knowledge"><span class="lx" lang="en">Knowledge</span><span class="lx" lang="ja">知識はどこから来るか</span></a>
+          <a href="evidence.html#boundary"><span class="lx" lang="en">Boundary</span><span class="lx" lang="ja">残る差は何か</span></a>
+          <a href="evidence.html#cost"><span class="lx" lang="en">Cost</span><span class="lx" lang="ja">思い出す方が安いか</span></a>
+          <a href="evidence.html#limitations"><span class="lx" lang="en">Limitations</span><span class="lx" lang="ja">限界の開示</span></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="nav-right">
+    <button class="nav-burger" aria-label="menu" aria-expanded="false" aria-controls="nav"><span></span></button>
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="index.html" class="lx" lang="en">← Home</a><a href="index.html" class="lx" lang="ja">← ホーム</a></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">The full toolset</span><span class="lx" lang="ja">道具一式</span></div>
+  <h1><span class="lx" lang="en">20 skills, 6 agents. Each one, one behavior.</span><span class="lx" lang="ja">skill 20 個・agent 6 体。それぞれが担う、1 つの動作。</span></h1>
+  <p class="lede lx" lang="en">26 tools split into five roles: skills that forge the ideology before a spec exists, a loop that drives implementation to green on its own, a mechanism that searches decision logs and past chats across sessions, tools that tune Japanese writing tone by audience, tools that drive branches and workspaces from intent, and meta-tools that audit Banto's own quality. Each entry's source of truth is its <code>SKILL.md</code> or agent definition — this page compresses each to one behavioral line plus a concrete example.</p>
+  <p class="lede lx" lang="ja">26 個の道具は 5 つの役割に分かれる：仕様の前に思想を固める skill、実装を green になるまで自走させるループ、決定ログと過去チャットを横断検索する仕組み、資料の文体を受け手別に整える道具、ブランチと workspace を意図から駆動する道具、そして自分自身の品質を監査するメタ道具。各項目の正本は <code>SKILL.md</code> か agent 定義そのもの。ここでは動作を 1 行と具体例に圧縮して示す。</p>
+</section>
+
+<!-- ============ 1. PIPELINE (SDD) ============ -->
+<section class="sec" id="pipeline">
+  <div class="sec-head">
+    <span class="ghost">1</span>
+    <div class="sub">SDD</div>
+    <h2><span class="lx" lang="en">Pipeline</span><span class="lx" lang="ja">パイプライン（SDD）</span></h2>
+    <p><span class="lx" lang="en">The ideology → spec → autonomous-build pipeline. Each skill picks up exactly where the previous one left off.</span><span class="lx" lang="ja">思想 → 仕様 → 自走実装のパイプライン。各 skill が前段の出力をそのまま引き継ぐ。</span></p>
+  </div>
+
+  <div class="cards" style="margin-top:16px">
+    <div class="card" id="concept">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">concept</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Forges a product's ideology through dialogue, then pins it into CLAUDE.md.</strong> Asks why the product exists, who it repels, and what world it projects — six phases for a real product, or one line in light mode for a throwaway experiment. The output, <code>CONCEPT.md</code>, becomes the judgment filter every later skill and agent reads. Without it, spec has no anti-goals to check a decision against.</span>
+        <span class="lx" lang="ja"><strong>製品の思想を対話で形づくり、CLAUDE.md へ焼き付ける。</strong>なぜ作るか・誰を弾くか・どんな世界観を投影するかを、本物の製品なら 6 Phase で、使い捨ての実験なら light モードの 1 行で確定する。出力の <code>CONCEPT.md</code> は、以後すべての skill と agent が読む判断フィルターになる。これが無いと、spec はアンチゴールと突き合わせる先を持てない。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"define the vision for this feature"</span><span class="lx" lang="ja">「思想を固めて」</span>
+        <span class="lx" lang="en">"what's our North Star here"</span><span class="lx" lang="ja">「何の敵で誰に刺すか考えて」</span>
+      </div>
+    </div>
+
+    <div class="card" id="design-brief">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">design-brief</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Turns "make it look nice" into a 14-axis design brief before any screen exists.</strong> Locks the target persona first — who's using it, in what mood, under what constraint — because color, type, and layout all derive from that. Fills the remaining axes in plain conversation, never a forced multiple-choice. Hands the finished brief to spec once code generation starts.</span>
+        <span class="lx" lang="ja"><strong>「おしゃれに」という依頼を、画面を作る前に 14 観点のブリーフへ変換する。</strong>色・文字サイズ・トーンはすべてターゲット（誰が・どんな感情で使うか）から波及するため、まずターゲットを固定する。プレーンな対話で 14 観点を順に埋め、選択式の質問はしない。仕上げたブリーフは、コード生成に進む段階で spec へ引き継ぐ。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"make the screen look sharp"</span><span class="lx" lang="ja">「いい感じの画面デザインにして」</span>
+        <span class="lx" lang="en">"give me a design brief for this"</span><span class="lx" lang="ja">「デザインブリーフ作って」</span>
+      </div>
+    </div>
+
+    <div class="card" id="spec">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">spec</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Writes an industry-standard spec through dialogue, before a line of code exists.</strong> Talks through six formats — Spec Kit, PRD, Design Doc, RFC, ADR, Scope Doc — and picks one (or a combination) by the task's weight, saving the result to <code>{base}/docs/specs/</code>. Stops to confirm only when a choice would change the acceptance criteria; otherwise proceeds on its own adopted interpretation.</span>
+        <span class="lx" lang="ja"><strong>コードを書く前に、業界標準の仕様書を対話で作る。</strong>Spec Kit・PRD・Design Doc・RFC・ADR・Scope Doc の 6 種から、タスクの重さに応じて 1 つ（または組み合わせ）を選び、<code>{base}/docs/specs/</code> へ保存する。受け入れ基準が変わるゴール分岐のときだけ事前確認し、それ以外は採用解釈で進める。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"just design this, don't build yet"</span><span class="lx" lang="ja">「まず設計だけして」</span>
+        <span class="lx" lang="en">"write me a spec"</span><span class="lx" lang="ja">「仕様書作って」</span>
+      </div>
+    </div>
+
+    <div class="card" id="dev-loop">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">dev-loop</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Breaks a big spec into small tasks and self-drives implementation to green.</strong> Presents the decomposition plan once for confirmation, then loops implement → build-and-verify → fix without asking again. Three consecutive test failures trip <code>odd-gate</code> and hand root-cause analysis to the debugger agent instead of grinding. Only exceptions — a goal fork, an irreversible action — come back to the owner.</span>
+        <span class="lx" lang="ja"><strong>大きな spec を小型タスクへ分解し、green になるまで実装を自走させる。</strong>分解プランは 1 度だけ提示して確認し、以後は実装 → build-and-verify → 修正を確認なしで周回する。テストが 3 連続で失敗すると <code>odd-gate</code> が止め、闇雲な繰り返しの代わりに debugger agent へ根本原因を委ねる。owner に戻るのはゴール分岐や不可逆操作などの例外のみ。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"run the whole spec autonomously"</span><span class="lx" lang="ja">「この spec を自走で全部やって」</span>
+        <span class="lx" lang="en">"break this down and build it"</span><span class="lx" lang="ja">「分解してそのまま実装まで」</span>
+      </div>
+    </div>
+
+    <div class="card" id="ai-build">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">ai-build</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Builds an AI feature (LLM, RAG, agent, prompt) and measures its quality with eval.</strong> Say "build a RAG" and it runs internal search, then fresh research if the method or model is more than 14 days stale, picks prompt / RAG / fine-tune, implements, and scores the result with an LLM-as-judge eval — not just "it runs." Model id, pricing, and API parameters go to the <code>claude-api</code> skill instead of being answered from memory.</span>
+        <span class="lx" lang="ja"><strong>AI 機能（LLM・RAG・agent・プロンプト）を構築し、eval で品質を測る。</strong>「RAG を組みたい」と言うと、内部検索のあと（手法やモデルの情報が 14 日より古ければ最新調査を挟み）prompt・RAG・fine-tune のいずれかを選んで実装し、LLM-as-judge の eval で採点する。「動いた」で終わらせない。Claude の id・価格・API パラメータは記憶で答えず <code>claude-api</code> skill に委ねる。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"I want to build a RAG"</span><span class="lx" lang="ja">「RAG を組みたい」</span>
+        <span class="lx" lang="en">"set up an eval for this agent"</span><span class="lx" lang="ja">「この agent の eval を組んで」</span>
+      </div>
+    </div>
+
+    <div class="card" id="model-lab">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">model-lab</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Trains a model from scratch to a published paper, verification-first.</strong> Covers pretraining, full fine-tune, PEFT/LoRA, distillation, pruning, and architecture search, through Frame → Survey → Design → Implement → Run (Mac → Nvidia → cloud) → Verify (eval, ablation, statistics) → Paper &amp; publish. A hook blocks any "done" claim lacking a backing experiment; launching paid compute and publishing to arXiv/Hugging Face/GitHub always stop at a human gate.</span>
+        <span class="lx" lang="ja"><strong>モデルの事前学習から論文公開までを、検証中心で自走させる。</strong>pretrain・フル fine-tune・PEFT/LoRA・蒸留・pruning・アーキ探索を、Frame → Survey → Design → Implement → Run（Mac → Nvidia → cloud）→ Verify（eval・ablation・統計）→ 論文公開の順で進める。裏づけ実験のない「完了」主張は <code>model-claim-guard</code> が止める。有料計算の起動と arXiv/Hugging Face/GitHub への公開は必ず人間ゲート。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"fine-tune this and write it up"</span><span class="lx" lang="ja">「fine-tune して論文まで書いて」</span>
+        <span class="lx" lang="en">"run ablations and publish to HF"</span><span class="lx" lang="ja">「ablation 回して HF に公開して」</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. KNOWLEDGE & CONTEXT ============ -->
+<section class="sec" id="knowledge">
+  <div class="sec-head">
+    <span class="ghost">2</span>
+    <div class="sub">{base}/</div>
+    <h2><span class="lx" lang="en">Knowledge &amp; context</span><span class="lx" lang="ja">知識 &amp; コンテキスト</span></h2>
+    <p><span class="lx" lang="en">Decisions, research, and session state live outside the repo, in the ai-context store, and get pulled back across sessions.</span><span class="lx" lang="ja">決定・調査・セッション状態を repo の外（ai-context ストア）に置き、セッションをまたいで呼び戻す。</span></p>
+  </div>
+
+  <div class="cards" style="margin-top:16px">
+    <div class="card" id="ai-context">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">ai-context</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>The control room for decisions, checkpoints, tasks, and store health.</strong> Say "record this as a decision" and it writes to <code>{base}/decisions/</code>; say "keep going on the next task" and it finds the next unchecked <code>tasks.md</code> item and implements it through to done. Also owns store bootstrap, <code>doctor</code> (health check), <code>sort</code> (tidy misfiled docs), and standing per-repo grants.</span>
+        <span class="lx" lang="ja"><strong>決定ログ・チェックポイント・タスク・store 健診をまとめて扱う司令塔。</strong>「これを決定として残して」と言えば <code>{base}/decisions/</code> に書き、「次のタスク進めて」と言えば <code>tasks.md</code> の未完了項目を見つけて実装まで完遂する。store の bootstrap・<code>doctor</code>（健全性診断）・<code>sort</code>（誤配置ファイルの整理）・repo 単位の常設許可もここが持つ。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"save this as a decision"</span><span class="lx" lang="ja">「これ決定として保存して」</span>
+        <span class="lx" lang="en">"keep going on the next task"</span><span class="lx" lang="ja">「次のタスク進めて」</span>
+      </div>
+    </div>
+
+    <div class="card" id="search">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">search</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Searches the local decision log and past chats — no web access.</strong> Ask "how did we decide on auth?" and it expands the query across synonyms and English/Japanese variants, greps <code>{base}/decisions/</code> and <code>docs/</code>, and returns the matching file and line — not a guess. A deep path falls back to 3–5 parallel <code>search-agent</code> instances when the fast pass finds nothing.</span>
+        <span class="lx" lang="ja"><strong>ローカルの決定ログと過去チャットを検索する。web には一切触れない。</strong>「認証どう決めたっけ」と聞くと、クエリを同義語・英日表記ゆれへ展開して <code>{base}/decisions/</code> と <code>docs/</code> を grep し、該当ファイルと行を返す。fast パスで空振りすると、<code>search-agent</code> を 3〜5 体並列起動する deep パスへ進む。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"what did we decide about this"</span><span class="lx" lang="ja">「これ前に何て決めたっけ」</span>
+        <span class="lx" lang="en">"search for it"</span><span class="lx" lang="ja">「探して」</span>
+      </div>
+    </div>
+
+    <div class="card" id="research">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">research</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Investigates the web/GitHub/arxiv and saves findings to <code>docs/research/</code>.</strong> Ask "what's new in Next.js 15" and it first checks search for an existing answer, then — if nothing recent turns up — launches 5–10 parallel <code>research-agent</code> instances that WebSearch for URLs and read the full text via webread, never a summarized guess.</span>
+        <span class="lx" lang="ja"><strong>web・GitHub・arxiv を新規に調査し、<code>docs/research/</code> へ保存する。</strong>「Next.js 15 の最新機能は」と聞くと、まず search で既存の確信ヒットを確認し、無ければ <code>research-agent</code> を 5〜10 体並列起動して WebSearch で URL を特定、webread で全文を精読する（要約頼みの推測はしない）。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"look up the latest best practice"</span><span class="lx" lang="ja">「最新のベストプラクティス調べて」</span>
+        <span class="lx" lang="en">"compare these two libraries"</span><span class="lx" lang="ja">「このライブラリ同士を比較して」</span>
+      </div>
+    </div>
+
+    <div class="card" id="save-checkpoint">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">save-checkpoint</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Folds a long session into <code>{base}/sessions/</code> without losing the thread.</strong> Writes what's being worked on, how it got there, and confirmed decisions in a few lines each, then recommends exactly one of <code>compact</code> or <code>clear</code> — never both, and never runs either itself. An idle hook fires the same skill automatically after 5 minutes of inactivity, through a headless fork.</span>
+        <span class="lx" lang="ja"><strong>長い会話を筋を失わずに <code>{base}/sessions/</code> へ畳む。</strong>今何をしていて・どういう経緯で・何を決めたかを数行ずつで書き、<code>compact</code> か <code>clear</code> のどちらか一方だけを推奨する（両方は言わず、どちらも自分では実行しない）。放置 5 分で idle hook が同じ処理をヘッドレスの fork で自動発火する。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"save state before we clear"</span><span class="lx" lang="ja">「clear する前に状態保存して」</span>
+        <span class="lx" lang="en">"checkpoint this before compacting"</span><span class="lx" lang="ja">「compact 前にチェックポイント切って」</span>
+      </div>
+    </div>
+
+    <div class="card" id="webread">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">webread</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Fetches a URL's full body with no summarization layer — the WebFetch alternative.</strong> Hand it a URL and it extracts the body as Markdown via trafilatura (local, no LLM), so the main model reads the raw text itself instead of trusting a small model's summary. For JS-rendered pages that come back empty, a two-step fallback saves the rendered HTML first, then extracts from that.</span>
+        <span class="lx" lang="ja"><strong>URL の本文全体を要約なしで取得する。WebFetch の代替。</strong>URL を渡すと trafilatura（ローカル・LLM 不使用）で本文を Markdown 抽出し、本体モデルが小型モデルの要約に頼らず生の全文を直接読む。JS レンダリングの SPA で本文が空になる場合は、レンダリング済み HTML を先に保存してから抽出する 2 段階に切り替える。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"read this URL"</span><span class="lx" lang="ja">「この URL 読んで」</span>
+        <span class="lx" lang="en">"check the actual content"</span><span class="lx" lang="ja">「ページの中身をちゃんと確認して」</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. DOCUMENTS & WRITING ============ -->
+<section class="sec" id="docs-writing">
+  <div class="sec-head">
+    <span class="ghost">3</span>
+    <div class="sub">writing</div>
+    <h2><span class="lx" lang="en">Documents &amp; writing</span><span class="lx" lang="ja">資料 &amp; 文章</span></h2>
+    <p><span class="lx" lang="en">Reports, proposals, and diagrams, written to fit the audience and the purpose.</span><span class="lx" lang="ja">報告書・提案書・図解を、受け手と目的に合わせて書き分ける。</span></p>
+  </div>
+
+  <div class="cards" style="margin-top:16px">
+    <div class="card" id="ja-writing">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">ja-writing</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Tunes Japanese writing tone by document type and audience.</strong> A proposal for executives and a PR description for engineers need different vocabulary and structure even for the same change; this skill runs the writing-ja rule's form through concrete patterns per document type and per audience level (non-technical, semi-technical, technical).</span>
+        <span class="lx" lang="ja"><strong>文書種別と受け手レベルに応じて、日本語の文体を書き分ける。</strong>同じ変更でも経営層向け提案書とエンジニア向け PR 説明では語彙も構成も変わる。writing-ja ルールの型を、文書種別（報告書・提案書・Excel セル・チャット/PR/commit）と受け手レベル（非技術・半技術・技術）別の具体例で運用する。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"rewrite this for executives"</span><span class="lx" lang="ja">「これ経営層向けに書き直して」</span>
+        <span class="lx" lang="en">"write the PR description"</span><span class="lx" lang="ja">「PR の説明文書いて」</span>
+      </div>
+    </div>
+
+    <div class="card" id="diagram">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">diagram</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Picks the right notation for a diagram — mermaid, draw.io, or hand-drawn SVG.</strong> Flowcharts, sequence diagrams, and Gantt charts default to mermaid; only layouts mermaid can't express — diagonal placement, ring layouts, map annotations — fall back to hand-drawn SVG. AWS architecture diagrams go through draw.io's nested VPC/subnet/AZ icon set.</span>
+        <span class="lx" lang="ja"><strong>図の記法（mermaid・draw.io・手描き SVG）そのものを選ぶ。</strong>フローチャート・シーケンス図・ガントチャートは既定で mermaid。対角配置や円環配置など mermaid で崩れるレイアウトだけ手描き SVG に切り替える。AWS 構成図は draw.io の VPC / サブネット / AZ の入れ子アイコンセットを使う。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"draw this as a sequence diagram"</span><span class="lx" lang="ja">「シーケンス図で描いて」</span>
+        <span class="lx" lang="en">"give me an AWS architecture diagram"</span><span class="lx" lang="ja">「AWS 構成図作って」</span>
+      </div>
+    </div>
+
+    <div class="card" id="b2b-docs">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">b2b-docs</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Structures a proposal or sales deck, and decides HTML vs. PowerPoint.</strong> Runs the chapter order conclusion → problem → impact → evidence → cost → steps → risk, and insists every impact claim carries a real before/after number with its source in the evidence chapter. Judges whether the deliverable needs <code>.pptx</code> or a single HTML document is enough.</span>
+        <span class="lx" lang="ja"><strong>提案書・営業資料の章立てを組み、HTML か PowerPoint かを判断する。</strong>結論 → 課題 → 効果 → 根拠 → 費用 → 手順 → リスクの順で構成し、効果は必ず before → after の実数を根拠章の出典付きで示す。<code>.pptx</code> が要るのか、単一 HTML 資料で足りるのかをここで判断する。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"put together a proposal"</span><span class="lx" lang="ja">「提案書作って」</span>
+        <span class="lx" lang="en">"make a sales deck in PowerPoint"</span><span class="lx" lang="ja">「パワポで営業資料作って」</span>
+      </div>
+    </div>
+
+    <div class="card" id="html-doc">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">html-doc</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Generates a self-contained single-HTML document from templates.</strong> Four document types (report, runbook, explainer, proposal) × Japanese/English × 7 color themes, with zero external requests — no CDN fonts, no tracking, diagrams pre-rendered to inline SVG — so the file is safe to hand over even under NDA. Rich layers (reading-progress bar, scroll-synced TOC, KPI stat cards) are built into every template and vanish in print.</span>
+        <span class="lx" lang="ja"><strong>自己完結な単一 HTML 資料を雛形から生成する。</strong>用途 4 種（報告書・手順書・説明資料・提案書）× 日英 × カラーテーマ 7 種。外部リクエストゼロ — CDN フォントもトラッキングもなく、図は事前レンダのインライン SVG — なので NDA 案件でもそのまま納品できる。リッチ層（読了バー・スクロール連動 TOC・KPI 統計カード）は全雛形に内蔵で、印刷時は自動で消える。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"make an HTML report"</span><span class="lx" lang="ja">「HTML で報告書作って」</span>
+        <span class="lx" lang="en">"turn this into a document"</span><span class="lx" lang="ja">「資料にまとめて」</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. WORKSPACE & META ============ -->
+<section class="sec" id="workspace-meta">
+  <div class="sec-head">
+    <span class="ghost">4</span>
+    <div class="sub">ws / meta</div>
+    <h2><span class="lx" lang="en">Workspace &amp; meta</span><span class="lx" lang="ja">ワークスペース &amp; メタ</span></h2>
+    <p><span class="lx" lang="en">Branch operations, language switching, and generating / auditing the plugin itself.</span><span class="lx" lang="ja">ブランチ運用・言語切替・プラグイン自身の生成と監査を扱う。</span></p>
+  </div>
+
+  <div class="cards" style="margin-top:16px">
+    <div class="card" id="ws">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">ws</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Drives a 3-tier branch model (main ← epic ← task worktree) from stated intent.</strong> Say "start the payment redesign" and it opens an epic branch plus worktree via git-town; say "this work is done" and it tests, merges, syncs, and cleans up on its own; say "ship it" and it always stops to confirm before opening the PR.</span>
+        <span class="lx" lang="ja"><strong>main ← epic ← task worktree の 3 階層ブランチを、発話の意図から駆動する。</strong>「決済のリデザインを始める」と言えば git-town 経由で epic ブランチと worktree を開き、「この作業終わった」と言えばテスト → merge → sync → cleanup を自動で回し、「出して」と言えば PR 作成前に必ず確認する。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"branch this off, run in parallel"</span><span class="lx" lang="ja">「ブランチ分けて並走したい」</span>
+        <span class="lx" lang="en">"this task is done, merge it back"</span><span class="lx" lang="ja">「この task 終わったから epic に戻して」</span>
+      </div>
+    </div>
+
+    <div class="card" id="set-language">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">set-language</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Switches Banto's language JA ⇄ EN, and makes the choice stick across updates.</strong> Say "switch to English" and it materializes <code>i18n/en/skills</code> and <code>agents</code> onto the active set, saving the preference to <code>~/.claude/banto-language</code>. After the next <code>claude plugin update</code>, a SessionStart hook re-applies the same language automatically.</span>
+        <span class="lx" lang="ja"><strong>Banto の言語を JA ⇄ EN で切り替え、プラグイン更新後も選択を保持する。</strong>「英語に切り替えて」と言うと <code>i18n/en/skills</code> と <code>agents</code> をアクティブなセットへ展開し、選択を <code>~/.claude/banto-language</code> に保存する。次回の <code>claude plugin update</code> 後も SessionStart hook が同じ言語を自動で再適用する。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"switch to english"</span><span class="lx" lang="ja">「言語を日本語にして」</span>
+      </div>
+    </div>
+
+    <div class="card" id="plugin-dev">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">plugin-dev</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Scaffolds or refactors a skill, hook, or plugin against official best practices.</strong> Say "build me a skill" and it generates a standard skill (or the 4-component <em>HeavySkill</em> for genuinely complex judgment); say "refactor skills/foo" and it improves quality without breaking existing trigger phrases. Loops with plugin-audit until the report comes back clean.</span>
+        <span class="lx" lang="ja"><strong>公式ベストプラクティスに沿って skill・hook・plugin を生成・改修する。</strong>「skill 作って」と言えば標準 skill（複雑な判断が要るときだけ 4 要素の <em>HeavySkill</em>）を生成し、「refactor skills/foo」と言えば既存のトリガー語を壊さずに品質を引き上げる。plugin-audit と連動し、クリーンな報告になるまで反復する。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"scaffold a new plugin"</span><span class="lx" lang="ja">「新規プラグインを scaffold して」</span>
+        <span class="lx" lang="en">"refactor this skill's quality"</span><span class="lx" lang="ja">「この skill の品質改修して」</span>
+      </div>
+    </div>
+
+    <div class="card" id="plugin-audit">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">plugin-audit</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Audits a whole plugin, or a single skill, on 15 quality axes.</strong> First passes an official-compliance check (directory structure, frontmatter, <code>hooks.json</code>), then scores structure, routing precision, generality, hook enforcement, usage, and containment. Full detail in <a href="#meta-tools">Meta-tools below</a>.</span>
+        <span class="lx" lang="ja"><strong>プラグイン全体、または単一 skill を 15 軸で監査する。</strong>まず公式準拠チェック（ディレクトリ構造・frontmatter・<code>hooks.json</code>）を通り、次に構造・ルーティング精度・汎用性・hook 強制・使用度・封じ込めを採点する。詳細は<a href="#meta-tools">下の「メタ道具」節</a>。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"audit this plugin"</span><span class="lx" lang="ja">「プラグイン監査して」</span>
+        <span class="lx" lang="en">"check this against best practices"</span><span class="lx" lang="ja">「SKILL.md をベストプラクティスと突き合わせて」</span>
+      </div>
+    </div>
+
+    <div class="card" id="skill-audit">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">skill-audit</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Audits a single skill's context engineering on 7 axes.</strong> Narrower and deeper than plugin-audit: it asks only whether a skill hands the model exactly the information it needs, across axes like information minimality and human-only-information leakage. Full detail in <a href="#meta-tools">Meta-tools below</a>.</span>
+        <span class="lx" lang="ja"><strong>skill 単体のコンテキスト設計を 7 軸で監査する。</strong>plugin-audit より狭く深い監査で、情報の最小性や人間専用情報の混入など、skill が実行に必要な情報だけを渡せているかだけを見る。詳細は<a href="#meta-tools">下の「メタ道具」節</a>。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"audit this skill's context engineering"</span><span class="lx" lang="ja">「この skill のコンテキストエンジニアリング監査して」</span>
+      </div>
+    </div>
+
+    <div class="card" id="kit">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">kit</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Shows every skill, agent, hook, and rule Banto ships, as one catalog.</strong> Ask "what can Banto do" and it prints the command list plus natural-language trigger examples verbatim — a discovery hub so nobody needs to memorize a command exists before using it.</span>
+        <span class="lx" lang="ja"><strong>Banto の全 skill・agent・hook・rule を一枚のカタログとして表示する。</strong>「banto で何ができる」と聞くと、コマンド一覧と自然文トリガー例をそのまま表示する。コマンドの存在を暗記していなくても、自然文だけで機能へたどり着ける発見ハブ。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"what can banto do"</span><span class="lx" lang="ja">「banto で何ができる」</span>
+        <span class="lx" lang="en">"show me the full command list"</span><span class="lx" lang="ja">「機能一覧見せて」</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. AGENTS ============ -->
+<section class="sec" id="agents">
+  <div class="sec-head">
+    <span class="ghost">5</span>
+    <div class="sub">Agent tool</div>
+    <h2><span class="lx" lang="en">Agents</span><span class="lx" lang="ja">エージェント</span></h2>
+    <p><span class="lx" lang="en">Specialist agents launched via the Agent tool from within a skill. architect, debugger, and qa-tester are user-facing; the other three are launched internally by another skill's orchestration.</span><span class="lx" lang="ja">skill から Agent tool で起動される専門エージェント。architect・debugger・qa-tester はユーザーが直接呼ぶ。残り 3 体は他 skill のオーケストレーションから内部起動される。</span></p>
+  </div>
+
+  <div class="cards" style="margin-top:16px">
+    <div class="card" id="architect">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">architect</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Investigates a design without touching code, and returns a trade-off table.</strong> Ask "how should this API be structured" and it reads the existing code and <code>decisions/</code>, classifies every option by reversibility (high/medium/low), and returns current state / issues / proposal / trade-offs / risks — never an Edit.</span>
+        <span class="lx" lang="ja"><strong>コードを変更せず設計を調査し、トレードオフ表で提案を返す。</strong>「この API どう設計すべきか」と聞くと、既存コードと <code>decisions/</code> を読み、選択肢を可逆性（高・中・低）で分類したうえで、現状・課題・提案・トレードオフ・リスクの形式で返す。Edit は使わない。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"review this design"</span><span class="lx" lang="ja">「設計レビューして」</span>
+        <span class="lx" lang="en">"help me pick between these two"</span><span class="lx" lang="ja">「この 2 案どっちがいいか相談したい」</span>
+      </div>
+    </div>
+
+    <div class="card" id="debugger">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">debugger</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Loops reproduce → fix → re-run until a bug is actually resolved.</strong> Say "the tests are failing" and it reads the stack trace, pins down repro steps, applies the minimal fix, and reports root cause plus a prevention recommendation. Under <code>odd-gate</code>'s failure lockout, it stops editing and returns a diff proposal instead.</span>
+        <span class="lx" lang="ja"><strong>再現 → 修正 → 再実行のループで、根本原因まで潰す。</strong>「テストが落ちる」と言うと、スタックトレースから再現手順を特定し最小限の修正を適用、根本原因と再発防止策を添えて報告する。<code>odd-gate</code> の連続失敗ロック下では Edit を使わず、修正案の diff だけを返す。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"I'm getting an error"</span><span class="lx" lang="ja">「エラーが出た」</span>
+        <span class="lx" lang="en">"figure out why this fails"</span><span class="lx" lang="ja">「なぜ失敗するか突き止めて」</span>
+      </div>
+    </div>
+
+    <div class="card" id="qa-tester">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">qa-tester</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Auto-detects web/desktop/mobile and runs E2E with the matching tool.</strong> Say "check this in the browser" and it navigates via Claude in Chrome (falling back to Playwright), clicks and types through the flow, and returns pass/fail per test case with a screenshot as evidence — saving the report is left to the caller.</span>
+        <span class="lx" lang="ja"><strong>web・desktop・mobile を自動判定し、対応ツールで E2E を回す。</strong>「ブラウザで確認して」と言うと Claude in Chrome（未接続なら Playwright）で画面へ遷移し、クリック・入力を通してテストケースごとに pass/fail をスクリーンショット付きで返す。結果の保存は呼び出し元が担う。</span>
+      </p>
+      <div class="trig">
+        <span class="lx" lang="en">"run an E2E test on this"</span><span class="lx" lang="ja">「E2E テストして」</span>
+        <span class="lx" lang="en">"check this in the browser"</span><span class="lx" lang="ja">「ブラウザで動作確認して」</span>
+      </div>
+    </div>
+
+    <div class="card" id="research-agent">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">research-agent</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Launched in parallel by the research skill to investigate and save one subtopic.</strong> Each instance WebSearches for URLs, reads them in full via webread (never a WebFetch summary), and writes a structured Markdown report to <code>docs/research/</code>.</span>
+        <span class="lx" lang="ja"><strong>research skill から並列起動され、1 サブトピックを調査・保存する。</strong>各インスタンスが WebSearch で URL を特定し、webread で全文を読み（WebFetch の要約には頼らない）、構造化した Markdown を <code>docs/research/</code> へ保存する。</span>
+      </p>
+      <p style="font-size:13px;color:var(--ink-soft);margin:8px 0 0">
+        <span class="lx" lang="en">internal only — launched by the research skill's fan-out, never called directly</span>
+        <span class="lx" lang="ja">内部専用 — research skill の並列起動からのみ。直接呼び出しなし</span>
+      </p>
+    </div>
+
+    <div class="card" id="search-agent">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">search-agent</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>A lightweight (haiku) grep runner launched from search's deep path.</strong> Runs the regex groups handed to it in parallel via Grep, writes every hit to a temp file, and returns only the top candidates as <code>{file, line, snippet, matched_term}</code> — relevance judgment stays with the orchestrator.</span>
+        <span class="lx" lang="ja"><strong>search skill の deep パスから起動される、軽量（haiku）な grep 実行役。</strong>渡された regex グループを Grep で並列実行し、全ヒットを一時ファイルへ書いたうえで、上位候補だけを <code>{file, line, snippet, matched_term}</code> として返す。関連度判定はオーケストレーター側が担う。</span>
+      </p>
+      <p style="font-size:13px;color:var(--ink-soft);margin:8px 0 0">
+        <span class="lx" lang="en">internal only — 3–5 instances launched from search's deep path</span>
+        <span class="lx" lang="ja">内部専用 — search skill の deep パスから 3〜5 体並列起動</span>
+      </p>
+    </div>
+
+    <div class="card" id="context-keeper">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">context-keeper</h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
+        <span class="lx" lang="en"><strong>Verifies and regenerates the search text layer (<code>full-combined.txt</code>).</strong> After a write, if the combined text is older than the newest decision or doc, it re-runs <code>ai_context_combined.py</code> and confirms via grep that the new file's marker actually landed — maintenance, not a search itself.</span>
+        <span class="lx" lang="ja"><strong>検索テキスト層（<code>full-combined.txt</code>）の鮮度を検証・再生成する。</strong>書き込み後、結合テキストが最新の決定ログやドキュメントより古ければ <code>ai_context_combined.py</code> を再実行し、新規ファイルのマーカーが実際に反映されたかを grep で確認する。検索そのものではなく保守が役目。</span>
+      </p>
+      <p style="font-size:13px;color:var(--ink-soft);margin:8px 0 0">
+        <span class="lx" lang="en">internal only — freshness checks on full-combined.txt / sessions-cache</span>
+        <span class="lx" lang="ja">内部専用 — full-combined.txt / sessions-cache の鮮度チェック</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. META-TOOLS ============ -->
+<section class="sec" id="meta-tools">
+  <div class="sec-head">
+    <span class="ghost">6</span>
+    <div class="sub">audit ↻ build</div>
+    <h2><span class="lx" lang="en">Meta-tools</span><span class="lx" lang="ja">メタ道具</span></h2>
+    <p><span class="lx" lang="en">The essentials of the old plugin-tools page: how plugin-audit, skill-audit, and plugin-dev work together to keep Banto's own quality in shape.</span><span class="lx" lang="ja">旧 plugin-tools.html の要点。plugin-audit・skill-audit・plugin-dev がどう連動して品質を保つか。</span></p>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <p style="font-size:14.5px;color:var(--ink-2);line-height:1.7;margin:0">
+      <span class="lx" lang="en"><code>plugin-audit</code> scores a skill on 15 axes: first an official-compliance pass (directory structure, frontmatter, <code>hooks.json</code>), then structure, routing precision, generality, hook enforcement, usage, and containment. Routing precision isn't asserted — it runs an <code>eval-cases</code> set and reports real precision/recall per model tier. Judgment axes go to a fresh, independent agent, so a skill never grades its own homework. Four modes cover it: a static pass in seconds, an eval sweep in tens of seconds, a sandboxed verify in minutes, and a fix mode that always shows a diff first. <code>skill-audit</code> is a separate, narrower pass — just one skill's context engineering (information minimality, human-only-information leakage) across 7 axes. <code>plugin-dev</code> handles the build side, scaffolding or refactoring a skill without breaking its trigger phrases, and loops with <code>plugin-audit</code> until the report comes back clean.</span>
+      <span class="lx" lang="ja"><code>plugin-audit</code> は skill を 15 軸で採点する。まず公式準拠チェック（ディレクトリ構造・frontmatter・<code>hooks.json</code>）を通り、次に構造・ルーティング精度・汎用性・hook 強制・使用度・封じ込めへ進む。ルーティング精度は断定せず、<code>eval-cases</code> を実行してモデル階層別の適合率・再現率を実数で返す。判定軸は独立したフレッシュな agent が採点し、skill が自分の答案を自分で採点する事態を避ける。4 モード（数秒の静的監査・数十秒の eval・数分の verify・diff 先出しの fix）を持つ。<code>skill-audit</code> はこれとは別の、より狭い監査 — skill 単体の情報の最小性・人間専用情報の混入だけを 7 軸で見る。<code>plugin-dev</code> は生成側を担い、既存のトリガー語を壊さず skill を scaffold・改修し、<code>plugin-audit</code> とクリーンな報告になるまで反復する。</span>
+    </p>
+  </div>
+
+  <div class="note" style="margin-top:16px">
+    <span class="seal" aria-hidden="true">番</span>
+    <div><span class="lx" lang="en">Dogfooded on Banto itself: these three tools audit and refactor Banto's own 20 skills and 6 agents, the same way they would audit yours.</span><span class="lx" lang="ja">Banto 自身でドッグフーディング：この 3 つの道具は、あなたの skill を監査するのと同じやり方で、Banto 自身の 20 skill・6 agent を監査・改修する。</span></div>
+  </div>
+</section>
+
+<!-- ============ RELATED ============ -->
+<section class="sec" id="related">
+  <div class="sec-head">
+    <span class="ghost">7</span>
+    <div class="sub"><span class="lx" lang="en">related</span><span class="lx" lang="ja">関連</span></div>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="index.html"><b>Home</b><span class="lx" lang="en">the pitch, the pipeline, the flagships</span><span class="lx" lang="ja">全体像・パイプライン・目玉機能</span></a>
+    <a href="mechanism.html"><b>Mechanism</b><span class="lx" lang="en">hooks &amp; ODD — how it's enforced</span><span class="lx" lang="ja">hooks &amp; ODD — 強制の仕組み</span></a>
+    <a href="store.html"><b>Store</b><span class="lx" lang="en">the ai-context store architecture</span><span class="lx" lang="ja">ai-context ストアのアーキテクチャ</span></a>
+    <a href="evidence.html"><b>Evidence</b><span class="lx" lang="en">benchmarks behind these claims</span><span class="lx" lang="ja">主張の裏づけとなる実測</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span class="lx" lang="en">Banto — a self-driving harness for Claude Code. Enforced by deterministic hooks.</span>
+  <span class="lx" lang="ja">Banto — Claude Code のための自走ハーネス。決定論的な hook が強制する。</span>
+  <span><a href="index.html" class="lx" lang="en">← Back home</a><a href="index.html" class="lx" lang="ja">← ホームへ戻る</a></span>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>

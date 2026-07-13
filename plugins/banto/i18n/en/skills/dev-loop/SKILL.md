@@ -13,7 +13,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # Dev-Loop — self-driving development loop (decompose → implement → verify → fix → loop)
 
-> **Storage base (store-first)**: Read/Write of `tasks.md` / decisions and other `.ai-context/...` paths happens under the 「ai-context ベース: &lt;絶対パス&gt;」 (absolute path) injected by the SessionStart/PreCompact hooks. If unknown: `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`.
+> **Storage base (store-first)**: `tasks.md` / decisions and the like live under `{base}/...`. `{base}` is the absolute ai-context base path injected by the SessionStart/PreCompact hooks (if unknown: `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
 
 The owner hands over a big task → decompose into small tasks → implement each, verify with ② build-and-verify, fix and re-verify if red, move on if green. Self-drive until tasks.md is exhausted, escalating **only exceptions to the owner** (the bantō contract). Every part already exists — **no new scripts are created**.
 
@@ -63,7 +63,8 @@ Detailed procedure, cadence, ML training loop: [`references/loop-protocol.md`](r
 | Stop churn | `odd-gate.sh` (PreToolUse) | Block edits after 3 consecutive test failures → go to root cause |
 | Prevent false green | `verify-claim-guard.sh` (Stop) | Block "done" claims while verify-last is red |
 | External egress | `egress-guard.sh` + ⑤ sandbox | Block leakage of secrets / other-project names into client paths |
-| Irreversible ops | safety rule | push / PR / main / delete are human-gated |
+
+Irreversible ops (push / PR / main / delete) are human-gated per the `safety` rule.
 
 ## ML training loop (variant)
 

@@ -9,6 +9,10 @@
 #   (avoids falsely flagging every skill as dormant right after installation).
 # Usage: dead-skill-report.sh [cwd]
 # fail-open: jq missing / telemetry missing → no output, exit 0.
+#
+# S4 automation gap note: this script intentionally does NOT auto-fold dormant skills. Decision
+# 2026-06-19-154131 (insurance-value rule) kept every current candidate as KEEP; folding stays a
+# human/agent judgment call, so this hook stays report-only.
 
 set -u
 

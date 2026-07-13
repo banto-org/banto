@@ -34,8 +34,9 @@ EXPECT_SKILLS=$(find "$PLUGIN_ROOT/skills" -mindepth 2 -maxdepth 2 -name SKILL.m
     && ok "gen: $EXPECT_SKILLS skill entities" || no "gen: skill count != $EXPECT_SKILLS"
 [ "$(jq '[.entities[]|select(.type=="agent")]|length' "$J" 2>/dev/null)" = "6" ] \
     && ok "gen: 6 agent entities" || no "gen: agent count != 6"
-[ "$(jq '[.entities[]|select(.type=="rule")]|length' "$J" 2>/dev/null)" = "9" ] \
-    && ok "gen: 9 rule entities" || no "gen: rule count != 9"
+EXPECT_RULES=$(find "$PLUGIN_ROOT/templates/rules" -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+[ "$(jq '[.entities[]|select(.type=="rule")]|length' "$J" 2>/dev/null)" = "$EXPECT_RULES" ] \
+    && ok "gen: $EXPECT_RULES rule entities" || no "gen: rule count != $EXPECT_RULES"
 [ "$(jq '[.relations[]|select(.type=="gates")]|length' "$J" 2>/dev/null)" -gt 0 ] \
     && ok "gen: gates relations present (hook->event)" || no "gen: no gates relations"
 grep -q '/Users/\|/home/' "$J" "$M" 2>/dev/null && no "gen: absolute path leaked" || ok "gen: no absolute paths (mask discipline)"
@@ -94,14 +95,14 @@ printf '%s\n' '[{"type":"conforms-to","to":"rule:safety"}]'
 STUBEOF
 CB="$FIX/conceptbase"; mkdir -p "$CB"
 CALLS="$FIX/calls"; : > "$CALLS"
-SC="$CALLS" BANTO_ONTOLOGY_EXTRACT_CMD="sh $STUB" sh "$GEN" --base "$CB" --scope full >/dev/null 2>&1
+SC="$CALLS" BANTO_ONTOLOGY_MAX_CALLS=200 BANTO_ONTOLOGY_EXTRACT_CMD="sh $STUB" sh "$GEN" --base "$CB" --scope full >/dev/null 2>&1
 CJ="$CB/meta/ontology.json"
 [ "$(jq -r '.scope' "$CJ" 2>/dev/null)" = "full" ] && ok "concept: scope=full" || no "concept: scope not full"
 [ "$(jq '[.relations[]|select(.type=="conforms-to")]|length' "$CJ" 2>/dev/null)" -ge 1 ] \
     && ok "concept: prose relations enriched (conforms-to)" || no "concept: no enriched relations"
 [ -d "$CB/meta/ontology-cache" ] && ok "concept: content-hash cache created" || no "concept: no cache dir"
 c1=$(grep -c x "$CALLS" 2>/dev/null); : > "$CALLS"
-SC="$CALLS" BANTO_ONTOLOGY_EXTRACT_CMD="sh $STUB" sh "$GEN" --base "$CB" --scope full >/dev/null 2>&1
+SC="$CALLS" BANTO_ONTOLOGY_MAX_CALLS=200 BANTO_ONTOLOGY_EXTRACT_CMD="sh $STUB" sh "$GEN" --base "$CB" --scope full >/dev/null 2>&1
 c2=$(grep -c x "$CALLS" 2>/dev/null)
 { [ "$c1" -gt 0 ] && [ "$c2" -eq 0 ]; } && ok "concept: cache hit on re-run (0 extractor calls)" || no "concept: cache ineffective (c1=$c1 c2=$c2)"
 sh "$LINT" --base "$CB" --strict >/dev/null 2>&1 && ok "concept: enriched ABox stays lint-clean" || no "concept: enriched ABox fails lint"

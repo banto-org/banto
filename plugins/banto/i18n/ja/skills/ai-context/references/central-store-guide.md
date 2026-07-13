@@ -6,12 +6,11 @@ ai-context の知識（decisions / docs / tasks / sessions / workspaces）は**�
 
 ## 解決順（hook がどこを base にするか）
 
-1. **mapping hit**: `<store>/.mapping.json` に登録済み → その project dir
-2. **grandfather**: repo 内に既存 `.ai-context/` が実在する legacy repo のみ → repo 内のまま動作
-   （`/ai-context migrate` で store へ移行可能）
+1. **central mapping hit**: `<store>/.mapping.json` に登録済み → その project dir
+2. **local mapping hit**: `~/ai-context-local/<project>/`（`local` 固定案件）
 3. **derive**: 未登録なら `<store>/<git toplevel の dirname>/` を自動採番（衝突時 `-2` suffix）+ 自動登録
 
-repo 側には何も作られない（CONTRACT.md「footprint 例外ゼロ」）。
+repo 内に既存 `.ai-context/` があっても解決対象にはならない。scaffold が検知時に store へ非破壊自動移行する（原本は消さない）。repo 側には何も作られない（CONTRACT.md「footprint 例外ゼロ」）。
 
 ---
 

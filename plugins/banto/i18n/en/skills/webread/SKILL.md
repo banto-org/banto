@@ -44,8 +44,7 @@ Only in that case, use the **2-step approach**:
 
 ### 3. Summarize / answer (only when needed)
 
-The main model summarizes/answers **after reading the full text**. Never hand the prompt to an
-external small model the way WebFetch does. "Actually verifying the content" is this skill's reason to exist.
+The main model summarizes/answers **after reading the full text** (see "Why WebRead instead of WebFetch" above for the reasoning).
 
 ## Installing the dependency (if missing)
 
@@ -57,6 +56,6 @@ When trafilatura is absent, webread.sh falls back to raw HTML via curl (tags inc
 
 ## Never do
 
-- Use WebFetch (it defeats this skill's reason to exist). Unify URL close-reading on WebRead.
-- State conclusions without Reading the fetched body (the same mistake as delegating to a summary model).
+- Use WebFetch. Unify URL close-reading on WebRead.
+- State conclusions without Reading the fetched body.
 - Use it to search for URLs (that is WebSearch / the research skill).

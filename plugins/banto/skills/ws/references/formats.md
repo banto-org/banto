@@ -27,7 +27,7 @@ per-checkout (**inside the git-dir** = not committed, independent per worktree).
 ```
 
 - Do not write a work summary (it drifts)
-- Related documents (the 「## 関連ドキュメント」 section): hooks (workspace-check / auto) notify about unregistered files, and the AI decides add/replace/skip and writes on the entity side
+- Related documents (the 「## 関連ドキュメント」 section): for the conservative cases a hook can decide mechanically (single mode, where the filename / first line contains the WS topic), the hook auto-appends; the AI decides add/replace/skip only when the match is undecidable
 - The 「ブランチ:」 line drives the `/ws switch` auto branch switch (skipped for shared names like main). It exists in both the pointer and the entity and is synced on switch
 - Tasks live in `tasks.md` in the same dir (equivalent to the old `tasks/active.md`); Phase archives go to `tasks-old/`
 

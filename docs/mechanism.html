@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mechanism — Banto / hook と ODD の仕組み</title>
+<meta name="description" content="How Banto enforces safety: 46 deterministic hooks that block, gate, and auto-trigger regardless of what any rule or skill says — plus ODD, the odd.yaml declaration each skill writes for its own operating range, and the map from each declared boundary to the hook that actually enforces it." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="subpage.css" />
+<style>
+  .lvl-table{ width:100%; border-collapse:collapse; margin-top:6px; font-size:14px; }
+  .lvl-table th,.lvl-table td{ border:1px solid var(--line); padding:10px 13px; text-align:left; vertical-align:top; line-height:1.55; }
+  .lvl-table th{ background:var(--paper-2); font-size:12.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); }
+  .lvl-table td.lv{ font-family:var(--mono); font-weight:700; color:var(--accent-d); white-space:nowrap; }
+  .lvl-table tr.out td{ color:var(--ink-soft); }
+  .field-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:14px; }
+  .field-grid .fd{ background:var(--card); border:1px solid var(--line); border-radius:11px; padding:13px 15px; box-shadow:var(--shadow); }
+  .field-grid .fd b{ font-family:var(--mono); font-size:13px; color:var(--accent-d); }
+  .field-grid .fd p{ font-size:13px; color:var(--ink-2); margin:6px 0 0; line-height:1.5; }
+  .ks-list{ margin:14px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px; }
+  .ks-list li{ background:var(--card); border:1px solid var(--line); border-radius:11px; padding:12px 16px; font-size:14px; color:var(--ink-2); line-height:1.6; box-shadow:var(--shadow); }
+  .ks-list li b{ color:var(--ink); }
+  .ks-list li .hk{ display:inline-block; margin-top:4px; font-family:var(--mono); font-size:12px; color:var(--accent-d); }
+  .ks-list li.soft{ border-style:dashed; }
+</style>
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="index.html" aria-label="Banto">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <div class="nav-item has-menu">
+      <a href="index.html" class="lx" lang="en" aria-haspopup="true">Home</a><a href="index.html" class="lx" lang="ja" aria-haspopup="true">ホーム</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="index.html#why"><span class="lx" lang="en">The contract</span><span class="lx" lang="ja">番頭の契約</span></a>
+          <a href="index.html#flagships"><span class="lx" lang="en">Flagships</span><span class="lx" lang="ja">3 つの目玉</span></a>
+          <a href="index.html#checkpoint"><span class="lx" lang="en">Folding a session</span><span class="lx" lang="ja">セッションを畳む</span></a>
+          <a href="index.html#pipeline"><span class="lx" lang="en">Pipeline</span><span class="lx" lang="ja">SDD パイプライン</span></a>
+          <a href="index.html#safety"><span class="lx" lang="en">Safety</span><span class="lx" lang="ja">決定論的な安全</span></a>
+          <a href="index.html#feel"><span class="lx" lang="en">How it feels</span><span class="lx" lang="ja">使い心地</span></a>
+          <a href="index.html#install"><span class="lx" lang="en">Install</span><span class="lx" lang="ja">インストール</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="toolset.html" class="lx" lang="en" aria-haspopup="true">Toolset</a><a href="toolset.html" class="lx" lang="ja" aria-haspopup="true">道具一式</a>
+      <div class="nav-menu">
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Pipeline (SDD)</span><span class="nav-menu-head lx" lang="ja">パイプライン（SDD）</span>
+          <a href="toolset.html#concept"><b>concept</b><span class="lx" lang="en">forge the ideology</span><span class="lx" lang="ja">思想を鍛える</span></a>
+          <a href="toolset.html#design-brief"><b>design-brief</b><span class="lx" lang="en">vague ask → design spec</span><span class="lx" lang="ja">曖昧な依頼をデザイン仕様へ</span></a>
+          <a href="toolset.html#spec"><b>spec</b><span class="lx" lang="en">interactive design docs</span><span class="lx" lang="ja">対話で設計書</span></a>
+          <a href="toolset.html#dev-loop"><b>dev-loop</b><span class="lx" lang="en">self-driving build</span><span class="lx" lang="ja">自走ビルド</span></a>
+          <a href="toolset.html#ai-build"><b>ai-build</b><span class="lx" lang="en">AI feature flow · eval</span><span class="lx" lang="ja">AI 構築フロー · eval</span></a>
+          <a href="toolset.html#model-lab"><b>model-lab</b><span class="lx" lang="en">train models · verify · paper</span><span class="lx" lang="ja">モデル学習 · 検証 · 論文</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Knowledge &amp; context</span><span class="nav-menu-head lx" lang="ja">知識 &amp; コンテキスト</span>
+          <a href="toolset.html#ai-context"><b>ai-context</b><span class="lx" lang="en">decisions · memo · store</span><span class="lx" lang="ja">決定 · メモ · ストア</span></a>
+          <a href="toolset.html#search"><b>search</b><span class="lx" lang="en">internal search, no web</span><span class="lx" lang="ja">内部検索（web なし）</span></a>
+          <a href="toolset.html#research"><b>research</b><span class="lx" lang="en">external, saved to store</span><span class="lx" lang="ja">外部調査 → ストア</span></a>
+          <a href="toolset.html#save-checkpoint"><b>save-checkpoint</b><span class="lx" lang="en">session snapshot</span><span class="lx" lang="ja">セッション保存</span></a>
+          <a href="toolset.html#webread"><b>webread</b><span class="lx" lang="en">full-text, no summary</span><span class="lx" lang="ja">要約なし全文取得</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Documents &amp; writing</span><span class="nav-menu-head lx" lang="ja">資料 &amp; 文章</span>
+          <a href="toolset.html#ja-writing"><b>ja-writing</b><span class="lx" lang="en">audience-tuned Japanese</span><span class="lx" lang="ja">受け手に合わせた日本語</span></a>
+          <a href="toolset.html#diagram"><b>diagram</b><span class="lx" lang="en">SVG · mermaid · draw.io</span><span class="lx" lang="ja">図解の実務パターン</span></a>
+          <a href="toolset.html#b2b-docs"><b>b2b-docs</b><span class="lx" lang="en">proposals &amp; decks</span><span class="lx" lang="ja">提案書 &amp; 営業資料</span></a>
+          <a href="toolset.html#html-doc"><b>html-doc</b><span class="lx" lang="en">self-contained HTML docs</span><span class="lx" lang="ja">自己完結 HTML 資料</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Workspace &amp; meta</span><span class="nav-menu-head lx" lang="ja">ワークスペース &amp; メタ</span>
+          <a href="toolset.html#ws"><b>ws</b><span class="lx" lang="en">workspace &amp; fleet</span><span class="lx" lang="ja">ワークスペース &amp; 艦隊</span></a>
+          <a href="toolset.html#set-language"><b>set-language</b><span class="lx" lang="en">JA ⇄ EN, sticky</span><span class="lx" lang="ja">日英切替（永続）</span></a>
+          <a href="toolset.html#plugin-dev"><b>plugin-dev</b><span class="lx" lang="en">scaffold &amp; refactor</span><span class="lx" lang="ja">生成 &amp; 改修</span></a>
+          <a href="toolset.html#plugin-audit"><b>plugin-audit</b><span class="lx" lang="en">15-axis quality audit</span><span class="lx" lang="ja">15 軸品質監査</span></a>
+          <a href="toolset.html#skill-audit"><b>skill-audit</b><span class="lx" lang="en">7-axis context audit</span><span class="lx" lang="ja">7 軸コンテキスト監査</span></a>
+          <a href="toolset.html#kit"><b>kit</b><span class="lx" lang="en">discover everything</span><span class="lx" lang="ja">全機能カタログ</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Agents</span><span class="nav-menu-head lx" lang="ja">エージェント</span>
+          <a href="toolset.html#architect"><b>architect</b><span class="lx" lang="en">design &amp; tradeoffs</span><span class="lx" lang="ja">設計 &amp; トレードオフ</span></a>
+          <a href="toolset.html#debugger"><b>debugger</b><span class="lx" lang="en">reproduce · fix · verify</span><span class="lx" lang="ja">再現 · 修正 · 検証</span></a>
+          <a href="toolset.html#qa-tester"><b>qa-tester</b><span class="lx" lang="en">E2E across web/desktop/mobile</span><span class="lx" lang="ja">web/desktop/mobile 横断 E2E</span></a>
+          <a href="toolset.html#research-agent"><b>research-agent</b><span class="lx" lang="en">parallel web research</span><span class="lx" lang="ja">並列 web 調査</span></a>
+          <a href="toolset.html#search-agent"><b>search-agent</b><span class="lx" lang="en">parallel internal grep (haiku)</span><span class="lx" lang="ja">並列内部検索（haiku）</span></a>
+          <a href="toolset.html#context-keeper"><b>context-keeper</b><span class="lx" lang="en">search-index maintenance</span><span class="lx" lang="ja">検索インデックス保守</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="mechanism.html" class="lx" lang="en" aria-haspopup="true">Mechanism</a><a href="mechanism.html" class="lx" lang="ja" aria-haspopup="true">仕組み</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="mechanism.html#hooks"><span class="lx" lang="en">The whole picture</span><span class="lx" lang="ja">全体像</span></a>
+          <a href="mechanism.html#flagship"><span class="lx" lang="en">The 7 flagship hooks</span><span class="lx" lang="ja">目玉 7 hook</span></a>
+          <a href="mechanism.html#principles"><span class="lx" lang="en">Design principles</span><span class="lx" lang="ja">設計原則</span></a>
+          <a href="mechanism.html#odd"><span class="lx" lang="en">ODD — declared autonomy</span><span class="lx" lang="ja">ODD — 自律性の宣言</span></a>
+          <a href="mechanism.html#enforce"><span class="lx" lang="en">Declaration → enforcement</span><span class="lx" lang="ja">宣言 → 強制</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="store.html" class="lx" lang="en" aria-haspopup="true">Store</a><a href="store.html" class="lx" lang="ja" aria-haspopup="true">ストア</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="store.html#store"><span class="lx" lang="en">What accumulates</span><span class="lx" lang="ja">何が貯まるか</span></a>
+          <a href="store.html#search"><span class="lx" lang="en">Cross-store search</span><span class="lx" lang="ja">横断検索</span></a>
+          <a href="store.html#team"><span class="lx" lang="en">Git &amp; teams</span><span class="lx" lang="ja">git &amp; 複数人</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="evidence.html" class="lx" lang="en" aria-haspopup="true">Evidence</a><a href="evidence.html" class="lx" lang="ja" aria-haspopup="true">実測</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="evidence.html#claim"><span class="lx" lang="en">The claim</span><span class="lx" lang="ja">主張と実測</span></a>
+          <a href="evidence.html#resume"><span class="lx" lang="en">Resume</span><span class="lx" lang="ja">「続き」は通じるか</span></a>
+          <a href="evidence.html#knowledge"><span class="lx" lang="en">Knowledge</span><span class="lx" lang="ja">知識はどこから来るか</span></a>
+          <a href="evidence.html#boundary"><span class="lx" lang="en">Boundary</span><span class="lx" lang="ja">残る差は何か</span></a>
+          <a href="evidence.html#cost"><span class="lx" lang="en">Cost</span><span class="lx" lang="ja">思い出す方が安いか</span></a>
+          <a href="evidence.html#limitations"><span class="lx" lang="en">Limitations</span><span class="lx" lang="ja">限界の開示</span></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="nav-right">
+    <button class="nav-burger" aria-label="menu" aria-expanded="false" aria-controls="nav"><span></span></button>
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="index.html" class="lx" lang="en">← Home</a><a href="index.html" class="lx" lang="ja">← ホーム</a><span> / </span><span class="lx" lang="en">Mechanism</span><span class="lx" lang="ja">仕組み</span></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">Deterministic hooks + ODD</span><span class="lx" lang="ja">決定論的 hook + ODD</span></div>
+  <h1><span class="lx" lang="en">Not a promise. A hook.</span><span class="lx" lang="ja">約束ではなく、hook が強制する。</span></h1>
+  <p class="lede lx" lang="en">A rule only <em>tells</em> Claude "don't push to main". A hook <em>stops</em> it — a small script that reads the tool call before it runs and exits 2 to block. Banto registers 46. Each skill declares its range in <code>odd.yaml</code> (ODD); this page maps which declaration lands on which hook.</p>
+  <p class="lede lx" lang="ja">rule は「main へ直接 push するな」と告げるだけ。止めるのは hook — tool call を実行前に読み、危険なら exit 2 で遮断する小さなスクリプト。Banto は 46 本。宣言側は各 skill の <code>odd.yaml</code>（ODD）が担い、どの宣言がどの hook に届くかまでこのページで突き合わせる。</p>
+
+  <!-- the gate, first thing on screen -->
+  <div style="margin:26px 0 0">
+    <svg viewBox="0 0 920 320" class="diagram" role="img" aria-label="tool call gate flow">
+      <defs>
+        <marker id="hk-arrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="var(--accent)"/>
+        </marker>
+        <marker id="hk-arrow-g" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="var(--green)"/>
+        </marker>
+      </defs>
+
+      <!-- Claude / tool call -->
+      <g class="node">
+        <rect x="24" y="128" width="160" height="64" rx="10"/>
+        <text x="104" y="155" class="n-title">Claude</text>
+        <text x="104" y="175" class="n-sub lx" lang="en">tool call</text><text x="104" y="175" class="n-sub lx" lang="ja">tool call</text>
+      </g>
+      <path class="flow" d="M184,160 L308,160" marker-end="url(#hk-arrow)"/>
+      <text x="246" y="146" class="edge-label mid">Bash · Write · Edit …</text>
+
+      <!-- PreToolUse gate -->
+      <g class="node" style="transition-delay:.25s">
+        <rect x="312" y="40" width="232" height="240" rx="12" style="stroke:var(--accent); stroke-width:2"/>
+        <text x="428" y="74" class="n-title">PreToolUse</text>
+        <text x="428" y="92" class="n-sub lx" lang="en">the gate — before it runs</text><text x="428" y="92" class="n-sub lx" lang="ja">実行前の関所</text>
+      </g>
+      <g class="node" style="transition-delay:.45s">
+        <rect x="336" y="108" width="184" height="32" rx="7"/>
+        <text x="428" y="129" class="n-sub" style="font-family:var(--mono); font-size:12px">odd-kill-switch</text>
+      </g>
+      <g class="node" style="transition-delay:.55s">
+        <rect x="336" y="148" width="184" height="32" rx="7"/>
+        <text x="428" y="169" class="n-sub" style="font-family:var(--mono); font-size:12px">prod-guard</text>
+      </g>
+      <g class="node" style="transition-delay:.65s">
+        <rect x="336" y="188" width="184" height="32" rx="7"/>
+        <text x="428" y="209" class="n-sub" style="font-family:var(--mono); font-size:12px">egress-guard</text>
+      </g>
+      <text x="428" y="252" class="n-sub2 lx" lang="en">… 18 entries on this event</text><text x="428" y="252" class="n-sub2 lx" lang="ja">… このイベントだけで 18 エントリ</text>
+
+      <!-- allow -->
+      <path class="flow" style="stroke:var(--green)" d="M544,120 C604,120 616,96 684,96" marker-end="url(#hk-arrow-g)"/>
+      <text x="596" y="88" class="edge-label lx" lang="en" style="fill:var(--green)">allow</text><text x="596" y="88" class="edge-label lx" lang="ja" style="fill:var(--green)">許可</text>
+      <g class="node" style="transition-delay:.8s">
+        <rect x="688" y="64" width="208" height="64" rx="10" style="stroke:var(--green)"/>
+        <text x="792" y="91" class="n-title" style="fill:var(--green)">exit 0</text>
+        <text x="792" y="111" class="n-sub lx" lang="en">runs, untouched</text><text x="792" y="111" class="n-sub lx" lang="ja">そのまま実行される</text>
+      </g>
+
+      <!-- block -->
+      <path class="flow" d="M544,200 C604,200 616,240 684,240" marker-end="url(#hk-arrow)"/>
+      <text x="596" y="256" class="edge-label lx" lang="en" style="fill:var(--accent)">block</text><text x="596" y="256" class="edge-label lx" lang="ja" style="fill:var(--accent)">遮断</text>
+      <g class="node node-banto" style="transition-delay:.95s">
+        <rect x="688" y="208" width="208" height="88" rx="10"/>
+        <text x="792" y="238" class="n-title">exit 2</text>
+        <text x="792" y="258" class="n-sub lx" lang="en">blocked, reason shown</text><text x="792" y="258" class="n-sub lx" lang="ja">理由つきで止まる</text>
+        <text x="792" y="278" class="n-sub2 lx" lang="en" style="font-family:var(--mono)">+ named escape</text><text x="792" y="278" class="n-sub2 lx" lang="ja" style="font-family:var(--mono)">+ 名前つき escape</text>
+      </g>
+    </svg>
+    <p class="crumb" style="text-align:center; margin-top:4px"><span class="lx" lang="en">one tool call, one deterministic verdict — no model in the gate</span><span class="lx" lang="ja">1 回の tool call に 1 つの決定論的な判定 — 関所にモデルはいない</span></p>
+  </div>
+</section>
+
+<section class="sec" id="hooks">
+  <div class="sec-head">
+    <span class="ghost">1</span>
+    <div class="sub">hooks.json</div>
+    <h2><span class="lx" lang="en">The whole picture</span><span class="lx" lang="ja">全体像</span></h2>
+    <p><span class="lx" lang="en">Every hook is wired to one of Claude Code's lifecycle events. Banto uses all ten.</span><span class="lx" lang="ja">すべての hook は Claude Code のライフサイクルイベントのいずれかに配線される。Banto は 10 種類すべてを使う。</span></p>
+  </div>
+
+
+  <div class="twocol">
+    <div class="card">
+      <h4 style="font-family:var(--serif);font-size:17px;margin:0 0 8px"><span class="lx" lang="en">Registered by the numbers</span><span class="lx" lang="ja">登録数の実数</span></h4>
+      <ul class="tight">
+        <li><span class="lx" lang="en"><strong>46</strong> distinct hook scripts wired in <code>hooks.json</code></span><span class="lx" lang="ja"><code>hooks.json</code> に配線された固有スクリプト <strong>46</strong> 本</span></li>
+        <li><span class="lx" lang="en"><strong>52</strong> total command entries across 10 lifecycle events (some scripts run on more than one matcher)</span><span class="lx" lang="ja">10 種類のライフサイクルイベント全体でのべ <strong>52</strong> エントリ（一部のスクリプトは複数 matcher に登録）</span></li>
+        <li><span class="lx" lang="en">events: <code>SessionStart</code>, <code>UserPromptSubmit</code>, <code>PreToolUse</code>, <code>PostToolUse</code>, <code>Stop</code>, <code>SessionEnd</code>, <code>PreCompact</code>, <code>SubagentStart</code>, <code>SubagentStop</code>, <code>UserPromptExpansion</code></span><span class="lx" lang="ja">イベント種別：<code>SessionStart</code>・<code>UserPromptSubmit</code>・<code>PreToolUse</code>・<code>PostToolUse</code>・<code>Stop</code>・<code>SessionEnd</code>・<code>PreCompact</code>・<code>SubagentStart</code>・<code>SubagentStop</code>・<code>UserPromptExpansion</code></span></li>
+        <li><span class="lx" lang="en"><code>PreToolUse</code> carries the heaviest load — 18 of the 52 entries — because that is where a dangerous action can still be stopped before it runs</span><span class="lx" lang="ja">最も比重が重いのは <code>PreToolUse</code>（52 件中 18 件）。危険な操作を「実行前」に止められる、唯一の地点だから</span></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4 style="font-family:var(--serif);font-size:17px;margin:0 0 8px"><span class="lx" lang="en">Rules get skipped. Hooks don't.</span><span class="lx" lang="ja">rule は読み飛ばされる。hook は読み飛ばせない。</span></h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0"><span class="lx" lang="en">CLAUDE.md, the ten behavioral rules, and each skill's own instructions are text Claude reads inside its context — and in a long session that text gets skipped, misremembered, or overridden by a more recent instruction. A hook is not text. It is a real process that starts the moment Claude calls a tool, reads that tool call's raw payload directly, and — when it blocks — exits 2 before the action runs. There is no context window for it to fall out of.</span><span class="lx" lang="ja">CLAUDE.md も、10 の行動規範も、各 skill 自身の指示も、Claude がコンテキストの中で読むテキストにすぎない。長いセッションでは、このテキストは読み飛ばされ、記憶が薄れ、後から来た指示に上書きされる。hook はテキストではない。Claude が tool を呼んだ瞬間に走る実プロセスで、その tool call の生の payload を直接読み、block するときは実行前に exit 2 で終了する。コンテキストウィンドウから落ちるということが、そもそも起こらない。</span></p>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:18px">
+    <span class="seal" aria-hidden="true">番</span>
+    <div><span class="lx" lang="en"><strong>Fail-open by design.</strong> A missing dependency must never break a session: if <code>jq</code> is absent, every hook exits 0 silently — the plugin effectively disables itself rather than blocking work on a broken environment. The inverse holds for a positive detection: when a safety hook decides to block, it blocks with exit 2 regardless of what any other plugin's hooks would allow.</span><span class="lx" lang="ja"><strong>判定材料が無ければ黙って通す（fail-open）。</strong>依存が欠けているだけでセッションを壊してはならない — <code>jq</code> が無ければ全 hook は黙って exit 0 とし、壊れた環境で作業を止めるのではなく、機能を自ら無効化する。逆に「危険を検知した」場合は fail-safe — 安全系 hook が block を決めたら、他プラグインの hook が何を許していようと exit 2 で止める。</span></div>
+  </div>
+</section>
+
+<section class="sec" id="flagship">
+  <div class="sec-head">
+    <span class="ghost">2</span>
+    <div class="sub">7 hooks</div>
+    <h2><span class="lx" lang="en">The seven that carry the weight</span><span class="lx" lang="ja">実質を担う 7 つの hook</span></h2>
+    <p><span class="lx" lang="en">Most of the 46 inject a few lines of context or track telemetry silently. These seven actually block, gate, or auto-trigger something — read straight from each script's own header comment.</span><span class="lx" lang="ja">46 本の大半は、数行のコンテキスト注入や無音のテレメトリ記録にとどまる。この 7 つだけが実際に block・gate・自動発火のいずれかを行う。各スクリプト冒頭のコメントから直接起こす。</span></p>
+  </div>
+
+  <div class="twocol">
+    <div class="card" id="odd-kill-switch">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 6px">odd-kill-switch <span class="trig" style="display:inline;margin:0"><span style="border-radius:6px">PreToolUse</span></span></h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0"><span class="lx" lang="en">Blocks four irreversible git / filesystem actions outright: pushing straight to <code>main</code>/<code>master</code>, <code>--no-verify</code>, a hard <code>--force</code> push (<code>--force-with-lease</code> passes), and <code>rm -rf</code> on root or home. Each has its own named escape hatch (e.g. <code>ODD_ALLOW_MAIN_PUSH=1</code>) — the block is default-on, never silent-on.</span><span class="lx" lang="ja">4 つの不可逆な git / ファイルシステム操作を全遮断する：<code>main</code>/<code>master</code> への直接 push、<code>--no-verify</code>、素の <code>--force</code> push（<code>--force-with-lease</code> は通過）、root や home への <code>rm -rf</code>。それぞれ専用の名前つきエスケープ（例：<code>ODD_ALLOW_MAIN_PUSH=1</code>）を持ち、既定は常に block。</span></p>
+    </div>
+    <div class="card" id="egress-guard">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 6px">egress-guard <span class="trig" style="display:inline;margin:0"><span style="border-radius:6px">PreToolUse: Write/Edit</span></span></h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0"><span class="lx" lang="en">Checks a Write/Edit's content against a private, user-scope name registry (<code>~/.claude/banto-name-registry</code>, never committed) before it lands in a client deliverable — catching internal member names, other-project names, and PII before they leak across an NDA boundary. No-ops if the registry is absent or empty; escape via <code>BANTO_ALLOW_NAMES=1</code>.</span><span class="lx" lang="ja">Write/Edit の内容を、非公開のユーザー単位の名前レジストリ（<code>~/.claude/banto-name-registry</code>、絶対にコミットしない）と照合し、客先成果物に書き込まれる前に止める — 内部メンバー名・他案件名・個人情報が NDA の境界を越える前に捕捉する。レジストリが無い/空なら no-op。エスケープは <code>BANTO_ALLOW_NAMES=1</code>。</span></p>
+    </div>
+    <div class="card" id="verify-claim-guard">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 6px">verify-claim-guard <span class="trig" style="display:inline;margin:0"><span style="border-radius:6px">Stop</span></span></h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0"><span class="lx" lang="en">Fires when the final response asserts completion (<em>"done," "fixed," "tests pass"</em>) while recent evidence says otherwise, on two narrow, structural checks: <strong>B1</strong> — the most recent full <code>verify-run</code> is recorded RED; <strong>B2</strong> — the very last tool result in the transcript has <code>is_error: true</code> (one success call after a failure is treated as an already-resolved retry, not a false completion). One re-verify prompt per stop, guarded by <code>stop_hook_active</code> so it never loops.</span><span class="lx" lang="ja">最終応答が完了を断定する（「完了しました」「修正しました」「テストが通った」等）一方で、直近の証跡がそれと矛盾するときに、2 つの狭い構造判定で発火する：<strong>B1</strong> — 直近のフル <code>verify-run</code> が RED として記録されている。<strong>B2</strong> — transcript 内で最後の tool result が <code>is_error: true</code>（失敗の後に成功呼び出しが 1 件あれば、それはリトライで解消済みとみなし、誤った完了断定とはしない）。1 stop につき再検証の促しは 1 回のみ・<code>stop_hook_active</code> で無限ループを防ぐ。</span></p>
+    </div>
+    <div class="card" id="idle-checkpoint">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 6px">idle-checkpoint <span class="trig" style="display:inline;margin:0"><span style="border-radius:6px">Stop / SessionEnd</span></span></h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0"><span class="lx" lang="en">On every <code>Stop</code>, arms a detached watcher process; if the transcript goes untouched for <code>BANTO_IDLE_CHECKPOINT_MIN</code> minutes (default 5 — the prompt-cache TTL), it fires a headless <code>claude -p --resume --fork-session</code> to auto-run <code>/save-checkpoint</code>. <code>SessionEnd</code> kills the watcher so a normally-finished session never triggers a wasted headless run. Motive: once the cache expires, resuming an idle session re-reads a huge context at cold prices — checkpointing first makes the eventual <code>/clear</code> + resume cheap.</span><span class="lx" lang="ja">毎回の <code>Stop</code> で、切り離されたウォッチャープロセスをアーム。transcript が <code>BANTO_IDLE_CHECKPOINT_MIN</code> 分（既定 5 分 = プロンプトキャッシュの TTL）更新されなければ、ヘッドレスの <code>claude -p --resume --fork-session</code> を起動して <code>/save-checkpoint</code> を自動実行する。<code>SessionEnd</code> はウォッチャーを kill し、正常終了したセッションで無駄なヘッドレス実行を走らせない。動機：キャッシュが切れた後に放置セッションへ復帰すると、巨大なコンテキストをコールド価格で読み直すことになる。先にチェックポイントを切っておけば、その後の <code>/clear</code> + 再開が安く済む。</span></p>
+    </div>
+    <div class="card" id="webfetch-deny">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 6px">webfetch-deny <span class="trig" style="display:inline;margin:0"><span style="border-radius:6px">PreToolUse: WebFetch</span></span></h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0"><span class="lx" lang="en">Denies WebFetch outright via the <code>permissionDecision</code> JSON contract — its rationale is the evidence-first rule: WebFetch returns a small-model summary of the page, so the main model can never verify the original text. URL reading is consolidated into <code>webread</code> (full-text extraction via trafilatura); URL discovery still uses WebSearch. Escape: <code>BANTO_ALLOW_WEBFETCH=1</code>.</span><span class="lx" lang="ja"><code>permissionDecision</code> の JSON 契約で WebFetch を全遮断する — 根拠は evidence-first rule：WebFetch は小型モデルによるページ要約を返すため、本体モデルは原文を検証できない。URL の精読は <code>webread</code>（trafilatura による全文抽出）に一本化し、URL の発見には引き続き WebSearch を使う。エスケープ：<code>BANTO_ALLOW_WEBFETCH=1</code>。</span></p>
+    </div>
+    <div class="card" id="odd-gate">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 6px">odd-gate <span class="trig" style="display:inline;margin:0"><span style="border-radius:6px">PreToolUse: Write/Edit</span></span></h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0"><span class="lx" lang="en">A circuit breaker for self-driving implementation loops: when a session-global counter (written by the test runner, reset on a pass) shows the project's own tests failing <code>ODD_TEST_FAILURE_THRESHOLD</code> times in a row (default 3), it blocks further edits and tells the model to hand the root cause to a debugger agent instead of churning. Fires regardless of which skill is active, because runaway edit→test-fail loops happen in the plain main loop too. Escape: <code>ODD_ALLOW_TEST_FAILURES=1</code>.</span><span class="lx" lang="ja">自走実装ループのための回路遮断器：セッション横断のカウンタ（テストランナーが書き、成功でリセット）が、プロジェクト自身のテストの連続失敗を <code>ODD_TEST_FAILURE_THRESHOLD</code> 回（既定 3 回）検知すると、それ以上の編集を止め、闇雲な繰り返しではなく debugger エージェントに根本原因を委ねるよう促す。どの skill が動いていても発火する — 暴走した「編集 → テスト失敗」ループは、skill 不在の素の main loop でも起こるため。エスケープ：<code>ODD_ALLOW_TEST_FAILURES=1</code>。</span></p>
+    </div>
+    <div class="card" id="prod-guard">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 6px">prod-guard <span class="trig" style="display:inline;margin:0"><span style="border-radius:6px">PreToolUse: Bash</span></span></h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0"><span class="lx" lang="en">Blocks production-environment operations by default — <code>kubectl</code> against a prod context, <code>terraform apply</code>/<code>destroy</code>, a <code>--prod</code> deploy, or <code>ssh</code> to a prod host. It only passes with a conversation-time approval escape (<code>BANTO_ALLOW_PROD=1</code>) or a standing per-repo grant (<code>prod_ops: allow</code> in <code>{base}/meta/grants.json</code>).</span><span class="lx" lang="ja">本番環境の操作を既定で block する — prod context への <code>kubectl</code>、<code>terraform apply</code>/<code>destroy</code>、<code>--prod</code> デプロイ、prod ホストへの <code>ssh</code>。通すのは会話内承認によるエスケープ（<code>BANTO_ALLOW_PROD=1</code>）か、リポジトリ単位の常設許可（<code>{base}/meta/grants.json</code> の <code>prod_ops: allow</code>）のみ。</span></p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 6px">verify-run / verify-detect <span class="trig" style="display:inline;margin:0"><span style="border-radius:6px">helpers, not hooks</span></span></h4>
+    <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0"><span class="lx" lang="en"><code>verify-detect.sh</code> is pure file-based detection (never runs the project's own tools) shared by both the per-edit test runner and the full verify — one source of truth for what "build," "test," and "API smoke" mean in this project. <code>verify-run.sh</code> is the loop's own full verify: build → full test suite → API smoke (against staging, <code>NODE_ENV=test</code>, never production), writing the green/red state that <code>verify-claim-guard</code>'s B1 check reads, and bumping the same failure counter that <code>odd-gate</code> watches. Neither is registered in <code>hooks.json</code> — they're invoked directly by the build-and-verify loop — but they're the ground truth both flagship hooks above depend on.</span><span class="lx" lang="ja"><code>verify-detect.sh</code> は純粋なファイル判定（プロジェクト自身のツールは決して実行しない）で、1 回ごとのテスト実行とフル verify の両方が共有する — このプロジェクトでの「build」「test」「API smoke」の定義を一本化する単一の正本。<code>verify-run.sh</code> はループ自身のフル verify：build → フルテスト → API smoke（ステージング向け・<code>NODE_ENV=test</code>・本番には決して当たらない）を実行し、<code>verify-claim-guard</code> の B1 判定が読む green/red 状態を書き込み、<code>odd-gate</code> が監視するのと同じ失敗カウンタを更新する。どちらも <code>hooks.json</code> には未登録 — build-and-verify ループから直接起動される — が、上記 2 つの目玉 hook が依存する事実の根拠そのもの。</span></p>
+  </div>
+</section>
+
+<section class="sec" id="principles">
+  <div class="sec-head">
+    <span class="ghost">3</span>
+    <div class="sub">CONTRACT.md</div>
+    <h2><span class="lx" lang="en">Design principles</span><span class="lx" lang="ja">設計原則</span></h2>
+    <p><span class="lx" lang="en">Every hook in the directory follows the same compatibility contract, documented in <code>hooks/CONTRACT.md</code> — not a new mechanism, just the rules that keep 46 independently-written scripts from becoming unpredictable together.</span><span class="lx" lang="ja">このディレクトリの全 hook は同じ互換性契約に従う（<code>hooks/CONTRACT.md</code> に記載）。新しい仕組みではなく、独立に書かれた 46 本のスクリプトが、まとまったときに予測不能にならないための規律。</span></p>
+  </div>
+
+  <div class="flow" style="margin-bottom:8px">
+    <span class="fnode hot"><span class="lx" lang="en">fail-open</span><span class="lx" lang="ja">fail-open</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">one stop, one re-check</span><span class="lx" lang="ja">1 stop 1 回</span></span>
+    <span class="arr">→</span>
+    <span class="fnode"><span class="lx" lang="en">narrow, structural judgment</span><span class="lx" lang="ja">narrow な構造判定</span></span>
+    <span class="arr">→</span>
+    <span class="fnode hot"><span class="lx" lang="en">named escape hatch</span><span class="lx" lang="ja">名前つき escape</span></span>
+  </div>
+
+  <div class="twocol" style="margin-top:14px">
+    <div class="card">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 6px"><span class="lx" lang="en">Narrow over clever</span><span class="lx" lang="ja">賢さより narrow</span></h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0"><span class="lx" lang="en"><code>verify-claim-guard</code> used to grep the last three tool outputs for words like <code>"fatal:"</code> — which also matched a hook script's own source code sitting in the transcript, a real false-positive source. The fix wasn't a smarter heuristic; it was reading the structured <code>is_error</code> flag on exactly the last <code>tool_result</code>. Across the hook set, the pattern repeats: replace a broad text match with a structural one the moment it misfires.</span><span class="lx" lang="ja"><code>verify-claim-guard</code> は以前、直近 3 件の tool 出力を <code>"fatal:"</code> のような語で grep していた — これは transcript 内にたまたま存在した hook スクリプト自身のソースコードにも一致してしまう、実際の誤検知源だった。修正は「賢いヒューリスティック」ではなく、最後の <code>tool_result</code> 1 件だけの構造化された <code>is_error</code> フラグを読むことだった。hook 群全体でこのパターンが繰り返される：広い文字列一致が誤爆した瞬間、構造判定に置き換える。</span></p>
+    </div>
+    <div class="card">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 6px"><span class="lx" lang="en">One stop, one re-check</span><span class="lx" lang="ja">1 stop に 1 回だけ</span></h4>
+      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0"><span class="lx" lang="en">A <code>Stop</code> hook may request exactly one extra turn via exit 2 — <code>verify-claim-guard</code> and the checkpoint-arming logic both check <code>stop_hook_active</code> before firing, so a re-prompt can never chain into a second re-prompt. This is what keeps a safety valve from becoming an infinite loop the moment its own trigger condition re-appears after the retry.</span><span class="lx" lang="ja"><code>Stop</code> hook が exit 2 で要求できる追加ターンはちょうど 1 回 — <code>verify-claim-guard</code> もチェックポイント起動ロジックも、発火前に必ず <code>stop_hook_active</code> を確認する。これにより、リトライ後に同じ発火条件が再び現れても、再プロンプトが二重に連鎖することはない。</span></p>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:16px">
+    <span class="seal" aria-hidden="true">番</span>
+    <div><span class="lx" lang="en"><strong>Escape hatches are named, not global.</strong> Every deterministic block ships its own environment-variable override — <code>BANTO_ALLOW_NAMES</code>, <code>ODD_ALLOW_MAIN_PUSH</code>, <code>ODD_ALLOW_TEST_FAILURES</code>, <code>BANTO_ALLOW_WEBFETCH</code> — so a legitimate exception can be granted precisely, without disabling the guard's other three rules along with it.</span><span class="lx" lang="ja"><strong>逃し方は個別に名前がつく。全体スイッチではない。</strong>決定論的な block はどれも、専用の環境変数エスケープを備える — <code>BANTO_ALLOW_NAMES</code>・<code>ODD_ALLOW_MAIN_PUSH</code>・<code>ODD_ALLOW_TEST_FAILURES</code>・<code>BANTO_ALLOW_WEBFETCH</code>。正当な例外は、そのガードの他 3 ルールまで一緒に無効化することなく、狙って許可できる。</span></div>
+  </div>
+</section>
+
+<section class="sec" id="odd">
+  <div class="sec-head">
+    <span class="ghost">4</span>
+    <div class="sub">odd.yaml</div>
+    <h2><span class="lx" lang="en">Autonomy by declaration</span><span class="lx" lang="ja">自律性は宣言する</span></h2>
+    <p><span class="lx" lang="en">A one-click utility (kit) and a multi-file autonomous loop (dev-loop) can't share one autonomy rule — a kit-sized mistake costs a re-run, a dev-loop-sized mistake costs a branch. Each skill states its own operating range in <code>plugins/banto/skills/&lt;name&gt;/odd.yaml</code>, validated against a JSON Schema that only checks shape, not behavior.</span><span class="lx" lang="ja">ワンショットの utility（kit）と、複数ファイルを跨ぐ自走ループ（dev-loop）を、同じ自律性ルールで扱うことはできない — kit の間違いはやり直しで済むが、dev-loop の間違いはブランチ 1 本分のコストになる。各 skill は <code>plugins/banto/skills/&lt;name&gt;/odd.yaml</code> に自分の運転可能な範囲を書き、形だけを見る JSON Schema で検証する（振る舞いの検証ではない）。</span></p>
+  </div>
+
+  <table class="lvl-table">
+    <thead>
+      <tr>
+        <th><span class="lx" lang="en">Level</span><span class="lx" lang="ja">レベル</span></th>
+        <th><span class="lx" lang="en">Meaning</span><span class="lx" lang="ja">意味</span></th>
+        <th><span class="lx" lang="en">Adopted interpretations (spec-fidelity)</span><span class="lx" lang="ja">採用解釈の扱い（spec-fidelity）</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="lv">L0</td><td><span class="lx" lang="en">Manual — information display only</span><span class="lx" lang="ja">Manual — 情報表示のみ</span></td><td><span class="lx" lang="en">May proceed, disclosed in the final report</span><span class="lx" lang="ja">採用解釈で進行可・最終報告で開示</span></td></tr>
+      <tr><td class="lv">L1</td><td><span class="lx" lang="en">Suggest — user approves each output</span><span class="lx" lang="ja">Suggest — 出力ごとにユーザーが承認</span></td><td><span class="lx" lang="en">May proceed, disclosed in the final report</span><span class="lx" lang="ja">採用解釈で進行可・最終報告で開示</span></td></tr>
+      <tr><td class="lv">L2</td><td><span class="lx" lang="en">Copilot — partial execution, per-step approval</span><span class="lx" lang="ja">Copilot — 部分実行・手順ごとに承認</span></td><td><span class="lx" lang="en">May proceed, disclosed in the final report</span><span class="lx" lang="ja">採用解釈で進行可・最終報告で開示</span></td></tr>
+      <tr><td class="lv">L3</td><td><span class="lx" lang="en">Autopilot — continuous execution, owner is asked only on exceptions</span><span class="lx" lang="ja">Autopilot — 継続実行・例外時のみ owner へ確認</span></td><td><span class="lx" lang="en">May proceed, but medium scale or larger MUST disclose interpretation / alternatives / verification</span><span class="lx" lang="ja">進行可。ただし中規模以上は「採用解釈・代替案・検証内容」の開示が必須</span></td></tr>
+      <tr class="out"><td class="lv">L4+</td><td><span class="lx" lang="en">Supervised-Auto / Self-improving — explicit stop conditions, little to no human loop</span><span class="lx" lang="ja">Supervised-Auto / Self-improving — 明示停止条件・人間の関与がほぼ無い</span></td><td><span class="lx" lang="en">Advance confirmation required — adopted interpretations not allowed. Out of Banto's scope.</span><span class="lx" lang="ja">事前確認が必須・採用解釈は不可。Banto の対象外。</span></td></tr>
+    </tbody>
+  </table>
+  <p class="crumb" style="margin-top:10px"><span class="lx" lang="en">A skill with no odd.yaml at all is treated as provisional L0 until one is written. Banto ships L0–L3; L4/L5 belong to a separate, not-yet-public plugin (banto-autonomy).</span><span class="lx" lang="ja">odd.yaml が無い skill は、書かれるまで暫定的に L0 として扱う。Banto が実装するのは L0〜L3 のみ。L4・L5 は別プラグイン（banto-autonomy・未公開）の領域。</span></p>
+
+  <div class="sec-head" style="margin-top:28px">
+    <div class="sub">plugins/banto/skills/dev-loop/odd.yaml</div>
+    <h3 style="font-family:var(--serif);font-size:19px;margin:0 0 6px"><span class="lx" lang="en">A real odd.yaml, field by field</span><span class="lx" lang="ja">実例で見る odd.yaml の中身</span></h3>
+    <p><span class="lx" lang="en">dev-loop is Banto's autonomous implementation loop (L3), so its odd.yaml is the most exercised one in the tree. Six fields carry the actual declaration.</span><span class="lx" lang="ja">dev-loop は Banto の自走実装ループ（L3）で、ツリー内でも odd.yaml が最も実働している skill。宣言の本体は 6 つのフィールドが担う。</span></p>
+  </div>
+  <div class="field-grid">
+    <div class="fd"><b>in_scope</b><p><span class="lx" lang="en">What the skill owns: task decomposition, the implement → build-and-verify → fix loop, tasks.md progress, parallel fan-out judgment, exception detection.</span><span class="lx" lang="ja">skill が担う範囲：タスク分解、実装 → 検証 → 修正の周回、tasks.md の前進、並列 fan-out 判定、例外検知。</span></p></div>
+    <div class="fd"><b>out_of_scope</b><p><span class="lx" lang="en">Spec generation and branch/worktree ops are delegated elsewhere; push / PR / merge to main stay a human gate.</span><span class="lx" lang="ja">仕様生成やブランチ / worktree 操作は他 skill へ委譲。push・PR・main マージは人間ゲートのまま。</span></p></div>
+    <div class="fd"><b>safety_boundaries</b><p><span class="lx" lang="en">Commits stop at the branch; verification must reuse the existing verify-run.sh, never reimplement its detection logic; fan-out caps at 5 parallel workers.</span><span class="lx" lang="ja">commit はブランチ止まり。検証は既存の verify-run.sh を正本とし検出ロジックを再実装しない。並列 fan-out は最大 5 worker。</span></p></div>
+    <div class="fd"><b>kill_switch_conditions</b><p><span class="lx" lang="en">4 conditions that stop the loop and escalate to the owner — detailed in <a href="#enforce">Where the declaration meets a hook</a> below.</span><span class="lx" lang="ja">周回を止めて owner へ上げる 4 条件 — 詳細は下の「宣言が hook と接続する場所」節。</span></p></div>
+    <div class="fd"><b>approval_gates</b><p><span class="lx" lang="en">Before entering the loop, the decomposition plan (task list + parallel policy) is shown once for confirmation; an epic-scale target routes through ws epic first.</span><span class="lx" lang="ja">自走に入る前、分解プラン（タスク列 + 並列方針）を 1 度提示して確認。epic 規模なら先に ws epic 提案を経由。</span></p></div>
+    <div class="fd"><b>metrics</b><p><span class="lx" lang="en"><code>test_failure_threshold: 3</code>, <code>parallel_fanout_max: 5</code> — the numeric backing for the boundaries above, read by the schema's <code>metrics</code> object.</span><span class="lx" lang="ja"><code>test_failure_threshold: 3</code>、<code>parallel_fanout_max: 5</code> — 上記境界の数値的な裏付け。スキーマの <code>metrics</code> オブジェクトとして読む。</span></p></div>
+  </div>
+  <p class="note"><span class="seal" aria-hidden="true">番</span><span><span class="lx" lang="en">dev-loop's own <code>autonomy_level</code> line even names its enforcers inline: <em>"explicit stop is a deterministic hook (odd-gate / verify-claim-guard); the human gate is the Phase-0 decomposition-plan confirmation plus push/PR/main."</em> The declaration and its enforcement are cross-referenced from day one.</span><span class="lx" lang="ja">dev-loop の <code>autonomy_level</code> 行そのものが強制側の名前まで書いている：「<em>explicit stop は deterministic hook（odd-gate/verify-claim-guard）/ human gate は Phase0 分解プラン確認＋push/PR/main</em>」。宣言と強制は最初から相互参照している。</span></span></p>
+</section>
+
+<section class="sec" id="enforce">
+  <div class="sec-head">
+    <span class="ghost">5</span>
+    <div class="sub">kill_switch_conditions → hooks</div>
+    <h2><span class="lx" lang="en">Where the declaration meets a hook</span><span class="lx" lang="ja">宣言が hook と接続する場所</span></h2>
+    <p><span class="lx" lang="en">dev-loop's odd.yaml lists 4 kill-switch conditions. Three land on a deterministic script; the fourth — a goal fork — is enforced by judgment, and that gap is disclosed on purpose.</span><span class="lx" lang="ja">dev-loop の odd.yaml は 4 つの kill switch 条件を挙げる。うち 3 つは決定論的スクリプトが受け、残る 1 つ（ゴール分岐）は判断で受ける — その隙間をあえて明示する。</span></p>
+  </div>
+
+  <!-- animated: declaration → enforcement map -->
+  <div style="margin:26px 0 18px">
+    <svg viewBox="0 0 920 360" class="diagram" role="img" aria-label="kill switch conditions mapped to their enforcers">
+      <defs>
+        <marker id="odd-arrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="var(--accent)"/>
+        </marker>
+        <marker id="odd-arrow-i" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="var(--ink-soft)"/>
+        </marker>
+      </defs>
+
+      <!-- declaration side -->
+      <g class="node">
+        <rect x="24" y="32" width="280" height="296" rx="12" style="stroke-dasharray:6 5"/>
+        <text x="164" y="62" class="n-title">odd.yaml</text>
+        <text x="164" y="80" class="n-sub lx" lang="en">declaration — readable text</text><text x="164" y="80" class="n-sub lx" lang="ja">宣言 — 人が読むテキスト</text>
+      </g>
+      <g class="node" style="transition-delay:.2s">
+        <rect x="48" y="96" width="232" height="48" rx="8"/>
+        <text x="164" y="125" class="n-sub lx" lang="en">3 consecutive test failures</text><text x="164" y="125" class="n-sub lx" lang="ja">テスト 3 連続失敗</text>
+      </g>
+      <g class="node" style="transition-delay:.3s">
+        <rect x="48" y="152" width="232" height="48" rx="8"/>
+        <text x="164" y="181" class="n-sub lx" lang="en">"done" while evidence is red</text><text x="164" y="181" class="n-sub lx" lang="ja">red 証跡のまま「完了」主張</text>
+      </g>
+      <g class="node" style="transition-delay:.4s">
+        <rect x="48" y="208" width="232" height="48" rx="8"/>
+        <text x="164" y="237" class="n-sub lx" lang="en">a goal fork, no clear reading</text><text x="164" y="237" class="n-sub lx" lang="ja">ゴール分岐で解釈が立たない</text>
+      </g>
+      <g class="node" style="transition-delay:.5s">
+        <rect x="48" y="264" width="232" height="48" rx="8"/>
+        <text x="164" y="293" class="n-sub lx" lang="en">irreversible / outward ops</text><text x="164" y="293" class="n-sub lx" lang="ja">不可逆・外向き操作</text>
+      </g>
+
+      <!-- flows -->
+      <path class="flow" d="M280,120 C440,120 470,84 612,84" marker-end="url(#odd-arrow)"/>
+      <path class="flow" d="M280,176 C440,176 470,156 612,156" marker-end="url(#odd-arrow)"/>
+      <path class="flow flow-exc" d="M280,232 C440,232 470,228 612,228" marker-end="url(#odd-arrow-i)"/>
+      <path class="flow" d="M280,288 C440,288 470,300 612,300" marker-end="url(#odd-arrow)"/>
+      <text x="446" y="66" class="edge-label mid lx" lang="en">deterministic hook</text><text x="446" y="66" class="edge-label mid lx" lang="ja">決定論的 hook が受ける</text>
+      <text x="446" y="260" class="edge-label mid lx" lang="en">judgment, disclosed</text><text x="446" y="260" class="edge-label mid lx" lang="ja">判断で受ける（明示開示）</text>
+
+      <!-- enforcement side -->
+      <g class="node" style="transition-delay:.6s">
+        <rect x="616" y="56" width="280" height="56" rx="10" style="stroke:var(--accent)"/>
+        <text x="756" y="80" class="n-title" style="font-family:var(--mono); font-size:13px">odd-gate.sh</text>
+        <text x="756" y="98" class="n-sub2 lx" lang="en">PreToolUse counter · threshold 3</text><text x="756" y="98" class="n-sub2 lx" lang="ja">PreToolUse カウンタ · 閾値 3</text>
+      </g>
+      <g class="node" style="transition-delay:.7s">
+        <rect x="616" y="128" width="280" height="56" rx="10" style="stroke:var(--accent)"/>
+        <text x="756" y="152" class="n-title" style="font-family:var(--mono); font-size:13px">verify-claim-guard.sh</text>
+        <text x="756" y="170" class="n-sub2 lx" lang="en">Stop hook · blocks the claim</text><text x="756" y="170" class="n-sub2 lx" lang="ja">Stop hook · 完了断定を止める</text>
+      </g>
+      <g class="node" style="transition-delay:.8s">
+        <rect x="616" y="200" width="280" height="56" rx="10" style="stroke-dasharray:6 5"/>
+        <text x="756" y="224" class="n-title" style="font-size:13px"><tspan class="lx" lang="en">spec-fidelity rule</tspan><tspan class="lx" lang="ja">spec-fidelity ルール</tspan></text>
+        <text x="756" y="242" class="n-sub2 lx" lang="en">not a hook — a stop trigger by judgment</text><text x="756" y="242" class="n-sub2 lx" lang="ja">hook ではない — 判断による stop trigger</text>
+      </g>
+      <g class="node" style="transition-delay:.9s">
+        <rect x="616" y="272" width="280" height="56" rx="10" style="stroke:var(--accent)"/>
+        <text x="756" y="296" class="n-title" style="font-family:var(--mono); font-size:13px">odd-kill-switch.sh</text>
+        <text x="756" y="314" class="n-sub2 lx" lang="en">4 blocking rules · named escapes</text><text x="756" y="314" class="n-sub2 lx" lang="ja">4 つの block · 名前つき escape</text>
+      </g>
+    </svg>
+    <p class="crumb" style="text-align:center; margin-top:2px"><span class="lx" lang="en">3 of 4 conditions land on a script — the 4th is disclosed as judgment, on purpose</span><span class="lx" lang="ja">4 条件中 3 つはスクリプトが受ける — 残る 1 つは「判断」だと、あえて明示する</span></p>
+  </div>
+
+  <ul class="ks-list">
+    <li><b><span class="lx" lang="en">3 consecutive test failures</span><span class="lx" lang="ja">テスト 3 連続失敗</span></b><span class="lx" lang="en"> → stops the loop, escalates to the owner.</span><span class="lx" lang="ja"> → 周回を停止し owner へ。</span>
+      <div class="hk"><span class="lx" lang="en">Enforced by:</span><span class="lx" lang="ja">強制元：</span> <a href="#odd-gate">odd-gate.sh</a> <span class="lx" lang="en">— a PreToolUse counter (default threshold 3, <code>ODD_TEST_FAILURE_THRESHOLD</code>), escape hatch <code>ODD_ALLOW_TEST_FAILURES=1</code>.</span><span class="lx" lang="ja">— PreToolUse のカウンタ（既定閾値 3・<code>ODD_TEST_FAILURE_THRESHOLD</code>）。エスケープは <code>ODD_ALLOW_TEST_FAILURES=1</code>。</span></div>
+    </li>
+    <li><b><span class="lx" lang="en">Claiming "done" while verify-last is red</span><span class="lx" lang="ja">verify-last が red のまま「完了」を主張</span></b><span class="lx" lang="en"> → blocked before the response goes out.</span><span class="lx" lang="ja"> → 応答が出る前にブロック。</span>
+      <div class="hk"><span class="lx" lang="en">Enforced by:</span><span class="lx" lang="ja">強制元：</span> <a href="#verify-claim-guard">verify-claim-guard.sh</a> <span class="lx" lang="en">— a Stop hook, fail-open (no jq / no transcript → exit 0), fires at most once per stop. It requires both a completion claim in the last assistant text AND unresolved evidence: the last full verify-run state is red (within 4 hours), or the last tool_result reports an error.</span><span class="lx" lang="ja">— Stop hook。判定材料が無ければ黙って通す fail-open（jq 不在・transcript 不在 → exit 0）で、1 stop につき最大 1 回だけ発火。最終応答に「完了」断定があり、かつ未解決の根拠（4 時間以内の verify-run 状態が red、または直近 tool_result が error）が両方揃ったときのみブロックする。</span></div>
+    </li>
+    <li class="soft"><b><span class="lx" lang="en">A goal fork with no clear interpretation</span><span class="lx" lang="ja">ゴール分岐で採用解釈が立たない</span></b><span class="lx" lang="en"> → stop, ask the owner.</span><span class="lx" lang="ja"> → 停止し owner へ確認。</span>
+      <div class="hk"><span class="lx" lang="en">Enforced by: judgment, not a hook</span><span class="lx" lang="ja">強制元：hook ではなく判断による</span> — <span class="lx" lang="en">the spec-fidelity rule's stop triggers. A goal fork is not a pattern a deterministic script can reliably detect.</span><span class="lx" lang="ja">spec-fidelity ルールの stop trigger による。ゴール分岐は決定論的スクリプトが確実に検知できるパターンではない。</span></div>
+    </li>
+    <li><b><span class="lx" lang="en">Irreversible / outward operations (push, PR, delete, external post)</span><span class="lx" lang="ja">不可逆・外向き操作（push・PR・削除・外部投稿）</span></b><span class="lx" lang="en"> → stop, ask the owner.</span><span class="lx" lang="ja"> → 停止し owner へ確認。</span>
+      <div class="hk"><span class="lx" lang="en">Enforced by:</span><span class="lx" lang="ja">強制元：</span> <a href="#odd-kill-switch">odd-kill-switch.sh</a> <span class="lx" lang="en">— 4 blocking rules, none dev-loop-specific: direct push to main/master, <code>--no-verify</code>, <code>--force</code> push, and <code>rm -rf</code> on root/home. Each has its own named escape variable, none default-on.</span><span class="lx" lang="ja">— 4 つのブロックルール（dev-loop 固有ではない）：main/master への直 push・<code>--no-verify</code>・<code>--force</code> push・root/home への <code>rm -rf</code>。各々に個別のエスケープ変数があり、既定では無効。</span></div>
+    </li>
+  </ul>
+  <p class="note"><span class="seal" aria-hidden="true">番</span><span><span class="lx" lang="en">Not every declared condition has a matching hook — and that gap is disclosed here on purpose. A kill switch that can't be mechanically detected still belongs in odd.yaml, as a human-readable boundary; it just needs a different kind of enforcement (a rule, a judgment call) than the ones a script can catch.</span><span class="lx" lang="ja">宣言した条件のすべてに対応する hook があるわけではない — その隙間をここであえて明示する。機械的に検知できない kill switch も、人が読める境界として odd.yaml に書く価値はある。ただしスクリプトが拾えるものとは違う種類の強制（ルール・判断）を要る。</span></span></p>
+</section>
+
+<section class="sec" id="related">
+  <div class="sec-head">
+    <span class="ghost">6</span>
+    <div class="sub"><span class="lx" lang="en">related</span><span class="lx" lang="ja">関連</span></div>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="rel">
+    <a href="index.html"><b>Home</b><span class="lx" lang="en">the whole harness, from the top</span><span class="lx" lang="ja">ハーネス全体を最初から</span></a>
+    <a href="toolset.html"><b>Toolset</b><span class="lx" lang="en">the skills these hooks and ODD boundaries wrap around</span><span class="lx" lang="ja">この hook と ODD が囲む skill 群</span></a>
+    <a href="store.html"><b>Store</b><span class="lx" lang="en">where checkpoints, decisions, and session state live</span><span class="lx" lang="ja">チェックポイント・決定・セッション状態の置き場</span></a>
+    <a href="evidence.html"><b>Evidence</b><span class="lx" lang="en">measured proof, not just claims</span><span class="lx" lang="ja">主張ではなく実測</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span class="lx" lang="en">Banto — a self-driving harness for Claude Code. Enforced by deterministic hooks.</span>
+  <span class="lx" lang="ja">Banto — Claude Code のための自走ハーネス。決定論的な hook が強制する。</span>
+  <span><a href="toolset.html" class="lx" lang="en">← Back to the toolset</a><a href="toolset.html" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>

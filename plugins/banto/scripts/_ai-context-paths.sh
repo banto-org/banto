@@ -5,12 +5,14 @@
 # Confines the central / legacy differences here; skills / hooks obtain paths via this helper.
 #
 # Provided functions:
-#   _ai_context_mode <cwd>       → echoes "central" | "legacy" (legacy = grandfathered in-repo base)
+#   _ai_context_mode <cwd>       → echoes "central" (in-repo .ai-context is abolished 2026-07-08,
+#                                  so "legacy" is no longer returned; kept for caller compatibility)
 #   _ai_context_base_dir <cwd>   → echoes the effective base dir (always exit 0)
 #       1. central mapping hit       → <store>/<project> (e.g. ~/ai-context-store/customer-A)
-#       2. existing in-repo base     → <toplevel>/.ai-context (grandfather; read/write as before)
-#       3. local store mapping hit   → <local_root>/<project> (e.g. ~/ai-context-local/myrepo)
-#       4. otherwise                 → derive: <store_root>/<toplevel dirname> (store-first default)
+#       2. local store mapping hit   → <local_root>/<project> (e.g. ~/ai-context-local/myrepo)
+#       3. otherwise                 → derive: <store_root>/<toplevel dirname> (store-first default)
+#       (in-repo .ai-context is never a resolution target; a legacy one is auto-migrated to the
+#        store by the scaffold. decision 2026-07-08 abolish-in-repo-ai-context)
 #   _ai_context_local_root       → echoes the local (GitHub-less) store root (env → ~/ai-context-local)
 #   _ai_context_local_lookup <top> → echoes the local store project dir if registered (else return 1)
 #   _ai_context_is_local <cwd>   → return 0 when cwd resolves into the local store
@@ -25,8 +27,17 @@
 #       → echoes the WS pointer write target (git-dir when in git, else <base>/WORKSPACE.md)
 #   _ai_context_ws_dir <base> [cwd]
 #       → echoes the current workspace's real dir (<base>/workspaces/<author>/<topic>) (return 1 if absent)
+#   _ai_context_ws_key <base> [cwd]
+#       → echoes a stable workspace key (the "# Workspace:" topic; no dir required). Addresses
+#         idle-checkpoints to their originating workspace (stable across /clear, unlike session_id)
 #   _ai_context_active_tasks <base> [cwd]
 #       → echoes the effective tasks file path (new layout if present, else legacy tasks/active.md)
+#   _ai_context_grant <key> [cwd]
+#       → echoes the per-repo standing-approval value for <key> from {base}/meta/grants.json
+#         (.grants.<key>): "allow" | "deny" | "confirm". A grant may be time-boxed via the object
+#         form {"value": "allow", "until": "YYYY-MM-DD"} — decays to "confirm" once <until> is
+#         strictly past. Fail-open to "confirm" on any resolution failure (missing base / file /
+#         key, jq absent, malformed until) — the existing confirm-first behavior.
 #
 # Decision (store-first, spec docs/specs/2026-06-11_store-first-architecture_spec.md):
 #   The store is the only write path for NEW projects. In-repo .ai-context/ is never created
@@ -142,21 +153,13 @@ _ai_context_base_dir() {
             return 0
         fi
     fi
-    # 2. grandfather: an existing in-repo .ai-context keeps working (cwd first, then git toplevel
-    #    so sessions started in a subdir of a legacy repo still find the repo's base)
-    if [ -d "$_aicp_cwd/.ai-context" ]; then
-        echo "$_aicp_cwd/.ai-context"
-        return 0
-    fi
+    # (in-repo .ai-context grandfather was resolution order 2; REMOVED 2026-07-08 — in-repo
+    #  .ai-context is fully abolished. A legacy in-repo .ai-context is auto-migrated into the
+    #  store by the scaffold (non-destructive), after which it resolves via the central/local
+    #  mapping above or the derive below. decision 2026-07-08 abolish-in-repo-ai-context.)
     _aicp_top=""
-    if command -v git >/dev/null 2>&1; then
-        _aicp_top=$(git -C "$_aicp_cwd" rev-parse --show-toplevel 2>/dev/null)
-        if [ -n "$_aicp_top" ] && [ "$_aicp_top" != "$_aicp_cwd" ] && [ -d "$_aicp_top/.ai-context" ]; then
-            echo "$_aicp_top/.ai-context"
-            return 0
-        fi
-    fi
-    # 3. local store (GitHub-less). The scaffold registers an unregistered repo here when there is
+    command -v git >/dev/null 2>&1 && _aicp_top=$(git -C "$_aicp_cwd" rev-parse --show-toplevel 2>/dev/null)
+    # 2. local store (GitHub-less). The scaffold registers an unregistered repo here when there is
     #    no central store yet (non-blocking). Keyed by git toplevel; fall back to cwd outside git.
     _aicp_key="$_aicp_top"
     [ -z "$_aicp_key" ] && _aicp_key="$_aicp_cwd"
@@ -165,7 +168,7 @@ _ai_context_base_dir() {
         echo "$_aicp_local"
         return 0
     fi
-    # 4. derive (store-first default — even unregistered repos resolve into the store)
+    # 3. derive (store-first default — even unregistered repos resolve into the store)
     _ai_context_derive_dir "$_aicp_cwd"
 }
 
@@ -294,6 +297,22 @@ _ai_context_ws_dir() {
     return 1
 }
 
+# Echoes a stable workspace key (the "# Workspace:" topic of the effective pointer). Unlike
+# _ai_context_ws_dir it does NOT require the workspace dir to exist — it only needs the pointer.
+# Used to address idle-checkpoints to the workspace that created them: this key is stable across
+# /clear (derived from the git-dir pointer / WORKSPACE.md, not session state), whereas session_id
+# rotates on /clear. Empty + return 1 when there is no pointer or no topic line.
+# Usage: _ai_context_ws_key <base> [cwd]
+_ai_context_ws_key() {
+    _awk_base="$1"
+    [ -z "$_awk_base" ] && return 1
+    _awk_ws=$(_ai_context_ws_pointer "$_awk_base" "${2:-}")
+    [ -f "$_awk_ws" ] || return 1
+    _awk_topic=$(grep -m1 '^# Workspace:' "$_awk_ws" 2>/dev/null | sed 's/^# Workspace:[[:space:]]*//')
+    [ -z "$_awk_topic" ] && return 1
+    printf '%s\n' "$_awk_topic"
+}
+
 # Echoes the current workspace's effective tasks file path (read fallback, always on).
 # Returns the new layout <base>/workspaces/<author>/<topic>/tasks.md if present, else the
 # legacy <base>/tasks/active.md (non-destructive guarantee for legacy projects). <topic>
@@ -310,6 +329,55 @@ _ai_context_active_tasks() {
     echo "$_aat_base/tasks/active.md"
 }
 
+# Echoes the standing per-repo approval for <key> ("pr_create" / "push_feature" / "prod_ops" / …)
+# from {base}/meta/grants.json: {"grants": {"<key>": "allow" | "deny" | "confirm"}}. A grant value
+# may also be a time-boxed object: {"<key>": {"value": "allow", "until": "YYYY-MM-DD"}} — once
+# `until` is strictly before today (string comparison on the fixed-width ISO date, so lexicographic
+# order == chronological order), the grant decays to "confirm" (the standing approval expires; it
+# does not flip to "deny"). An `until` on today or in the future is still honored.
+# Fail-open to "confirm" (= the pre-grants confirm-first behavior) whenever resolution is
+# uncertain: no jq, no resolvable base, no grants.json, missing key, unrecognized value, or a
+# malformed `until` (not exactly YYYY-MM-DD).
+# Read-only — this helper never writes grants.json (that is the ai-context skill's job).
+# Usage: _ai_context_grant <key> [cwd]
+_ai_context_grant() {
+    _acg_key="$1"
+    [ -z "$_acg_key" ] && { echo confirm; return 0; }
+    command -v jq >/dev/null 2>&1 || { echo confirm; return 0; }
+    _acg_base=$(_ai_context_base_dir "${2:-$PWD}")
+    [ -z "$_acg_base" ] && { echo confirm; return 0; }
+    _acg_file="$_acg_base/meta/grants.json"
+    [ -f "$_acg_file" ] || { echo confirm; return 0; }
+    # value: plain string form, or the .value field of the time-boxed object form
+    _acg_val=$(jq -r --arg k "$_acg_key" '
+        .grants[$k] as $g
+        | if ($g | type) == "string" then $g
+          elif ($g | type) == "object" then ($g.value // empty)
+          else empty end
+    ' "$_acg_file" 2>/dev/null)
+    case "$_acg_val" in
+        allow|deny) ;;
+        *) echo confirm; return 0 ;;
+    esac
+    # until: only present on the object form; empty for the plain-string form (no expiry)
+    _acg_until=$(jq -r --arg k "$_acg_key" '
+        .grants[$k] as $g
+        | if ($g | type) == "object" then ($g.until // empty) else empty end
+    ' "$_acg_file" 2>/dev/null)
+    if [ -n "$_acg_until" ]; then
+        case "$_acg_until" in
+            [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) ;;
+            *) echo confirm; return 0 ;;
+        esac
+        _acg_today=$(date +%Y-%m-%d 2>/dev/null)
+        [ -z "$_acg_today" ] && { echo confirm; return 0; }
+        if awk -v u="$_acg_until" -v t="$_acg_today" 'BEGIN { exit !(u < t) }'; then
+            echo confirm; return 0
+        fi
+    fi
+    echo "$_acg_val"
+}
+
 # Primary use is sourcing the functions. Skills / CLI can fetch one line via explicit flags:
 #   base=$(sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD")
 #   author=$(sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --author "$PWD")
@@ -321,4 +389,6 @@ case "${1:-}" in
     --author)  _ai_context_author "${2:-$PWD}" ;;
     --ws-pointer)        _c="${2:-$PWD}"; _ai_context_ws_pointer "$(_ai_context_base_dir "$_c")" "$_c" ;;
     --ws-pointer-target) _c="${2:-$PWD}"; _ai_context_ws_pointer_target "$(_ai_context_base_dir "$_c")" "$_c" ;;
+    --ws-key)            _c="${2:-$PWD}"; _ai_context_ws_key "$(_ai_context_base_dir "$_c")" "$_c" ;;
+    --grant)             _ai_context_grant "${2:-}" "${3:-$PWD}" ;;
 esac

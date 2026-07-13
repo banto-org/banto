@@ -86,8 +86,8 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
   `tasks/` (legacy read-fallback only, never auto-created) / `WORKSPACE.md` (pointer fallback for non-git checkouts;
   the primary pointer lives at `<git-dir>/banto-ws-pointer.md`). The old `refs/` bucket (doc-import) was retired in 5.75.10.
 
-- **grandfather (legacy)**: projects that already have an in-repo `.ai-context/` keep using the same bucket structure
-  on the in-repo base until they migrate (`/ai-context migrate`) — read/write stays as before. Nothing new is generated.
+- **In-repo `.ai-context/`**: never a resolver target. Scaffold non-destructively auto-migrates it into the store
+  under the same bucket structure on detection (originals are kept). Nothing new is generated in-repo.
 - The store's gitignore divisions are managed centrally in `<store_root>/.gitignore` (no per-project .gitignore).
 
 **Don't touch the project's mainline documents (`docs/requirements.md`, etc.).**

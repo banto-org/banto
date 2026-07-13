@@ -85,13 +85,18 @@ B2=$(sh "$DIR/scripts/_ai-context-paths.sh" --resolve "$R2")
 [ "$B1" != "$B2" ] && ok "collision: two repos resolve to distinct dirs" || bad "collision: same dir ($B1)"
 case "$B1" in "$TMP/local/"*) ok "collision: first repo resolves into the local store" ;; *) bad "collision: first repo not local ($B1)" ;; esac
 
-# === case 8: grandfather — 既存の repo 内 .ai-context は触らず local/central 登録もしない ===
-G="$TMP/leg"; mkdir -p "$G/.ai-context/decisions"; git -C "$G" init -q
+# === case 8: in-repo .ai-context 廃止（2026-07-08）— その場読みをやめ、store へ自動移行 + 登録（非破壊） ===
+G="$TMP/leg"; mkdir -p "$G/.ai-context/decisions"; printf '# d\n' > "$G/.ai-context/decisions/legacy-note.md"; git -C "$G" init -q
 BEFORE=$(jq '.projects | length' "$LMAP")
-_ai_context_scaffold "$G" >/dev/null
-[ "$(jq '.projects | length' "$LMAP")" = "$BEFORE" ] && ok "grandfather: no local registration" || bad "grandfather: registered locally"
-[ ! -e "$TMP/local/leg" ] && ok "grandfather: no local store dir" || bad "grandfather: local store dir created"
-[ ! -e "$TMP/store/leg" ] && ok "grandfather: no central store dir" || bad "grandfather: central store dir created"
+GOUT=$(_ai_context_scaffold "$G")
+GTOP=$(git -C "$G" rev-parse --show-toplevel)
+GPROJ=$(jq -r --arg t "$GTOP" '.projects[$t].project // empty' "$LMAP" 2>/dev/null)
+[ "$(jq '.projects | length' "$LMAP")" -gt "$BEFORE" ] && ok "abolish: legacy repo now registered (local)" || bad "abolish: not registered"
+[ -n "$GPROJ" ] && [ -d "$TMP/local/$GPROJ" ] && ok "abolish: local store dir created" || bad "abolish: local store dir missing (proj=$GPROJ)"
+[ -n "$GPROJ" ] && [ -f "$TMP/local/$GPROJ/decisions/legacy-note.md" ] && ok "abolish: in-repo decision migrated into the store" || bad "abolish: content not migrated"
+[ -n "$GPROJ" ] && [ -f "$TMP/local/$GPROJ/meta/.migrated-from-inrepo" ] && ok "abolish: migration marker written (store side)" || bad "abolish: marker missing"
+[ -d "$G/.ai-context" ] && ok "abolish: in-repo .ai-context left intact (non-destructive)" || bad "abolish: in-repo dir removed"
+case "$GOUT" in *"Migrated in-repo .ai-context"*) ok "abolish: migration notice printed" ;; *) bad "abolish: no migration notice" ;; esac
 
 # === case 9: local 固定（/ai-context local 相当）→ mapping local:true・bootstrap でスキップ ===
 RL="$TMP/pinned/repo"; mkdir -p "$RL"; git -C "$RL" init -q

@@ -14,7 +14,7 @@ compatibility: Claude Code (requires bash, git, jq)
 # Plugin Dev — Claude Code Plugin Development Support
 
 Detailed reference material lives in `references/`. Read it only when needed.
-If the user converses in Japanese, respond in Japanese.
+Output language: respond in the conversation language (follow `writing-ja.md` for Japanese).
 
 Official basis: https://code.claude.com/docs/en/plugins-reference (see also [`references/sources.md`](references/sources.md)).
 
@@ -147,7 +147,7 @@ claude plugin install <plugin>[@marketplace] [--scope user|project|local]
 - Applying changes: `/reload-plugins` (reloads all of skills / agents / hooks / MCP / LSP)
 - semver required (`MAJOR.MINOR.PATCH`), document in `CHANGELOG.md`; without a version bump, caching prevents existing users from receiving updates
 - Official submission: https://claude.ai/settings/plugins/submit
-- Post-development audit: `/plugin-audit` for official compliance (Phases 1-8.5) + the 14-axis quality audit (Phase 9, see [`references/quality-scoring.md`](references/quality-scoring.md))
+- Post-development audit: `/plugin-audit` for official compliance (Phases 1-8.5) + the 15-axis quality audit (Phase 9, see [`references/quality-scoring.md`](references/quality-scoring.md))
 
 ## Common mistakes
 

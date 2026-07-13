@@ -3,7 +3,7 @@ name: plugin-audit
 description: |
   既存の Claude Code プラグイン、または単一スキルを、公式ベストプラクティスと突き合わせて監査し、不整合を検出して修正を提案する。引数にプラグインパスまたはスキルパスを渡せる（スキル単位監査）。
   トリガー: 「プラグイン監査して」「この skill の品質チェック」「SKILL.md をベストプラクティスと突き合わせて」「15 軸で見て」。/plugin-audit でも呼び出し可能。監査自体は read-only であり、修正の適用にはユーザー承認が必要。
-  使わない場面: ハーネス全体をシステムとして監査する場合（harness-audit）、プラグインを生成 / リファクタする場合（plugin-dev）。
+  使わない場面: ハーネス全体をシステムとして監査する場合（harness-audit）、プラグインを生成 / リファクタする場合（plugin-dev）、skill 単体をコンテキストエンジニアリング視点（情報の最小性等）で監査したい場合（skill-audit）。
 user-invocable: true
 argument-hint: "[eval|verify|fix|global] [プラグインパス または skills/<name>（省略時はカレントディレクトリ）]"
 allowed-tools: Read Write Edit Glob Grep Bash Agent
@@ -12,10 +12,11 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # Plugin Audit — プラグイン公式ベストプラクティス監査
 
-ユーザーが日本語で会話している場合は、日本語で応答する。
+出力言語: 応答は会話言語で書く（日本語なら `writing-ja.md` 準拠）。
 
 > **メタ監査の責務分担**:
-> - **plugin-audit（この skill）** = プラグイン / 単一スキルの**品質**監査（公式準拠 + 15 軸構造評価）。引数に `skills/<name>` を渡すと**スキル単位監査（= skill-audit）** になる — 別 skill ではなく、この skill のモードとして提供する。
+> - **plugin-audit（この skill）** = プラグイン / 単一スキルの**品質**監査（公式準拠 + 15 軸構造評価）。引数に `skills/<name>` を渡すとスキル単位監査になる。
+> - **skill-audit** = 単一 skill に絞った**コンテキストエンジニアリング**監査（情報の最小性 / 人間専用情報の混入 / 構成の分担 / 実行モデル指定 / コンテキスト効率 / 想定 AI 整合 / 決定論との分担の 7 軸）。plugin-audit の 15 軸品質監査より狭く、実行に必要な情報だけを渡せているかに絞る別 skill。
 > - **harness-audit** = ハーネスの**全体システム**監査（思想整合 / 死蔵機能 / 鮮度 / インストールポリシー / Claude 機能整合）。「スキル品質は完璧だが機能が死蔵 or ドリフトしている = それでも壊れている」を拾う別レイヤー。
 > - **plugin-dev** = 生成とリファクタ（監査は plugin-audit に委譲）。
 
@@ -47,27 +48,9 @@ Phase 1-8.5 は「動くか」を見る公式準拠チェック。Phase 9 は **
 - 評価基準（15 軸の定義）: [`references/scoring.md`](references/scoring.md)
 - 機能検証（`verify` サブコマンド — skill が発火したあと、claim 通りに実際に生成するか）: [`references/verify.md`](references/verify.md)
 
-**15 軸**（static = 監査スクリプトが計算 / agent = 独立サブエージェントが判定）:
+**15 軸**（static = 監査スクリプトが計算 / agent = 独立サブエージェントが判定）。各軸の定義は [`references/scoring.md`](references/scoring.md) が正本 — ここでは再掲しない。static 軸は 1/2/3/7/9/10/11/12/14/15（+5/6 の検出材料）、agent 軸は 4/6/7-semantic/8/12b/13/14-semantic。軸とスクリプトの対応は下記コマンド一覧を参照。
 
-| Axis | 内容 | 実行方法 |
-|------|------|---------|
-| 1 | YAML 構造妥当性（公式フィールド網羅 + ユースケース矛盾検出 + **argument-hint ↔ 実サブコマンド整合**）| static (`collect`/`report`/`interface`) |
-| 2 | 本文構造妥当性（≤500 行 / トークン予算 / 参照リンク妥当性 / 3 層 progressive loading）| static (`collect`/`report`) |
-| 3 | description ルーティング形式（"Use when..." / ネガティブ例 / ≤50 語）| static (`collect`/`report`) |
-| 4 | 実測ルーティング精度（Precision / Recall / Forbidden）| agent（`eval-cases.yaml` に対する複数サブエージェント投票）|
-| 5 | HeavySkill 適用妥当性（推奨 / 不要 / 誤適用）| static 検出 + agent 判定 |
-| 6 | Cross-skill disambiguation（語彙重複 / 参照 / 境界曖昧さ）| static (`matrix`) + agent 境界判定 |
-| 7 | 汎用性（絶対パス / 個人名・組織名 / OS ツール前提 / 言語 / 文化 / ライセンス）| static regex (`collect`/`report`) + agent semantic |
-| 8 | 汎用性 / rule 外部化適性（`.claude/rules/` から読むべきハードコード基準）| agent 判定 |
-| 9 | Layer 3 ハーネスエンジニアリング整合性（path-scoping + hook-enforce 候補 + hook 整合）| static (`collect`/`report`) |
-| 10 | ODD 適用（odd.yaml 存在 + autonomy_level L0-L5 妥当性）| static (`collect`/`report`) |
-| 11 | 使用度（過去 N 日の commits + {base} 言及 → active/mentioned/dormant/likely-trim）| static (`usage`) |
-| 12 | 権限スコープ最小性 — **12a** 過剰付与（最小性）/ **12b** 宣言漏れ（runtime 正当性）| static (`permissions`) + agent |
-| 13 | 封じ込め（hook が実際に実行する危険コマンド / secret 生出力）| agent（block パターンと実実行を区別）|
-| 14 | Content hygiene（固有情報の漏れ / 貼り込まれた実行結果）— **skill サブツリー全体**（SKILL.md は collect、references/ + ネストは assets）| static regex (`collect`/`report`/`assets`) + agent semantic |
-| 15 | Cross-skill 参照整合（相関）— 同一 store パスを複数の綴り（`{base}`/`{BASE}`/`<base>`/`.ai-context`）で参照する乖離、接頭辞の非正準混在、命名形式の不一致 | static (`consistency`) |
-
-**静的軸 — スクリプトを実行**（Axis 1 / 2 / 3 / 7 / 9 / 10 / 11 / 12 / 14 / 15、加えて 5 / 6 の検出材料）:
+**静的軸 — スクリプトを実行**:
 
 ```bash
 # Static structural audit (Axes 1/2/3/5-detect/7/9/10/14 + material for 6)
@@ -125,7 +108,13 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-odd.sh <plugin_dir>
 ${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-usage.sh --skill skills/<name> [since_days]
 ```
 
-`collect.sh` / `report.sh` はプラグインディレクトリを前提とするので、スキル単位監査では「その skill の SKILL.md を直接 Read し Axis 1/2/3/5/12 を Agent で判定」と `usage.sh --skill` を組み合わせる。引数が単一スキルかプラグインかは `skills/` サブディレクトリの有無で判定する。
+`collect.sh` / `report.sh` はプラグインディレクトリを前提とするため、スキル単位監査は次の手順で代替する:
+
+1. 引数が単一スキルかプラグインかを `skills/` サブディレクトリの有無で判定する（あればプラグイン、無ければ単一スキル）
+2. 対象の `SKILL.md`（+ `references/` があれば）を Read する
+3. `usage.sh --skill` を実行して使用度（Axis 11）を得る
+4. Axis 1/2/3/5/12 は、Read した内容を [`references/scoring.md`](references/scoring.md) の各軸定義と突き合わせて Agent が判定する
+5. Critical → Warning → Info の順でレポート形式（下記）にまとめる
 
 **サブコマンド（モード）**:
 
@@ -136,15 +125,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-usage.sh --skill skills/<name> [since
 | `plugin-audit verify` | 機能検証 — Tier A/B の skill を sandbox で end-to-end 実行し、その `verify-cases.yaml` に対して検証する（[`references/verify.md`](references/verify.md)）| 数分 |
 | `plugin-audit fix` | Agent が修正提案 → 対話承認 + Axis 8 rule 外部化 + **軽量化提案**（既定レポートの shapeup トリガーを Agent がレビュー → 分割 / 抽出 / rule 化 / 統合。閾値超過は失敗でなくレビュー対象）| 数十秒 |
 
-`global` 修飾子（任意サフィックス）は公開配布基準（言語 / 文化 / ライセンスチェック ON）に切り替える。
-
-**改善提案フロー**:
-
-1. レポート生成後、違反（構造 + 判定軸の指摘）を Critical を先頭に提示する
-2. どこから改善するかをテキストで確認する
-3. 対象ファイルの修正案を提示する（review-then-fix、description は決して自動書き換えしない）
-
-**Reviewer = Fresh Agent 原則**: 判定作業（特に eval / fix）はメインセッションの self-evaluation bias を避けるため、Agent サブエージェントが独立に判定する。
+`global` 修飾子（任意サフィックス）は公開配布基準（言語 / 文化 / ライセンスチェック ON）に切り替える。改善提案の対話フローは下記「修正フロー」を参照（review-then-fix、description は決して自動書き換えしない。判定は Reviewer = Fresh Agent 原則に従う）。
 
 ## 監査レポート形式
 
@@ -174,7 +155,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-usage.sh --skill skills/<name> [since
 
 ## 修正フロー
 
-監査を実行しレポートを生成したあと（手順は audit-phases.md の Phase 1-8）、以下の対話フローで修正する。上記「改善提案フロー」の review-then-fix を具体化したもの。
+監査を実行しレポートを生成したあと（手順は audit-phases.md の Phase 1-8）、以下の対話フローで修正する。
 
 ### Step 1: 結果をユーザーに提示 + 修正を確認
 

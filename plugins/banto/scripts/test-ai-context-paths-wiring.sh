@@ -2,7 +2,8 @@
 # test-ai-context-paths-wiring.sh — regression test for wiring hooks through _ai-context-paths.sh.
 #
 # Invariants verified (store-first resolution order, spec 2026-06-11_store-first-architecture):
-#   1. grandfather (existing in-repo .ai-context) → DEC_DIR stays <cwd>/.ai-context/decisions
+#   1. in-repo .ai-context ABOLISHED (2026-07-08) → NOT a resolution target; base falls through to
+#      derive (in-repo .ai-context/decisions is ignored, so no naming warning fires)
 #   2. central (mapping registered)               → DEC_DIR redirects to <store>/<project>/decisions
 #   3. unregistered + no legacy + empty store     → derive target has no decisions (negative control)
 #   4. unregistered + no legacy + store has <dirname>/decisions → derive resolves into the store
@@ -61,8 +62,10 @@ fail=0
 check() { if [ "$2" = "$3" ]; then printf '  ok  %s\n' "$1"; else printf '  FAIL %s\n    expected: %s\n    actual:   %s\n' "$1" "$2" "$3"; fail=1; fi; }
 
 echo "== hook wiring regression test (store-first) =="
-# grandfather: nonexistent mapping + empty store → in-repo .ai-context wins over derive
-check "grandfather: resolves local .ai-context (kept working)" "yes" "$(naming_emitted "$LEG" "$TMP/none.json" "$STORE2")"
+# in-repo .ai-context ABOLISHED (2026-07-08): NOT a resolution target. Nonexistent mapping + empty
+# store → LEG resolves to the (empty) derive store, so the in-repo .ai-context/decisions is ignored
+# → no naming warning (proves the in-repo dir no longer wins over derive).
+check "abolish: in-repo .ai-context ignored (not resolved as base)" "no" "$(naming_emitted "$LEG" "$TMP/none.json" "$STORE2")"
 # central: mapping registered → resolves store/projX/decisions despite no local .ai-context
 check "central: redirects to store/projX (mapping honored)" "yes" "$(naming_emitted "$CEN" "$TMP/.mapping.json" "$STORE")"
 # negative control: unregistered + no legacy + derive target lacks decisions/ → silent

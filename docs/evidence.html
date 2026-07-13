@@ -120,19 +120,110 @@
 <!-- NAV -->
 <header class="nav" id="nav">
  <div class="nav-inner">
-  <a class="brand" href="index.html" aria-label="Banto home">
+  <a class="brand" href="index.html" aria-label="Banto">
     <span class="seal" aria-hidden="true">番</span>
     <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
   </a>
   <nav class="nav-links" aria-label="primary">
-    <a href="#claim" class="lx" lang="en">The claim</a><a href="#claim" class="lx" lang="ja">主張</a>
-    <a href="#resume" class="lx" lang="en">Proof</a><a href="#resume" class="lx" lang="ja">実証</a>
-    <a href="#cost" class="lx" lang="en">Cost</a><a href="#cost" class="lx" lang="ja">コスト</a>
-    <a href="#conclusion" class="lx" lang="en">Conclusion</a><a href="#conclusion" class="lx" lang="ja">結論</a>
-    <a href="#method" class="lx" lang="en">Method</a><a href="#method" class="lx" lang="ja">方法</a>
-    <a href="ai-context-store.html" class="lx" lang="en">AI-Context-Store</a><a href="ai-context-store.html" class="lx" lang="ja">コンテキストストア</a>
+    <div class="nav-item has-menu">
+      <a href="index.html" class="lx" lang="en" aria-haspopup="true">Home</a><a href="index.html" class="lx" lang="ja" aria-haspopup="true">ホーム</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="index.html#why"><span class="lx" lang="en">The contract</span><span class="lx" lang="ja">番頭の契約</span></a>
+          <a href="index.html#flagships"><span class="lx" lang="en">Flagships</span><span class="lx" lang="ja">3 つの目玉</span></a>
+          <a href="index.html#checkpoint"><span class="lx" lang="en">Folding a session</span><span class="lx" lang="ja">セッションを畳む</span></a>
+          <a href="index.html#pipeline"><span class="lx" lang="en">Pipeline</span><span class="lx" lang="ja">SDD パイプライン</span></a>
+          <a href="index.html#safety"><span class="lx" lang="en">Safety</span><span class="lx" lang="ja">決定論的な安全</span></a>
+          <a href="index.html#feel"><span class="lx" lang="en">How it feels</span><span class="lx" lang="ja">使い心地</span></a>
+          <a href="index.html#install"><span class="lx" lang="en">Install</span><span class="lx" lang="ja">インストール</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="toolset.html" class="lx" lang="en" aria-haspopup="true">Toolset</a><a href="toolset.html" class="lx" lang="ja" aria-haspopup="true">道具一式</a>
+      <div class="nav-menu">
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Pipeline (SDD)</span><span class="nav-menu-head lx" lang="ja">パイプライン（SDD）</span>
+          <a href="toolset.html#concept"><b>concept</b><span class="lx" lang="en">forge the ideology</span><span class="lx" lang="ja">思想を鍛える</span></a>
+          <a href="toolset.html#design-brief"><b>design-brief</b><span class="lx" lang="en">vague ask → design spec</span><span class="lx" lang="ja">曖昧な依頼をデザイン仕様へ</span></a>
+          <a href="toolset.html#spec"><b>spec</b><span class="lx" lang="en">interactive design docs</span><span class="lx" lang="ja">対話で設計書</span></a>
+          <a href="toolset.html#dev-loop"><b>dev-loop</b><span class="lx" lang="en">self-driving build</span><span class="lx" lang="ja">自走ビルド</span></a>
+          <a href="toolset.html#ai-build"><b>ai-build</b><span class="lx" lang="en">AI feature flow · eval</span><span class="lx" lang="ja">AI 構築フロー · eval</span></a>
+          <a href="toolset.html#model-lab"><b>model-lab</b><span class="lx" lang="en">train models · verify · paper</span><span class="lx" lang="ja">モデル学習 · 検証 · 論文</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Knowledge &amp; context</span><span class="nav-menu-head lx" lang="ja">知識 &amp; コンテキスト</span>
+          <a href="toolset.html#ai-context"><b>ai-context</b><span class="lx" lang="en">decisions · memo · store</span><span class="lx" lang="ja">決定 · メモ · ストア</span></a>
+          <a href="toolset.html#search"><b>search</b><span class="lx" lang="en">internal search, no web</span><span class="lx" lang="ja">内部検索（web なし）</span></a>
+          <a href="toolset.html#research"><b>research</b><span class="lx" lang="en">external, saved to store</span><span class="lx" lang="ja">外部調査 → ストア</span></a>
+          <a href="toolset.html#save-checkpoint"><b>save-checkpoint</b><span class="lx" lang="en">session snapshot</span><span class="lx" lang="ja">セッション保存</span></a>
+          <a href="toolset.html#webread"><b>webread</b><span class="lx" lang="en">full-text, no summary</span><span class="lx" lang="ja">要約なし全文取得</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Documents &amp; writing</span><span class="nav-menu-head lx" lang="ja">資料 &amp; 文章</span>
+          <a href="toolset.html#ja-writing"><b>ja-writing</b><span class="lx" lang="en">audience-tuned Japanese</span><span class="lx" lang="ja">受け手に合わせた日本語</span></a>
+          <a href="toolset.html#diagram"><b>diagram</b><span class="lx" lang="en">SVG · mermaid · draw.io</span><span class="lx" lang="ja">図解の実務パターン</span></a>
+          <a href="toolset.html#b2b-docs"><b>b2b-docs</b><span class="lx" lang="en">proposals &amp; decks</span><span class="lx" lang="ja">提案書 &amp; 営業資料</span></a>
+          <a href="toolset.html#html-doc"><b>html-doc</b><span class="lx" lang="en">self-contained HTML docs</span><span class="lx" lang="ja">自己完結 HTML 資料</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Workspace &amp; meta</span><span class="nav-menu-head lx" lang="ja">ワークスペース &amp; メタ</span>
+          <a href="toolset.html#ws"><b>ws</b><span class="lx" lang="en">workspace &amp; fleet</span><span class="lx" lang="ja">ワークスペース &amp; 艦隊</span></a>
+          <a href="toolset.html#set-language"><b>set-language</b><span class="lx" lang="en">JA ⇄ EN, sticky</span><span class="lx" lang="ja">日英切替（永続）</span></a>
+          <a href="toolset.html#plugin-dev"><b>plugin-dev</b><span class="lx" lang="en">scaffold &amp; refactor</span><span class="lx" lang="ja">生成 &amp; 改修</span></a>
+          <a href="toolset.html#plugin-audit"><b>plugin-audit</b><span class="lx" lang="en">15-axis quality audit</span><span class="lx" lang="ja">15 軸品質監査</span></a>
+          <a href="toolset.html#skill-audit"><b>skill-audit</b><span class="lx" lang="en">7-axis context audit</span><span class="lx" lang="ja">7 軸コンテキスト監査</span></a>
+          <a href="toolset.html#kit"><b>kit</b><span class="lx" lang="en">discover everything</span><span class="lx" lang="ja">全機能カタログ</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Agents</span><span class="nav-menu-head lx" lang="ja">エージェント</span>
+          <a href="toolset.html#architect"><b>architect</b><span class="lx" lang="en">design &amp; tradeoffs</span><span class="lx" lang="ja">設計 &amp; トレードオフ</span></a>
+          <a href="toolset.html#debugger"><b>debugger</b><span class="lx" lang="en">reproduce · fix · verify</span><span class="lx" lang="ja">再現 · 修正 · 検証</span></a>
+          <a href="toolset.html#qa-tester"><b>qa-tester</b><span class="lx" lang="en">E2E across web/desktop/mobile</span><span class="lx" lang="ja">web/desktop/mobile 横断 E2E</span></a>
+          <a href="toolset.html#research-agent"><b>research-agent</b><span class="lx" lang="en">parallel web research</span><span class="lx" lang="ja">並列 web 調査</span></a>
+          <a href="toolset.html#search-agent"><b>search-agent</b><span class="lx" lang="en">parallel internal grep (haiku)</span><span class="lx" lang="ja">並列内部検索（haiku）</span></a>
+          <a href="toolset.html#context-keeper"><b>context-keeper</b><span class="lx" lang="en">search-index maintenance</span><span class="lx" lang="ja">検索インデックス保守</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="mechanism.html" class="lx" lang="en" aria-haspopup="true">Mechanism</a><a href="mechanism.html" class="lx" lang="ja" aria-haspopup="true">仕組み</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="mechanism.html#hooks"><span class="lx" lang="en">The whole picture</span><span class="lx" lang="ja">全体像</span></a>
+          <a href="mechanism.html#flagship"><span class="lx" lang="en">The 7 flagship hooks</span><span class="lx" lang="ja">目玉 7 hook</span></a>
+          <a href="mechanism.html#principles"><span class="lx" lang="en">Design principles</span><span class="lx" lang="ja">設計原則</span></a>
+          <a href="mechanism.html#odd"><span class="lx" lang="en">ODD — declared autonomy</span><span class="lx" lang="ja">ODD — 自律性の宣言</span></a>
+          <a href="mechanism.html#enforce"><span class="lx" lang="en">Declaration → enforcement</span><span class="lx" lang="ja">宣言 → 強制</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="store.html" class="lx" lang="en" aria-haspopup="true">Store</a><a href="store.html" class="lx" lang="ja" aria-haspopup="true">ストア</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="store.html#store"><span class="lx" lang="en">What accumulates</span><span class="lx" lang="ja">何が貯まるか</span></a>
+          <a href="store.html#search"><span class="lx" lang="en">Cross-store search</span><span class="lx" lang="ja">横断検索</span></a>
+          <a href="store.html#team"><span class="lx" lang="en">Git &amp; teams</span><span class="lx" lang="ja">git &amp; 複数人</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="evidence.html" class="lx" lang="en" aria-haspopup="true">Evidence</a><a href="evidence.html" class="lx" lang="ja" aria-haspopup="true">実測</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="evidence.html#claim"><span class="lx" lang="en">The claim</span><span class="lx" lang="ja">主張と実測</span></a>
+          <a href="evidence.html#resume"><span class="lx" lang="en">Resume</span><span class="lx" lang="ja">「続き」は通じるか</span></a>
+          <a href="evidence.html#knowledge"><span class="lx" lang="en">Knowledge</span><span class="lx" lang="ja">知識はどこから来るか</span></a>
+          <a href="evidence.html#boundary"><span class="lx" lang="en">Boundary</span><span class="lx" lang="ja">残る差は何か</span></a>
+          <a href="evidence.html#cost"><span class="lx" lang="en">Cost</span><span class="lx" lang="ja">思い出す方が安いか</span></a>
+          <a href="evidence.html#limitations"><span class="lx" lang="en">Limitations</span><span class="lx" lang="ja">限界の開示</span></a>
+        </div>
+      </div>
+    </div>
   </nav>
   <div class="nav-right">
+    <button class="nav-burger" aria-label="menu" aria-expanded="false" aria-controls="nav"><span></span></button>
     <div class="lang-toggle" role="group" aria-label="language">
       <button data-setlang="en" class="on">EN</button>
       <button data-setlang="ja">日本語</button>
@@ -162,7 +253,7 @@
       models, run with and without the store, on the work developers actually do. Every number below is measured.
     </p>
     <p class="lede reveal lx" lang="ja">
-      ボトルネックはもう「モデルがどれだけコードを書けるか」ではない。「プロジェクトが何を決めたかを覚えているか」だ。
+      ボトルネックはもう「モデルがどれだけコードを書けるか」ではない —「プロジェクトが何を決めたかを覚えているか」。
       Banto はその記憶を AI に与える — <b>ai-context store</b>。同じ Claude モデルを store あり・なしで走らせ、
       開発者が実際にやる作業でぶつけた。以下の数値はすべて実測。
     </p>
@@ -361,8 +452,6 @@ store/（ハーネス条件のみに見える）
       <span class="ev-cap lx" lang="en">with the store — average correct</span><span class="ev-cap lx" lang="ja">store あり — 平均正答</span>
     </div>
   </div>
-  <p class="fine reveal lx" lang="en" style="text-align:center">Partial-credit scoring, reference value only — binary re-scoring not yet run.</p>
-  <p class="fine reveal lx" lang="ja" style="text-align:center">部分点採点・参考値（二値再採点は未実施）。</p>
 
   <p class="prose-p reveal lx" lang="en" style="margin-top:26px">And the store even lifts a weak model to the top. On the separate file-finding benchmark (fully binary, exact path match):</p>
   <p class="prose-p reveal lx" lang="ja" style="margin-top:26px">しかも store は弱いモデルを頂点まで引き上げる。別のファイル探しベンチ（完全二値・パス完全一致）では：</p>
@@ -377,8 +466,8 @@ store/（ハーネス条件のみに見える）
       <span class="ev-cap lx" lang="en">after — best of 3 runs (7, 8, 10), machine-scored</span><span class="ev-cap lx" lang="ja">再設計後 — 3 回中の最高（内訳 7, 8, 10）・機械採点</span>
     </div>
   </div>
-  <p class="fine reveal lx" lang="en" style="text-align:center">Fully binary scoring (exact path match, no partial credit). In the model &times; effort matrix, <span class="win">haiku at effort low scored 9/10 — the same as opus 4.8 at effort high</span>. Method: <a href="store-search.html#measured">Store Search → Measured</a>.</p>
-  <p class="fine reveal lx" lang="ja" style="text-align:center">こちらは完全二値の採点（パス完全一致・部分点なし）。モデル × effort の総当たりでは、<span class="win">haiku の effort low（最低設定）が 9/10 — opus 4.8 の effort high（最高設定）と同点</span>。方法は <a href="store-search.html#measured">Store Search → 実測</a>。</p>
+  <p class="fine reveal lx" lang="en" style="text-align:center">Fully binary scoring (exact path match, no partial credit). In the model &times; effort matrix, <span class="win">haiku at effort low scored 9/10 — the same as opus 4.8 at effort high</span>. Method: <a href="store.html#search">Store Search → Measured</a>.</p>
+  <p class="fine reveal lx" lang="ja" style="text-align:center">こちらは完全二値の採点（パス完全一致・部分点なし）。モデル × effort の総当たりでは、<span class="win">haiku の effort low（最低設定）が 9/10 — opus 4.8 の effort high（最高設定）と同点</span>。方法は <a href="store.html#search">Store Search → 実測</a>。</p>
 
   <ul class="obs-list reveal">
     <li class="lx" lang="en">In the bare condition, every model reported project-specific measured values as "unknown" (zero fabrication = honest). Only opus and fable partially reconstructed the mechanism from general knowledge (example: deriving from first principles that 8 blocks ÷ 32 threads = 25% SIMD utilization).</li>
@@ -483,7 +572,7 @@ store/（ハーネス条件のみに見える）
     <li class="lx" lang="en">The difference came from boundary judgment. The harness group derived "don't publish the conversation cache" from the canonical reference's scope (shared / personal / ephemeral). Bare×sonnet didn't know this and published the plaintext of a security-review conversation in full (no real harm — inside a test environment; in production this would be an NDA / personal-data incident).</li>
     <li class="lx" lang="ja">差が出たのは境界の判断。ハーネス群は正本の scope（共有 / 個人 / 一時）から「会話キャッシュは公開しない」を導いた。ハーネスなし × sonnet はそれを知らず、セキュリティレビュー会話の平文を全公開した（検証環境内のため実害なし。実運用なら NDA / 個人情報事故）。</li>
     <li class="lx" lang="en">Tokens: bare×sonnet out 37.5k → harness×sonnet out 19.7k. Having the canonical reference means "not building what doesn't need building" — it raised the score from 8.0 to 9.8 while halving the output.</li>
-    <li class="lx" lang="ja">トークン: ハーネスなし × sonnet の out 37.5k → ハーネス × sonnet の out 19.7k。正本があると「作らなくてよいものを作らない」——スコアを 8.0 → 9.8 に上げながら出力を半減した。</li>
+    <li class="lx" lang="ja">トークン: ハーネスなし × sonnet の out 37.5k → ハーネス × sonnet の out 19.7k。正本があると「作らなくてよいものを作らない」 — スコアを 8.0 → 9.8 に上げながら出力を半減した。</li>
   </ul>
 </section>
 
@@ -539,7 +628,7 @@ store/（ハーネス条件のみに見える）
     <li class="lx" lang="en">The store is about 33% cheaper (web costs about 1.5x). The answer is fully contained in one 150-line file in the store, while web search pulls in a long model-card body on top of the search itself, inflating both input and output.</li>
     <li class="lx" lang="ja">store が約 33% 安い（web は約 1.5 倍）。正解は store 内の 150 行 1 ファイルで完結し、web は検索 + 長大なモデルカード本文の取り込みで入出力とも膨らむ。</li>
     <li class="lx" lang="en">Secondary finding: some numbers in the answers disagreed between conditions — the public page had been updated since the store fetched it, so the store is cheap but can go stale. The correct operating rule is to go to the web only for freshness-sensitive questions — exactly the ordering in banto's evidence-first rule.</li>
-    <li class="lx" lang="ja">副次発見: 回答の一部数値が条件間で不一致——公開ページが store 取得後に更新されており、store は安いが古くなり得る。鮮度が効く問いだけ web へ、が正しい運用（banto の evidence-first ルールの順序そのもの）。</li>
+    <li class="lx" lang="ja">副次発見: 回答の一部数値が条件間で不一致 — 公開ページが store 取得後に更新されており、store は安いが古くなり得る。鮮度が効く問いだけ web へ、が正しい運用（banto の evidence-first ルールの順序そのもの）。</li>
   </ul>
 </section>
 
@@ -557,7 +646,7 @@ store/（ハーネス条件のみに見える）
     </div>
     <div class="card reveal">
       <h3 style="font-size:16.5px"><span class="sub" style="font-family:var(--mono);font-size:12px;color:var(--ink-soft)">R2</span> &nbsp;<span class="lx" lang="en">Strong models tie; the risk is self-verification</span><span class="lx" lang="ja">強モデルは同点・危ういのは自己検証</span></h3>
-      <p style="font-size:14px;color:var(--ink-2);margin-top:10px;line-height:1.6"><span class="lx" lang="en">At ~400 documents, bare vs harness accuracy was identical for sonnet / opus / fable (10/10 either way). The only mover was haiku — and its errors trace to one root cause: it hit a filename-glob trap, got 0 results, and accepted the 0 without re-checking. Sonnet hit the same trap and caught itself. That self-correction — not the store — is the real line for whether a model can be trusted to implement.</span><span class="lx" lang="ja">400 文書規模では、sonnet / opus / fable は store あり・なしで同点（どちらも 10/10）。動いたのは haiku だけで、その誤りの正体は「自己検証の欠如」— ファイル名 glob の罠で 0 件になり、その 0 件を無検証で受理した。sonnet は同じ罠を踏んでも自力で気づいた。実装を任せられるかの線引きは store ではなく、この self-correction の有無。</span></p>
+      <p style="font-size:14px;color:var(--ink-2);margin-top:10px;line-height:1.6"><span class="lx" lang="en">At ~400 documents, bare vs harness accuracy was identical for sonnet / opus / fable (10/10 either way). The only mover was haiku — and its errors trace to one root cause: it hit a filename-glob trap, got 0 results, and accepted the 0 without re-checking. Sonnet hit the same trap and caught itself. That self-correction — not the store — is the real line for whether a model can be trusted to implement.</span><span class="lx" lang="ja">400 文書規模では、sonnet / opus / fable は store あり・なしで同点（どちらも 10/10）。動いたのは haiku だけで、その誤りの正体は「自己検証の欠如」。ファイル名 glob の罠で 0 件になり、その 0 件を無検証で受理した。sonnet は同じ罠を踏んでも自力で気づいた。実装を任せられるかの線引きは store ではなく、この self-correction の有無。</span></p>
     </div>
   </div>
   <p class="fine reveal" style="margin-top:16px"><span class="lx" lang="en">Neither result is painted red — there is no Banto advantage to highlight. That is the point of showing them.</span><span class="lx" lang="ja">この 2 件に赤字はない — 強調すべき Banto 優位が無いから。それを見せることに意味がある。</span></p>
@@ -654,7 +743,7 @@ store/（ハーネス条件のみに見える）
     <h2><span class="lx" lang="en">The store, measured — not promised.</span><span class="lx" lang="ja">約束ではなく、測定された store。</span></h2>
     <p><span class="lx" lang="en">Same models, with a memory and a boundary. If that is the difference you want, the store is how Banto gives it to you.</span><span class="lx" lang="ja">同じモデルに、記憶と境界を。その差が欲しいなら、それを渡す仕組みが store。</span></p>
     <div style="display:flex;gap:14px;flex-wrap:wrap">
-      <a class="btn btn-primary" href="ai-context-store.html"><span class="lx" lang="en">How the store works →</span><span class="lx" lang="ja">store の仕組みを見る →</span></a>
+      <a class="btn btn-primary" href="store.html"><span class="lx" lang="en">How the store works →</span><span class="lx" lang="ja">store の仕組みを見る →</span></a>
       <a class="btn btn-ghost" href="index.html" style="color:var(--paper);border-color:rgba(245,240,230,.4)"><span class="lx" lang="en">Back to home</span><span class="lx" lang="ja">ホームへ戻る</span></a>
     </div>
   </div>

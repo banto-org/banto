@@ -57,6 +57,17 @@ if [ "$(cat "$FIX/skills/.banto-lang" 2>/dev/null)" = "en 1.0.0" ]; then ok "mar
 #     i18n (else set-language — active-only — would vanish on every language switch).
 if grep -q 'active-only switcher' "$FIX/skills/switcher/SKILL.md" 2>/dev/null; then ok "materialize preserves active-only skill (set-language invariant)"; else no "materialize wiped active-only skill — set-language would be lost"; fi
 
+# 4c) DRIFT GUARD: hand-editing the active tree directly (without touching the canonical)
+#     must make the next materialize call REFUSE rather than silently discard the edit.
+printf 'EN skill\nHAND-EDITED\n' > "$FIX/skills/foo/SKILL.md"
+if sh "$SC/i18n-materialize.sh" ja >/dev/null 2>&1; then no "materialize should REFUSE on hand-edited active tree"; else ok "drift guard refuses to overwrite a hand-edited active file"; fi
+if grep -q 'HAND-EDITED' "$FIX/skills/foo/SKILL.md" 2>/dev/null; then ok "drift guard preserved the hand-edit (no silent revert)"; else no "hand-edit was silently discarded"; fi
+if [ "$(cat "$FIX/skills/.banto-lang" 2>/dev/null)" = "en 1.0.0" ]; then ok "drift guard left marker unchanged (still en)"; else no "marker changed despite refused materialize"; fi
+# BANTO_MATERIALIZE_FORCE=1 bypasses the guard for an intentional override
+if BANTO_MATERIALIZE_FORCE=1 sh "$SC/i18n-materialize.sh" ja >/dev/null 2>&1; then ok "BANTO_MATERIALIZE_FORCE=1 bypasses the drift guard"; else no "force override should have succeeded"; fi
+printf 'EN skill\n' > "$FIX/i18n/en/skills/foo/SKILL.md"   # restore fixture to the pre-drift state
+sh "$SC/i18n-materialize.sh" en >/dev/null 2>&1             # re-sync active back to clean en
+
 # 5) reconcile is a NO-OP when no preference exists (fail-open)
 rm -f "$PREF"
 before=$(cat "$FIX/skills/.banto-lang")
@@ -67,6 +78,14 @@ if [ "$(cat "$FIX/skills/.banto-lang")" = "$before" ]; then ok "reconcile no-op 
 sh "$SC/set-language.sh" ja >/dev/null 2>&1
 if [ "$(cat "$PREF" 2>/dev/null)" = "ja" ]; then ok "preference persisted = ja"; else no "preference not persisted"; fi
 if grep -q 'JA skill' "$FIX/skills/foo/SKILL.md"; then ok "set-language materialized ja"; else no "active not ja after set-language"; fi
+
+# 6b) LEGITIMATE canonical update must NOT be blocked as drift: editing i18n/ja (the correct
+#     workflow) and re-materializing the SAME language must succeed — the guard compares against
+#     the last-materialized state, not live canonical, so this must not false-positive.
+printf 'JA skill\nupdated canonical\n' > "$FIX/i18n/ja/skills/foo/SKILL.md"
+if sh "$SC/i18n-materialize.sh" ja >/dev/null 2>&1; then ok "legitimate canonical update re-materializes without being flagged as drift"; else no "canonical update was wrongly refused as drift"; fi
+if grep -q 'updated canonical' "$FIX/skills/foo/SKILL.md" 2>/dev/null; then ok "active reflects the updated canonical"; else no "active did not pick up the canonical update"; fi
+printf 'JA skill\n' > "$FIX/i18n/ja/skills/foo/SKILL.md"   # restore fixture
 
 # 7) reconcile NO-OP when marker already matches preference + version
 m1=$(cat "$FIX/skills/.banto-lang")
@@ -82,6 +101,20 @@ if grep -q 'JA skill' "$FIX/skills/foo/SKILL.md" && [ "$(cat "$FIX/skills/.banto
 else
     no "sticky failed: active='$(head -1 "$FIX/skills/foo/SKILL.md")' marker='$(cat "$FIX/skills/.banto-lang")'"
 fi
+
+# 9) AUTO-MODE SAFETY: a translate command that produces empty output must leave the existing
+#    EN file untouched and the script must exit non-zero (regression guard: the translator used
+#    to write its empty/hung stdout straight into the EN file, destroying it in place).
+printf 'JA skill\nauto trigger\n' > "$FIX/i18n/ja/skills/foo/SKILL.md"
+before_en=$(cat "$FIX/i18n/en/skills/foo/SKILL.md")
+if BANTO_I18N_TRANSLATE_CMD=true sh "$SC/i18n-gen.sh" >/dev/null 2>&1; then
+    no "i18n-gen should exit non-zero when translate output is empty"
+else
+    ok "i18n-gen exits non-zero on empty translate output"
+fi
+if [ "$(cat "$FIX/i18n/en/skills/foo/SKILL.md")" = "$before_en" ]; then ok "existing EN left untouched on translate failure"; else no "EN file was overwritten with empty/invalid output"; fi
+printf 'JA skill\n' > "$FIX/i18n/ja/skills/foo/SKILL.md"   # restore fixture
+sh "$SC/i18n-gen.sh" --record >/dev/null 2>&1
 
 echo ""
 echo "i18n tests: $pass passed, $fail failed"

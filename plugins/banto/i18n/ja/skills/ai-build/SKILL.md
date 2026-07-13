@@ -76,7 +76,8 @@ odd.yaml = **L3（Autopilot＝継続実行＋例外時のみ owner 要求）**�
 | churn 停止 | `odd-gate.sh`（PreToolUse） | 連続失敗で edit をブロック → root cause へ |
 | 偽 green 防止 | `verify-claim-guard.sh`（Stop） | eval が red のまま「完了」主張をブロック |
 | 外部流出 | `egress-guard.sh` | client パスへの内部名 / PII 流出を遮断（eval ケースに本番データを混ぜない） |
-| 不可逆操作 | safety rule | push / PR / main / 削除 / 外部投稿は人間ゲート |
+
+不可逆操作（push / PR / main / 削除 / 外部投稿）は `safety` rule に従い人間ゲート。
 
 ## 使い方（インテント検出 — コマンド暗記は不要）
 

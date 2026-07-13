@@ -14,7 +14,7 @@ compatibility: Claude Code (requires bash, git, jq, python3)
 
 > **Search base (store-first)**: in this skill, `{base}` refers to the ai-context base. Search under the absolute path that the SessionStart/PreCompact hook injects as "ai-context base: &lt;absolute path&gt;" (when unknown, resolve it with `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`).
 
-When the user is conversing in Japanese, respond in Japanese (write the search report in Japanese too).
+Output language: respond and write the search report in the conversation language (follow `writing-ja.md` for Japanese).
 
 ## search vs research
 

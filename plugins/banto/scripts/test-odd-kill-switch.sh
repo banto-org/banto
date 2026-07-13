@@ -90,6 +90,27 @@ run_hook 'rm -rf ~'; [ $? -eq 2 ] \
 run_hook 'rm -r -f ./build'; [ $? -eq 0 ] \
     && ok "R4: split flags on relative path pass (negative)" || bad "R4: relative split flags blocked"
 
+# === ルール 5: rm が git 管理下ファイルを対象（warn only, no block） ===
+run_hook_cwd() {  # $1=command $2=cwd → stdout=stderr, exit code は $? に残る
+    printf '{"tool_name":"Bash","tool_input":{"command":%s},"cwd":%s}' \
+        "$(printf '%s' "$1" | jq -Rs .)" "$(printf '%s' "$2" | jq -Rs .)" \
+        | sh "$HOOK" 2>&1 >/dev/null
+}
+RM_REPO="$TMP/rm-repo"
+git init -q -b main "$RM_REPO"
+printf 'x' > "$RM_REPO/tracked.txt"
+( cd "$RM_REPO" && git add tracked.txt && git -c user.email=t@t -c user.name=t commit -q -m init )
+
+_rm_out=$(run_hook_cwd 'rm tracked.txt' "$RM_REPO"); _rm_rc=$?
+[ "$_rm_rc" -eq 0 ] && printf '%s' "$_rm_out" | grep -q "git-tracked file" \
+    && ok "R5: rm on tracked file warns (no block)" || bad "R5: rm on tracked file did not warn as expected (rc=$_rm_rc)"
+_rm_out2=$(run_hook_cwd 'rm untracked.txt' "$RM_REPO"); _rm_rc2=$?
+[ "$_rm_rc2" -eq 0 ] && ! printf '%s' "$_rm_out2" | grep -q "git-tracked file" \
+    && ok "R5: rm on untracked file does not warn (negative)" || bad "R5: rm on untracked file falsely warned"
+_rm_out3=$(run_hook_cwd 'rm *.txt' "$RM_REPO"); _rm_rc3=$?
+[ "$_rm_rc3" -eq 0 ] && ! printf '%s' "$_rm_out3" | grep -q "git-tracked file" \
+    && ok "R5: rm with glob is undeterminable, passes silently (negative)" || bad "R5: glob path falsely warned"
+
 # === 早期 exit 撤去: プラグインルート解決が壊れても 4 ルールは生きる（2026-07-02 監査） ===
 mkdir -p "$TMP/empty-root/hooks"
 CLAUDE_PLUGIN_ROOT="$TMP/empty-root" sh -c "printf '%s' '{\"tool_name\":\"Bash\",\"tool_input\":{\"command\":\"git push origin main\"}}' | sh '$HOOK' >/dev/null 2>&1"; [ $? -eq 2 ] \

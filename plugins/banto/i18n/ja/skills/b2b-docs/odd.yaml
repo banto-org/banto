@@ -1,0 +1,23 @@
+# ODD Spec for b2b-docs
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: b2b-docs
+autonomy_level: L1  # 軽量ユーティリティ（reference 参照のみ。成果物生成は呼び出し元/html-doc skill）
+
+in_scope:
+  - B2B 提案・営業資料の章立て（結論 → 課題 → 効果 → 根拠 → 費用 → 導入手順 → リスク）の提示
+  - HTML 資料と PowerPoint（.pptx）のどちらで作るかの判断基準の提示
+  - python-pptx による .pptx 生成の実務パターンの提示
+
+out_of_scope:
+  - ブラウザ表示・印刷 PDF 前提の単一 HTML 資料そのものの生成（html-doc skill）
+  - 受け手レベル別の文体調整（ja-writing skill の audience-levels.md）
+  - 図の作成（diagram skill）
+
+safety_boundaries:
+  - 本 skill 自体はファイルを書かない（reference を Read し、呼び出し元が成果物に反映する）
+
+kill_switch_conditions: []
+
+approval_gates: []

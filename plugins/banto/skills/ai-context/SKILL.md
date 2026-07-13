@@ -1,8 +1,8 @@
 ---
 name: ai-context
 description: |
-  AI context management: decision logs / checkpoints / task file (tasks.md) editing + next-task navigation + Phase completion / document sorting / memos / knowledge promotion / store bootstrap + health diagnostics. Internal search is owned by the `search` skill.
-  Triggers: "decision", "design choice", "save", "checkpoint", "compact", "clear", "task", "TODO", "Phase", "continue", "next task", "carry on", "tidy up the docs", "it's a mess", "exclude", "don't touch it", "disable", "make a note", "jot this down", "summarize and save this conversation", "turn into knowledge", "promote to knowledge", "show me the drafts", "save as a lesson", "create a store", "pin local", "health check".
+  AI context management: decision logs / checkpoints / task file (tasks.md) editing + next-task navigation + Phase completion / document sorting / memos / knowledge promotion / store bootstrap + health diagnostics + standing-approval (grants) management. Internal search is owned by the `search` skill.
+  Triggers: "decision", "design choice", "save", "checkpoint", "compact", "clear", "task", "TODO", "Phase", "continue", "next task", "carry on", "tidy up the docs", "it's a mess", "exclude", "don't touch it", "disable", "make a note", "jot this down", "summarize and save this conversation", "turn into knowledge", "promote to knowledge", "show me the drafts", "save as a lesson", "create a store", "pin local", "health check", "standing approval", "grant permission".
   Do not use when: searching context already stored (use the `search` skill) or investigating external sources (use `research`). A bare "do it" / "go ahead" during implementation means self-driving (act directly); only task-qualified phrases ("next task", "carry on") route to next-task navigation. Saving session state is `save-checkpoint`; switching git worktree / branch for scoping is `ws`, not this skill.
 allowed-tools: Read Write Edit Glob Grep Bash Agent
 argument-hint: "[bootstrap|local|doctor|sort|next|phase-done|ignore|tasks|migrate|memo|knowledge]"
@@ -11,13 +11,9 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # AI Context
 
-> **About the storage base (store-first)**: every `{base}/...` path in this skill refers to the **ai-context base directory** —
-> the absolute path injected by the SessionStart / PreCompact hook as "ai-context base: &lt;absolute path&gt;". Always
-> Read/Write **under that injected absolute path**, and never write to a relative `.ai-context/` (an in-repo `.ai-context/`
-> exists only in grandfathered legacy repos and keeps working as the base until you migrate with `/ai-context migrate`).
-> If the base is unknown, resolve it in one line: `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`.
-
-> **Output language**: write the artifacts you generate (decision logs / tasks.md / checkpoints / status reports / memos / knowledge, etc.) in the user's conversation language. The Japanese templates under `references/` are only structural scaffolds — translate the headings/labels to match the conversation language.
+> **Storage base (store-first)**: `{base}` is the absolute ai-context base path injected by the SessionStart/PreCompact hook. Always Read/Write under it (in-repo `.ai-context/` is retired — it is non-destructively auto-migrated to the store on detection; never write to it by hand). If unknown, resolve it: `sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --resolve "$PWD"`.
+>
+> **Output language**: write generated artifacts in the user's conversation language. The Japanese templates under `references/` are only structural scaffolds — translate the headings/labels to match the conversation language.
 
 ## Subcommand router (explicit user invocation)
 
@@ -35,27 +31,13 @@ Interpret the first token of `$ARGUMENTS` as a subcommand, Read the correspondin
 | `ignore` | Manage scaffold-suppression paths (writes) | `references/ignore.md` |
 | `tasks split` | Split tasks.md by Phase | `references/task-lifecycle.md` |
 | `migrate [path\|--all]` | Migrate a project's ai-context to the central store | `references/setup.md` |
-| `memo [text]` | Turn the conversation / given content into a `[Memo]` document (absorbs the former `memo` skill) | "Memo (`memo`)" below |
-| `knowledge [list\|promote\|<topic>]` | List / promote / create knowledge drafts (absorbs the former `knowledge` skill) | "Knowledge (`knowledge`)" below |
+| `memo [text]` | Turn the conversation / given content into a `[Memo]` document | "Memo (`memo`)" below |
+| `knowledge [list\|promote\|<topic>]` | List / promote / create knowledge drafts | "Knowledge (`knowledge`)" below |
 | `ref [location/URI]` | Register an external document's location card under `docs/refs/` (also fires on "it's here") | "Location registration (`ref`)" below |
 
 If the argument is empty or unknown, show usage.
 
-### Backward-compat aliases (one release only, accepted with a warning)
-
-Old subcommands / old skill names are **accepted, but emit a one-line deprecation warning and steer you to the new form** (slated for removal next release):
-
-| Old form | New form accepted and steered to |
-|---|---|
-| `/ai-context init` | `bootstrap` (merged into store create / register + provisional-local migration) |
-| `/ai-context status` | `doctor` (status merged in; health diagnostics double as the status display) |
-| `/ai-context prune` | (Removed) Cleanup of empty / migrated-legacy / mis-generated folders is automated by a hook. If manual cleanup is needed, follow the `doctor` report |
-| `/memo ...` / "make a note" | `ai-context memo [text]` (runs the same procedure) |
-| `/knowledge ...` / "turn into knowledge" | `ai-context knowledge [list\|promote\|<topic>]` (runs the same procedure) |
-
-Warning example: "`init` has been merged into `bootstrap` (this alias will be removed next release). Continuing as bootstrap." — once you've emitted the warning, **continue right away with the new form's procedure** (don't block the work).
-
-**Firing from natural language**: in addition to explicit subcommands, route automatically from context: "continue" / "next" / "next task" / "go ahead" → `next`; "organize the docs" / "it's a mess" → `sort project`; "phase done" → `phase-done`; "make a note" / "jot this down" / "summarize and save this conversation" → `memo`; "turn into knowledge" / "promote to knowledge" / "list the drafts" / "save as a lesson" → `knowledge`; "create a store" / "set up ai-context-store" / "I want to push this to GitHub" and the SessionStart hook's bootstrap prompt → `bootstrap`; "keep this repo local-only" / "don't push to GitHub" / "pin local" → `local`; "health check" / "health diagnostics" / "show me the status" / "tell me what's here" → `doctor`.
+**Firing from natural language**: in addition to explicit subcommands, route automatically from context: "continue" / "next" / "next task" / "go ahead" → `next`; "organize the docs" / "it's a mess" → `sort project`; "phase done" → `phase-done`; "make a note" / "jot this down" / "summarize and save this conversation" → `memo`; "turn into knowledge" / "promote to knowledge" / "list the drafts" / "save as a lesson" → `knowledge`; "create a store" / "set up ai-context-store" / "I want to push this to GitHub" and the SessionStart hook's bootstrap prompt → `bootstrap`; "keep this repo local-only" / "don't push to GitHub" / "pin local" → `local`; "health check" / "health diagnostics" / "show me the status" / "tell me what's here" → `doctor`; "allow PR creation for this repo" / "allow production work" / "grant standing approval for push" / "standing approval" / "grant permission" → "Standing approval (grants)".
 
 **Central store operations (teams / multiple projects)**: the end-to-end procedure for aggregating, syncing, and running the central store across a team (setup → migrate `migrate` → reference → push) lives in [`references/central-store-guide.md`](references/central-store-guide.md).
 
@@ -77,7 +59,7 @@ After registering/creating, if this repo has a provisional local (`ai-context-lo
 
 > **interface (WT-A)**: `ai-context-store-init.sh bootstrap [<org/name>|<org>]` wraps register-or-create + provisional-local migration. Pinning to local is the `local` subcommand. The legacy flags `--create` / `--register` / `--org` are also available.
 
-In either branch, once registration is done, from the next SessionStart "ai-context base: &lt;absolute path&gt;" is injected as the store-side absolute path, and you can write decisions / docs / tasks to the store. To only save the org, use `--org <org>`; to move an existing in-repo `.ai-context/` into the store, use `migrate` rather than `bootstrap` (read compatibility is preserved, so there's no rush).
+In either branch, once registration is done, from the next SessionStart "ai-context base: &lt;absolute path&gt;" is injected as the store-side absolute path, and you can write decisions / docs / tasks to the store. To only save the org, use `--org <org>`. An existing in-repo `.ai-context/` is not a resolver target — scaffold auto-migrates it to the store non-destructively on detection, so running `migrate` explicitly is not required (use it only when you want it done right now).
 
 ## Pin to local (`local`)
 
@@ -90,6 +72,18 @@ sh "$CLAUDE_PLUGIN_ROOT/scripts/ai-context-store-init.sh" local
 Once pinned, this repo's ai-context stays resident at `~/ai-context-local/<project>/`, and `bootstrap` / migration are skipped. If you want to undo it, migrate to a store again with `bootstrap`.
 
 > **interface (WT-A)**: `ai-context-store-init.sh local [--cwd <dir>]` sets `local:true` on the corresponding project in the mapping.
+
+## Standing approval (grants)
+
+Record a per-repo standing approval in `{base}/meta/grants.json` (fires on "allow PR creation for this repo" / "allow production work" / "grant standing approval for push"). After writing, recording the change as one line under `decisions/` is recommended.
+
+Keys are `pr_create` (`gh pr create`), `push_feature` (push to a feature branch), and `prod_ops` (production-environment operations). Values are `allow` (standing approval — no further confirmation), `deny` (always block — an explicit refusal against accidental approval), or `confirm` (default — confirm every time). `allow`/`deny` are read deterministically by `release-guard.sh` (`pr_create`) and `prod-guard.sh` (`prod_ops`).
+
+Time-boxed approvals are also supported (e.g. "only allow it for a week"): set the value to the object form `{"value": "allow", "until": "YYYY-MM-DD"}`, and it automatically reverts to `confirm` (confirm every time) the day after `until` — it never decays into `deny`.
+
+```json
+{"schema_version": 1, "grants": {"pr_create": "allow", "prod_ops": {"value": "allow", "until": "2026-07-17"}}}
+```
 
 ## Saving decisions (auto-save / format / secrets)
 
@@ -133,117 +127,15 @@ related:
 
 ## Memo (`memo`)
 
-Save the conversation / given content as a `[Memo]`-prefixed document under `{base}/docs/` (absorbs the former `memo` skill; also fires on "make a note" / "jot this down" / "summarize and save this conversation"). Write the *body* of the memo in the user's conversation language. The section headings (`## Content` / `## Topics discussed`, etc.) are fixed structural markers and are not translated.
+Save the conversation / given content as a `[Memo]`-prefixed document under `{base}/docs/` (also fires on "make a note" / "jot this down" / "summarize and save this conversation"). Write the *body* of the memo in the user's conversation language. The section headings (`## Content` / `## Topics discussed`, etc.) are fixed structural markers and are not translated.
 
-### Mode 1: no arguments (summarize the conversation)
-
-Summarize the current conversation into a memo. Items to extract: topics discussed / decisions made / open issues / key findings & insights.
-Destination: `{base}/docs/[Memo] session-summary-{YYYY-MM-DD}.md`
-
-```markdown
-# [Memo] Session Summary
-
-- **Date**: {today's date}
-- **Author**: AI
-
-## Topics discussed
-- {topic 1}
-- {topic 2}
-
-## Decisions made
--
-
-## Open issues
--
-
-## Key findings / insights
--
-```
-
-In Mode 1, **present the summary as text and then save** (after-the-fact disclosure — saving to the store is a non-destructive "run freely" operation per safety.md; the user can request edits afterward).
-
-### Mode 2: with an argument (memoize the given content)
-
-Record the content of `$ARGUMENTS` as a memo.
-Destination: `{base}/docs/[Memo] {slugified argument}-{YYYY-MM-DD}.md`
-
-```markdown
-# [Memo] {title from the argument}
-
-- **Date**: {today's date}
-- **Author**: AI
-
-## Content
-
-{structured write-up of $ARGUMENTS}
-```
-
-Saving and reporting follow the common pattern (`${CLAUDE_PLUGIN_ROOT}/templates/docs/_common-pattern.md` §2 pattern B / §3 naming convention / §4 report format / §1.6 style conventions). A Japanese memo body follows `~/.claude/rules/writing-ja.md` (noun-ending style / no だ・である・です・ます at sentence end / fewer katakana-English terms / half-width space around alphanumerics / don't round numbers).
+No argument → summarize the conversation into `{base}/docs/[Memo] session-summary-{YYYY-MM-DD}.md`. With an argument → record the content of `$ARGUMENTS` into `{base}/docs/[Memo] {slugified argument}-{YYYY-MM-DD}.md`. Fill-in templates and style conventions: [`references/doc-templates.md`](references/doc-templates.md).
 
 ## Knowledge (`knowledge`)
 
-Review and promote knowledge drafts (`{base}/docs/knowledges/drafts/`), organizing them into formal knowledge entries (absorbs the former `knowledge` skill; also fires on "turn into knowledge" / "show me the drafts" / "save as a lesson"). Respond and write in the user's conversation language.
+Review and promote knowledge drafts (`{base}/docs/knowledges/drafts/`), organizing them into formal knowledge entries (also fires on "turn into knowledge" / "show me the drafts" / "save as a lesson"). Respond and write in the user's conversation language.
 
-Structure: see [`references/directory-structure.md`](references/directory-structure.md) for details. Promotion target = `{base}/docs/knowledges/{topic}.md`, draft = `{base}/docs/knowledges/drafts/{topic}.md`.
-
-### Determine the mode (the first token of `$ARGUMENTS`)
-
-- **No argument / `list`** → list drafts
-- **A number / `promote`** → promotion mode
-- **A topic string** → create a new knowledge entry
-
-#### list (list drafts)
-
-1. `Glob("{base}/docs/knowledges/drafts/*.md")`
-2. Read the first 3 lines (the title) of each file
-3. Display the list and ask for the number(s) to promote (or "all"):
-
-```
-## Knowledge drafts
-
-1. **PostToolUse JSON shell expansion issue** (drafts/posttooluse-json-shell-expansion.md)
-2. **search query expansion tuning** (drafts/search-query-expansion-tuning.md)
-
-Pick the ones to promote (number, or "all").
-```
-
-#### promote (promotion)
-
-1. Read the selected file in full, display it, and ask the user for edits
-2. Once confirmed, move it from `drafts/` directly into `knowledges/`:
-   ```bash
-   git mv "{base}/docs/knowledges/drafts/{file}" "{base}/docs/knowledges/{file}"
-   ```
-   (use `mv` if the store is not under git)
-3. search ranking scans decisions/docs directly, so the file is searchable right after the move (the FTS5 section index auto-follows the Write via the PostToolUse hook)
-
-#### Create new
-
-Save `$ARGUMENTS` as the topic directly into `knowledges/`:
-
-```markdown
-# {topic}
-
-## Problem
-{what happened}
-
-## Cause
-{why it happened}
-
-## Solution
-{how it was solved}
-
-## Lesson
-{how to prevent the same problem}
-
-## Related
-- {related decisions/ files}
-- {related research/ files}
-```
-
-Naming follows the knowledge exception (no prefix; the title becomes the filename) (`_common-pattern.md` §3 "knowledge exception"). Promoted knowledge is searchable across the store via the `search` skill (`/search <query>`).
-
-> **Auto-saving drafts (hook)**: when `ai-context-auto.sh` detects "got stuck", "the cause is", "solved it", "pattern", "figured it out", "turned out", "discovered", "noticed", "gotcha", "workaround", "notice", it prompts to save a draft. Accumulated drafts are surfaced by the SessionStart hook (`knowledge-draft-review.sh`) once they exceed a threshold, and handled by this `knowledge` procedure.
+Determine the mode from the first token of `$ARGUMENTS`: no argument/`list` → list drafts, a number/`promote` → promotion, a topic string → create new. Procedure, fill-in templates, and the draft auto-save hook: [`references/doc-templates.md`](references/doc-templates.md). Canonical structure: [`references/directory-structure.md`](references/directory-structure.md) (promotion target = `{base}/docs/knowledges/{topic}.md`, draft = `{base}/docs/knowledges/drafts/{topic}.md`).
 
 ## Directory structure / prefixes
 
@@ -254,7 +146,9 @@ Details, canonical source: [`references/directory-structure.md`](references/dire
 | Purpose | Tool |
 |------|-------|
 | In-session work tracking | `TaskCreate` `TaskUpdate` (Claude Code built-in) |
-| Persistent project tasks | The effective tasks file (the path under the SessionStart "ongoing tasks" heading; new layout = `workspaces/<author>/<topic>/tasks.md`, legacy = `tasks/active.md`) |
+| Persistent project tasks | The effective tasks file (definition below) |
+
+**Definition of the effective tasks file**: prefer the path under the SessionStart-injected "ongoing tasks" heading. In environments with no hook injection (Claude Desktop / IDE extensions, etc.), look for the current WS's `workspaces/<author>/<topic>/tasks.md`, falling back to the legacy `tasks/active.md`.
 
 **Tasks-file priority:**
 1. An existing `tasks.md` `TODO.md` `ROADMAP.md` exists → use it
@@ -275,7 +169,7 @@ Details: [`references/setup.md`](references/setup.md)
 Summary:
 - **fallback**: in environments without hooks (Claude Desktop / IDE extensions / Web UI), use `bash "${CLAUDE_PLUGIN_ROOT}/hooks/_ai-context-scaffold.sh" "$PWD"` to idempotently generate the store skeleton (or the provisional local) (it does not create an in-repo `.ai-context/`)
 - **denylist**: for paths registered in `~/.claude/banto-ignore`, the hook exits early. Manage them with `/ai-context ignore add/list/remove`
-- **migration**: moving an existing in-repo `.ai-context/` to the central store is `/ai-context migrate` (read compatibility preserved)
+- **migration**: an existing in-repo `.ai-context/` is auto-migrated to the store non-destructively by scaffold on detection. `/ai-context migrate` is the explicit trigger for doing it right now
 
 ## Searching past context
 
@@ -306,7 +200,7 @@ Usage: /ai-context <bootstrap|local|doctor|sort|next|phase-done|ignore|tasks|mig
 Examples:
   /ai-context bootstrap
   /ai-context local
-  /ai-context memo この会話の要点
+  /ai-context memo the gist of this conversation
   /ai-context knowledge list
   /ai-context tasks split --auto
 ```

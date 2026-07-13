@@ -76,7 +76,8 @@ Detailed steps are in [`references/stages.md`](references/stages.md).
 | churn stop | `odd-gate.sh` (PreToolUse) | Blocks edits on repeated failures → go to root cause |
 | false-green prevention | `verify-claim-guard.sh` (Stop) | Blocks a "done" claim while eval is still red |
 | egress | `egress-guard.sh` | Blocks internal names / PII leaking to a client path (don't mix production data into eval cases) |
-| irreversible ops | safety rule | push / PR / main / deletion / external posting are human gates |
+
+Irreversible ops (push / PR / main / deletion / external posting) are human gates per the `safety` rule.
 
 ## How to use (intent detection — no need to memorize commands)
 

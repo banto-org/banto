@@ -46,10 +46,24 @@ jobs:
           sh plugins/banto/scripts/test-resolve-store-path.sh
           sh plugins/banto/scripts/test-scaffold-root-guard.sh
           sh plugins/banto/scripts/test-store-first-session.sh
+          sh plugins/banto/scripts/test-idle-checkpoint-delivery.sh
           sh plugins/banto/scripts/test-release-guard.sh
+          sh plugins/banto/scripts/test-prod-guard.sh
           sh plugins/banto/scripts/test-odd-kill-switch.sh
           sh plugins/banto/scripts/test-egress-guard.sh
           sh plugins/banto/scripts/test-hook-payloads.sh
+          sh plugins/banto/scripts/test-drift-commit-guard.sh
+          sh plugins/banto/scripts/test-ja-lint.sh
+          sh plugins/banto/scripts/test-model-role-guard.sh
+          sh plugins/banto/scripts/test-cross-check.sh
+          sh plugins/banto/scripts/test-export-agents-md.sh
+          sh plugins/banto/scripts/test-harness-drift-autoupdate.sh
+          sh plugins/banto/scripts/test-lexicon-distill-autoapply.sh
+          sh plugins/banto/scripts/test-knowledge-draft-autoreview.sh
+          sh plugins/banto/scripts/test-knowledge-draft-review.sh
+          sh plugins/banto/scripts/test-ai-context-workspace-autoregister.sh
+          sh plugins/banto/scripts/test-checkpoint-autofire.sh
+          sh plugins/banto/scripts/test-skill-audit-metrics.sh
           sh plugins/banto/scripts/test-ontology.sh
           sh plugins/banto/scripts/test-i18n.sh
 

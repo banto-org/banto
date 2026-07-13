@@ -3,7 +3,7 @@ name: plugin-audit
 description: |
   Audit an existing Claude Code plugin, or a single skill, against official best practices; detect inconsistencies and propose fixes. A plugin path or a skill path can be passed as the argument (per-skill audit).
   Triggers: "audit this plugin", "check this skill's quality", "review the SKILL.md against best practices", "score this skill". Also invocable via /plugin-audit. The audit itself is read-only; applying fixes requires user approval.
-  Do not use when: auditing the harness as a whole system (harness-audit), or generating / refactoring a plugin (plugin-dev).
+  Do not use when: auditing the harness as a whole system (harness-audit), generating / refactoring a plugin (plugin-dev), or auditing a single skill from a context-engineering angle such as information minimality (skill-audit).
 user-invocable: true
 argument-hint: "[eval|verify|fix|global] [plugin path or skills/<name> (defaults to the current directory)]"
 allowed-tools: Read Write Edit Glob Grep Bash Agent
@@ -12,10 +12,11 @@ compatibility: Claude Code (requires bash, git, jq)
 
 # Plugin Audit — Official Best-Practice Audit for Plugins
 
-If the user converses in Japanese, respond in Japanese.
+Output language: respond in the conversation language (follow `writing-ja.md` for Japanese).
 
 > **Division of meta-audit responsibilities**:
-> - **plugin-audit (this skill)** = **quality** audit of a plugin / single skill (official compliance + 15-axis structural evaluation). Pass `skills/<name>` as the argument for a **per-skill audit (= skill-audit)** — provided as a mode of this skill rather than a separate skill.
+> - **plugin-audit (this skill)** = **quality** audit of a plugin / single skill (official compliance + 15-axis structural evaluation). Pass `skills/<name>` as the argument for a per-skill audit.
+> - **skill-audit** = a **context-engineering** audit scoped to a single skill (7 axes: information minimality / leakage of human-only information / division of labor in structure / execution-model directive / context efficiency / stated-AI consistency / division of labor with determinism). Narrower than plugin-audit's 15-axis quality audit — a separate skill focused on whether execution gets only the information it needs.
 > - **harness-audit** = **whole-system** audit of the harness (philosophy alignment / dead features / currency / installation policy / Claude feature alignment). A separate layer that catches "skill quality is perfect but the feature is dormant or drifted = still broken".
 > - **plugin-dev** = generation and refactoring (audit is delegated to plugin-audit).
 
@@ -47,27 +48,9 @@ Details:
 - Evaluation criteria (15-axis definitions): [`references/scoring.md`](references/scoring.md)
 - Functional verification (the `verify` subcommand — once a skill fires, does it actually produce what it claims): [`references/verify.md`](references/verify.md)
 
-**The 15 axes** (static = computed by the audit scripts; agent = judged by independent subagents):
+**The 15 axes** (static = computed by the audit scripts; agent = judged by independent subagents). [`references/scoring.md`](references/scoring.md) is the canonical definition of every axis — not repeated here. Static axes are 1/2/3/7/9/10/11/12/14/15 (plus detection material for 5/6); agent axes are 4/6/7-semantic/8/12b/13/14-semantic. See the command list below for the axis-to-script mapping.
 
-| Axis | Content | How it runs |
-|------|------|---------|
-| 1 | YAML structural validity (official field coverage + use-case-contradiction detection + **argument-hint ↔ real-subcommand fidelity**) | static (`collect`/`report`/`interface`) |
-| 2 | Body structural validity (≤500 lines / token budget / reference-link validity / 3-layer progressive loading) | static (`collect`/`report`) |
-| 3 | description routing format ("Use when..." / negative examples / ≤50 words) | static (`collect`/`report`) |
-| 4 | Measured routing precision (Precision / Recall / Forbidden) | agent (multi-subagent vote over `eval-cases.yaml`) |
-| 5 | HeavySkill applicability (recommend / unneeded / mis-applied) | static detection + agent judgment |
-| 6 | Cross-skill disambiguation (vocabulary overlap / references / boundary ambiguity) | static (`matrix`) + agent boundary judgment |
-| 7 | Generality (absolute paths / personal & org names / OS-tool assumptions / language / culture / license) | static regex (`collect`/`report`) + agent semantic |
-| 8 | Generality / rule-externalization fitness (hardcoded standards that should load from `.claude/rules/`) | agent judgment |
-| 9 | Layer 3 harness-engineering consistency (path-scoping + hook-enforce candidates + hook consistency) | static (`collect`/`report`) |
-| 10 | ODD application (odd.yaml presence + autonomy_level L0-L5 validity) | static (`collect`/`report`) |
-| 11 | Usage (commits + {base} mentions over N days → active/mentioned/dormant/likely-trim) | static (`usage`) |
-| 12 | Permission-scope minimality — **12a** over-grant (minimality) / **12b** under-declare (runtime correctness) | static (`permissions`) + agent |
-| 13 | Containment (dangerous commands actually executed by hooks / raw secret output) | agent (distinguishes block-patterns from real execution) |
-| 14 | Content hygiene (leaked specifics / pasted run output) — **the whole skill subtree** (SKILL.md via collect; references/ + nested via assets) | static regex (`collect`/`report`/`assets`) + agent semantic |
-| 15 | Cross-skill reference consistency (correlation) — divergence where the same store path is referenced with multiple spellings (`{base}`/`{BASE}`/`<base>`/`.ai-context`), non-canonical prefix mixing, naming-format mismatch | static (`consistency`) |
-
-**Static axes — run the scripts** (Axes 1 / 2 / 3 / 7 / 9 / 10 / 11 / 12 / 14 / 15, plus detection material for 5 / 6):
+**Static axes — run the scripts**:
 
 ```bash
 # Static structural audit (Axes 1/2/3/5-detect/7/9/10/14 + material for 6)
@@ -125,7 +108,13 @@ If the argument is not a plugin dir but a **single skill directory** such as `sk
 ${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-usage.sh --skill skills/<name> [since_days]
 ```
 
-`collect.sh` / `report.sh` assume a plugin dir, so for per-skill audits combine "Read that skill's SKILL.md directly and judge Axes 1/2/3/5/12 via Agent" with `usage.sh --skill`. Whether the argument is a single skill or a plugin is determined by the presence of a `skills/` subdirectory.
+`collect.sh` / `report.sh` assume a plugin dir, so a per-skill audit substitutes the following procedure:
+
+1. Determine whether the argument is a single skill or a plugin by the presence of a `skills/` subdirectory (present → plugin, absent → single skill)
+2. Read the target `SKILL.md` (+ `references/` if present)
+3. Run `usage.sh --skill` to get usage (Axis 11)
+4. For Axes 1/2/3/5/12, an Agent judges the Read content against each axis's definition in [`references/scoring.md`](references/scoring.md)
+5. Compile into the report format (below) in Critical → Warning → Info order
 
 **Subcommands (modes)**:
 
@@ -136,15 +125,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-usage.sh --skill skills/<name> [since
 | `plugin-audit verify` | Functional verification — run Tier A/B skills end-to-end in a sandbox against their `verify-cases.yaml` ([`references/verify.md`](references/verify.md)) | minutes |
 | `plugin-audit fix` | Agent proposes fixes → interactive approval + Axis 8 rule-externalization + **slimming proposals** (an Agent reviews the default report's shapeup triggers → split / extract / rule-ify / consolidate; a threshold-exceed is a review item, not a failure) | tens of seconds |
 
-The `global` modifier (optional suffix) switches to public-distribution criteria (language / culture / license checks ON).
-
-**Improvement-proposal flow**:
-
-1. After the report is produced, present the violations (structural + judgment-axis findings), Critical first
-2. Confirm in text where to start improving
-3. Present fix proposals for the target files (review-then-fix; never auto-rewrite descriptions)
-
-**Reviewer = Fresh Agent principle**: judgment work (especially eval / fix) is judged independently by Agent subagents to avoid the main session's self-evaluation bias.
+The `global` modifier (optional suffix) switches to public-distribution criteria (language / culture / license checks ON). The improvement-proposal dialogue flow is in "Fix flow" below (review-then-fix; never auto-rewrite descriptions; judgment follows the Reviewer = Fresh Agent principle).
 
 ## Audit report format
 
@@ -174,7 +155,7 @@ The `global` modifier (optional suffix) switches to public-distribution criteria
 
 ## Fix flow
 
-After running the audit and producing the report (procedure: Phases 1-8 in audit-phases.md), fix via the interactive flow below. This makes the review-then-fix of the "Improvement-proposal flow" above concrete.
+After running the audit and producing the report (procedure: Phases 1-8 in audit-phases.md), fix via the interactive flow below.
 
 ### Step 1: Present results to the user + confirm fixes
 

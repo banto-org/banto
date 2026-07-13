@@ -26,17 +26,15 @@ compatibility: Claude Code (requires bash, git, jq)
 | Command | 内容 |
 |---------|------|
 | `/save-checkpoint` | セッション状態をチェックポイントとして保存。compact/clear を推奨 |
-| `/ai-context [bootstrap/local/doctor/sort/ignore/migrate/memo/knowledge]` | `{base}/` の管理コマンド（store 作成・登録 / ローカル固定 / 健診 / 整理 / 抑制 / 移行 / メモ / ナレッジを内包。`init`・`status` は旧名エイリアス・1 リリース後方互換） |
+| `/ai-context [bootstrap/local/doctor/sort/ignore/migrate/memo/knowledge]` | `{base}/` の管理コマンド（store 作成・登録 / ローカル固定 / 健診 / 整理 / 抑制 / 移行 / メモ / ナレッジを内包） |
 
 ### ドキュメント作成
 ドキュメント作成系スキル共通のパターン: `${CLAUDE_PLUGIN_ROOT}/templates/docs/_common-pattern.md`（パターン A: agent 起動型 / パターン B: 穴埋めテンプレート）
 
 | Command | 内容 | パターン |
 |---------|------|----------|
-| `/ai-context memo [content]` | 引数なし: 会話要約を保存。引数あり: 指定内容をメモ化（旧 `/memo` は 1 リリース後方互換） | B |
-| `/ai-context knowledge [list/promote]` | ナレッジ下書きのレビュー / 昇格 / 作成（旧 `/knowledge` は 1 リリース後方互換）| B（例外: プレフィックスなし） |
-
-> コードレビューとセキュリティ監査は**公式 Anthropic プラグインに委譲**（`code-review` / `security-guidance` / `/security-review`）。
+| `/ai-context memo [content]` | 引数なし: 会話要約を保存。引数あり: 指定内容をメモ化 | B |
+| `/ai-context knowledge [list/promote]` | ナレッジ下書きのレビュー / 昇格 / 作成 | B（例外: プレフィックスなし） |
 
 ### 開発フロー
 | Command | 内容 |
@@ -51,11 +49,10 @@ compatibility: Claude Code (requires bash, git, jq)
 | `/init` + `harness-setup.sh` | CLAUDE.md（ネイティブ /init）+ rules / 設定 / store の初回セットアップ（決定論スクリプト） |
 | `/plugin-dev {description}` | 新規プラグインの scaffold / 既存スキルのリファクタ |
 | `/plugin-audit [path]` | 既存プラグイン / 単一スキルを公式ベストプラクティスと突き合わせて監査 |
+| `/skill-audit [path]` | skill 単体をコンテキストエンジニアリング視点で監査（情報の最小性 / 人間専用情報の混入 / 構成の分担等 7 軸。plugin-audit は plugin 全体） |
 | `/set-language [ja/en]` | Banto の言語を日英で切替。選択は永続（プラグイン更新をまたいで保持）。反映には Claude Code の再起動が必要 |
 | `/ai-context sort project` | プロジェクト全体に散らかったドキュメントを整理 |
 | `/kit` | このカタログを表示 |
-
-> セキュリティ監査とコードレビューは公式 Anthropic プラグインに委譲（`security-guidance` / `code-review` / `/security-review`）。
 
 ## 自然言語から自動発火するスキル
 
@@ -66,15 +63,21 @@ compatibility: Claude Code (requires bash, git, jq)
 | `research` | 「調べて」「最新の〜」「ベストプラクティス」「比較して」「論文」「リサーチ」（外部リサーチ。`/research` でも可） |
 | `ai-context` (next) | 「続き」「次は何」「次のタスク」「進めて」「やって」 |
 | `concept` | 「思想」「コンセプト」「世界観」「ビジョン」「哲学」「北極星」「なぜ作る」 |
+| `design-brief` | 「デザイン指定」「画面のデザイン依頼」「デザインブリーフ」「UI の指示」「おしゃれにしたい」（concept/spec の上流でターゲット起点の 14 観点へ変換） |
 | `spec` | 「spec」「仕様書作って」「設計だけして」「plan」「実装しないで」 |
 | `dev-loop` | 「自走で開発」「大玉を分解して回して」「ループで開発」「dev loop」「学習ループ」（単発実装は self-driving で直接） |
 | `ai-build` | 「RAG を作りたい」「エージェント作る」「eval 組む」「プロンプト改善」「どのモデルがいい」（AI 機能構築フロー。dev-loop の AI 特化版・eval まで） |
 | `model-lab` | 「モデルを学習」「事前学習」「fine-tune して」「蒸留」「pruning」「ablation 回す」「論文書く」「HF に公開」（モデル作成・学習の研究フロー。検証中心・論文/HF/GitHub 公開まで。ai-build がアプリ層なのに対し研究層） |
 | `ai-context` (memo) | 「メモして」「書き留めて」「会話を要約して保存」（ai-context に内包。旧 `memo` は後方互換） |
 | `ai-context` (knowledge) | 「ナレッジにして」「昇格して」「教訓として残して」（ai-context に内包） |
-| `plugin-audit` | 「この skill の品質チェック」「14軸で見て」「SKILL.md を best practice と突き合わせ」 |
+| `plugin-audit` | 「この skill の品質チェック」「15軸で見て」「SKILL.md を best practice と突き合わせ」 |
+| `skill-audit` | 「skill 監査して」「この skill をコンテキストエンジニアリング監査」（plugin-audit は plugin 全体、skill-audit は skill 単体のコンテキスト効率） |
 | `ws` | 「ワークスペース」「作業切り替え」「並走」「ブランチ分けて」「worktree」「epic」「この作業終わった」「マージして」「リリースして」 |
 | `set-language` | 「言語を日本語にして」「英語に切り替えて」「言語設定」「make banto japanese/english」（永続。再起動で反映） |
+| `ja-writing` | 「報告書書いて」「日本語の資料」「Excel に書いて」「PR 説明」「相手に合わせて書き分けて」（受け手レベル別の実務パターン） |
+| `diagram` | 「図解して」「シーケンス図」「構成図」「mermaid で」「draw.io で」（記法選択と実務パターン） |
+| `b2b-docs` | 「提案書作って」「営業資料」「パワポで」「pptx で」（章立てと HTML/PowerPoint の使い分け） |
+| `html-doc` | 「HTML 資料」「HTML で出して」「報告書作って」「手順書」「資料にまとめて」（自己完結な単一 HTML を雛形から生成。用途 4 種 × 日英 × テーマ 7 種・図は事前レンダ SVG） |
 
 > **intent-first 全面適用**: 上記の skill は旧 `disable-model-invocation` を解除し、自然文で発見・起動できるようにした（北極星「人間は呼び出しを考えない」）。コマンドは deterministic エイリアスとして維持。
 
@@ -91,7 +94,7 @@ compatibility: Claude Code (requires bash, git, jq)
 | `search-agent` | 内部検索の機械的実行（haiku、軽量） | search スキルの deep path から: 3〜5 並列 `Agent(subagent_type="search-agent", model="haiku", ...)` |
 | `context-keeper` | 検索テキスト層（full-combined.txt / sessions-cache）の整合チェック / 再生成 | full-combined.txt の鮮度疑い時のフォールバック、あるいは直接 |
 
-> コードレビューとセキュリティ監査は公式 Anthropic プラグインに委譲（`code-review` / `security-guidance`）。
+コードレビューとセキュリティ監査は公式 Anthropic プラグインへ委譲する（下の委譲ルーブリック参照）。
 
 ## Subagent 委譲ルーブリック — いつ委譲するか
 

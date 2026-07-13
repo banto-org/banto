@@ -1,6 +1,6 @@
 # Quality scoring criteria for skill / agent / rule
 
-The canonical source for quality scoring is `skills/plugin-audit/references/scoring.md` (14 axes). plugin-dev references it at scaffold time. The 14-axis scoring, the description char caps (1,024 / 1,536 chars), and the token budget (warn 500 / hard 1,000) live there as the single source of truth and are not duplicated in this file.
+The canonical source for quality scoring is `skills/plugin-audit/references/scoring.md` (15 axes). plugin-dev references it at scaffold time. The 15-axis scoring, the description char caps (1,024 / 1,536 chars), and the token budget (warn 500 / hard 1,000) live there as the single source of truth and are not duplicated in this file.
 
 What this file owns is the **authoring aids** that are plugin-dev's own job: the bilingual detection-vocabulary table and the description templates (Japanese / English).
 

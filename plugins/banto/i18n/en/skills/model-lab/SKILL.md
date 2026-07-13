@@ -87,7 +87,8 @@ Detailed steps are in [`references/stages.md`](references/stages.md). The quick 
 | missing reproducibility | `repro-gate.sh` (PreToolUse) | Detects a missing fixed seed / determinism flags / std·CI in results (escape: `BANTO_ALLOW_UNREPRO=1`) |
 | compute cost | `compute-cost-gate.sh` (PreToolUse) | Stops every paid-compute launch (cloud / cluster, Spot included) → owner confirms the budget, then authorize with `BANTO_ALLOW_COMPUTE=1` (local runs are not gated) |
 | egress | `egress-guard.sh` (existing) | Blocks client production data / PII leaking into eval / training data |
-| irreversible ops | safety rule (existing) | push / PR / main / deletion / external posting are human gates |
+
+Irreversible ops (push / PR / main / deletion / external posting) are human gates per the `safety` rule.
 
 ## How to use (intent detection — no need to memorize commands)
 

@@ -11,7 +11,7 @@
 ## ディレクトリ構成（新 layout）
 
 ```
-{base}/                            （store: ~/ai-context-store/<project>/、grandfather legacy: repo 内 .ai-context/）
+{base}/                            （store: ~/ai-context-store/<project>/ または ~/ai-context-local/<project>/）
 ├── WORKSPACE.md                   ← 軽量ポインタ（per-checkout ローカル・gitignore。WS名+ブランチ+実体パス）
 ├── WORKSPACE-refs.md              ← /ws multi 時のみ存在（参照 WS の一覧・ローカル）
 ├── DASHBOARD.md                   ← hook 管理の鳥瞰図（ローカル・gitignore）

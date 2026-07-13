@@ -1,12 +1,21 @@
 {
   "schema_version": 1,
-  "_note": "Role -> model policy (single source of truth). Skills and hooks reference these defaults instead of hardcoding model names. Rationale: decisions/2026-07-02-100946 (12-cell measurement: sonnet 10/10 in all conditions; haiku sole misses). design=inherit keeps the session model (fable/opus) for conversation, design, and exception judgment. summarize=sonnet for faithful transcript->template summarization (the idle-checkpoint background fork): the cost motive rules out opus, and sonnet is measured to pass where haiku is the sole miss.",
+  "_note": "Role -> model policy (single source of truth). Skills and hooks reference these defaults instead of hardcoding model names. Rationale: decisions/2026-07-02-100946 (12-cell measurement: sonnet 10/10 in all conditions; haiku sole misses). design=inherit keeps the session model (fable/opus) for conversation, design, and exception judgment. summarize=sonnet for faithful transcript->template summarization (the idle-checkpoint background fork): the cost motive rules out opus, and sonnet is measured to pass where haiku is the sole miss. verify_external is a different-vendor judge for cross-check.sh (decisions/2026-07-10-070500): a separate provider mitigates self-preference bias, and multi-agent deliberation is deliberately not adopted (it can amplify bias), so this stays a single-shot refutation review. cost_optimized_nda_ok=false because DeepSeek documents in-China data processing, which the PII protection rule forbids for NDA engagements. Owner decision (2026-07-10): OpenRouter is not adopted as a paid contract, so verify_external prioritizes each user's own subscription CLI (codex, then gemini) and keeps openrouter as an API-key fallback only; claude is excluded from auto-detection as a same-vendor judge (self-preference bias) and requires explicit opt-in.",
   "roles": {
     "design": "inherit",
     "implement": "sonnet",
     "summarize": "sonnet",
     "audit": "opus",
     "audit_alt": "fable",
-    "mechanical": "haiku"
+    "mechanical": "haiku",
+    "verify_external": {
+      "backends": ["codex", "gemini", "openrouter"],
+      "same_vendor_backend": "claude",
+      "openrouter": {
+        "default": "x-ai/grok-build-0.1",
+        "cost_optimized": "deepseek/deepseek-v4-flash",
+        "cost_optimized_nda_ok": false
+      }
+    }
   }
 }

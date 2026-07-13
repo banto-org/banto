@@ -1,6 +1,6 @@
 # Ideology formation — question script (Phase 1-6)
 
-Ask **in text** at each Phase (do not use AskUserQuestion). Do not throw everything at once; take the person's answer and dig deeper. Do not lead — pick up the person's raw words.
+Ask **in text** at each Phase (see the dialogue-flow policy in SKILL.md). Do not throw everything at once; take the person's answer and dig deeper. Do not lead — pick up the person's raw words.
 
 ## Phase 1: Dig into the "why" from first principles
 
