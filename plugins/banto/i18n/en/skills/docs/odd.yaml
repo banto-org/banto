@@ -1,0 +1,27 @@
+# ODD Spec for docs
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: docs
+autonomy_level: L2  # medium-weight workflow (self-drives from format selection → writing → sweeps/verification → saving)
+
+in_scope:
+  - Generating Japanese explainer documents (HTML / xlsx / pptx / docx / tables) and choosing the format via the format-selection table
+  - Writing and revising prose along writing-core's 3 layers (cognition / persuasion / scene)
+  - Running the terminology sweep / phrasing sweep / HTML verification (the scripts/ checkers) and applying fixes
+  - Swapping colors/fonts via theme files (theme-default / theme-custom)
+
+out_of_scope:
+  - App/screen UI implementation (use the ui-design skill if available)
+  - Choosing the diagram notation itself and its conventions (diagram skill)
+  - Internal memos / decision records (Markdown is sufficient)
+
+safety_boundaries:
+  - Keep zero external requests (no CDN fonts, no external CSS, no tracking)
+  - Never write a claim of external origin that can't be verified (confirm the source URL is reachable and matches the claim before citing it)
+  - Mask internal names, other companies' names, and PII in client-facing deliverables (per the pii-protection rule / egress-guard)
+  - Read an existing file before overwriting generated output (per the Write convention)
+
+kill_switch_conditions: []
+
+approval_gates: []

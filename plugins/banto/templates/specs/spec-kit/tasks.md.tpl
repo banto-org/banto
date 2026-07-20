@@ -30,7 +30,7 @@ Break down in TDD structure (Red → Green → Refactor) and state dependencies 
 
 - `- [ ]` incomplete / `- [x]` complete
 - `deps:` lists dependency task IDs (`none` or `T1.3` / `T1.3, T2.1`)
-- While in progress, refer to the corresponding Phase in `active.md`
+- While in progress, refer to the corresponding Phase in this tasks file
 
 ## Commit convention
 

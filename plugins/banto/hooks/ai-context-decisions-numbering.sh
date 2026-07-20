@@ -59,6 +59,29 @@ Reason: second-precision timestamp naming is recommended to avoid number collisi
 END
             fi
         fi
+        # スケルトン節チェック（decision 2026-07-17 freshness-newest-first）: 大型 decision の
+        # 必須 4 節（背景/決定/根拠/検討した代替案。JA/EN 見出しとも許容）の欠落を警告する。
+        # 軽量フォーマットの小型 decision はサイズゲートで対象外。warn-only・never block。
+        if [ -f "$FILE" ]; then
+            SIZE=$(wc -c < "$FILE" 2>/dev/null | tr -d ' ')
+            if [ "${SIZE:-0}" -gt 1500 ]; then
+                MISSING=""
+                grep -Eq "^#{1,3} .*(背景|出発点|Background|Context)" "$FILE" || MISSING="$MISSING 背景/Background"
+                grep -Eq "^#{1,3} .*(決定|判断|Decision)" "$FILE" || MISSING="$MISSING 決定/Decision"
+                grep -Eq "^#{1,3} .*(根拠|決め手|理由|Rationale)" "$FILE" || MISSING="$MISSING 根拠/Rationale"
+                grep -Eq "^#{1,3} .*(代替案|選択肢|不採用|Alternatives|Considered)" "$FILE" || MISSING="$MISSING 検討した代替案/Considered-Alternatives"
+                if [ -n "$MISSING" ]; then
+                    cat >&2 << END
+[Decision Skeleton] missing required sections:$MISSING
+
+Substantial decisions follow the fixed skeleton (背景/決定/根拠/検討した代替案 + 影響と限界).
+The rejected-alternatives section is the highest-value one: it answers "why not X" searches
+and becomes the extraction unit for training-data export ([B-03]).
+Template: ai-context skill references/decisions.md (warn-only; lightweight small decisions are exempt)
+END
+                fi
+            fi
+        fi
         ;;
 esac
 

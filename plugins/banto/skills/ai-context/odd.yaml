@@ -9,7 +9,7 @@ in_scope:
   - subcommand router (bootstrap / local / doctor / sort / sort project / next / phase-done / ignore / tasks split / memo / knowledge)
   - decision-log storage ({base}/decisions/)
   - checkpoint storage ({base}/sessions/)
-  - active.md editing + per-Phase splitting
+  - tasks.md editing + per-Phase splitting
   - next-task navigation (next; merged into sdd-core in v5.16.0)
   - Phase completion check + archiving (phase-done; merged the phase-done skill in v5.16.0)
   - project-wide document organization (sort project; merged doc-sort in v5.16.0)
@@ -38,4 +38,4 @@ kill_switch_conditions:
 approval_gates:
   - the actual move operation of the sort subcommand
   - adding a path via the ignore subcommand
-  - confirming a per-Phase split of active.md
+  - confirming a per-Phase split of tasks.md

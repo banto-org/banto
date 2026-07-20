@@ -66,6 +66,7 @@ python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_search_rank.py" \
 
 - Treat `confident: false` (top score < 1.0) in the output JSON as a **zero hit** → go to Step 4
 - `confident: true` → go to Step 3
+- `results` are presented **newest-first** (v3.1): score is used only as the relevance gate (top-N selection); the order is filename-date descending. Primary documents come before derived records (`derived: true`), dateless files go last. Each row carries `date` / `age_days` / `status` (from front-matter; `superseded` / `stale` gets score ×0.3 and sinks to the bottom — v3.2) — **reading top-down = reading newest-first**
 
 ### Step 2.5: 3-layer retrieval (token-budget control; when there are too many hits / you want a full overview)
 
@@ -79,7 +80,7 @@ python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_search_rank.py" \
 
 The output is `{confident, layers:{index, timeline, full}}` (without `--layered`, `{confident, results}` as before / compatible). How to read each layer and the display order:
 
-1. **index (cheapest; read first)**: an index compressing the top `--index-top` entries into a single line of `path / score / terms (matched terms)`. Present only this first and narrow down the candidates to open.
+1. **index (cheapest; read first)**: an index compressing the top `--index-top` entries into a single line of `path / date / age_days / score / terms (matched terms)`. Present only this first and narrow down the candidates to open.
 2. **timeline (chronological context)**: a column of all hits ordered **newest first** by the date at the start of the filename (`YYYY-MM-DD`). Use it to survey history and supersede relations (entries without a date go last).
 3. **full (last; right before Read)**: the conventional detailed `score / path / hits` lines. Read only the files you decided to open from index and timeline.
 
@@ -109,14 +110,14 @@ sh "$CLAUDE_PLUGIN_ROOT/scripts/store-query.sh" --related <unique fragment of th
 - Read-verify the decision you traced to before moving to Step 3 (don't answer from the derived record's content alone).
 - Lesson from the R8 benchmark: landing on a checkpoint / ledger without tracing back to the primary document produced wrong answers. Don't stop at the derived record.
 
-### Step 3: Verify (Read and judge)
+### Step 3: Verify (Read newest-first and judge)
 
-Read the top 3–5 files and **judge relevance yourself**:
+Read 3–5 files starting from the top of the presented order (= the newest primary document) and **judge relevance yourself**. **The default answer source is the newest hit**; older hits only reinforce the history:
 
+- **Read newest-first**: Read the top hit → only when the history is needed, trace back via its front-matter `supersedes:` / `relates:` and Step 2.8's `--related`. Never answer from the older side. When you answer from high-`age_days` information **only**, disclose its staleness in the report.
 - Exclude polysemy mismatches (e.g. a document where "harness" means wiring).
 - Exclude self-references (the very document you're writing now, or an evaluation table that merely quotes the query).
-- Check supersede relations (has an old decision been overridden by a newer one?).
-- Check whether you landed on a derived record — if so, trace back to the primary document via Step 2.8's `--related`.
+- Check whether you landed on a derived record (`derived: true` — checkpoints / [Status] / [Index] etc.) — if so, trace back to the primary document via `--related`.
 - If the hit is a `[Ref]` card (doc_type=ref), the real content lives remotely — when you need the content itself, use `research` to pull the text in.
 
 ### Step 4: Second pass on zero hits (once only)
@@ -168,7 +169,7 @@ Always declare whether you appended in the Step 7 report (making omissions visib
 - {summary of matched context}
 
 ### Notes
-- {supersede relations, explicit "not confident", etc.}
+- {supersede relations, staleness disclosure (age_days) when answering from old hits only, explicit "not confident", etc.}
 
 ### Search method: {fast (ranking vN) / fast+layered (index→timeline→full) / fts5 (store-query.sh, project|all) / deep (haiku xN parallel, wall time Xs) / cross-store: {store names,...}}
 

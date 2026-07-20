@@ -108,7 +108,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 補助確認（`search` が拾いきれないコンテキスト用 — 任意・並列でよい）:
 - **WS 関連ドキュメント**: 現在 WS の実体 `workspaces/<author>/<topic>/workspace.md`（ポインタは `<git-dir>/banto-ws-pointer.md`、非 git は `{base}/WORKSPACE.md`）の `## 関連ドキュメント` に、トピックの一次ソースになる URL があるか確認（あれば Step 1 でそのサブトピックの一次ソースに使う）
-- **active.md**: 現在のタスクファイルを Read し、リサーチトピックが現在のタスクとどう関連するか把握する
+- **tasks.md**: 現在 WS の実効タスクファイル（`workspaces/<author>/<topic>/tasks.md`）を Read し、リサーチトピックが現在のタスクとどう関連するか把握する
 
 **判断ルール**:
 - `search` が既存リサーチを浮上させ **14 日以内** → 「既存リサーチが見つかりました（{filename}、{date}）。更新しますか？」と聞く

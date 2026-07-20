@@ -1,9 +1,18 @@
 # タスクのライフサイクル（next / phase-done / 自動アーカイブ / split）
 
+## 都度更新の義務（task mirror）
+
+tasks.md（store の正本）と組み込みタスク UI（TaskCreate / TaskUpdate）は**作業のたびに両方を更新する**。SessionStart が tasks.md を注入した時点で、今セッションで扱う未完了項目が UI に無ければ TaskCreate で立てる。運用は 3 点:
+
+1. **着手時**: tasks.md の該当項目を確認し、UI 側を in_progress にする
+2. **完了時**: tasks.md をチェック（`- [x]`）し、UI 側を completed にする — どちらか片方で終えない
+3. **新しい依頼**: tasks.md に無い作業を頼まれたら、まず tasks.md へ追記してから着手する（記録の場所は現在 WS の tasks.md。話題が WS のスコープ外なら先に /ws switch / new を提案する）
+
+
 <!-- merged from next.md -->
 ## next — タスクナビゲーター（旧 sdd-core skill を統合）
 
-`active.md` から次の未完了タスクを特定し、コンテキストを収集して実装・検証まで完遂する。
+実効タスクファイル（`workspaces/<author>/<topic>/tasks.md`）から次の未完了タスクを特定し、コンテキストを収集して実装・検証まで完遂する。
 
 呼び出し: `/ai-context next`、または「続き」「次」「次のタスク」「進めて」等の自然言語でも ai-context が発火してこの手順に入る。
 
@@ -12,7 +21,7 @@
 探索順・プロジェクト本筋ファイル尊重ルール・新規作成判断は SKILL.md「タスク管理ルール」に準ずる（single source of truth）。要約:
 
 1. プロジェクト既存の `tasks.md` / `TODO.md` / `ROADMAP.md` があれば尊重
-2. なければ `{base}/tasks/active.md` を使用・新規作成（`{base}` は central/legacy で解決）
+2. なければ現在 WS の `tasks.md`（`workspaces/<author>/<topic>/tasks.md`）を使用・新規作成（legacy `{base}/tasks/active.md` は読取フォールバックのみ — 新規作成しない）
 
 ## ナビゲーションフロー
 
@@ -86,7 +95,7 @@ subject: Task ID を含める
 
 現在の Phase が完了したか確認し、検証して次 Phase へ進む準備を整える。
 
-呼び出し: `/ai-context phase-done [Phase番号]`（明示）。省略時は active.md の最新 Phase。
+呼び出し: `/ai-context phase-done [Phase番号]`（明示）。省略時は実効タスクファイル（tasks.md）の最新 Phase。
 
 ## 実行手順
 

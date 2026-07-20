@@ -73,7 +73,7 @@ Detailed steps are in [`references/stages.md`](references/stages.md).
 
 | Guard | hook | Effect |
 |---|---|---|
-| churn stop | `odd-gate.sh` (PreToolUse) | Blocks edits on repeated failures → go to root cause |
+| churn stop | TF counter (`auto-test.sh`) + loop protocol | Stop the loop on repeated failures → go to root cause (forced blocking by `odd-gate.sh` is opt-in) |
 | false-green prevention | `verify-claim-guard.sh` (Stop) | Blocks a "done" claim while eval is still red |
 | egress | `egress-guard.sh` | Blocks internal names / PII leaking to a client path (don't mix production data into eval cases) |
 

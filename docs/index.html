@@ -36,6 +36,9 @@
         </div>
       </div>
     </div>
+    <div class="nav-item">
+      <a href="flow.html" class="lx" lang="en">Flow</a><a href="flow.html" class="lx" lang="ja">開発の流れ</a>
+    </div>
     <div class="nav-item has-menu">
       <a href="toolset.html" class="lx" lang="en" aria-haspopup="true">Toolset</a><a href="toolset.html" class="lx" lang="ja" aria-haspopup="true">道具一式</a>
       <div class="nav-menu">
@@ -58,10 +61,8 @@
         </div>
         <div class="nav-menu-col">
           <span class="nav-menu-head lx" lang="en">Documents &amp; writing</span><span class="nav-menu-head lx" lang="ja">資料 &amp; 文章</span>
-          <a href="toolset.html#ja-writing"><b>ja-writing</b><span class="lx" lang="en">audience-tuned Japanese</span><span class="lx" lang="ja">受け手に合わせた日本語</span></a>
-          <a href="toolset.html#diagram"><b>diagram</b><span class="lx" lang="en">SVG · mermaid · draw.io</span><span class="lx" lang="ja">図解の実務パターン</span></a>
-          <a href="toolset.html#b2b-docs"><b>b2b-docs</b><span class="lx" lang="en">proposals &amp; decks</span><span class="lx" lang="ja">提案書 &amp; 営業資料</span></a>
-          <a href="toolset.html#html-doc"><b>html-doc</b><span class="lx" lang="en">self-contained HTML docs</span><span class="lx" lang="ja">自己完結 HTML 資料</span></a>
+          <a href="toolset.html#docs"><b>docs</b><span class="lx" lang="en">every document, one skill</span><span class="lx" lang="ja">資料作成を 1 つに統合</span></a>
+          <a href="toolset.html#diagram"><b>diagram</b><span class="lx" lang="en">14 diagram patterns</span><span class="lx" lang="ja">図解 14 パターン</span></a>
         </div>
         <div class="nav-menu-col">
           <span class="nav-menu-head lx" lang="en">Workspace &amp; meta</span><span class="nav-menu-head lx" lang="ja">ワークスペース &amp; メタ</span>
@@ -71,6 +72,7 @@
           <a href="toolset.html#plugin-audit"><b>plugin-audit</b><span class="lx" lang="en">15-axis quality audit</span><span class="lx" lang="ja">15 軸品質監査</span></a>
           <a href="toolset.html#skill-audit"><b>skill-audit</b><span class="lx" lang="en">7-axis context audit</span><span class="lx" lang="ja">7 軸コンテキスト監査</span></a>
           <a href="toolset.html#kit"><b>kit</b><span class="lx" lang="en">discover everything</span><span class="lx" lang="ja">全機能カタログ</span></a>
+          <a href="toolset.html#policy"><b>policy</b><span class="lx" lang="en">grants &amp; guards console</span><span class="lx" lang="ja">許可と保護の一覧管理</span></a>
         </div>
         <div class="nav-menu-col">
           <span class="nav-menu-head lx" lang="en">Agents</span><span class="nav-menu-head lx" lang="ja">エージェント</span>
@@ -102,6 +104,7 @@
           <a href="store.html#store"><span class="lx" lang="en">What accumulates</span><span class="lx" lang="ja">何が貯まるか</span></a>
           <a href="store.html#search"><span class="lx" lang="en">Cross-store search</span><span class="lx" lang="ja">横断検索</span></a>
           <a href="store.html#team"><span class="lx" lang="en">Git &amp; teams</span><span class="lx" lang="ja">git &amp; 複数人</span></a>
+          <a href="store.html#register"><span class="lx" lang="en">Register a project</span><span class="lx" lang="ja">プロジェクトを登録</span></a>
         </div>
       </div>
     </div>
@@ -149,13 +152,13 @@
       </h1>
       <p class="lede reveal lx" lang="en">
         A <strong>self-driving harness for Claude Code</strong>. It keeps your decisions, research,
-        and work-in-progress in a store and re-injects them at every session start — <code>/clear</code>,
-        and nothing is forgotten. <strong>Hooks stop</strong> pushes to main and production changes
+        and work-in-progress in a store, and re-injects them at every session start. Even after
+        <code>/clear</code>, nothing is forgotten. <strong>Hooks stop</strong> pushes to main and production changes
         <em>before they run</em>. The only thing that reaches you is an exception worth deciding.
       </p>
       <p class="lede reveal lx" lang="ja">
         <strong>Claude Code のための自走ハーネス</strong>。設計判断・調査・作業の続きをストアに残し、
-        セッションを開くたびに注入する — <code>/clear</code> しても「前に決めたこと」を忘れない。
+        セッションを開くたびに注入する。<code>/clear</code> しても「前に決めたこと」を忘れない。
         main への push や本番操作は <strong>hook が実行前に止める</strong>。あなたに届くのは、
         判断の要る例外だけ。
       </p>
@@ -232,7 +235,7 @@
   <div class="stat-strip reveal">
     <div class="stat"><b class="count" data-to="20">0</b><span class="lx" lang="en">skills</span><span class="lx" lang="ja">スキル</span></div>
     <div class="stat"><b class="count" data-to="6">0</b><span class="lx" lang="en">agents</span><span class="lx" lang="ja">エージェント</span></div>
-    <div class="stat"><b class="count" data-to="46">0</b><span class="lx" lang="en">hooks</span><span class="lx" lang="ja">フック</span></div>
+    <div class="stat"><b class="count" data-to="49">0</b><span class="lx" lang="en">hooks</span><span class="lx" lang="ja">フック</span></div>
     <div class="stat"><b class="count" data-to="10">0</b><span class="lx" lang="en">rules</span><span class="lx" lang="ja">ルール</span></div>
     <div class="stat"><b>0</b><span class="lx" lang="en">MCP bundled</span><span class="lx" lang="ja">同梱 MCP</span></div>
   </div>
@@ -250,18 +253,19 @@
       <p class="reveal lx" lang="en">
         A <em>bantō</em> (番頭) was the head clerk of an Edo-period merchant house. The owner set the
         direction; the bantō ran everything end to end and brought only the <strong>exceptions</strong>
-        back to the owner. Banto applies that exact contract to software — the modern bantō doesn't
-        run a shop, it <strong>runs your development</strong>.
+        back to the owner. Banto applies that exact contract to software. The modern bantō doesn't
+        run a shop. It <strong>runs your development</strong>.
       </p>
       <p class="reveal lx" lang="ja">
-        番頭とは、商家の主人に代わって店のすべてを切り盛りし、<strong>例外</strong>だけを主人に上げる
-        筆頭奉公人のこと。Banto はその契約をそのまま持ち込む — 現代の番頭が回すのは店ではなく、
-        <strong>あなたの開発</strong>。
+        番頭とは、<strong>江戸時代の商家</strong>で主人に代わって店のすべてを切り盛りし、
+        <strong>例外</strong>だけを主人に上げた筆頭の奉公人のこと。Banto はその契約をそのまま
+        受け継ぐ。現代の番頭が動かすのは店ではない。動かすのは<strong>あなたの開発</strong>だ。
       </p>
       <p class="reveal lx" lang="en">
-        In an era where AI pushes the cost of building toward zero, the moat moves from execution to
-        <strong>vision + empathy</strong>. Banto is not a "dev workflow tool" — it is a harness that
-        maximizes the leverage of one human commanding N AI sessions.
+        In an era where AI pushes the cost of building toward zero, the moat (the durable edge that
+        keeps out competitors) moves from execution to <strong>vision + empathy</strong>. Banto is not
+        a "dev workflow tool." It is a harness that maximizes the leverage of one human commanding N
+        AI sessions.
       </p>
       <p class="reveal lx" lang="ja">
         AI が「作るコスト」をゼロに近づける時代、競争優位（moat）は実行から<strong>ビジョンと共感</strong>へ移る。
@@ -270,13 +274,13 @@
       </p>
       <p class="reveal lx" lang="en">
         Concretely: say <em>"start the payment redesign"</em> and a branch and workspace open, then
-        spec → build → verify runs on its own. You are called twice — when the spec forks, and right
-        before anything lands on main.
+        spec → build → verify runs on its own. You are called only twice. Once when the spec forks,
+        and once right before anything lands on main.
       </p>
       <p class="reveal lx" lang="ja">
         具体的にはこう動く：「決済のリデザインを始める」と言えば、ブランチと作業場が開き、
-        仕様 → 実装 → 検証が自分で回る。あなたが呼ばれるのは 2 回だけ — 仕様の解釈が割れたときと、
-        main に入れる直前。
+        仕様 → 実装 → 検証が自分で回る。あなたが呼ばれるのは 2 回だけだ。1 回目は仕様の解釈が
+        割れたとき、2 回目は main に入れる直前だ。
       </p>
     </div>
 
@@ -333,7 +337,7 @@
             決定ログ・調査・チェックポイントは repo ではなく中央知識ストア
             (<code>~/ai-context-store/&lt;project&gt;/</code>) に置く。<strong>セッション開始ごとに
             再注入</strong>されるため、<code>/clear</code> や自動圧縮で文脈を失わない。
-            知識はストアへ、コードは repo へ。
+            知識はストアに集約され、コードは repo にとどまる。
           </p>
           <ul class="ticks">
             <li class="lx" lang="en">Claude-native internal search — query expansion + ranking over everything accumulated</li>
@@ -398,8 +402,8 @@
       <div class="flag-body reverse">
         <div class="flag-text">
           <p class="lx" lang="en">
-            Topic-based workspaces sit on a 3-tier branch model —
-            <strong>main ← epic ← task worktree</strong> — orchestrated via git-town. You don't run
+            Topic-based workspaces sit on a 3-tier branch model
+            (<strong>main ← epic ← task worktree</strong>), orchestrated via git-town. You don't run
             git commands; you state intent ("start the payment redesign", "this work is done",
             "ship it") and Banto opens branches, isolates worktrees, merges, syncs, and cleans up.
           </p>
@@ -412,8 +416,8 @@
           <ul class="ticks">
             <li class="lx" lang="en">Worktree isolation lets multiple agents run in parallel without colliding</li>
             <li class="lx" lang="ja">worktree 分離で複数エージェントが衝突せず並走</li>
-            <li class="lx" lang="en">A session registry with collision detection for the fleet</li>
-            <li class="lx" lang="ja">艦隊向けの衝突検知付きセッションレジストリ</li>
+            <li class="lx" lang="en">A session registry with collision detection for the fleet (the set of agent sessions running in parallel)</li>
+            <li class="lx" lang="ja">艦隊（並走させる複数セッション全体）向けの衝突検知付きセッションレジストリ</li>
             <li class="lx" lang="en">Irreversible / outward actions (ship, push, PR) always stop at a human gate</li>
             <li class="lx" lang="ja">不可逆・外向き操作（ship / push / PR）は必ず人間ゲートで止まる</li>
           </ul>
@@ -464,13 +468,13 @@
         ones, kept in lock-step by a hash manifest. The trick is the
         <strong>determinism split</strong>: translation is delegated to an LLM (non-deterministic),
         but verifying that the translation is current is <strong>fully deterministic</strong>. That is
-        the whole method — and it is the one we most want others to adopt.
+        the whole method. It's the one we most want others to adopt.
       </p>
       <p class="star-intro reveal lx" lang="ja">
         Banto は <strong>日本語を正本</strong>、<strong>英語を自動生成</strong>とし、ハッシュ
-        マニフェストで同期を取る。鍵は<strong>決定論の分離</strong> — 翻訳は LLM に委譲
-        （非決定論）するが、その翻訳が最新かの検証は<strong>完全に決定論</strong>。これが方式の
-        全てで、最も真似してほしい型。
+        マニフェストで同期を取る。鍵は<strong>決定論の分離</strong>だ。翻訳は LLM に委譲
+        （非決定論）するが、その翻訳が最新かどうかの検証は<strong>完全に決定論</strong>だ。
+        これが方式の全てだ。最も真似してほしい型でもある。
       </p>
 
       <!-- the pipeline diagram -->
@@ -530,41 +534,42 @@
         <div class="lstep reveal">
           <span class="lstep-n">A</span>
           <h4 class="lx" lang="en">One canonical source</h4><h4 class="lx" lang="ja">正本は 1 つ</h4>
-          <p class="lx" lang="en">Skills and agents are authored once, in Japanese (<code>i18n/ja/</code>). It is the single source of truth — every other language is downstream of it.</p>
-          <p class="lx" lang="ja">スキルとエージェントは日本語で一度だけ書く（<code>i18n/ja/</code>）。これが唯一の正本で、他の言語はすべてその下流。</p>
+          <p class="lx" lang="en">Skills, agents, and rule templates are authored once, in Japanese (<code>i18n/ja/</code>). It is the single source of truth. Every other language is downstream of it.</p>
+          <p class="lx" lang="ja">スキル・エージェント・ルールテンプレートは日本語で一度だけ書く（<code>i18n/ja/</code>）。これが唯一の正本だ。他の言語はすべてその下流にある。</p>
         </div>
         <div class="lstep reveal">
           <span class="lstep-n">B</span>
           <h4 class="lx" lang="en">Generate, don't hand-maintain</h4><h4 class="lx" lang="ja">手で保守せず生成する</h4>
-          <p class="lx" lang="en"><code>i18n-gen.sh</code> hashes each canonical file; when a hash drifts it calls an LLM translator with a strict contract — never touch YAML keys, code fences, paths, or commands; <em>do</em> localize trigger phrases.</p>
-          <p class="lx" lang="ja"><code>i18n-gen.sh</code> が正本をハッシュし、ズレたファイルだけ LLM 翻訳を呼ぶ。契約は厳格 — YAML キー・コードフェンス・パス・コマンドは触らない。トリガー文だけは自然な言い回しに直す。</p>
+          <p class="lx" lang="en"><code>i18n-gen.sh</code> hashes each canonical file. When a hash drifts, it calls an LLM translator under a strict contract: never touch YAML keys, code fences, paths, or commands. It <em>does</em> localize trigger phrases.</p>
+          <p class="lx" lang="ja"><code>i18n-gen.sh</code> が正本をハッシュし、ズレたファイルだけ LLM 翻訳を呼ぶ。契約は厳格だ。YAML キー・コードフェンス・パス・コマンドには触れない。トリガー文だけは自然な言い回しに直す。</p>
         </div>
         <div class="lstep reveal">
           <span class="lstep-n">C</span>
           <h4 class="lx" lang="en">Verify deterministically</h4><h4 class="lx" lang="ja">検証は決定論で</h4>
-          <p class="lx" lang="en">The translation is fuzzy, but <code>i18n-sync-check.sh</code> is exact: it compares sha256 hashes in <code>.sync-manifest.json</code> and fails CI on STALE / MISSING / TAMPERED / ORPHAN. No LLM in the gate.</p>
-          <p class="lx" lang="ja">翻訳は曖昧でも <code>i18n-sync-check.sh</code> は厳密 — <code>.sync-manifest.json</code> の sha256 を突き合わせ、STALE / MISSING / TAMPERED / ORPHAN で CI を落とす。ゲートに LLM はいない。</p>
+          <p class="lx" lang="en">The translation is fuzzy, but <code>i18n-sync-check.sh</code> is exact: it compares sha256 hashes in <code>.sync-manifest.json</code> and fails CI on STALE / MISSING / TAMPERED / ORPHAN. A second gate, <code>i18n-coverage-check.sh</code>, classifies every shipped file as i18n-managed or explicitly exempt. Nothing slips in by omission. No LLM in either gate.</p>
+          <p class="lx" lang="ja">翻訳は曖昧でも、<code>i18n-sync-check.sh</code> は厳密だ。<code>.sync-manifest.json</code> の sha256 を突き合わせ、STALE / MISSING / TAMPERED / ORPHAN で CI を落とす。もう 1 つのゲート <code>i18n-coverage-check.sh</code> は、配布ファイルを全数分類し、i18n 管理か明示 exemption のどちらかに必ず入れる。見落としで混ざる経路がない。どちらのゲートにも LLM はいない。</p>
         </div>
         <div class="lstep reveal">
           <span class="lstep-n">D</span>
           <h4 class="lx" lang="en">Swap, and make it stick</h4><h4 class="lx" lang="ja">切り替えて、固定する</h4>
-          <p class="lx" lang="en"><code>/set-language ja|en</code> materializes the chosen tree onto the active set and saves the choice in user scope. A SessionStart hook re-applies it after every plugin update — the choice survives.</p>
-          <p class="lx" lang="ja"><code>/set-language ja|en</code> が選んだ言語を active セットへ展開し、選択を user スコープに保存。SessionStart hook がプラグイン更新のたびに再適用する — 選択は生き残る。</p>
+          <p class="lx" lang="en"><code>/set-language ja|en</code> materializes the chosen tree onto the active set and saves the choice in user scope. A SessionStart hook re-applies it after every plugin update. The choice survives.</p>
+          <p class="lx" lang="ja"><code>/set-language ja|en</code> が選んだ言語を active セットへ展開し、選択を user スコープに保存する。SessionStart hook がプラグイン更新のたびに再適用する。選択は生き残る。</p>
         </div>
       </div>
 
       <div class="callout reveal">
         <p class="lx" lang="en">
-          <strong>Why this is worth copying:</strong> most i18n either hand-maintains every locale
-          (drifts silently) or trusts an LLM to "keep them in sync" (unverifiable). Banto separates the
-          two — let the LLM translate, let a hash gate prove freshness. This very page runs on the same
-          idea: one set of content, a toggle, both languages always present.
+          <strong>This pattern is worth copying.</strong> Most i18n setups hand-maintain every locale,
+          and it drifts silently. Others trust an LLM to keep translations in sync, but that isn't
+          verifiable. Banto separates the two: the LLM translates, and a hash gate proves freshness.
+          This page runs on the same idea: one set of content, a toggle, and both languages always
+          present.
         </p>
         <p class="lx" lang="ja">
-          <strong>真似する価値:</strong> 多くの i18n は各ロケールを手で保守して黙ってズレるか、
-          LLM に「同期しといて」と委ねて検証不能になる。Banto は両者を分ける — 翻訳は LLM に、
-          鮮度の証明はハッシュゲートに。このページ自身も同じ発想 — コンテンツは 1 組、トグル 1 つ、
-          両言語が常に在る。
+          <strong>この型は真似する価値がある。</strong> 多くの i18n は各ロケールを手で保守し、
+          黙ってズレていく。あるいは LLM に「同期しといて」と委ねるが、それでは検証できない。
+          Banto は両者を分ける。翻訳は LLM に任せ、鮮度の証明はハッシュゲートに任せる。
+          このページ自身も同じ発想だ。コンテンツは 1 組、トグルは 1 つ、両言語が常に在る。
         </p>
       </div>
     </article>
@@ -582,25 +587,25 @@
     <p class="section-lede reveal lx" lang="en">
       A long session bloats context and gets expensive. <code>save-checkpoint</code> writes a
       structured, resumable snapshot to the store, then recommends exactly one of <code>compact</code>
-      or <code>clear</code> — never both, and never runs either itself.
+      or <code>clear</code>, never both. It never runs either command itself.
     </p>
     <p class="section-lede reveal lx" lang="ja">
       会話が伸びるとコンテキストが膨らみ、コストも上がる。<code>save-checkpoint</code> は再開できる
       構造化スナップショットを store に書き、<code>compact</code> か <code>clear</code> の
-      どちらか一方だけを推奨する — 両論併記はせず、どちらも自分では実行しない。
+      どちらか一方だけを推奨する。両論併記はせず、どちらも自分では実行しない。
     </p>
 
     <!-- compare: plain compact vs checkpoint + clear -->
     <div class="lang-steps" style="margin-top:30px">
       <div class="lstep reveal">
         <h4 class="lx" lang="en">Plain /compact</h4><h4 class="lx" lang="ja">通常の /compact</h4>
-        <p class="lx" lang="en">An in-session LLM summary that compresses the transcript in place. Lossy and opaque — drops happen silently and the summary is whatever the summarizer produced. Nothing lands on disk; you stay inside the same, partly-reclaimed window.</p>
+        <p class="lx" lang="en">An in-session LLM summary compresses the transcript in place. Drops happen silently, and you can't choose what the summary keeps. Nothing lands on disk, and you stay inside the same window, only partly reclaimed.</p>
         <p class="lx" lang="ja">会話内で LLM が要約し、その場で圧縮する。欠落は静かに起き、要約の中身は選べない。ディスクには何も残らず、一部しか戻らない同じ窓の中に居続ける。</p>
       </div>
       <div class="lstep reveal">
         <h4 class="lx" lang="en">save-checkpoint + /clear</h4><h4 class="lx" lang="ja">save-checkpoint + /clear</h4>
-        <p class="lx" lang="en">A purpose-built, structured checkpoint written to the store — durable and reviewable. Then <code>/clear</code> reclaims the full 1M window, and the next session's SessionStart re-injects the checkpoint. You resume from a curated summary, not a lossy one.</p>
-        <p class="lx" lang="ja">再開のために設計した構造化チェックポイントを store に書く — 永続で、あとから読み返せる。その後 <code>/clear</code> で 1M の窓を丸ごと取り戻し、次のセッションの SessionStart が再注入する。欠落した要約ではなく、整えた要約から再開できる。</p>
+        <p class="lx" lang="en">A purpose-built, structured checkpoint is written to the store. It's durable and reviewable. Then <code>/clear</code> reclaims the full context window (1M tokens), and the next session's SessionStart re-injects the checkpoint. You resume from a curated summary, not a lossy one.</p>
+        <p class="lx" lang="ja">再開のために設計した構造化チェックポイントを store に書く。永続で、あとから読み返せる。その後 <code>/clear</code> でコンテキストウィンドウ（1M トークン）を丸ごと取り戻し、次のセッションの SessionStart が再注入する。欠落した要約ではなく、整えた要約から再開できる。</p>
       </div>
     </div>
 
@@ -617,25 +622,25 @@
         <div class="lstep reveal">
           <span class="lstep-n">A</span>
           <h4 class="lx" lang="en">Armed on every turn</h4><h4 class="lx" lang="ja">応答ごとにアーム</h4>
-          <p class="lx" lang="en">Each finished response arms a watcher on the transcript. It measures idle time, not wall-clock — only time you are actually away counts toward the threshold.</p>
+          <p class="lx" lang="en">Each finished response arms a watcher on the transcript. It measures idle time, not wall-clock time. Only the time you're actually away counts toward the threshold.</p>
           <p class="lx" lang="ja">応答が終わるたび transcript のウォッチャーをアームする。測るのは無操作時間で、覚醒中に離れていた分だけをしきい値に数える。</p>
         </div>
         <div class="lstep reveal">
           <span class="lstep-n">B</span>
           <h4 class="lx" lang="en">Fires at the cache TTL</h4><h4 class="lx" lang="ja">キャッシュ TTL で発火</h4>
-          <p class="lx" lang="en">After 5 minutes idle — matching the prompt-cache TTL — it runs <code>/save-checkpoint</code> through a headless <code>claude -p --resume --fork-session</code>. Being a fork, it never writes back to your live session.</p>
-          <p class="lx" lang="ja">無操作 5 分 — プロンプトキャッシュの TTL に一致 — で、ヘッドレスの <code>claude -p --resume --fork-session</code> が <code>/save-checkpoint</code> を回す。fork なので現行セッションには一切書き戻さない。</p>
+          <p class="lx" lang="en">After 5 minutes idle (matching the prompt-cache TTL), it runs <code>/save-checkpoint</code> through a headless <code>claude -p --resume --fork-session</code>. Being a fork, it never writes back to your live session.</p>
+          <p class="lx" lang="ja">無操作 5 分（プロンプトキャッシュの TTL に一致）で、ヘッドレスの <code>claude -p --resume --fork-session</code> が <code>/save-checkpoint</code> を回す。fork なので現行セッションには一切書き戻さない。</p>
         </div>
         <div class="lstep reveal">
           <span class="lstep-n">C</span>
           <h4 class="lx" lang="en">Guarded, not on clean exit</h4><h4 class="lx" lang="ja">ガード付き・正常終了では動かない</h4>
-          <p class="lx" lang="en">A cleanly ended session disarms the watcher — no checkpoint. It fires only on substantial sessions (context &gt;10% or transcript &gt;256KB) and is sleep-aware, so reopening a closed laptop does not trip it.</p>
-          <p class="lx" lang="ja">正常に終えたセッションはウォッチャーを解除する — 発火しない。中身のあるセッション（コンテキスト &gt;10% か transcript &gt;256KB）だけが対象で、スリープも考慮するため、閉じたラップトップを開いた瞬間には動かない。</p>
+          <p class="lx" lang="en">A cleanly ended session disarms the watcher. No checkpoint fires. It fires only on substantial sessions (context &gt;10% or transcript &gt;256KB) and is sleep-aware, so reopening a closed laptop does not trip it.</p>
+          <p class="lx" lang="ja">正常に終えたセッションはウォッチャーを解除する。発火しない。中身のあるセッション（コンテキスト &gt;10% か transcript &gt;256KB）だけが対象で、スリープも考慮するため、閉じたラップトップを開いた瞬間には動かない。</p>
         </div>
       </div>
       <div class="callout reveal" style="margin-top:22px">
-        <p class="lx" lang="en"><strong>Why it fires cheap:</strong> the whole feature exists to save money — resuming a huge context after the cache expires re-reads it at cold pricing. So the background fork runs on an inexpensive model (<code>sonnet</code>, which resolves to the latest Sonnet), not an expensive one. Filling a fixed checkpoint template from a transcript is faithful-summary work, measured to pass on sonnet; spending opus here would defeat the very motive the feature was built for.</p>
-        <p class="lx" lang="ja"><strong>安く発火する理由:</strong> この機能はコスト削減のために在る — キャッシュ失効後に巨大コンテキストを再開すると、コールド価格で読み直す。だから裏の fork は高額モデルではなく安価な <code>sonnet</code>（最新の Sonnet に解決される）で回す。transcript から定型のチェックポイントテンプレを埋める作業は忠実な要約であり、実測で sonnet が通過する。ここに opus を使えば、機能の動機そのものを裏切る。</p>
+        <p class="lx" lang="en"><strong>It runs on a cheap model by design.</strong> The whole feature exists to save money. When the prompt cache expires, resuming a huge context re-reads every token at cold pricing (the standard per-token rate once the cached discount has lapsed). So the background fork runs on an inexpensive model (<code>sonnet</code>, which resolves to the latest Sonnet), not an expensive one. Filling a fixed checkpoint template from a transcript is faithful-summary work, and sonnet passes that bar in testing. Spending opus here would defeat the very motive the feature was built for.</p>
+        <p class="lx" lang="ja"><strong>安いモデルで動くよう設計している。</strong> この機能はコスト削減のために在る。キャッシュが失効した後に巨大なコンテキストを再開すると、コールド価格（キャッシュ割引が切れた後の通常単価）で全トークンを読み直す。だから裏の fork は高額モデルではなく安価な <code>sonnet</code>（最新の Sonnet に解決される）で回す。transcript から定型のチェックポイントテンプレを埋める作業は忠実な要約であり、実測で sonnet がその基準を通過する。ここに opus を使えば、機能の動機そのものを裏切る。</p>
       </div>
       <p class="reveal" style="margin-top:18px; font-size:15px;">
         <a href="toolset.html#save-checkpoint" class="lx" lang="en">Full save-checkpoint page →</a><a href="toolset.html#save-checkpoint" class="lx" lang="ja">save-checkpoint の詳細ページ →</a>
@@ -647,8 +652,8 @@
       <div class="flag-head">
         <div>
           <h3><span class="lx" lang="en">One line under the prompt tells you everything</span><span class="lx" lang="ja">手元の 1 行で、全部わかる</span></h3>
-          <p class="flag-tag lx" lang="en">The bundled status line surfaces open tasks, the auto-checkpoint save, and a context-usage warning — at a glance, without asking.</p>
-          <p class="flag-tag lx" lang="ja">同梱の statusline が、未完了タスク・自動チェックポイント保存・トークン使用量の警告を一目で示す — 聞かなくても、見ればわかる。</p>
+          <p class="flag-tag lx" lang="en">The bundled status line surfaces open tasks, the auto-checkpoint save, and a context-usage warning at a glance. You don't have to ask.</p>
+          <p class="flag-tag lx" lang="ja">同梱の statusline が、未完了タスク・自動チェックポイント保存・トークン使用量の警告を一目で示す。聞かなくても、見ればわかる。</p>
         </div>
       </div>
       <p style="margin-top:22px">
@@ -662,7 +667,7 @@
         </div>
         <div class="lstep reveal">
           <h4><span class="lx" lang="en">💾 Auto-checkpoint saved</span><span class="lx" lang="ja">💾 自動チェックポイント保存済み</span></h4>
-          <p class="lx" lang="en">When the idle / context-pressure checkpoint fires in the background, the save time appears here — so walking away and coming back, you know the session is already folded.</p>
+          <p class="lx" lang="en">When the idle / context-pressure checkpoint fires in the background, the save time appears here. So even after walking away and coming back, you know the session is already folded.</p>
           <p class="lx" lang="ja">放置検知・コンテキスト逼迫の自動チェックポイントが裏で走ると、保存時刻がここに出る。離席して戻っても、もう畳まれていることが見ればわかる。</p>
         </div>
         <div class="lstep reveal">
@@ -672,10 +677,10 @@
         </div>
       </div>
       <p class="reveal lx" lang="en" style="margin-top:18px; font-size:14px; color:var(--ink-2)">
-        Deployed by <code>harness-setup.sh</code> as part of the harness — an existing custom status line is never overwritten. Renders in the terminal CLI (including terminals inside IDEs); it refreshes on a 10-second timer, so the 💾 mark appears even while you are away.
+        <code>harness-setup.sh</code> deploys it as part of the harness. An existing custom status line is never overwritten. It renders in the terminal CLI (including terminals inside IDEs) and refreshes on a 10-second timer, so the 💾 mark appears even while you are away.
       </p>
       <p class="reveal lx" lang="ja" style="margin-top:18px; font-size:14px; color:var(--ink-2)">
-        <code>harness-setup.sh</code> がハーネスの一部として配備する — 既にカスタム statusline がある環境は上書きしない。表示されるのはターミナル CLI（IDE 内蔵ターミナル含む）で、10 秒間隔で再描画するため離席中でも 💾 が現れる。
+        <code>harness-setup.sh</code> がハーネスの一部として配備する。既にカスタム statusline がある環境は上書きしない。表示されるのはターミナル CLI（IDE 内蔵ターミナル含む）で、10 秒間隔で再描画するため離席中でも 💾 が現れる。
       </p>
     </article>
   </div>
@@ -684,13 +689,13 @@
 <!-- ===================== SDD PIPELINE ===================== -->
 <section class="band" id="pipeline">
   <div class="container">
-    <p class="kicker reveal"><span class="lx" lang="en">The SDD pipeline</span><span class="lx" lang="ja">SDD パイプライン</span></p>
+    <p class="kicker reveal"><span class="lx" lang="en">The SDD pipeline (spec-driven development)</span><span class="lx" lang="ja">SDD パイプライン（spec-driven development）</span></p>
     <h2 class="reveal">
       <span class="lx" lang="en">Ideology → spec → autonomous build</span>
       <span class="lx" lang="ja">思想 → 仕様 → 自走実装</span>
     </h2>
     <p class="section-lede reveal lx" lang="en">
-      Write down what to build — and what not to — in CLAUDE.md; every session judges by it. From a
+      Write down what to build, and what not to build, in CLAUDE.md. Every session judges by it. From a
       spec, <code>dev-loop</code> splits the work into small tasks and keeps implementing and fixing
       until every test passes.
     </p>
@@ -753,12 +758,13 @@
       <span class="lx" lang="ja">約束ではなく hook が強制する</span>
     </h2>
     <p class="section-lede center reveal light lx" lang="en">
-      Anything that must never happen is blocked by a deterministic hook before it runs — not asked
-      about, not hoped for. Approvals stay minimal; the guard rails are mechanical.
+      Anything that must never happen is blocked by a deterministic hook before it runs. Nothing here
+      is asked about, and nothing is hoped for. Approvals stay minimal, and the guard rails are
+      mechanical.
     </p>
     <p class="section-lede center reveal light lx" lang="ja">
-      起きてはならないことは、実行前に決定論的な hook が遮断する — 訊くのでも祈るのでもなく。
-      承認は最小限、ガードレールは機械的。
+      起きてはならないことは、実行前に決定論的な hook が遮断する。訊くのでも祈るのでもない。
+      承認は最小限で、ガードレールは機械的だ。
     </p>
 
     <div class="gate-demo reveal" aria-hidden="true">
@@ -776,7 +782,7 @@
       </div>
       <div class="card dark reveal">
         <h4>prod-guard</h4>
-        <p class="lx" lang="en">Production operations (prod contexts, <code>terraform apply</code>, prod deploys) are blocked by default — passed only by conversational approval or a standing per-repo grant.</p>
+        <p class="lx" lang="en">Production operations (prod contexts, <code>terraform apply</code>, prod deploys) are blocked by default. They pass only with conversational approval or a standing per-repo grant.</p>
         <p class="lx" lang="ja">本番操作（prod context・<code>terraform apply</code>・本番デプロイ）は既定で遮断。通すのは会話での承認か、repo 単位の常設許可（grants）だけ。</p>
       </div>
       <div class="card dark reveal">
@@ -791,13 +797,13 @@
       </div>
       <div class="card dark reveal">
         <h4>cross-check</h4>
-        <p class="lx" lang="en">A second opinion from a different vendor's model — an adversarial review that tries to refute the work before you trust it. Same-vendor reviews are refused by default.</p>
-        <p class="lx" lang="ja">別ベンダーのモデルによる反証レビュー — 信じる前に、壊しにかかる第二の目。同一ベンダー同士のレビューは既定で拒否。</p>
+        <p class="lx" lang="en">A second opinion from a different vendor's model. This adversarial review tries to refute the work before you trust it. Same-vendor reviews are refused by default.</p>
+        <p class="lx" lang="ja">別ベンダーのモデルによる、もう一つの視点からのレビューだ。信じる前に、あえて反証を試みる。同一ベンダー同士のレビューは既定で拒否する。</p>
       </div>
       <div class="card dark reveal">
         <h4><span class="lx" lang="en">OS sandbox · opt-in</span><span class="lx" lang="ja">OS サンドボックス · opt-in</span></h4>
         <p class="lx" lang="en">A second layer: Claude's bash can run in an OS sandbox (Seatbelt / bubblewrap) blocking credential reads and off-allowlist network. Off by default.</p>
-        <p class="lx" lang="ja">もう一段の層 — Claude の bash を OS サンドボックス（Seatbelt / bubblewrap）で走らせる。秘匿情報の読取と許可外のネットワーク接続を遮断。既定は無効。</p>
+        <p class="lx" lang="ja">もう一段の層だ。Claude の bash を OS サンドボックス（Seatbelt / bubblewrap）で走らせ、秘匿情報の読み取りと許可外のネットワーク接続を遮断する。既定は無効。</p>
       </div>
     </div>
 
@@ -806,11 +812,11 @@
       <p class="lx" lang="en">
         <strong>Self-auditing.</strong> A 15-axis plugin-quality audit, a 7-axis per-skill context
         audit, and a 5-axis whole-harness audit watch for drift between what the harness declares and
-        what it actually does — so the docs never lie.
+        what it actually does. That keeps the docs honest.
       </p>
       <p class="lx" lang="ja">
         <strong>自己監査。</strong> 15 軸のプラグイン品質監査・7 軸の skill コンテキスト監査・
-        5 軸のハーネス監査が、宣言と実体の乖離を見張る — ドキュメントが嘘をつかない。
+        5 軸のハーネス監査が、宣言と実体の乖離を見張る。だからドキュメントが嘘をつかない。
       </p>
     </div>
 
@@ -830,12 +836,12 @@
       <span class="lx" lang="ja">箱の中身、すべて</span>
     </h2>
     <p class="section-lede reveal lx" lang="en">
-      20 skills, 6 agents, 46 hooks, 10 behavioral rules — and no bundled MCP. Code review and security
+      20 skills, 6 agents, 49 hooks, 10 behavioral rules, and no bundled MCP. Code review and security
       review are deliberately delegated to Anthropic's official plugins rather than reimplemented.
     </p>
     <p class="section-lede reveal lx" lang="ja">
-      20 スキル・6 エージェント・46 フック・10 行動ルール — MCP 同梱なし。コードレビューと
-      セキュリティレビューは再実装せず、Anthropic 公式プラグインへ意図的に委譲。
+      20 スキル・6 エージェント・49 フック・10 行動ルール、そして MCP は同梱しない。コードレビューと
+      セキュリティレビューは再実装せず、Anthropic 公式プラグインへ意図的に委譲する。
     </p>
 
     <div class="tool-group reveal">
@@ -864,10 +870,8 @@
     <div class="tool-group reveal">
       <h4 class="tg-head"><span class="lx" lang="en">Documents &amp; writing</span><span class="lx" lang="ja">資料 &amp; 文章</span></h4>
       <div class="chips">
-        <a class="chip" href="toolset.html#ja-writing"><b>ja-writing</b><i class="lx" lang="en">audience-tuned Japanese</i><i class="lx" lang="ja">受け手に合わせた日本語</i></a>
-        <a class="chip" href="toolset.html#diagram"><b>diagram</b><i class="lx" lang="en">SVG · mermaid · draw.io</i><i class="lx" lang="ja">図解の実務パターン</i></a>
-        <a class="chip" href="toolset.html#b2b-docs"><b>b2b-docs</b><i class="lx" lang="en">proposals &amp; decks</i><i class="lx" lang="ja">提案書 &amp; 営業資料</i></a>
-        <a class="chip" href="toolset.html#html-doc"><b>html-doc</b><i class="lx" lang="en">self-contained HTML docs</i><i class="lx" lang="ja">自己完結 HTML 資料</i></a>
+        <a class="chip star" href="toolset.html#docs"><b>docs</b><i class="lx" lang="en">every document, one skill</i><i class="lx" lang="ja">資料作成を 1 つに統合</i></a>
+        <a class="chip" href="toolset.html#diagram"><b>diagram</b><i class="lx" lang="en">14 diagram patterns</i><i class="lx" lang="ja">図解 14 パターン</i></a>
       </div>
     </div>
 
@@ -880,6 +884,7 @@
         <a class="chip" href="toolset.html#plugin-audit"><b>plugin-audit</b><i class="lx" lang="en">15-axis quality audit</i><i class="lx" lang="ja">15 軸品質監査</i></a>
         <a class="chip" href="toolset.html#skill-audit"><b>skill-audit</b><i class="lx" lang="en">7-axis context audit</i><i class="lx" lang="ja">7 軸コンテキスト監査</i></a>
         <a class="chip" href="toolset.html#kit"><b>kit</b><i class="lx" lang="en">discover everything</i><i class="lx" lang="ja">全機能カタログ</i></a>
+        <a class="chip" href="toolset.html#policy"><b>policy</b><i class="lx" lang="en">grants &amp; guards console</i><i class="lx" lang="ja">許可と保護の一覧管理</i></a>
       </div>
       <a class="flag-more" href="toolset.html#plugin-audit"><span class="lx" lang="en">How plugin-audit &amp; plugin-dev work →</span><span class="lx" lang="ja">plugin-audit &amp; plugin-dev の解説 →</span></a>
     </div>
@@ -988,14 +993,18 @@
       Restart Claude Code. On a project without a CLAUDE.md, the SessionStart hook prompts the
       one-time setup with the exact command. <code>harness-setup.sh</code> deploys the behavioral
       rules, statusline, minimal permissions, and the <strong>disabled</strong> OS-sandbox block, and
-      initializes the store. Default language is English — run <code>/set-language ja</code> once to
-      switch (it survives updates).
+      it initializes the store. <strong>Run it.</strong> Skipping this step means decisions never get
+      logged, checkpoints never fire, and the statusline stays blank. The default language is English.
+      Run <code>/set-language ja</code> once to switch. The choice survives updates.
     </p>
     <p class="install-note reveal lx" lang="ja">
-      Claude Code を再起動。CLAUDE.md の無いプロジェクトでは SessionStart hook が正確なコマンド付きで
-      初回セットアップを提案する。<code>harness-setup.sh</code> が行動ルール・statusline・最小限の
-      権限設定・<strong>既定で無効</strong>の OS サンドボックス設定を配置する。あわせてストアも初期化。
-      既定は英語 — 日本語にするには <code>/set-language ja</code> を一度だけ（更新をまたいで保持）。
+      Claude Code を再起動する。CLAUDE.md の無いプロジェクトでは、SessionStart hook が正確な
+      コマンド付きで初回セットアップを提案する。<code>harness-setup.sh</code> が行動ルール・
+      statusline・最小限の権限設定・<strong>既定で無効</strong>の OS サンドボックス設定を配置し、
+      あわせてストアも初期化する。<strong>必ず実行する。</strong>これを飛ばすと、決定ログは記録
+      されず、チェックポイントも自動発火せず、statusline も表示されない。既定の言語は英語だ。
+      日本語にするには <code>/set-language ja</code> を一度だけ実行する。この選択は更新をまたいで
+      保持される。
     </p>
     <p class="install-note reveal lx" lang="en">
       <code>harness-setup.sh</code> also enables marketplace <strong>autoUpdate</strong>, so every
@@ -1020,12 +1029,70 @@
       </p>
     </div>
 
+    <h4 class="reveal" style="font-size:18px;margin-top:34px"><span class="lx" lang="en">Right after install, try one of these</span><span class="lx" lang="ja">インストール直後に、試しにこう言ってみる</span></h4>
+    <div class="feel-table reveal">
+      <div class="feel-row feel-head">
+        <div class="lx" lang="en">You say</div><div class="lx" lang="ja">あなたの発話</div>
+        <div class="lx" lang="en">Banto does</div><div class="lx" lang="ja">Banto の動き</div>
+      </div>
+      <div class="feel-row">
+        <div class="fsay"><span class="lx" lang="en">"save this as a decision"</span><span class="lx" lang="ja">「これ決定として保存して」</span></div>
+        <div class="fdo"><span class="lx" lang="en">written to <code>decisions/</code></span><span class="lx" lang="ja"><code>decisions/</code> に保存</span></div>
+      </div>
+      <div class="feel-row">
+        <div class="fsay"><span class="lx" lang="en">"next task"</span><span class="lx" lang="ja">「次のタスク進めて」</span></div>
+        <div class="fdo"><span class="lx" lang="en">runs the next open <code>tasks.md</code> item</span><span class="lx" lang="ja">次タスクを実行</span></div>
+      </div>
+      <div class="feel-row">
+        <div class="fsay"><span class="lx" lang="en">"health check"</span><span class="lx" lang="ja">「健康診断して」</span></div>
+        <div class="fdo"><span class="lx" lang="en">shows the store's status</span><span class="lx" lang="ja">store の状態を表示</span></div>
+      </div>
+    </div>
+
     <div class="final-cta reveal">
       <a class="btn btn-primary lg" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
         <span class="lx" lang="en">Open the repo on GitHub</span><span class="lx" lang="ja">GitHub でリポジトリを開く</span>
       </a>
       <span class="repo-url">github.com/banto-org/banto</span>
     </div>
+  </div>
+</section>
+
+<!-- ===================== FIRST STEPS ===================== -->
+<section class="band" id="first-steps">
+  <div class="container narrow">
+    <p class="kicker reveal"><span class="lx" lang="en">One linear path</span><span class="lx" lang="ja">導線を一本に</span></p>
+    <h2 class="reveal">
+      <span class="lx" lang="en">First steps</span>
+      <span class="lx" lang="ja">はじめの一歩</span>
+    </h2>
+    <p class="section-lede reveal lx" lang="en">This page organizes the first five minutes, in order. It covers the whole path from install to your first working session, in one place.</p>
+    <p class="section-lede reveal lx" lang="ja">最初の 5 分でやることを、順番どおりに 1 か所へまとめた。install から最初の動作確認までの一本道。</p>
+
+    <ol class="loop-list reveal" style="margin-top:30px">
+      <li class="reveal">
+        <b class="lx" lang="en">Add the marketplace</b><b class="lx" lang="ja">marketplace を追加</b>
+        <span class="lx" lang="en">Point Claude Code at Banto's marketplace.</span><span class="lx" lang="ja">Claude Code に Banto の marketplace を登録する。</span>
+        <code class="cmd" data-copy="claude plugin marketplace add banto-org/banto" style="margin-top:10px"><span class="prompt">$</span> claude plugin marketplace add banto-org/banto</code>
+      </li>
+      <li class="reveal">
+        <b class="lx" lang="en">Install the plugin</b><b class="lx" lang="ja">プラグインをインストール</b>
+        <span class="lx" lang="en">Pull Banto itself from that marketplace.</span><span class="lx" lang="ja">その marketplace から Banto 本体を取得する。</span>
+        <code class="cmd" data-copy="claude plugin install banto@banto-marketplace" style="margin-top:10px"><span class="prompt">$</span> claude plugin install banto@banto-marketplace</code>
+      </li>
+      <li class="reveal">
+        <b class="lx" lang="en">Restart Claude Code</b><b class="lx" lang="ja">Claude Code を再起動</b>
+        <span class="lx" lang="en">Required once, for the plugin to load.</span><span class="lx" lang="ja">プラグインを読み込むために、一度だけ必要。</span>
+      </li>
+      <li class="reveal">
+        <b class="lx" lang="en">Follow the setup SessionStart walks you through</b><b class="lx" lang="ja">SessionStart が案内するセットアップに従う</b>
+        <span class="lx" lang="en">It hands you the exact <code>harness-setup.sh</code> command. Running it wires the rules, statusline, and store into place.</span><span class="lx" lang="ja"><code>harness-setup.sh</code> の正確なコマンドを提示する。実行するとルール・statusline・store が配線・反映される。</span>
+      </li>
+      <li class="reveal">
+        <b class="lx" lang="en">Try a trigger phrase</b><b class="lx" lang="ja">試しに言ってみる</b>
+        <span class="lx" lang="en">Say <em>"save this as a decision"</em> and watch it land in the store.</span><span class="lx" lang="ja"><em>「これ決定として保存して」</em>と言ってみて、store に書き込まれるのを確認する。</span>
+      </li>
+    </ol>
   </div>
 </section>
 

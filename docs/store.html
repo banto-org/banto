@@ -119,6 +119,9 @@
         </div>
       </div>
     </div>
+    <div class="nav-item">
+      <a href="flow.html" class="lx" lang="en">Flow</a><a href="flow.html" class="lx" lang="ja">開発の流れ</a>
+    </div>
     <div class="nav-item has-menu">
       <a href="toolset.html" class="lx" lang="en" aria-haspopup="true">Toolset</a><a href="toolset.html" class="lx" lang="ja" aria-haspopup="true">道具一式</a>
       <div class="nav-menu">
@@ -141,10 +144,8 @@
         </div>
         <div class="nav-menu-col">
           <span class="nav-menu-head lx" lang="en">Documents &amp; writing</span><span class="nav-menu-head lx" lang="ja">資料 &amp; 文章</span>
-          <a href="toolset.html#ja-writing"><b>ja-writing</b><span class="lx" lang="en">audience-tuned Japanese</span><span class="lx" lang="ja">受け手に合わせた日本語</span></a>
-          <a href="toolset.html#diagram"><b>diagram</b><span class="lx" lang="en">SVG · mermaid · draw.io</span><span class="lx" lang="ja">図解の実務パターン</span></a>
-          <a href="toolset.html#b2b-docs"><b>b2b-docs</b><span class="lx" lang="en">proposals &amp; decks</span><span class="lx" lang="ja">提案書 &amp; 営業資料</span></a>
-          <a href="toolset.html#html-doc"><b>html-doc</b><span class="lx" lang="en">self-contained HTML docs</span><span class="lx" lang="ja">自己完結 HTML 資料</span></a>
+          <a href="toolset.html#docs"><b>docs</b><span class="lx" lang="en">every document, one skill</span><span class="lx" lang="ja">資料作成を 1 つに統合</span></a>
+          <a href="toolset.html#diagram"><b>diagram</b><span class="lx" lang="en">14 diagram patterns</span><span class="lx" lang="ja">図解 14 パターン</span></a>
         </div>
         <div class="nav-menu-col">
           <span class="nav-menu-head lx" lang="en">Workspace &amp; meta</span><span class="nav-menu-head lx" lang="ja">ワークスペース &amp; メタ</span>
@@ -154,6 +155,7 @@
           <a href="toolset.html#plugin-audit"><b>plugin-audit</b><span class="lx" lang="en">15-axis quality audit</span><span class="lx" lang="ja">15 軸品質監査</span></a>
           <a href="toolset.html#skill-audit"><b>skill-audit</b><span class="lx" lang="en">7-axis context audit</span><span class="lx" lang="ja">7 軸コンテキスト監査</span></a>
           <a href="toolset.html#kit"><b>kit</b><span class="lx" lang="en">discover everything</span><span class="lx" lang="ja">全機能カタログ</span></a>
+          <a href="toolset.html#policy"><b>policy</b><span class="lx" lang="en">grants &amp; guards console</span><span class="lx" lang="ja">許可と保護の一覧管理</span></a>
         </div>
         <div class="nav-menu-col">
           <span class="nav-menu-head lx" lang="en">Agents</span><span class="nav-menu-head lx" lang="ja">エージェント</span>
@@ -185,6 +187,7 @@
           <a href="store.html#store"><span class="lx" lang="en">What accumulates</span><span class="lx" lang="ja">何が貯まるか</span></a>
           <a href="store.html#search"><span class="lx" lang="en">Cross-store search</span><span class="lx" lang="ja">横断検索</span></a>
           <a href="store.html#team"><span class="lx" lang="en">Git &amp; teams</span><span class="lx" lang="ja">git &amp; 複数人</span></a>
+          <a href="store.html#register"><span class="lx" lang="en">Register a project</span><span class="lx" lang="ja">プロジェクトを登録</span></a>
         </div>
       </div>
     </div>
@@ -230,14 +233,16 @@
       </h1>
       <p class="lede reveal lx" lang="en">
         Every decision, research note, and working state lives in a <strong>central store outside your repo</strong>.
-        Banto injects it at the start of every session and saves it at the end, so a <code>/clear</code> or a
-        compaction never costs you the thread. Once the store has grown enough — 1,471 documents in the current
-        example — a fail-open search stack lets even the cheapest model find any of it in under a millisecond.
+        Banto injects it at the start of every session and saves it again at the end, so a <code>/clear</code> or a
+        compaction never loses your context. Once the store grows large (1,471 documents in the current
+        example), the search stack takes over. It keeps searching even at zero hits, so even the cheapest model
+        reaches the right section in under a millisecond.
       </p>
       <p class="lede reveal lx" lang="ja">
         決定・調査・作業状態は、すべて <strong>repo の外の中央ストア</strong>に置く。Banto がセッション開始時に注入し、
         終了時に保存するため、<code>/clear</code> や自動圧縮でも文脈を失わない。ストアが育つと（現在の実例で
-        1,471 文書）、0 件でも止まらない検索スタックが働き、いちばん安いモデルでも 1 ミリ秒未満で目当てのセクションに届く。
+        1,471 文書）、検索スタックが働き始める。0 件のときも止まらず探し続けるため、いちばん安いモデルでも
+        1 ミリ秒未満で目当てのセクションに届く。
       </p>
     </div>
     <!-- animated diagram: many sessions, one surviving store -->
@@ -277,7 +282,7 @@
           <text x="200" y="309" class="n-sub lx" lang="en">stays clean — code only</text><text x="200" y="309" class="n-sub lx" lang="ja">汚れない — code だけ</text></g>
         <path class="ctx-flow w3" d="M200,232 L200,270" marker-end="url(#arrow-ink)"/>
       </svg>
-      <p class="crumb" style="text-align:center;margin-top:8px"><span class="lx" lang="en">Each session saves; the next session reads it back.</span><span class="lx" lang="ja">各セッションが保存し、次のセッションが読み込む。</span></p>
+      <p class="crumb" style="text-align:center;margin-top:8px"><span class="lx" lang="en">Each session saves. The next session reads it back.</span><span class="lx" lang="ja">各セッションが保存する。次のセッションがそれを読み込む。</span></p>
     </div>
   </div>
 </section>
@@ -286,12 +291,12 @@
 <section class="sec" id="store">
   <div class="sec-head reveal">
     <span class="ghost">01</span>
-    <h2><span class="lx" lang="en">What accumulates — and how it comes back</span><span class="lx" lang="ja">何が貯まるか — どう再注入されるか</span></h2>
-    <p><span class="lx" lang="en">An external memory, one per project. It accumulates decisions, research, and working state, and recalls them automatically at the next session start — the same store that saves also restores.</span><span class="lx" lang="ja">プロジェクトごとの外部メモリ。決定・調査・作業状態を貯め、次のセッション開始時に自動で思い出す。保存するストアが、そのまま復元も担う。</span></p>
+    <h2><span class="lx" lang="en">What accumulates, and how it comes back</span><span class="lx" lang="ja">何が貯まるか、どう再注入されるか</span></h2>
+    <p><span class="lx" lang="en">The store is an external memory, one per project. It accumulates decisions, research, and working state, then recalls them automatically at the next session start. The same store that saves the record also restores it.</span><span class="lx" lang="ja">ストアは、プロジェクトごとに 1 つ持つ外部メモリだ。決定・調査・作業状態を貯め、次のセッション開始時に自動で思い出す。保存するストアが、そのまま復元も担う。</span></p>
   </div>
 
   <div class="defbox reveal">
-    <p><span class="lx" lang="en">Without a store, everything built up in a conversation vanishes on <code>/clear</code> or auto-compaction — next session, you explain it all again.</span><span class="lx" lang="ja">ストアがなければ、会話で積み上げた内容は <code>/clear</code> や自動圧縮で消える。次のセッションで、同じ説明をまた繰り返す。</span></p>
+    <p><span class="lx" lang="en">Without a store, everything built up in a conversation vanishes on <code>/clear</code> or auto-compaction. Next session, you explain it all again.</span><span class="lx" lang="ja">ストアがなければ、会話で積み上げた内容は <code>/clear</code> や自動圧縮で消える。次のセッションで、同じ説明をまた繰り返す。</span></p>
   </div>
 
   <div class="subhead reveal">
@@ -300,7 +305,7 @@
   <div class="pain-grid">
     <div class="pain-card bad reveal">
       <span class="pc-tag"><span class="lx" lang="en">without a store</span><span class="lx" lang="ja">ストアなし</span></span>
-      <h3><span class="lx" lang="en">The session ends — memory drops to zero</span><span class="lx" lang="ja">セッション終了 — 記憶はゼロ</span></h3>
+      <h3><span class="lx" lang="en">The session ends. Memory drops to zero</span><span class="lx" lang="ja">セッションが終わる。記憶はゼロになる</span></h3>
       <ul>
         <li><span class="lx" lang="en">why a decision was made is lost</span><span class="lx" lang="ja">決定の理由が消える</span></li>
         <li><span class="lx" lang="en">the same research gets redone</span><span class="lx" lang="ja">同じ調査をやり直す</span></li>
@@ -309,7 +314,7 @@
     </div>
     <div class="pain-card good reveal">
       <span class="pc-tag"><span class="lx" lang="en">with the store</span><span class="lx" lang="ja">ストアあり</span></span>
-      <h3><span class="lx" lang="en">The store remembers — the next session continues</span><span class="lx" lang="ja">ストアが覚えている — 次のセッションは続きから</span></h3>
+      <h3><span class="lx" lang="en">The store remembers. The next session continues</span><span class="lx" lang="ja">ストアが覚えている。次のセッションは続きから始まる</span></h3>
       <ul>
         <li><span class="lx" lang="en">decisions and research persist</span><span class="lx" lang="ja">決定・調査が残る</span></li>
         <li><span class="lx" lang="en">restored automatically at session start</span><span class="lx" lang="ja">開始時に自動で復元</span></li>
@@ -320,7 +325,7 @@
 
   <div class="subhead reveal">
     <h3><span class="lx" lang="en">How it comes back</span><span class="lx" lang="ja">どう戻ってくるか</span></h3>
-    <p><span class="lx" lang="en">One store persists; sessions come and go. Session 1 works and clears, the store keeps everything, session 2 restores automatically.</span><span class="lx" lang="ja">ストアは 1 つ、セッションは入れ替わる。セッション 1 が作業して <code>/clear</code> を実行し、ストアが保存、セッション 2 が自動で復元する。</span></p>
+    <p><span class="lx" lang="en">One store persists; sessions come and go. Session 1 works, then runs <code>/clear</code>. The store keeps everything from that session. Session 2 opens already restored.</span><span class="lx" lang="ja">ストアは 1 つ、セッションは入れ替わる。セッション 1 が作業して <code>/clear</code> を実行する。そのすべてをストアが保存する。セッション 2 は、復元された状態で始まる。</span></p>
   </div>
   <div class="tl3 reveal" aria-hidden="true">
     <div class="tl3-row">
@@ -356,12 +361,12 @@
       <span class="lx" lang="en">the same store stays put — only the sessions change</span><span class="lx" lang="ja">同じストアが居続ける — 入れ替わるのはセッションだけ</span>
     </div>
   </div>
-  <p class="prose-p reveal lx" lang="en" style="margin-top:16px">The re-injection is not manual. Banto hooks into <strong>six lifecycle events</strong> (SessionStart among them), so save and restore never require a human step — the full mechanics are on the mechanism page.</p>
-  <p class="prose-p reveal lx" lang="ja" style="margin-top:16px">この再注入は手動ではない。Banto は<strong>6 つのライフサイクルイベント</strong>（SessionStart など）に hook し、保存と復元に人の一手を挟まない。仕組みの詳細は mechanism ページに譲る。</p>
+  <p class="prose-p reveal lx" lang="en" style="margin-top:16px">The re-injection is not manual. Banto hooks into <strong>six lifecycle events</strong>, including SessionStart (the event that fires when a session begins), so save and restore never need a human step. The full mechanics are on the mechanism page.</p>
+  <p class="prose-p reveal lx" lang="ja" style="margin-top:16px">この再注入は手動ではない。Banto は<strong>6 つのライフサイクルイベント</strong>に hook する。その 1 つが SessionStart（セッション開始時に発火するイベント）で、保存と復元に人の一手を挟まない。仕組みの詳細は mechanism ページに譲る。</p>
 
   <div class="subhead reveal">
     <h3><span class="lx" lang="en">What's inside</span><span class="lx" lang="ja">中身</span></h3>
-    <p><span class="lx" lang="en">One folder per project, a fixed layout any tool can read. Shared knowledge is flat and author-tagged; personal state is namespaced per author.</span><span class="lx" lang="ja">プロジェクトごとに 1 フォルダ・決まった構成。共有知識は階層を持たず、ファイル名に作成者名が入る。個人の状態は、作成者ごとの名前空間で分離する。</span></p>
+    <p><span class="lx" lang="en">Each project gets one folder, in a fixed layout that any tool can read. Shared knowledge is flat and author-tagged. Personal state is namespaced per author.</span><span class="lx" lang="ja">プロジェクトごとに 1 フォルダを持ち、どのツールからも読める決まった構成にする。共有知識は階層を持たず、ファイル名に作成者名が入る。個人の状態は、作成者ごとの名前空間で分離する。</span></p>
   </div>
   <div class="store-table-wrap reveal">
     <table class="store-table">
@@ -430,7 +435,7 @@
     <span><b class="pe"><span class="lx" lang="en">personal</span><span class="lx" lang="ja">個人</span></b><span class="lx" lang="en">under <code>&lt;author&gt;/</code> — working state never collides</span><span class="lx" lang="ja"><code>&lt;author&gt;/</code> 配下 — 作業状態が衝突しない</span></span>
     <span><b class="ep"><span class="lx" lang="en">ephemeral</span><span class="lx" lang="ja">一時</span></b><span class="lx" lang="en">gitignored, never committed — this machine, this moment only</span><span class="lx" lang="ja">gitignore・コミットされない — このマシンのその場限り</span></span>
   </div>
-  <p class="prose-p reveal lx" lang="en" style="margin-top:16px">Setup never gates the work. An unregistered project still works immediately — records land in a temporary local home (<code>~/ai-context-local/&lt;project&gt;/</code>, same layout) until <code>bootstrap</code> registers a private GitHub store and pulls the local content in, additive only.</p>
+  <p class="prose-p reveal lx" lang="en" style="margin-top:16px">Setup never stops the work. An unregistered project still works immediately. Records land in a temporary local home (<code>~/ai-context-local/&lt;project&gt;/</code>, same layout) until <code>bootstrap</code> registers a private GitHub store and pulls the local content in. That migration only adds. It never destroys anything.</p>
   <p class="prose-p reveal lx" lang="ja" style="margin-top:16px">準備で作業を止めない。未登録のプロジェクトも即座に動く。まず仮のローカル置き場（<code>~/ai-context-local/&lt;project&gt;/</code>・同じ構成）に記録し、<code>bootstrap</code> が非公開の GitHub ストアを登録した時点でローカル分を取り込む。移行は追加のみ。</p>
 </section>
 
@@ -439,7 +444,7 @@
   <div class="sec-head reveal">
     <span class="ghost">02</span>
     <h2><span class="lx" lang="en">Search across every store</span><span class="lx" lang="ja">全 store を横断して検索する</span></h2>
-    <p><span class="lx" lang="en">Store Search is how the AI finds things in your accumulated records. It stacks three methods — plain grep, a full-text index, and a loosened retry — and when one comes up empty it moves to the next automatically, so a search never dead-ends.</span><span class="lx" lang="ja">Store Search は、AI が蓄積した記録から目当てを探し出す仕組み。索引なしの grep・全文索引・条件を緩めた再検索の 3 つを重ね、どれかが 0 件でも次の手に自動で進む。検索が行き止まりにならない。</span></p>
+    <p><span class="lx" lang="en">Store Search is how the AI finds things in your accumulated records. It stacks three methods: plain grep, a full-text index, and a loosened retry. When one method comes up empty, Store Search moves to the next automatically. A search never dead-ends.</span><span class="lx" lang="ja">Store Search は、AI が蓄積した記録から目当てを探し出す仕組みだ。索引なしの grep・全文索引・条件を緩めた再検索という 3 つの手段を重ねる。どれかが 0 件でも、次の手に自動で進む。検索が行き止まりにならない。</span></p>
   </div>
 
   <div class="ev-highlight reveal">
@@ -458,8 +463,8 @@
       <span class="ev-cap lx" lang="en">haiku at its <b>lowest</b> effort matches opus 4.8 at its <b>highest</b> (9/10 each)</span><span class="ev-cap lx" lang="ja">effort <b>最低</b>の haiku が、effort <b>最高</b>の opus 4.8 と同点（ともに 9/10）</span>
     </div>
   </div>
-  <p class="fine reveal lx" lang="en">*The test: 10 questions of the form "which file says X?", asked against the real store; score = correct file paths, machine-checked. The 3 runs scored 7, 8 and 10 (mean 8.3).</p>
-  <p class="fine reveal lx" lang="ja">*テストの中身：実際の記録に対して「◯◯と書いたファイルはどれか」を 10 問出題し、正しいファイルを言い当てた数を機械採点。3 回の結果は 7 点・8 点・10 点（平均 8.3）。</p>
+  <p class="fine reveal lx" lang="en">*The test: 10 questions of the form "which file says X?," asked against the real store. The score counts correct file paths, checked automatically. The 3 runs scored 7, 8, and 10 (mean 8.3).</p>
+  <p class="fine reveal lx" lang="ja">*テストの中身：実際の記録に対して「◯◯と書いたファイルはどれか」を 10 問出題する。正しいファイルを言い当てた数を機械採点する。3 回の結果は 7 点・8 点・10 点（平均 8.3）。</p>
 
   <div class="stat-strip reveal">
     <div class="stat"><b class="count" data-to="1471">0</b><span class="lx" lang="en">documents indexed</span><span class="lx" lang="ja">索引化ドキュメント</span></div>
@@ -531,17 +536,17 @@
   </div>
 
   <ul class="obs-list reveal">
-    <li class="lx" lang="en">Cross-project by construction: one index spans every project store on the machine. Any session, in any project, reaches every accumulated decision and research doc with a single query.</li>
-    <li class="lx" lang="ja">構造として横断的：索引はマシン上の全プロジェクト store を 1 つに束ねる。どのプロジェクトのセッションからでも、蓄積した全ての決定・調査に 1 クエリで届く。</li>
-    <li class="lx" lang="en">Japanese works out of the box: the trigram tokenizer matches CJK text directly, no morphological analyzer needed.</li>
-    <li class="lx" lang="ja">日本語はそのまま動く。trigram トークナイザが CJK（日本語・中国語・韓国語）の文字を直接マッチさせるため、形態素解析器は不要。</li>
-    <li class="lx" lang="en">Built for where it matters most: records grown to the 1,500-document scale, and cheap models doing the searching. Below that scale the grep layer simply carries the load — the stack adapts by itself.</li>
-    <li class="lx" lang="ja">真価が出るのは、記録が 1,500 文書規模に育った store と、安いモデルに検索させる運用。それ未満の規模では grep 層がそのまま受け持つ — スタックが自分で適応する。</li>
+    <li class="lx" lang="en">The index is cross-project by construction. One index spans every project store on the machine. Any session, in any project, reaches every accumulated decision and research doc with a single query.</li>
+    <li class="lx" lang="ja">索引は、構造として横断的だ。マシン上の全プロジェクトの store を 1 つに束ねる。どのプロジェクトのセッションからでも、蓄積した全ての決定・調査に 1 クエリで届く。</li>
+    <li class="lx" lang="en">Japanese works out of the box. The trigram tokenizer matches CJK (Chinese, Japanese, Korean) text directly, so no morphological analyzer is needed.</li>
+    <li class="lx" lang="ja">日本語はそのまま動く。trigram トークナイザが CJK（日本語・中国語・韓国語）の文字を直接マッチさせるため、形態素解析器は不要だ。</li>
+    <li class="lx" lang="en">The stack is built for where it matters most: stores grown to the 1,500-document scale, searched by cheap models. Below that scale, the grep layer alone carries the load. The stack adapts by itself.</li>
+    <li class="lx" lang="ja">真価が出るのは、記録が 1,500 文書規模に育った store で、安いモデルに検索させる運用のときだ。それ未満の規模では、grep 層がそのまま受け持つ。スタックが自分で適応する。</li>
   </ul>
 
   <div class="subhead reveal">
     <h3><span class="lx" lang="en">How it's layered</span><span class="lx" lang="ja">3 層構成</span></h3>
-    <p><span class="lx" lang="en">A tiny router directs each question to the layer built for it, so no session ever dumps the whole store into context.</span><span class="lx" lang="ja">小さなルーターが、質問ごとに向くべき層へ振り分ける。store 全体をコンテキストへ丸ごと投入することはない。</span></p>
+    <p><span class="lx" lang="en">A tiny router directs each question to the layer built for it. No session ever dumps the whole store into context.</span><span class="lx" lang="ja">小さなルーターが、質問ごとに向くべき層へ振り分ける。store 全体をコンテキストへ丸ごと投入することはない。</span></p>
   </div>
   <div class="mini-grid">
     <div class="card reveal">
@@ -550,19 +555,19 @@
     </div>
     <div class="card reveal">
       <h3><span class="step-n">1</span><span class="lx" lang="en">Ledger</span><span class="lx" lang="ja">台帳</span></h3>
-      <p><span class="lx" lang="en">A deterministic, complete document ledger for counting, auditing, and existence guarantees — measured to be where index-based navigation actually wins.</span><span class="lx" lang="ja">数える・監査する・存在を保証するための決定論的な全数台帳。索引をたどる探索が実測で勝つのはここ。</span></p>
+      <p><span class="lx" lang="en">The ledger is a deterministic, complete list of every document. It exists to count, audit, and confirm what's there. This is where index-based navigation is measured to actually win.</span><span class="lx" lang="ja">台帳は、数える・監査する・存在を保証するための決定論的な全数リストだ。索引をたどる探索は、ここでこそ実測で勝る。</span></p>
     </div>
     <div class="card reveal">
       <h3><span class="step-n">2</span><span class="lx" lang="en">Store Search</span><span class="lx" lang="ja">Store Search</span></h3>
-      <p><span class="lx" lang="en">Full-text section search over every store, ranked by BM25, returning exact line ranges — so the agent reads the section, not the whole file.</span><span class="lx" lang="ja">全 store を対象にした全文セクション検索。BM25 で順位付けし、行範囲を返す。エージェントは全文でなく、セクションだけを読む。</span></p>
+      <p><span class="lx" lang="en">Store Search is a full-text search over every store's sections. It ranks results with BM25, a standard relevance-ranking algorithm, and returns exact line ranges. The agent reads just the matching section, never the whole file.</span><span class="lx" lang="ja">Store Search は、全 store を対象にした全文セクション検索だ。BM25（定番の関連度ランキング手法）で順位付けし、該当する行範囲を返す。エージェントは全文でなく、セクションだけを読む。</span></p>
     </div>
   </div>
 
   <div class="subhead reveal">
     <h3><span class="lx" lang="en">Measured, not assumed</span><span class="lx" lang="ja">実測で選んだ</span></h3>
   </div>
-  <p class="prose-p reveal lx" lang="en">Three real-run measurements back this design. A strict index-only test (10 "which file says X?" questions, path-matched against the real store) took haiku from 4/10 before the redesign to a best of 10/10 after — the fix was automatic OR-relaxation on a 0-hit query, decision-weighted ranking, checkpoint exclusion from the index, and a <code>--related</code> follow. A separate 3-model × 3-effort sweep (18 runs, 2026-07-04) found effort barely moves the score: haiku at its lowest setting (9, 8) lands within noise of opus 4.8 at its highest (9, 9). At published June 2026 pricing, haiku runs at 1/5 opus 4.8's rate and 1/10 fable 5's. Every run, including the configurations that didn't make the cut, is in the <a href="evidence.html">evidence report</a>.</p>
-  <p class="prose-p reveal lx" lang="ja">この設計は 3 種類の実走行で裏づけた。索引のみに絞った厳しいテスト（実際の store への「◯◯と書いたファイルはどれか」10 問・パス一致）で、haiku は再設計前の 4/10 から、再設計後は最高 10/10 まで改善。効いたのは、0 件クエリの自動 OR 緩和・decision 重み付けランキング・checkpoint の索引除外・<code>--related</code> 追走の 4 点。別枠の 3 モデル × 3 effort 総当たり（18 走行・2026-07-04）では、effort はほぼ効かず、haiku の最低設定（9 点・8 点）が opus 4.8 の最高設定（9 点・9 点）と誤差の範囲で並んだ。2026 年 6 月公表の単価では、haiku は opus 4.8 の 1/5、fable 5 の 1/10。採用しなかった構成も含む全走行は<a href="evidence.html">実測レポート</a>にある。</p>
+  <p class="prose-p reveal lx" lang="en">Three real-run measurements back this design. A strict index-only test used 10 "which file says X?" questions, path-matched against the real store. Haiku went from 4/10 before the redesign to a best of 10/10 after. The fix combined four changes: automatic OR-relaxation on a 0-hit query, decision-weighted ranking, checkpoint exclusion from the index, and a <code>--related</code> follow. A separate 3-model × 3-effort sweep (18 runs, 2026-07-04) found that effort barely moves the score. Haiku at its lowest setting (9, 8) lands within noise of opus 4.8 at its highest (9, 9). At published June 2026 pricing, haiku runs at 1/5 opus 4.8's rate and 1/10 fable 5's. Every run, including the configurations that didn't make the cut, is in the <a href="evidence.html">evidence report</a>.</p>
+  <p class="prose-p reveal lx" lang="ja">この設計は 3 種類の実走行で裏づけた。索引のみに絞った厳しいテストでは、実際の store への「◯◯と書いたファイルはどれか」を 10 問・パス一致で採点した。haiku は、再設計前の 4/10 から再設計後は最高 10/10 まで改善した。効いたのは、0 件クエリの自動 OR 緩和・decision 重み付けランキング・checkpoint の索引除外・<code>--related</code> 追走の 4 点だ。別枠の 3 モデル × 3 effort 総当たり（18 走行・2026-07-04）では、effort はほぼ効かなかった。haiku の最低設定（9 点・8 点）が、opus 4.8 の最高設定（9 点・9 点）と誤差の範囲で並んだ。2026 年 6 月公表の単価では、haiku は opus 4.8 の 1/5、fable 5 の 1/10 で動く。採用しなかった構成も含む全走行は<a href="evidence.html">実測レポート</a>にある。</p>
 </section>
 
 <!-- 03. TEAM -->
@@ -574,11 +579,42 @@
   </div>
   <div class="method reveal">
     <ol>
-      <li><b><span class="lx" lang="en">Canonical vs. derived.</span><span class="lx" lang="ja">正本と派生物。</span></b> <span class="lx" lang="en">Git manages markdown only. The index is a local cache with zero information value — delete it and lose nothing; the next session rebuilds it in 2.5 seconds.</span><span class="lx" lang="ja">git が管理するのは markdown だけ。索引は情報価値ゼロのローカルキャッシュであり、消しても何も失わない。次のセッションが 2.5 秒で作り直す。</span></li>
-      <li><b><span class="lx" lang="en">No shared database.</span><span class="lx" lang="ja">共有 db なし。</span></b> <span class="lx" lang="en">SQLite's classic weaknesses — concurrent writers, corruption on network filesystems — never arise: each machine builds its own index from the markdown it has, and the only writer is the local rebuild.</span><span class="lx" lang="ja">sqlite の古典的弱点（同時書き込み・ネットワークファイルシステム上の破損）は構造上発生しない。各マシンが手元の markdown から自分の索引を作り、書き込むのはローカルの再生成だけ。</span></li>
-      <li><b><span class="lx" lang="en">Teammates never see it.</span><span class="lx" lang="ja">メンバーは意識しない。</span></b> <span class="lx" lang="en">New members clone, open a session, and have their own index — no setup step, no shared infrastructure, no SQLite knowledge required.</span><span class="lx" lang="ja">新メンバーは clone してセッションを開くだけで自分の索引を持つ。準備手順なし、共有インフラなし、sqlite の知識も不要。</span></li>
-      <li><b><span class="lx" lang="en">Access control stays in git.</span><span class="lx" lang="ja">アクセス制御は git のまま。</span></b> <span class="lx" lang="en">Your index is built only from markdown you legitimately have — sharing granularity is decided by repository access, and the index can never widen it.</span><span class="lx" lang="ja">索引は自分が正当に持つ markdown からしか作られない。共有の粒度はリポジトリのアクセス権が決め、索引がそれを広げることは決してない。</span></li>
+      <li><b><span class="lx" lang="en">Canonical vs. derived.</span><span class="lx" lang="ja">正本と派生物。</span></b> <span class="lx" lang="en">Git manages markdown only. The index is a local cache with zero information value. You can delete it and lose nothing. The next session rebuilds it in 2.5 seconds.</span><span class="lx" lang="ja">git が管理するのは markdown だけだ。索引は情報価値ゼロのローカルキャッシュだ。消しても何も失わない。次のセッションが 2.5 秒で作り直す。</span></li>
+      <li><b><span class="lx" lang="en">No shared database.</span><span class="lx" lang="ja">共有 db なし。</span></b> <span class="lx" lang="en">SQLite's classic weaknesses never arise here: concurrent writers, corruption on network filesystems. Each machine builds its own index from the markdown it has. The only writer is the local rebuild.</span><span class="lx" lang="ja">sqlite の古典的弱点（同時書き込み・ネットワークファイルシステム上の破損）は、構造上発生しない。各マシンが、手元の markdown から自分の索引を作る。書き込むのはローカルの再生成だけだ。</span></li>
+      <li><b><span class="lx" lang="en">Teammates never see it.</span><span class="lx" lang="ja">メンバーは意識しない。</span></b> <span class="lx" lang="en">New members clone the repo, open a session, and their index is already there. There's no setup step, no shared infrastructure, and no need to know SQLite.</span><span class="lx" lang="ja">新メンバーは、clone してセッションを開くだけで自分の索引を持つ。準備の手順も、共有インフラも、sqlite の知識も要らない。</span></li>
+      <li><b><span class="lx" lang="en">Access control stays in git.</span><span class="lx" lang="ja">アクセス制御は git のまま。</span></b> <span class="lx" lang="en">Your index is built only from markdown you already have legitimate access to. Repository access decides the sharing granularity. The index itself can never widen that access.</span><span class="lx" lang="ja">索引は、自分が正当に持つ markdown からしか作られない。共有の粒度は、リポジトリのアクセス権が決める。索引がその粒度を広げることは、決してない。</span></li>
     </ol>
+  </div>
+</section>
+
+<!-- 04. REGISTER A NEW PROJECT -->
+<section class="sec" id="register">
+  <div class="sec-head reveal">
+    <span class="ghost">04</span>
+    <h2><span class="lx" lang="en">Register a new project</span><span class="lx" lang="ja">新規プロジェクトを登録する</span></h2>
+    <p><span class="lx" lang="en">A brand-new repo works immediately in a temporary local store. Moving it to the shared central store, or pinning it local on purpose, is one sentence away.</span><span class="lx" lang="ja">新規 repo は、一時的なローカル store の上ですぐに動き始める。中央 store へ上げるのも、意図してローカルに留めるのも、一言で済む。</span></p>
+  </div>
+
+  <p class="prose-p reveal lx" lang="en">A new repo is never blocked on setup. Records land in <code>~/ai-context-local/&lt;project&gt;/</code> (the same layout as the central store) until you decide otherwise.</p>
+  <p class="prose-p reveal lx" lang="ja">新規 repo はセットアップで止まらない。まず <code>~/ai-context-local/&lt;project&gt;/</code>（中央 store と同じ構成）へ記録し、決めるまではそのままそこに置かれる。</p>
+
+  <div class="mini-grid" style="margin-top:18px">
+    <div class="card reveal">
+      <h3><span class="step-n">a</span><span class="lx" lang="en">Local by default</span><span class="lx" lang="ja">既定はローカル</span></h3>
+      <p><span class="lx" lang="en">A new repo is not yet on the shared GitHub store. It accumulates non-destructively in the temporary local home above.</span><span class="lx" lang="ja">新規 repo はまだ GitHub の中央 store には乗っていない。上記の一時ローカル置き場に、非破壊で貯まっていく。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">b</span><span class="lx" lang="en">Move it to the central store</span><span class="lx" lang="ja">中央 store へ上げる</span></h3>
+      <p><span class="lx" lang="en">Say <em>"I want this on GitHub"</em> or <em>"set up the store."</em> That triggers <code>bootstrap</code>, which registers a private GitHub store and pulls the local content in.</span><span class="lx" lang="ja"><em>「GitHub に上げたい」</em>や<em>「store を作って」</em>と言うと、<code>bootstrap</code> が発火し、非公開の GitHub store を登録してローカル分を取り込む。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">c</span><span class="lx" lang="en">Or pin it local, on purpose</span><span class="lx" lang="ja">意図してローカル固定</span></h3>
+      <p><span class="lx" lang="en">Say <em>"keep this repo local-only,"</em> and <code>local</code> pins it. No GitHub store is ever registered for this project.</span><span class="lx" lang="ja"><em>「この repo はローカルだけで」</em>と言うと <code>local</code> が固定する。この project 用の GitHub store は一切登録されない。</span></p>
+    </div>
+    <div class="card reveal">
+      <h3><span class="step-n">d</span><span class="lx" lang="en">An old in-repo .ai-context/ still works</span><span class="lx" lang="ja">旧 .ai-context/ もそのまま活きる</span></h3>
+      <p><span class="lx" lang="en">A repo that still carries an old in-repo <code>.ai-context/</code> gets it copied into the central store automatically at session start. That copy only adds. Nothing is destroyed.</span><span class="lx" lang="ja">repo 内に旧 <code>.ai-context/</code> が残っている場合は、セッション開始時に自動で中央 store へコピーされる。コピーは追加のみで、既存のものは壊さない。</span></p>
+    </div>
   </div>
 </section>
 
@@ -586,7 +622,7 @@
 <div class="cta-band reveal">
   <div class="cta-inner">
     <h2><span class="lx" lang="en">The harness holds the knowledge. You hold the vision.</span><span class="lx" lang="ja">知識はハーネスが持つ。方針はあなたが持つ。</span></h2>
-    <p><span class="lx" lang="en">The store and its search are one of Banto's flagships, alongside the toolset that drives it and the deterministic mechanism underneath.</span><span class="lx" lang="ja">ストアと横断検索は Banto の目玉の 1 つ。それを動かす道具一式、その下で働く決定論的な仕組みと並ぶ。</span></p>
+    <p><span class="lx" lang="en">The store and its search are one of Banto's flagships, alongside the toolset that drives it and the deterministic mechanism underneath.</span><span class="lx" lang="ja">ストアと横断検索は、Banto の目玉の 1 つだ。それを動かす道具一式や、その下で働く決定論的な仕組みと並ぶ。</span></p>
     <div style="display:flex;gap:14px;flex-wrap:wrap">
       <a class="btn btn-primary" href="evidence.html"><span class="lx" lang="en">See all the evidence →</span><span class="lx" lang="ja">実測を見る →</span></a>
       <a class="btn btn-ghost" href="toolset.html" style="color:var(--paper);border-color:rgba(245,240,230,.4)"><span class="lx" lang="en">The toolset →</span><span class="lx" lang="ja">道具一式 →</span></a>

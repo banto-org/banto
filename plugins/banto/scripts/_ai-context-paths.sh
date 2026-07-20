@@ -33,7 +33,8 @@
 #   _ai_context_active_tasks <base> [cwd]
 #       → echoes the effective tasks file path (new layout if present, else legacy tasks/active.md)
 #   _ai_context_grant <key> [cwd]
-#       → echoes the per-repo standing-approval value for <key> from {base}/meta/grants.json
+#       → echoes the per-repo standing-approval value for <key> from {base}/meta/policy.json
+#         (falls back to legacy {base}/meta/grants.json; both carry the same .grants.<key> schema)
 #         (.grants.<key>): "allow" | "deny" | "confirm". A grant may be time-boxed via the object
 #         form {"value": "allow", "until": "YYYY-MM-DD"} — decays to "confirm" once <until> is
 #         strictly past. Fail-open to "confirm" on any resolution failure (missing base / file /
@@ -346,7 +347,10 @@ _ai_context_grant() {
     command -v jq >/dev/null 2>&1 || { echo confirm; return 0; }
     _acg_base=$(_ai_context_base_dir "${2:-$PWD}")
     [ -z "$_acg_base" ] && { echo confirm; return 0; }
-    _acg_file="$_acg_base/meta/grants.json"
+    # policy.json（grants + ignore の統合正典）を優先し、旧 grants.json へ fallback。
+    # どちらも .grants.<key> の同一スキーマなので以降の解決ロジックは共通。
+    _acg_file="$_acg_base/meta/policy.json"
+    [ -f "$_acg_file" ] || _acg_file="$_acg_base/meta/grants.json"
     [ -f "$_acg_file" ] || { echo confirm; return 0; }
     # value: plain string form, or the .value field of the time-boxed object form
     _acg_val=$(jq -r --arg k "$_acg_key" '

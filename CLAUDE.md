@@ -13,10 +13,10 @@ it.** (The concept → spec → autonomous-implementation pipeline is dogfooded 
 ## Project facts
 
 - Type: Claude Code plugin (marketplace distribution). Core: `plugins/banto/`.
-- Layout: 24 skills (21 in v1 public scope; 3 dev-only via PLUGIN_EXCLUDE: status [pending telemetry
+- Layout: 26 skills (20 in v1 public scope; 6 via PLUGIN_EXCLUDE: dev-only status [pending telemetry
   review] + harness-audit [meta self-audit] + banto-port [maintainer-only: ports banto's own dev tree
-  to public]) / 6 agents / 46 registered
-  hooks (55 script files — 9 unregistered helpers invoked indirectly: scaffold / dashboard /
+  to public], deprecated html-doc + ja-writing + b2b-docs [superseded by docs]) / 6 agents / 48 registered
+  hooks (57 script files — 9 unregistered helpers invoked indirectly: scaffold / dashboard /
   pending-channel / egress-guard.py / verify-detect / verify-run / idle-checkpoint-watch / checkpoint-autofire /
   ja-lint.py; model-lab adds repro-gate /
   model-claim-guard / compute-cost-gate + scripts/ helpers repro-check / eval-stats / claim-link) / 10 rules. No bundled MCP.

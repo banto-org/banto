@@ -34,6 +34,9 @@
         </div>
       </div>
     </div>
+    <div class="nav-item">
+      <a href="flow.html" class="lx" lang="en">Flow</a><a href="flow.html" class="lx" lang="ja">開発の流れ</a>
+    </div>
     <div class="nav-item has-menu">
       <a href="toolset.html" class="lx" lang="en" aria-haspopup="true">Toolset</a><a href="toolset.html" class="lx" lang="ja" aria-haspopup="true">道具一式</a>
       <div class="nav-menu">
@@ -56,10 +59,8 @@
         </div>
         <div class="nav-menu-col">
           <span class="nav-menu-head lx" lang="en">Documents &amp; writing</span><span class="nav-menu-head lx" lang="ja">資料 &amp; 文章</span>
-          <a href="toolset.html#ja-writing"><b>ja-writing</b><span class="lx" lang="en">audience-tuned Japanese</span><span class="lx" lang="ja">受け手に合わせた日本語</span></a>
-          <a href="toolset.html#diagram"><b>diagram</b><span class="lx" lang="en">SVG · mermaid · draw.io</span><span class="lx" lang="ja">図解の実務パターン</span></a>
-          <a href="toolset.html#b2b-docs"><b>b2b-docs</b><span class="lx" lang="en">proposals &amp; decks</span><span class="lx" lang="ja">提案書 &amp; 営業資料</span></a>
-          <a href="toolset.html#html-doc"><b>html-doc</b><span class="lx" lang="en">self-contained HTML docs</span><span class="lx" lang="ja">自己完結 HTML 資料</span></a>
+          <a href="toolset.html#docs"><b>docs</b><span class="lx" lang="en">every document, one skill</span><span class="lx" lang="ja">資料作成を 1 つに統合</span></a>
+          <a href="toolset.html#diagram"><b>diagram</b><span class="lx" lang="en">14 diagram patterns</span><span class="lx" lang="ja">図解 14 パターン</span></a>
         </div>
         <div class="nav-menu-col">
           <span class="nav-menu-head lx" lang="en">Workspace &amp; meta</span><span class="nav-menu-head lx" lang="ja">ワークスペース &amp; メタ</span>
@@ -69,6 +70,7 @@
           <a href="toolset.html#plugin-audit"><b>plugin-audit</b><span class="lx" lang="en">15-axis quality audit</span><span class="lx" lang="ja">15 軸品質監査</span></a>
           <a href="toolset.html#skill-audit"><b>skill-audit</b><span class="lx" lang="en">7-axis context audit</span><span class="lx" lang="ja">7 軸コンテキスト監査</span></a>
           <a href="toolset.html#kit"><b>kit</b><span class="lx" lang="en">discover everything</span><span class="lx" lang="ja">全機能カタログ</span></a>
+          <a href="toolset.html#policy"><b>policy</b><span class="lx" lang="en">grants &amp; guards console</span><span class="lx" lang="ja">許可と保護の一覧管理</span></a>
         </div>
         <div class="nav-menu-col">
           <span class="nav-menu-head lx" lang="en">Agents</span><span class="nav-menu-head lx" lang="ja">エージェント</span>
@@ -100,6 +102,7 @@
           <a href="store.html#store"><span class="lx" lang="en">What accumulates</span><span class="lx" lang="ja">何が貯まるか</span></a>
           <a href="store.html#search"><span class="lx" lang="en">Cross-store search</span><span class="lx" lang="ja">横断検索</span></a>
           <a href="store.html#team"><span class="lx" lang="en">Git &amp; teams</span><span class="lx" lang="ja">git &amp; 複数人</span></a>
+          <a href="store.html#register"><span class="lx" lang="en">Register a project</span><span class="lx" lang="ja">プロジェクトを登録</span></a>
         </div>
       </div>
     </div>
@@ -131,14 +134,14 @@
  </div>
 </header>
 
-<main id="top">
+<main id="top" class="tool-modal-enabled">
 
 <section class="doc-hero">
   <div class="crumb"><a href="index.html" class="lx" lang="en">← Home</a><a href="index.html" class="lx" lang="ja">← ホーム</a></div>
   <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">The full toolset</span><span class="lx" lang="ja">道具一式</span></div>
   <h1><span class="lx" lang="en">20 skills, 6 agents. Each one, one behavior.</span><span class="lx" lang="ja">skill 20 個・agent 6 体。それぞれが担う、1 つの動作。</span></h1>
-  <p class="lede lx" lang="en">26 tools split into five roles: skills that forge the ideology before a spec exists, a loop that drives implementation to green on its own, a mechanism that searches decision logs and past chats across sessions, tools that tune Japanese writing tone by audience, tools that drive branches and workspaces from intent, and meta-tools that audit Banto's own quality. Each entry's source of truth is its <code>SKILL.md</code> or agent definition — this page compresses each to one behavioral line plus a concrete example.</p>
-  <p class="lede lx" lang="ja">26 個の道具は 5 つの役割に分かれる：仕様の前に思想を固める skill、実装を green になるまで自走させるループ、決定ログと過去チャットを横断検索する仕組み、資料の文体を受け手別に整える道具、ブランチと workspace を意図から駆動する道具、そして自分自身の品質を監査するメタ道具。各項目の正本は <code>SKILL.md</code> か agent 定義そのもの。ここでは動作を 1 行と具体例に圧縮して示す。</p>
+  <p class="lede lx" lang="en">26 tools split into six roles: skills that forge the ideology before a spec exists, a loop that drives implementation to green on its own, a mechanism that searches decision logs and past chats across sessions, one skill that writes every document in its best-fit format, tools that drive branches and workspaces from intent, and meta-tools that audit Banto's own quality. Each entry's source of truth is its <code>SKILL.md</code> or agent definition — this page compresses each to one behavioral line plus a concrete example.</p>
+  <p class="lede lx" lang="ja">26 個の道具は 6 つの役割に分かれる：仕様の前に思想を固める skill、実装を green になるまで自走させるループ、決定ログと過去チャットを横断検索する仕組み、資料を目的に合う形式で作る skill、ブランチと workspace を意図から駆動する道具、そして自分自身の品質を監査するメタ道具。各項目の正本は <code>SKILL.md</code> か agent 定義そのもの。ここでは動作を 1 行と具体例に圧縮して示す。</p>
 </section>
 
 <!-- ============ 1. PIPELINE (SDD) ============ -->
@@ -153,10 +156,18 @@
   <div class="cards" style="margin-top:16px">
     <div class="card" id="concept">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">concept</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Forges a product's ideology through dialogue, then pins it into CLAUDE.md.</strong> Asks why the product exists, who it repels, and what world it projects — six phases for a real product, or one line in light mode for a throwaway experiment. The output, <code>CONCEPT.md</code>, becomes the judgment filter every later skill and agent reads. Without it, spec has no anti-goals to check a decision against.</span>
-        <span class="lx" lang="ja"><strong>製品の思想を対話で形づくり、CLAUDE.md へ焼き付ける。</strong>なぜ作るか・誰を弾くか・どんな世界観を投影するかを、本物の製品なら 6 Phase で、使い捨ての実験なら light モードの 1 行で確定する。出力の <code>CONCEPT.md</code> は、以後すべての skill と agent が読む判断フィルターになる。これが無いと、spec はアンチゴールと突き合わせる先を持てない。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Forges a product's ideology through dialogue, then pins it into CLAUDE.md.</strong></span>
+        <span class="lx" lang="ja"><strong>製品の思想を対話で形づくり、CLAUDE.md へ焼き付ける。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"define the vision"</span><span class="lx" lang="ja">「思想を固めて」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">concept</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">CONCEPT.md in CLAUDE.md</span><span class="lx" lang="ja">CONCEPT.md を注入</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Asks why the product exists, who it repels, and what world it projects — six phases for a real product, or one line in light mode for a throwaway experiment.</span><span class="lx" lang="ja">なぜ作るか・誰を弾くか・どんな世界観を投影するかを、本物の製品なら 6 Phase で、使い捨ての実験なら light モードの 1 行で確定する。</span></li>
+        <li><span class="lx" lang="en">The output, <code>CONCEPT.md</code>, becomes the judgment filter every later skill and agent reads.</span><span class="lx" lang="ja">出力の <code>CONCEPT.md</code> は、以後すべての skill と agent が読む判断フィルターになる。</span></li>
+        <li><span class="lx" lang="en">Without it, spec has no anti-goals to check a decision against.</span><span class="lx" lang="ja">これが無いと、spec はアンチゴールと突き合わせる先を持てない。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"define the vision for this feature"</span><span class="lx" lang="ja">「思想を固めて」</span>
         <span class="lx" lang="en">"what's our North Star here"</span><span class="lx" lang="ja">「何の敵で誰に刺すか考えて」</span>
@@ -165,10 +176,18 @@
 
     <div class="card" id="design-brief">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">design-brief</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Turns "make it look nice" into a 14-axis design brief before any screen exists.</strong> Locks the target persona first — who's using it, in what mood, under what constraint — because color, type, and layout all derive from that. Fills the remaining axes in plain conversation, never a forced multiple-choice. Hands the finished brief to spec once code generation starts.</span>
-        <span class="lx" lang="ja"><strong>「おしゃれに」という依頼を、画面を作る前に 14 観点のブリーフへ変換する。</strong>色・文字サイズ・トーンはすべてターゲット（誰が・どんな感情で使うか）から波及するため、まずターゲットを固定する。プレーンな対話で 14 観点を順に埋め、選択式の質問はしない。仕上げたブリーフは、コード生成に進む段階で spec へ引き継ぐ。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Turns "make it look nice" into a 14-axis design brief before any screen exists.</strong></span>
+        <span class="lx" lang="ja"><strong>「おしゃれに」という依頼を、画面を作る前に 14 観点のブリーフへ変換する。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"make it look sharp"</span><span class="lx" lang="ja">「いい感じにして」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">design-brief</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">14-axis brief → spec</span><span class="lx" lang="ja">14 観点ブリーフ → spec へ</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Locks the target persona first — who's using it, in what mood, under what constraint — because color, type, and layout all derive from that.</span><span class="lx" lang="ja">色・文字サイズ・トーンはすべてターゲット（誰が・どんな感情で使うか）から波及するため、まずターゲットを固定する。</span></li>
+        <li><span class="lx" lang="en">Fills the remaining axes in plain conversation, never a forced multiple-choice.</span><span class="lx" lang="ja">プレーンな対話で 14 観点を順に埋め、選択式の質問はしない。</span></li>
+        <li><span class="lx" lang="en">Hands the finished brief to spec once code generation starts.</span><span class="lx" lang="ja">仕上げたブリーフは、コード生成に進む段階で spec へ引き継ぐ。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"make the screen look sharp"</span><span class="lx" lang="ja">「いい感じの画面デザインにして」</span>
         <span class="lx" lang="en">"give me a design brief for this"</span><span class="lx" lang="ja">「デザインブリーフ作って」</span>
@@ -177,10 +196,17 @@
 
     <div class="card" id="spec">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">spec</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Writes an industry-standard spec through dialogue, before a line of code exists.</strong> Talks through six formats — Spec Kit, PRD, Design Doc, RFC, ADR, Scope Doc — and picks one (or a combination) by the task's weight, saving the result to <code>{base}/docs/specs/</code>. Stops to confirm only when a choice would change the acceptance criteria; otherwise proceeds on its own adopted interpretation.</span>
-        <span class="lx" lang="ja"><strong>コードを書く前に、業界標準の仕様書を対話で作る。</strong>Spec Kit・PRD・Design Doc・RFC・ADR・Scope Doc の 6 種から、タスクの重さに応じて 1 つ（または組み合わせ）を選び、<code>{base}/docs/specs/</code> へ保存する。受け入れ基準が変わるゴール分岐のときだけ事前確認し、それ以外は採用解釈で進める。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Writes an industry-standard spec through dialogue, before a line of code exists.</strong></span>
+        <span class="lx" lang="ja"><strong>コードを書く前に、業界標準の仕様書を対話で作る。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"design this, don't build"</span><span class="lx" lang="ja">「まず設計だけして」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">spec</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">spec in {base}/docs/specs/</span><span class="lx" lang="ja">{base}/docs/specs/ へ保存</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Talks through six formats — Spec Kit, PRD, Design Doc, RFC, ADR, Scope Doc — and picks one (or a combination) by the task's weight, saving the result to <code>{base}/docs/specs/</code>.</span><span class="lx" lang="ja">Spec Kit・PRD・Design Doc・RFC・ADR・Scope Doc の 6 種から、タスクの重さに応じて 1 つ（または組み合わせ）を選び、<code>{base}/docs/specs/</code> へ保存する。</span></li>
+        <li><span class="lx" lang="en">Stops to confirm only when a choice would change the acceptance criteria; otherwise proceeds on its own adopted interpretation.</span><span class="lx" lang="ja">受け入れ基準が変わるゴール分岐のときだけ事前確認し、それ以外は採用解釈で進める。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"just design this, don't build yet"</span><span class="lx" lang="ja">「まず設計だけして」</span>
         <span class="lx" lang="en">"write me a spec"</span><span class="lx" lang="ja">「仕様書作って」</span>
@@ -189,10 +215,18 @@
 
     <div class="card" id="dev-loop">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">dev-loop</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Breaks a big spec into small tasks and self-drives implementation to green.</strong> Presents the decomposition plan once for confirmation, then loops implement → build-and-verify → fix without asking again. Three consecutive test failures trip <code>odd-gate</code> and hand root-cause analysis to the debugger agent instead of grinding. Only exceptions — a goal fork, an irreversible action — come back to the owner.</span>
-        <span class="lx" lang="ja"><strong>大きな spec を小型タスクへ分解し、green になるまで実装を自走させる。</strong>分解プランは 1 度だけ提示して確認し、以後は実装 → build-and-verify → 修正を確認なしで周回する。テストが 3 連続で失敗すると <code>odd-gate</code> が止め、闇雲な繰り返しの代わりに debugger agent へ根本原因を委ねる。owner に戻るのはゴール分岐や不可逆操作などの例外のみ。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Breaks a big spec into small tasks and self-drives implementation to green.</strong></span>
+        <span class="lx" lang="ja"><strong>大きな spec を小型タスクへ分解し、green になるまで実装を自走させる。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"run the spec autonomously"</span><span class="lx" lang="ja">「自走で全部やって」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">dev-loop</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">tasks.md all green</span><span class="lx" lang="ja">tasks.md が green に</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Presents the decomposition plan once for confirmation, then loops implement → build-and-verify → fix without asking again.</span><span class="lx" lang="ja">分解プランは 1 度だけ提示して確認し、以後は実装 → build-and-verify → 修正を確認なしで周回する。</span></li>
+        <li><span class="lx" lang="en">Three consecutive test failures trip <code>odd-gate</code> and hand root-cause analysis to the debugger agent instead of grinding.</span><span class="lx" lang="ja">テストが 3 連続で失敗すると <code>odd-gate</code> が止め、闇雲な繰り返しの代わりに debugger agent へ根本原因を委ねる。</span></li>
+        <li><span class="lx" lang="en">Only exceptions — a goal fork, an irreversible action — come back to the owner.</span><span class="lx" lang="ja">owner に戻るのはゴール分岐や不可逆操作などの例外のみ。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"run the whole spec autonomously"</span><span class="lx" lang="ja">「この spec を自走で全部やって」</span>
         <span class="lx" lang="en">"break this down and build it"</span><span class="lx" lang="ja">「分解してそのまま実装まで」</span>
@@ -201,10 +235,18 @@
 
     <div class="card" id="ai-build">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">ai-build</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Builds an AI feature (LLM, RAG, agent, prompt) and measures its quality with eval.</strong> Say "build a RAG" and it runs internal search, then fresh research if the method or model is more than 14 days stale, picks prompt / RAG / fine-tune, implements, and scores the result with an LLM-as-judge eval — not just "it runs." Model id, pricing, and API parameters go to the <code>claude-api</code> skill instead of being answered from memory.</span>
-        <span class="lx" lang="ja"><strong>AI 機能（LLM・RAG・agent・プロンプト）を構築し、eval で品質を測る。</strong>「RAG を組みたい」と言うと、内部検索のあと（手法やモデルの情報が 14 日より古ければ最新調査を挟み）prompt・RAG・fine-tune のいずれかを選んで実装し、LLM-as-judge の eval で採点する。「動いた」で終わらせない。Claude の id・価格・API パラメータは記憶で答えず <code>claude-api</code> skill に委ねる。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Builds an AI feature (LLM, RAG, agent, prompt) and measures its quality with eval.</strong></span>
+        <span class="lx" lang="ja"><strong>AI 機能（LLM・RAG・agent・プロンプト）を構築し、eval で品質を測る。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"I want to build a RAG"</span><span class="lx" lang="ja">「RAG を組みたい」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">ai-build</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">implementation + eval score</span><span class="lx" lang="ja">実装 + eval 採点</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Say "build a RAG" and it runs internal search, then fresh research if the method or model is more than 14 days stale, picks prompt / RAG / fine-tune, and implements.</span><span class="lx" lang="ja">「RAG を組みたい」と言うと、内部検索のあと（手法やモデルの情報が 14 日より古ければ最新調査を挟み）prompt・RAG・fine-tune のいずれかを選んで実装する。</span></li>
+        <li><span class="lx" lang="en">Scores the result with an LLM-as-judge eval — not just "it runs."</span><span class="lx" lang="ja">LLM-as-judge の eval で採点する。「動いた」で終わらせない。</span></li>
+        <li><span class="lx" lang="en">Model id, pricing, and API parameters go to the <code>claude-api</code> skill instead of being answered from memory.</span><span class="lx" lang="ja">Claude の id・価格・API パラメータは記憶で答えず <code>claude-api</code> skill に委ねる。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"I want to build a RAG"</span><span class="lx" lang="ja">「RAG を組みたい」</span>
         <span class="lx" lang="en">"set up an eval for this agent"</span><span class="lx" lang="ja">「この agent の eval を組んで」</span>
@@ -213,10 +255,18 @@
 
     <div class="card" id="model-lab">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">model-lab</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Trains a model from scratch to a published paper, verification-first.</strong> Covers pretraining, full fine-tune, PEFT/LoRA, distillation, pruning, and architecture search, through Frame → Survey → Design → Implement → Run (Mac → Nvidia → cloud) → Verify (eval, ablation, statistics) → Paper &amp; publish. A hook blocks any "done" claim lacking a backing experiment; launching paid compute and publishing to arXiv/Hugging Face/GitHub always stop at a human gate.</span>
-        <span class="lx" lang="ja"><strong>モデルの事前学習から論文公開までを、検証中心で自走させる。</strong>pretrain・フル fine-tune・PEFT/LoRA・蒸留・pruning・アーキ探索を、Frame → Survey → Design → Implement → Run（Mac → Nvidia → cloud）→ Verify（eval・ablation・統計）→ 論文公開の順で進める。裏づけ実験のない「完了」主張は <code>model-claim-guard</code> が止める。有料計算の起動と arXiv/Hugging Face/GitHub への公開は必ず人間ゲート。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Trains a model from scratch to a published paper, verification-first.</strong></span>
+        <span class="lx" lang="ja"><strong>モデルの事前学習から論文公開までを、検証中心で自走させる。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"fine-tune, write it up"</span><span class="lx" lang="ja">「論文まで書いて」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">model-lab</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">trained model + paper</span><span class="lx" lang="ja">学習済みモデル + 論文</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Covers pretraining, full fine-tune, PEFT/LoRA, distillation, pruning, and architecture search, through Frame → Survey → Design → Implement → Run (Mac → Nvidia → cloud) → Verify (eval, ablation, statistics) → Paper &amp; publish.</span><span class="lx" lang="ja">pretrain・フル fine-tune・PEFT/LoRA・蒸留・pruning・アーキ探索を、Frame → Survey → Design → Implement → Run（Mac → Nvidia → cloud）→ Verify（eval・ablation・統計）→ 論文公開の順で進める。</span></li>
+        <li><span class="lx" lang="en">A hook blocks any "done" claim lacking a backing experiment.</span><span class="lx" lang="ja">裏づけ実験のない「完了」主張は <code>model-claim-guard</code> が止める。</span></li>
+        <li><span class="lx" lang="en">Launching paid compute and publishing to arXiv/Hugging Face/GitHub always stop at a human gate.</span><span class="lx" lang="ja">有料計算の起動と arXiv/Hugging Face/GitHub への公開は必ず人間ゲート。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"fine-tune this and write it up"</span><span class="lx" lang="ja">「fine-tune して論文まで書いて」</span>
         <span class="lx" lang="en">"run ablations and publish to HF"</span><span class="lx" lang="ja">「ablation 回して HF に公開して」</span>
@@ -237,10 +287,18 @@
   <div class="cards" style="margin-top:16px">
     <div class="card" id="ai-context">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">ai-context</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>The control room for decisions, checkpoints, tasks, and store health.</strong> Say "record this as a decision" and it writes to <code>{base}/decisions/</code>; say "keep going on the next task" and it finds the next unchecked <code>tasks.md</code> item and implements it through to done. Also owns store bootstrap, <code>doctor</code> (health check), <code>sort</code> (tidy misfiled docs), and standing per-repo grants.</span>
-        <span class="lx" lang="ja"><strong>決定ログ・チェックポイント・タスク・store 健診をまとめて扱う司令塔。</strong>「これを決定として残して」と言えば <code>{base}/decisions/</code> に書き、「次のタスク進めて」と言えば <code>tasks.md</code> の未完了項目を見つけて実装まで完遂する。store の bootstrap・<code>doctor</code>（健全性診断）・<code>sort</code>（誤配置ファイルの整理）・repo 単位の常設許可もここが持つ。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>The control room for decisions, checkpoints, tasks, and store health.</strong></span>
+        <span class="lx" lang="ja"><strong>決定ログ・チェックポイント・タスク・store 健診をまとめて扱う司令塔。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"save this as a decision"</span><span class="lx" lang="ja">「決定として保存して」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">ai-context</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">decision / task written</span><span class="lx" lang="ja">決定・タスクを記録</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Say "record this as a decision" and it writes to <code>{base}/decisions/</code>.</span><span class="lx" lang="ja">「これを決定として残して」と言えば <code>{base}/decisions/</code> に書く。</span></li>
+        <li><span class="lx" lang="en">Say "keep going on the next task" and it finds the next unchecked <code>tasks.md</code> item and implements it through to done.</span><span class="lx" lang="ja">「次のタスク進めて」と言えば <code>tasks.md</code> の未完了項目を見つけて実装まで完遂する。</span></li>
+        <li><span class="lx" lang="en">Also owns store bootstrap, <code>doctor</code> (health check), <code>sort</code> (tidy misfiled docs), and standing per-repo grants.</span><span class="lx" lang="ja">store の bootstrap・<code>doctor</code>（健全性診断）・<code>sort</code>（誤配置ファイルの整理）・repo 単位の常設許可もここが持つ。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"save this as a decision"</span><span class="lx" lang="ja">「これ決定として保存して」</span>
         <span class="lx" lang="en">"keep going on the next task"</span><span class="lx" lang="ja">「次のタスク進めて」</span>
@@ -249,10 +307,17 @@
 
     <div class="card" id="search">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">search</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Searches the local decision log and past chats — no web access.</strong> Ask "how did we decide on auth?" and it expands the query across synonyms and English/Japanese variants, greps <code>{base}/decisions/</code> and <code>docs/</code>, and returns the matching file and line — not a guess. A deep path falls back to 3–5 parallel <code>search-agent</code> instances when the fast pass finds nothing.</span>
-        <span class="lx" lang="ja"><strong>ローカルの決定ログと過去チャットを検索する。web には一切触れない。</strong>「認証どう決めたっけ」と聞くと、クエリを同義語・英日表記ゆれへ展開して <code>{base}/decisions/</code> と <code>docs/</code> を grep し、該当ファイルと行を返す。fast パスで空振りすると、<code>search-agent</code> を 3〜5 体並列起動する deep パスへ進む。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Searches the local decision log and past chats — no web access.</strong></span>
+        <span class="lx" lang="ja"><strong>ローカルの決定ログと過去チャットを検索する。web には一切触れない。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"what did we decide"</span><span class="lx" lang="ja">「何て決めたっけ」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">search</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">matching file + line</span><span class="lx" lang="ja">該当ファイル + 行</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Ask "how did we decide on auth?" and it expands the query across synonyms and English/Japanese variants, greps <code>{base}/decisions/</code> and <code>docs/</code>, and returns the matching file and line — not a guess.</span><span class="lx" lang="ja">「認証どう決めたっけ」と聞くと、クエリを同義語・英日表記ゆれへ展開して <code>{base}/decisions/</code> と <code>docs/</code> を grep し、該当ファイルと行を返す。</span></li>
+        <li><span class="lx" lang="en">A deep path falls back to 3–5 parallel <code>search-agent</code> instances when the fast pass finds nothing.</span><span class="lx" lang="ja">fast パスで空振りすると、<code>search-agent</code> を 3〜5 体並列起動する deep パスへ進む。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"what did we decide about this"</span><span class="lx" lang="ja">「これ前に何て決めたっけ」</span>
         <span class="lx" lang="en">"search for it"</span><span class="lx" lang="ja">「探して」</span>
@@ -261,10 +326,17 @@
 
     <div class="card" id="research">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">research</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Investigates the web/GitHub/arxiv and saves findings to <code>docs/research/</code>.</strong> Ask "what's new in Next.js 15" and it first checks search for an existing answer, then — if nothing recent turns up — launches 5–10 parallel <code>research-agent</code> instances that WebSearch for URLs and read the full text via webread, never a summarized guess.</span>
-        <span class="lx" lang="ja"><strong>web・GitHub・arxiv を新規に調査し、<code>docs/research/</code> へ保存する。</strong>「Next.js 15 の最新機能は」と聞くと、まず search で既存の確信ヒットを確認し、無ければ <code>research-agent</code> を 5〜10 体並列起動して WebSearch で URL を特定、webread で全文を精読する（要約頼みの推測はしない）。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Investigates the web/GitHub/arxiv and saves findings to <code>docs/research/</code>.</strong></span>
+        <span class="lx" lang="ja"><strong>web・GitHub・arxiv を新規に調査し、<code>docs/research/</code> へ保存する。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"look up the latest"</span><span class="lx" lang="ja">「最新調べて」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">research</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">doc in docs/research/</span><span class="lx" lang="ja">docs/research/ へ保存</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Ask "what's new in Next.js 15" and it first checks search for an existing answer.</span><span class="lx" lang="ja">「Next.js 15 の最新機能は」と聞くと、まず search で既存の確信ヒットを確認する。</span></li>
+        <li><span class="lx" lang="en">If nothing recent turns up, it launches 5–10 parallel <code>research-agent</code> instances that WebSearch for URLs and read the full text via webread, never a summarized guess.</span><span class="lx" lang="ja">無ければ <code>research-agent</code> を 5〜10 体並列起動して WebSearch で URL を特定、webread で全文を精読する（要約頼みの推測はしない）。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"look up the latest best practice"</span><span class="lx" lang="ja">「最新のベストプラクティス調べて」</span>
         <span class="lx" lang="en">"compare these two libraries"</span><span class="lx" lang="ja">「このライブラリ同士を比較して」</span>
@@ -273,10 +345,17 @@
 
     <div class="card" id="save-checkpoint">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">save-checkpoint</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Folds a long session into <code>{base}/sessions/</code> without losing the thread.</strong> Writes what's being worked on, how it got there, and confirmed decisions in a few lines each, then recommends exactly one of <code>compact</code> or <code>clear</code> — never both, and never runs either itself. An idle hook fires the same skill automatically after 5 minutes of inactivity, through a headless fork.</span>
-        <span class="lx" lang="ja"><strong>長い会話を筋を失わずに <code>{base}/sessions/</code> へ畳む。</strong>今何をしていて・どういう経緯で・何を決めたかを数行ずつで書き、<code>compact</code> か <code>clear</code> のどちらか一方だけを推奨する（両方は言わず、どちらも自分では実行しない）。放置 5 分で idle hook が同じ処理をヘッドレスの fork で自動発火する。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Folds a long session into <code>{base}/sessions/</code> without losing the thread.</strong></span>
+        <span class="lx" lang="ja"><strong>長い会話を筋を失わずに <code>{base}/sessions/</code> へ畳む。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"save state before we clear"</span><span class="lx" lang="ja">「状態保存して」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">save-checkpoint</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">note in {base}/sessions/</span><span class="lx" lang="ja">{base}/sessions/ に保存</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Writes what's being worked on, how it got there, and confirmed decisions in a few lines each, then recommends exactly one of <code>compact</code> or <code>clear</code> — never both, and never runs either itself.</span><span class="lx" lang="ja">今何をしていて・どういう経緯で・何を決めたかを数行ずつで書き、<code>compact</code> か <code>clear</code> のどちらか一方だけを推奨する（両方は言わず、どちらも自分では実行しない）。</span></li>
+        <li><span class="lx" lang="en">An idle hook fires the same skill automatically after 5 minutes of inactivity, through a headless fork.</span><span class="lx" lang="ja">放置 5 分で idle hook が同じ処理をヘッドレスの fork で自動発火する。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"save state before we clear"</span><span class="lx" lang="ja">「clear する前に状態保存して」</span>
         <span class="lx" lang="en">"checkpoint this before compacting"</span><span class="lx" lang="ja">「compact 前にチェックポイント切って」</span>
@@ -285,10 +364,17 @@
 
     <div class="card" id="webread">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">webread</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Fetches a URL's full body with no summarization layer — the WebFetch alternative.</strong> Hand it a URL and it extracts the body as Markdown via trafilatura (local, no LLM), so the main model reads the raw text itself instead of trusting a small model's summary. For JS-rendered pages that come back empty, a two-step fallback saves the rendered HTML first, then extracts from that.</span>
-        <span class="lx" lang="ja"><strong>URL の本文全体を要約なしで取得する。WebFetch の代替。</strong>URL を渡すと trafilatura（ローカル・LLM 不使用）で本文を Markdown 抽出し、本体モデルが小型モデルの要約に頼らず生の全文を直接読む。JS レンダリングの SPA で本文が空になる場合は、レンダリング済み HTML を先に保存してから抽出する 2 段階に切り替える。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Fetches a URL's full body with no summarization layer — the WebFetch alternative.</strong></span>
+        <span class="lx" lang="ja"><strong>URL の本文全体を要約なしで取得する。WebFetch の代替。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"read this URL"</span><span class="lx" lang="ja">「この URL 読んで」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">webread</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">full-text Markdown</span><span class="lx" lang="ja">本文全体を Markdown で</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Hand it a URL and it extracts the body as Markdown via trafilatura (local, no LLM), so the main model reads the raw text itself instead of trusting a small model's summary.</span><span class="lx" lang="ja">URL を渡すと trafilatura（ローカル・LLM 不使用）で本文を Markdown 抽出し、本体モデルが小型モデルの要約に頼らず生の全文を直接読む。</span></li>
+        <li><span class="lx" lang="en">For JS-rendered pages that come back empty, a two-step fallback saves the rendered HTML first, then extracts from that.</span><span class="lx" lang="ja">JS レンダリングの SPA で本文が空になる場合は、レンダリング済み HTML を先に保存してから抽出する 2 段階に切り替える。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"read this URL"</span><span class="lx" lang="ja">「この URL 読んで」</span>
         <span class="lx" lang="en">"check the actual content"</span><span class="lx" lang="ja">「ページの中身をちゃんと確認して」</span>
@@ -303,55 +389,47 @@
     <span class="ghost">3</span>
     <div class="sub">writing</div>
     <h2><span class="lx" lang="en">Documents &amp; writing</span><span class="lx" lang="ja">資料 &amp; 文章</span></h2>
-    <p><span class="lx" lang="en">Reports, proposals, and diagrams, written to fit the audience and the purpose.</span><span class="lx" lang="ja">報告書・提案書・図解を、受け手と目的に合わせて書き分ける。</span></p>
+    <p><span class="lx" lang="en">One integrated skill writes the document; one 14-pattern library draws the diagrams.</span><span class="lx" lang="ja">資料は統合 skill が 1 つで作り、図解は 14 パターンのライブラリで描く。</span></p>
   </div>
 
   <div class="cards" style="margin-top:16px">
-    <div class="card" id="ja-writing">
-      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">ja-writing</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Tunes Japanese writing tone by document type and audience.</strong> A proposal for executives and a PR description for engineers need different vocabulary and structure even for the same change; this skill runs the writing-ja rule's form through concrete patterns per document type and per audience level (non-technical, semi-technical, technical).</span>
-        <span class="lx" lang="ja"><strong>文書種別と受け手レベルに応じて、日本語の文体を書き分ける。</strong>同じ変更でも経営層向け提案書とエンジニア向け PR 説明では語彙も構成も変わる。writing-ja ルールの型を、文書種別（報告書・提案書・Excel セル・チャット/PR/commit）と受け手レベル（非技術・半技術・技術）別の具体例で運用する。</span>
+    <div class="card" id="docs">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">docs</h4>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>One skill for every document — HTML, Excel, slides, Word, and tables — chosen by purpose.</strong></span>
+        <span class="lx" lang="ja"><strong>HTML・Excel・スライド・Word・表を、資料の目的から選んで作る統合 skill。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"turn this into a document"</span><span class="lx" lang="ja">「資料にまとめて」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">docs</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">HTML / xlsx / pptx / docx</span><span class="lx" lang="ja">HTML / xlsx / pptx / docx</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Say "turn this into a document" and it first picks the best-fit format from a selection table: HTML to read on screen, xlsx for numeric lists, pptx to present, docx for approval-and-circulation workflows.</span><span class="lx" lang="ja">「資料にまとめて」と言うと、まず形式選択表で最適な形式を決める。画面で読むなら HTML、数値の一覧なら xlsx、投影して話すなら pptx、決裁・回覧の文化なら docx。</span></li>
+        <li><span class="lx" lang="en">The writing follows 25 rules in three layers (readability, persuasion, document-scene fit) shared across all formats, and stiff phrasing is caught by a wording-swap canon plus a machine sweep.</span><span class="lx" lang="ja">文章は全形式共通の 3 層 25 ルール（読みやすさ・訴求力・場面適合）に沿い、「されうる」のような硬い表現は言い換え正典と機械検査で検出する。</span></li>
+        <li><span class="lx" lang="en">The default theme — ivory ground with navy — passes WCAG contrast checks.</span><span class="lx" lang="ja">既定テーマ（アイボリー地 + 紺）は WCAG のコントラスト検証済み。</span></li>
+      </ul>
       <div class="trig">
-        <span class="lx" lang="en">"rewrite this for executives"</span><span class="lx" lang="ja">「これ経営層向けに書き直して」</span>
-        <span class="lx" lang="en">"write the PR description"</span><span class="lx" lang="ja">「PR の説明文書いて」</span>
+        <span class="lx" lang="en">"turn this into a document"</span><span class="lx" lang="ja">「資料にまとめて」</span>
+        <span class="lx" lang="en">"make slides for this"</span><span class="lx" lang="ja">「パワポで説明資料作って」</span>
       </div>
     </div>
 
     <div class="card" id="diagram">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">diagram</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Picks the right notation for a diagram — mermaid, draw.io, or hand-drawn SVG.</strong> Flowcharts, sequence diagrams, and Gantt charts default to mermaid; only layouts mermaid can't express — diagonal placement, ring layouts, map annotations — fall back to hand-drawn SVG. AWS architecture diagrams go through draw.io's nested VPC/subnet/AZ icon set.</span>
-        <span class="lx" lang="ja"><strong>図の記法（mermaid・draw.io・手描き SVG）そのものを選ぶ。</strong>フローチャート・シーケンス図・ガントチャートは既定で mermaid。対角配置や円環配置など mermaid で崩れるレイアウトだけ手描き SVG に切り替える。AWS 構成図は draw.io の VPC / サブネット / AZ の入れ子アイコンセットを使う。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>A 14-pattern diagram library — pick the pattern from the structure you want to convey.</strong></span>
+        <span class="lx" lang="ja"><strong>伝えたい構造から図の型を選ぶ、14 パターンの図解ライブラリ。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"draw a sequence diagram"</span><span class="lx" lang="ja">「シーケンス図で描いて」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">diagram</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">SVG diagram</span><span class="lx" lang="ja">SVG の図</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Correspondence maps, ✗/✓ comparisons, flowcharts, logic trees, 2-axis matrices, Venn diagrams, Gantt charts, funnels and more, each with complete SVG code.</span><span class="lx" lang="ja">対応マッピング・✗✓比較・フローチャート・ロジックツリー・2 軸マトリクス・ベン図・ガント・ファネルなどの 14 種を、完全な SVG コード付きで持つ。</span></li>
+        <li><span class="lx" lang="en">Every pattern carries numeric constraints — element counts, label lengths, box widths — so the layout cannot fall apart structurally.</span><span class="lx" lang="ja">各パターンは要素数・文字数・箱幅の数値制約を内蔵しているため、レイアウト崩れを構造的に防げる。</span></li>
+        <li><span class="lx" lang="en">Sequence diagrams route to mermaid; AWS architecture diagrams to draw.io's nested VPC/subnet/AZ icon set.</span><span class="lx" lang="ja">シーケンス図は mermaid、AWS 構成図は draw.io の入れ子アイコンセットへ振り分ける。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"draw this as a sequence diagram"</span><span class="lx" lang="ja">「シーケンス図で描いて」</span>
-        <span class="lx" lang="en">"give me an AWS architecture diagram"</span><span class="lx" lang="ja">「AWS 構成図作って」</span>
-      </div>
-    </div>
-
-    <div class="card" id="b2b-docs">
-      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">b2b-docs</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Structures a proposal or sales deck, and decides HTML vs. PowerPoint.</strong> Runs the chapter order conclusion → problem → impact → evidence → cost → steps → risk, and insists every impact claim carries a real before/after number with its source in the evidence chapter. Judges whether the deliverable needs <code>.pptx</code> or a single HTML document is enough.</span>
-        <span class="lx" lang="ja"><strong>提案書・営業資料の章立てを組み、HTML か PowerPoint かを判断する。</strong>結論 → 課題 → 効果 → 根拠 → 費用 → 手順 → リスクの順で構成し、効果は必ず before → after の実数を根拠章の出典付きで示す。<code>.pptx</code> が要るのか、単一 HTML 資料で足りるのかをここで判断する。</span>
-      </p>
-      <div class="trig">
-        <span class="lx" lang="en">"put together a proposal"</span><span class="lx" lang="ja">「提案書作って」</span>
-        <span class="lx" lang="en">"make a sales deck in PowerPoint"</span><span class="lx" lang="ja">「パワポで営業資料作って」</span>
-      </div>
-    </div>
-
-    <div class="card" id="html-doc">
-      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">html-doc</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Generates a self-contained single-HTML document from templates.</strong> Four document types (report, runbook, explainer, proposal) × Japanese/English × 7 color themes, with zero external requests — no CDN fonts, no tracking, diagrams pre-rendered to inline SVG — so the file is safe to hand over even under NDA. Rich layers (reading-progress bar, scroll-synced TOC, KPI stat cards) are built into every template and vanish in print.</span>
-        <span class="lx" lang="ja"><strong>自己完結な単一 HTML 資料を雛形から生成する。</strong>用途 4 種（報告書・手順書・説明資料・提案書）× 日英 × カラーテーマ 7 種。外部リクエストゼロ — CDN フォントもトラッキングもなく、図は事前レンダのインライン SVG — なので NDA 案件でもそのまま納品できる。リッチ層（読了バー・スクロール連動 TOC・KPI 統計カード）は全雛形に内蔵で、印刷時は自動で消える。</span>
-      </p>
-      <div class="trig">
-        <span class="lx" lang="en">"make an HTML report"</span><span class="lx" lang="ja">「HTML で報告書作って」</span>
-        <span class="lx" lang="en">"turn this into a document"</span><span class="lx" lang="ja">「資料にまとめて」</span>
+        <span class="lx" lang="en">"map this on a 2-axis matrix"</span><span class="lx" lang="ja">「四象限で整理して」</span>
       </div>
     </div>
   </div>
@@ -369,10 +447,18 @@
   <div class="cards" style="margin-top:16px">
     <div class="card" id="ws">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">ws</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Drives a 3-tier branch model (main ← epic ← task worktree) from stated intent.</strong> Say "start the payment redesign" and it opens an epic branch plus worktree via git-town; say "this work is done" and it tests, merges, syncs, and cleans up on its own; say "ship it" and it always stops to confirm before opening the PR.</span>
-        <span class="lx" lang="ja"><strong>main ← epic ← task worktree の 3 階層ブランチを、発話の意図から駆動する。</strong>「決済のリデザインを始める」と言えば git-town 経由で epic ブランチと worktree を開き、「この作業終わった」と言えばテスト → merge → sync → cleanup を自動で回し、「出して」と言えば PR 作成前に必ず確認する。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Drives a 3-tier branch model (main ← epic ← task worktree) from stated intent.</strong></span>
+        <span class="lx" lang="ja"><strong>main ← epic ← task worktree の 3 階層ブランチを、発話の意図から駆動する。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"branch off, run in parallel"</span><span class="lx" lang="ja">「ブランチ分けて」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">ws</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">epic/task branch + PR</span><span class="lx" lang="ja">epic/task ブランチ + PR</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Say "start the payment redesign" and it opens an epic branch plus worktree via git-town.</span><span class="lx" lang="ja">「決済のリデザインを始める」と言えば git-town 経由で epic ブランチと worktree を開く。</span></li>
+        <li><span class="lx" lang="en">Say "this work is done" and it tests, merges, syncs, and cleans up on its own.</span><span class="lx" lang="ja">「この作業終わった」と言えばテスト → merge → sync → cleanup を自動で回す。</span></li>
+        <li><span class="lx" lang="en">Say "ship it" and it always stops to confirm before opening the PR.</span><span class="lx" lang="ja">「出して」と言えば PR 作成前に必ず確認する。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"branch this off, run in parallel"</span><span class="lx" lang="ja">「ブランチ分けて並走したい」</span>
         <span class="lx" lang="en">"this task is done, merge it back"</span><span class="lx" lang="ja">「この task 終わったから epic に戻して」</span>
@@ -381,10 +467,17 @@
 
     <div class="card" id="set-language">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">set-language</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Switches Banto's language JA ⇄ EN, and makes the choice stick across updates.</strong> Say "switch to English" and it materializes <code>i18n/en/skills</code> and <code>agents</code> onto the active set, saving the preference to <code>~/.claude/banto-language</code>. After the next <code>claude plugin update</code>, a SessionStart hook re-applies the same language automatically.</span>
-        <span class="lx" lang="ja"><strong>Banto の言語を JA ⇄ EN で切り替え、プラグイン更新後も選択を保持する。</strong>「英語に切り替えて」と言うと <code>i18n/en/skills</code> と <code>agents</code> をアクティブなセットへ展開し、選択を <code>~/.claude/banto-language</code> に保存する。次回の <code>claude plugin update</code> 後も SessionStart hook が同じ言語を自動で再適用する。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Switches Banto's language JA ⇄ EN, and makes the choice stick across updates.</strong></span>
+        <span class="lx" lang="ja"><strong>Banto の言語を JA ⇄ EN で切り替え、プラグイン更新後も選択を保持する。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"switch to english"</span><span class="lx" lang="ja">「日本語にして」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">set-language</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">i18n/en/ tree applied</span><span class="lx" lang="ja">i18n/en/ を適用</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Say "switch to English" and it materializes the <code>i18n/en/</code> tree — skills, agents, and rule templates — onto the active set, saving the preference to <code>~/.claude/banto-language</code>.</span><span class="lx" lang="ja">「英語に切り替えて」と言うと <code>i18n/en/</code> ツリー（skills・agents・rule templates）をアクティブなセットへ展開し、選択を <code>~/.claude/banto-language</code> に保存する。</span></li>
+        <li><span class="lx" lang="en">After the next <code>claude plugin update</code>, a SessionStart hook re-applies the same language automatically.</span><span class="lx" lang="ja">次回の <code>claude plugin update</code> 後も SessionStart hook が同じ言語を自動で再適用する。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"switch to english"</span><span class="lx" lang="ja">「言語を日本語にして」</span>
       </div>
@@ -392,10 +485,18 @@
 
     <div class="card" id="plugin-dev">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">plugin-dev</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Scaffolds or refactors a skill, hook, or plugin against official best practices.</strong> Say "build me a skill" and it generates a standard skill (or the 4-component <em>HeavySkill</em> for genuinely complex judgment); say "refactor skills/foo" and it improves quality without breaking existing trigger phrases. Loops with plugin-audit until the report comes back clean.</span>
-        <span class="lx" lang="ja"><strong>公式ベストプラクティスに沿って skill・hook・plugin を生成・改修する。</strong>「skill 作って」と言えば標準 skill（複雑な判断が要るときだけ 4 要素の <em>HeavySkill</em>）を生成し、「refactor skills/foo」と言えば既存のトリガー語を壊さずに品質を引き上げる。plugin-audit と連動し、クリーンな報告になるまで反復する。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Scaffolds or refactors a skill, hook, or plugin against official best practices.</strong></span>
+        <span class="lx" lang="ja"><strong>公式ベストプラクティスに沿って skill・hook・plugin を生成・改修する。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"build me a skill"</span><span class="lx" lang="ja">「スキル作って」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">plugin-dev</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">skill/hook scaffolded</span><span class="lx" lang="ja">skill/hook を生成</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Say "build me a skill" and it generates a standard skill (or the 4-component <em>HeavySkill</em> for genuinely complex judgment).</span><span class="lx" lang="ja">「skill 作って」と言えば標準 skill（複雑な判断が要るときだけ 4 要素の <em>HeavySkill</em>）を生成する。</span></li>
+        <li><span class="lx" lang="en">Say "refactor skills/foo" and it improves quality without breaking existing trigger phrases.</span><span class="lx" lang="ja">「refactor skills/foo」と言えば既存のトリガー語を壊さずに品質を引き上げる。</span></li>
+        <li><span class="lx" lang="en">Loops with plugin-audit until the report comes back clean.</span><span class="lx" lang="ja">plugin-audit と連動し、クリーンな報告になるまで反復する。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"scaffold a new plugin"</span><span class="lx" lang="ja">「新規プラグインを scaffold して」</span>
         <span class="lx" lang="en">"refactor this skill's quality"</span><span class="lx" lang="ja">「この skill の品質改修して」</span>
@@ -404,10 +505,17 @@
 
     <div class="card" id="plugin-audit">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">plugin-audit</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Audits a whole plugin, or a single skill, on 15 quality axes.</strong> First passes an official-compliance check (directory structure, frontmatter, <code>hooks.json</code>), then scores structure, routing precision, generality, hook enforcement, usage, and containment. Full detail in <a href="#meta-tools">Meta-tools below</a>.</span>
-        <span class="lx" lang="ja"><strong>プラグイン全体、または単一 skill を 15 軸で監査する。</strong>まず公式準拠チェック（ディレクトリ構造・frontmatter・<code>hooks.json</code>）を通り、次に構造・ルーティング精度・汎用性・hook 強制・使用度・封じ込めを採点する。詳細は<a href="#meta-tools">下の「メタ道具」節</a>。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Audits a whole plugin, or a single skill, on 15 quality axes.</strong></span>
+        <span class="lx" lang="ja"><strong>プラグイン全体、または単一 skill を 15 軸で監査する。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"audit this plugin"</span><span class="lx" lang="ja">「プラグイン監査して」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">plugin-audit</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">15-axis score</span><span class="lx" lang="ja">15 軸の採点</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">First passes an official-compliance check (directory structure, frontmatter, <code>hooks.json</code>), then scores structure, routing precision, generality, hook enforcement, usage, and containment.</span><span class="lx" lang="ja">まず公式準拠チェック（ディレクトリ構造・frontmatter・<code>hooks.json</code>）を通り、次に構造・ルーティング精度・汎用性・hook 強制・使用度・封じ込めを採点する。</span></li>
+        <li><span class="lx" lang="en">Full detail in <a href="#meta-tools">Meta-tools below</a>.</span><span class="lx" lang="ja">詳細は<a href="#meta-tools">下の「メタ道具」節</a>。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"audit this plugin"</span><span class="lx" lang="ja">「プラグイン監査して」</span>
         <span class="lx" lang="en">"check this against best practices"</span><span class="lx" lang="ja">「SKILL.md をベストプラクティスと突き合わせて」</span>
@@ -416,10 +524,17 @@
 
     <div class="card" id="skill-audit">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">skill-audit</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Audits a single skill's context engineering on 7 axes.</strong> Narrower and deeper than plugin-audit: it asks only whether a skill hands the model exactly the information it needs, across axes like information minimality and human-only-information leakage. Full detail in <a href="#meta-tools">Meta-tools below</a>.</span>
-        <span class="lx" lang="ja"><strong>skill 単体のコンテキスト設計を 7 軸で監査する。</strong>plugin-audit より狭く深い監査で、情報の最小性や人間専用情報の混入など、skill が実行に必要な情報だけを渡せているかだけを見る。詳細は<a href="#meta-tools">下の「メタ道具」節</a>。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Audits a single skill's context engineering on 7 axes.</strong></span>
+        <span class="lx" lang="ja"><strong>skill 単体のコンテキスト設計を 7 軸で監査する。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"audit this skill"</span><span class="lx" lang="ja">「skill を監査して」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">skill-audit</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">7-axis score</span><span class="lx" lang="ja">7 軸の採点</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Narrower and deeper than plugin-audit: it asks only whether a skill hands the model exactly the information it needs, across axes like information minimality and human-only-information leakage.</span><span class="lx" lang="ja">plugin-audit より狭く深い監査で、情報の最小性や人間専用情報の混入など、skill が実行に必要な情報だけを渡せているかだけを見る。</span></li>
+        <li><span class="lx" lang="en">Full detail in <a href="#meta-tools">Meta-tools below</a>.</span><span class="lx" lang="ja">詳細は<a href="#meta-tools">下の「メタ道具」節</a>。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"audit this skill's context engineering"</span><span class="lx" lang="ja">「この skill のコンテキストエンジニアリング監査して」</span>
       </div>
@@ -427,13 +542,40 @@
 
     <div class="card" id="kit">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">kit</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Shows every skill, agent, hook, and rule Banto ships, as one catalog.</strong> Ask "what can Banto do" and it prints the command list plus natural-language trigger examples verbatim — a discovery hub so nobody needs to memorize a command exists before using it.</span>
-        <span class="lx" lang="ja"><strong>Banto の全 skill・agent・hook・rule を一枚のカタログとして表示する。</strong>「banto で何ができる」と聞くと、コマンド一覧と自然文トリガー例をそのまま表示する。コマンドの存在を暗記していなくても、自然文だけで機能へたどり着ける発見ハブ。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Shows every skill, agent, hook, and rule Banto ships, as one catalog.</strong></span>
+        <span class="lx" lang="ja"><strong>Banto の全 skill・agent・hook・rule を一枚のカタログとして表示する。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"what can banto do"</span><span class="lx" lang="ja">「何ができる」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">kit</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">full command catalog</span><span class="lx" lang="ja">全機能カタログ</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Ask "what can Banto do" and it prints the command list plus natural-language trigger examples verbatim.</span><span class="lx" lang="ja">「banto で何ができる」と聞くと、コマンド一覧と自然文トリガー例をそのまま表示する。</span></li>
+        <li><span class="lx" lang="en">A discovery hub so nobody needs to memorize a command exists before using it.</span><span class="lx" lang="ja">コマンドの存在を暗記していなくても、自然文だけで機能へたどり着ける発見ハブ。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"what can banto do"</span><span class="lx" lang="ja">「banto で何ができる」</span>
         <span class="lx" lang="en">"show me the full command list"</span><span class="lx" lang="ja">「機能一覧見せて」</span>
+      </div>
+    </div>
+
+    <div class="card" id="policy">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">policy</h4>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Shows — and edits — what this repo permits and protects, on a single screen.</strong></span>
+        <span class="lx" lang="ja"><strong>この repo で何を許可し、何を守っているかを 1 画面で見て、その場で変える。</strong></span>
+      </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"show me the policy"</span><span class="lx" lang="ja">「ポリシー見せて」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">policy</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">grants + guards, one screen</span><span class="lx" lang="ja">許可 + 保護を 1 画面で</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Say "show me the policy" and a console opens in the browser listing standing grants (PR creation, push, production ops) and protections (no-edit, no-sync files).</span><span class="lx" lang="ja">「ポリシー見せて」と言うとブラウザにコンソールが開き、常設許可（PR 作成・push・本番操作）と保護対象（編集禁止・同期除外のファイル）を一覧表示する。</span></li>
+        <li><span class="lx" lang="en">Changes save automatically and take effect on the guard hooks immediately.</span><span class="lx" lang="ja">変更は自動保存され、ガード hook に即時反映される。</span></li>
+        <li><span class="lx" lang="en">The server exits on the Done button, on tab close, or after 15 idle minutes — it never stays resident.</span><span class="lx" lang="ja">サーバは完了ボタン・タブを閉じる・15 分放置のどれかで自動終了し、常駐しない。</span></li>
+      </ul>
+      <div class="trig">
+        <span class="lx" lang="en">"show me the policy"</span><span class="lx" lang="ja">「ポリシー見せて」</span>
+        <span class="lx" lang="en">"what have I already approved"</span><span class="lx" lang="ja">「どこまで許可してるか見せて」</span>
       </div>
     </div>
   </div>
@@ -451,10 +593,17 @@
   <div class="cards" style="margin-top:16px">
     <div class="card" id="architect">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">architect</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Investigates a design without touching code, and returns a trade-off table.</strong> Ask "how should this API be structured" and it reads the existing code and <code>decisions/</code>, classifies every option by reversibility (high/medium/low), and returns current state / issues / proposal / trade-offs / risks — never an Edit.</span>
-        <span class="lx" lang="ja"><strong>コードを変更せず設計を調査し、トレードオフ表で提案を返す。</strong>「この API どう設計すべきか」と聞くと、既存コードと <code>decisions/</code> を読み、選択肢を可逆性（高・中・低）で分類したうえで、現状・課題・提案・トレードオフ・リスクの形式で返す。Edit は使わない。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Investigates a design without touching code, and returns a trade-off table.</strong></span>
+        <span class="lx" lang="ja"><strong>コードを変更せず設計を調査し、トレードオフ表で提案を返す。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"review this design"</span><span class="lx" lang="ja">「設計レビューして」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">architect</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">trade-off table</span><span class="lx" lang="ja">トレードオフ表</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Ask "how should this API be structured" and it reads the existing code and <code>decisions/</code>, classifies every option by reversibility (high/medium/low).</span><span class="lx" lang="ja">「この API どう設計すべきか」と聞くと、既存コードと <code>decisions/</code> を読み、選択肢を可逆性（高・中・低）で分類する。</span></li>
+        <li><span class="lx" lang="en">Returns current state / issues / proposal / trade-offs / risks — never an Edit.</span><span class="lx" lang="ja">現状・課題・提案・トレードオフ・リスクの形式で返す。Edit は使わない。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"review this design"</span><span class="lx" lang="ja">「設計レビューして」</span>
         <span class="lx" lang="en">"help me pick between these two"</span><span class="lx" lang="ja">「この 2 案どっちがいいか相談したい」</span>
@@ -463,10 +612,17 @@
 
     <div class="card" id="debugger">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">debugger</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Loops reproduce → fix → re-run until a bug is actually resolved.</strong> Say "the tests are failing" and it reads the stack trace, pins down repro steps, applies the minimal fix, and reports root cause plus a prevention recommendation. Under <code>odd-gate</code>'s failure lockout, it stops editing and returns a diff proposal instead.</span>
-        <span class="lx" lang="ja"><strong>再現 → 修正 → 再実行のループで、根本原因まで潰す。</strong>「テストが落ちる」と言うと、スタックトレースから再現手順を特定し最小限の修正を適用、根本原因と再発防止策を添えて報告する。<code>odd-gate</code> の連続失敗ロック下では Edit を使わず、修正案の diff だけを返す。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Loops reproduce → fix → re-run until a bug is actually resolved.</strong></span>
+        <span class="lx" lang="ja"><strong>再現 → 修正 → 再実行のループで、根本原因まで潰す。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"I'm getting an error"</span><span class="lx" lang="ja">「エラーが出た」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">debugger</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">root cause + fix</span><span class="lx" lang="ja">根本原因 + 修正</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Say "the tests are failing" and it reads the stack trace, pins down repro steps, applies the minimal fix, and reports root cause plus a prevention recommendation.</span><span class="lx" lang="ja">「テストが落ちる」と言うと、スタックトレースから再現手順を特定し最小限の修正を適用、根本原因と再発防止策を添えて報告する。</span></li>
+        <li><span class="lx" lang="en">Under <code>odd-gate</code>'s failure lockout, it stops editing and returns a diff proposal instead.</span><span class="lx" lang="ja"><code>odd-gate</code> の連続失敗ロック下では Edit を使わず、修正案の diff だけを返す。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"I'm getting an error"</span><span class="lx" lang="ja">「エラーが出た」</span>
         <span class="lx" lang="en">"figure out why this fails"</span><span class="lx" lang="ja">「なぜ失敗するか突き止めて」</span>
@@ -475,10 +631,17 @@
 
     <div class="card" id="qa-tester">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">qa-tester</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Auto-detects web/desktop/mobile and runs E2E with the matching tool.</strong> Say "check this in the browser" and it navigates via Claude in Chrome (falling back to Playwright), clicks and types through the flow, and returns pass/fail per test case with a screenshot as evidence — saving the report is left to the caller.</span>
-        <span class="lx" lang="ja"><strong>web・desktop・mobile を自動判定し、対応ツールで E2E を回す。</strong>「ブラウザで確認して」と言うと Claude in Chrome（未接続なら Playwright）で画面へ遷移し、クリック・入力を通してテストケースごとに pass/fail をスクリーンショット付きで返す。結果の保存は呼び出し元が担う。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Auto-detects web/desktop/mobile and runs E2E with the matching tool.</strong></span>
+        <span class="lx" lang="ja"><strong>web・desktop・mobile を自動判定し、対応ツールで E2E を回す。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"check this in the browser"</span><span class="lx" lang="ja">「ブラウザで確認して」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">qa-tester</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">pass/fail + screenshot</span><span class="lx" lang="ja">pass/fail + 画面キャプチャ</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Say "check this in the browser" and it navigates via Claude in Chrome (falling back to Playwright), clicks and types through the flow, and returns pass/fail per test case with a screenshot as evidence.</span><span class="lx" lang="ja">「ブラウザで確認して」と言うと Claude in Chrome（未接続なら Playwright）で画面へ遷移し、クリック・入力を通してテストケースごとに pass/fail をスクリーンショット付きで返す。</span></li>
+        <li><span class="lx" lang="en">Saving the report is left to the caller.</span><span class="lx" lang="ja">結果の保存は呼び出し元が担う。</span></li>
+      </ul>
       <div class="trig">
         <span class="lx" lang="en">"run an E2E test on this"</span><span class="lx" lang="ja">「E2E テストして」</span>
         <span class="lx" lang="en">"check this in the browser"</span><span class="lx" lang="ja">「ブラウザで動作確認して」</span>
@@ -487,10 +650,17 @@
 
     <div class="card" id="research-agent">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">research-agent</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Launched in parallel by the research skill to investigate and save one subtopic.</strong> Each instance WebSearches for URLs, reads them in full via webread (never a WebFetch summary), and writes a structured Markdown report to <code>docs/research/</code>.</span>
-        <span class="lx" lang="ja"><strong>research skill から並列起動され、1 サブトピックを調査・保存する。</strong>各インスタンスが WebSearch で URL を特定し、webread で全文を読み（WebFetch の要約には頼らない）、構造化した Markdown を <code>docs/research/</code> へ保存する。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Launched in parallel by the research skill to investigate and save one subtopic.</strong></span>
+        <span class="lx" lang="ja"><strong>research skill から並列起動され、1 サブトピックを調査・保存する。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">research fans out</span><span class="lx" lang="ja">research が並列起動</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">research-agent</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">subtopic report saved</span><span class="lx" lang="ja">サブトピック報告を保存</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Each instance WebSearches for URLs, and reads them in full via webread (never a WebFetch summary).</span><span class="lx" lang="ja">各インスタンスが WebSearch で URL を特定し、webread で全文を読む（WebFetch の要約には頼らない）。</span></li>
+        <li><span class="lx" lang="en">Writes a structured Markdown report to <code>docs/research/</code>.</span><span class="lx" lang="ja">構造化した Markdown を <code>docs/research/</code> へ保存する。</span></li>
+      </ul>
       <p style="font-size:13px;color:var(--ink-soft);margin:8px 0 0">
         <span class="lx" lang="en">internal only — launched by the research skill's fan-out, never called directly</span>
         <span class="lx" lang="ja">内部専用 — research skill の並列起動からのみ。直接呼び出しなし</span>
@@ -499,10 +669,17 @@
 
     <div class="card" id="search-agent">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">search-agent</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>A lightweight (haiku) grep runner launched from search's deep path.</strong> Runs the regex groups handed to it in parallel via Grep, writes every hit to a temp file, and returns only the top candidates as <code>{file, line, snippet, matched_term}</code> — relevance judgment stays with the orchestrator.</span>
-        <span class="lx" lang="ja"><strong>search skill の deep パスから起動される、軽量（haiku）な grep 実行役。</strong>渡された regex グループを Grep で並列実行し、全ヒットを一時ファイルへ書いたうえで、上位候補だけを <code>{file, line, snippet, matched_term}</code> として返す。関連度判定はオーケストレーター側が担う。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>A lightweight (haiku) grep runner launched from search's deep path.</strong></span>
+        <span class="lx" lang="ja"><strong>search skill の deep パスから起動される、軽量（haiku）な grep 実行役。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">search's deep path</span><span class="lx" lang="ja">search の deep パス</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">search-agent</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">top candidates returned</span><span class="lx" lang="ja">上位候補を返す</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Runs the regex groups handed to it in parallel via Grep, writes every hit to a temp file, and returns only the top candidates as <code>{file, line, snippet, matched_term}</code>.</span><span class="lx" lang="ja">渡された regex グループを Grep で並列実行し、全ヒットを一時ファイルへ書いたうえで、上位候補だけを <code>{file, line, snippet, matched_term}</code> として返す。</span></li>
+        <li><span class="lx" lang="en">Relevance judgment stays with the orchestrator.</span><span class="lx" lang="ja">関連度判定はオーケストレーター側が担う。</span></li>
+      </ul>
       <p style="font-size:13px;color:var(--ink-soft);margin:8px 0 0">
         <span class="lx" lang="en">internal only — 3–5 instances launched from search's deep path</span>
         <span class="lx" lang="ja">内部専用 — search skill の deep パスから 3〜5 体並列起動</span>
@@ -511,10 +688,17 @@
 
     <div class="card" id="context-keeper">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">context-keeper</h4>
-      <p style="font-size:14px;color:var(--ink-2);line-height:1.6;margin:0">
-        <span class="lx" lang="en"><strong>Verifies and regenerates the search text layer (<code>full-combined.txt</code>).</strong> After a write, if the combined text is older than the newest decision or doc, it re-runs <code>ai_context_combined.py</code> and confirms via grep that the new file's marker actually landed — maintenance, not a search itself.</span>
-        <span class="lx" lang="ja"><strong>検索テキスト層（<code>full-combined.txt</code>）の鮮度を検証・再生成する。</strong>書き込み後、結合テキストが最新の決定ログやドキュメントより古ければ <code>ai_context_combined.py</code> を再実行し、新規ファイルのマーカーが実際に反映されたかを grep で確認する。検索そのものではなく保守が役目。</span>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Verifies and regenerates the search text layer (<code>full-combined.txt</code>).</strong></span>
+        <span class="lx" lang="ja"><strong>検索テキスト層（<code>full-combined.txt</code>）の鮮度を検証・再生成する。</strong></span>
       </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">after a write</span><span class="lx" lang="ja">書き込み後</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">context-keeper</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">full-combined.txt refreshed</span><span class="lx" lang="ja">full-combined.txt を更新</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">After a write, if the combined text is older than the newest decision or doc, it re-runs <code>ai_context_combined.py</code>.</span><span class="lx" lang="ja">書き込み後、結合テキストが最新の決定ログやドキュメントより古ければ <code>ai_context_combined.py</code> を再実行する。</span></li>
+        <li><span class="lx" lang="en">Confirms via grep that the new file's marker actually landed — maintenance, not a search itself.</span><span class="lx" lang="ja">新規ファイルのマーカーが実際に反映されたかを grep で確認する。検索そのものではなく保守が役目。</span></li>
+      </ul>
       <p style="font-size:13px;color:var(--ink-soft);margin:8px 0 0">
         <span class="lx" lang="en">internal only — freshness checks on full-combined.txt / sessions-cache</span>
         <span class="lx" lang="ja">内部専用 — full-combined.txt / sessions-cache の鮮度チェック</span>

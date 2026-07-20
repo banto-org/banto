@@ -12,7 +12,7 @@ in_scope:
 out_of_scope:
   - Running /compact or /clear themselves (this skill never runs them)
   - Recording design decisions (decisions/ — ai-context skill)
-  - Editing the task file (active.md) (ai-context skill)
+  - Editing the task file (tasks.md) (ai-context skill)
 
 safety_boundaries:
   - Write only to new files under {base}/sessions/ (never overwrite existing files)

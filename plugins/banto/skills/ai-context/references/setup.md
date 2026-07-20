@@ -26,7 +26,7 @@ The engine is `scripts/migrate-to-store.sh` (copy mode, dry-run by default, neve
    `PROJ=$(basename "$(sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --derive <abs-path>)")`
    → `.mapping.json`'s `.projects[<abs-path>] = {"project": $PROJ}` (added only if not already registered).
 2. **dry-run**: check what will be migrated with `sh "$CLAUDE_PLUGIN_ROOT/scripts/migrate-to-store.sh" <path>`.
-3. **apply**: `... --apply <path>` (copies **every file** under the in-repo `.ai-context/` = decisions/docs/tasks/archive/audit/concept etc. + `WORKSPACE.md` / `config.json`. Regenerated artifacts (`*-combined.txt`), `.obsidian/`, `.git/`, and `.DS_Store` are excluded. Existing files are skipped. v5.21.7+).
+3. **apply**: `... --apply <path>` (copies the files under the in-repo `.ai-context/` = decisions/docs/tasks/archive/audit/concept etc. + `config.json`. `WORKSPACE.md` / `WORKSPACE-refs.md` / `DASHBOARD.md` (per-checkout local pointers), regenerated artifacts (`*-combined.txt`), `.obsidian/`, `.git/`, and `.DS_Store` are excluded. Existing files are skipped. v5.21.7+).
 4. **Search layer**: regenerated automatically by a hook (no manual step needed).
 5. **Report**: number of files migrated / store path / the source legacy is retained (its removal is automated by a hook).
 

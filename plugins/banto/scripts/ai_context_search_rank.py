@@ -16,12 +16,18 @@ the JP terms below illustrate cross-language query expansion):
    [0.6, ["観測", "watch"]],
    [0.3, ["監査", "audit"]]]
 
-Output: JSON {"confident": bool, "results": [{"score", "path", "hits"}...]}
+Output: JSON {"confident": bool, "results": [{"score", "path", "hits", "date", "age_days", "derived"}...]}
+
+v3.1 (decision 2026-07-17 freshness-newest-first): score is only the relevance gate
+(confidence + top-N selection); the presented order is newest-first by filename date.
+Primary docs come before derived records ([Index]/[Status]/[QA]/aggregates), dateless
+files sort last, score breaks ties. age_days makes staleness visible before any Read.
 """
 
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import math
 import re
@@ -48,8 +54,23 @@ def base_dirs(base: Path, project_root: Path) -> list[Path]:
                 dirs.append(p)
     return dirs
 
-# v3 rule 5: aggregate-style files subject to demotion
-AGG_PAT = re.compile(r"\[Index\]|complete-guide|map-2026|-overview|\[QA\]")
+# v3 rule 5 + v3.1: aggregate/derived records subject to score demotion and
+# presentation demotion (derived records are always the newest files, so a
+# newest-first order without this demotion would surface them above decisions)
+AGG_PAT = re.compile(r"\[Index\]|\[Status\]|complete-guide|map-2026|-overview|\[QA\]")
+
+# v3.2: front-matter status demotion — a doc that says it is outdated must not outrank
+# the living one, whatever its term match. Only the YAML head is consulted (cheap).
+STATUS_PAT = re.compile(r"^status:\s*([\w-]+)", re.MULTILINE)
+STALE_STATUSES = {"superseded", "stale", "deprecated", "rejected"}
+
+
+def head_status(text: str) -> str:
+    """front-matter status from the first 400 bytes; '' when absent."""
+    if not text.startswith("---"):
+        return ""
+    m = STATUS_PAT.search(text[:400])
+    return m.group(1).lower() if m else ""
 
 
 def term_pattern(t: str) -> re.Pattern:
@@ -127,11 +148,36 @@ def rank(dirs: list[Path], groups, top: int, threshold: float) -> dict:
             # rel is relative to root's parent, not the basename (keeps the decisions/ prefix)
             rel = str(p.relative_to(root.parent))
             s, detail = score_file(prose, tbl, rel, p.stat().st_size / 1024, groups)
+            st = head_status(text)
+            if st in STALE_STATUSES:
+                s *= 0.3  # v3.2: self-declared outdated docs lose to living ones
             if s > 0:
-                results.append({"score": round(s, 2), "path": str(p), "hits": detail})
+                results.append({"score": round(s, 2), "path": str(p), "hits": detail, "status": st})
     results.sort(key=lambda r: r["score"], reverse=True)
     confident = bool(results) and results[0]["score"] >= threshold  # rule 10: confidence threshold
-    return {"confident": confident, "results": results[:top]}
+    return {"confident": confident, "results": present(results[:top])}
+
+
+def present(rows: list[dict], today: dt.date | None = None) -> list[dict]:
+    """v3.1 newest-first presentation: relevance selected the rows; the date orders them.
+
+    Sort contract: primary docs before derived records, then filename date desc
+    (dateless last), then score desc. Stable three-pass sort, least significant first.
+    """
+    today = today or dt.date.today()
+    for r in rows:
+        d = _extract_date(r["path"])
+        r["date"] = d
+        try:
+            r["age_days"] = (today - dt.date.fromisoformat(d)).days if d else None
+        except ValueError:
+            r["age_days"] = None
+        r["derived"] = bool(AGG_PAT.search(Path(r["path"]).name))
+    rows.sort(key=lambda r: r["score"], reverse=True)
+    rows.sort(key=lambda r: r["date"], reverse=True)  # ISO strings; "" (dateless) sorts last
+    # derived records and self-declared stale docs both go last (v3.1 + v3.2)
+    rows.sort(key=lambda r: r["derived"] or r.get("status", "") in STALE_STATUSES)
+    return rows
 
 
 # ------------------------------------------------------- 3-layer retrieval
@@ -158,7 +204,8 @@ def layered(ranked: dict, index_top: int) -> dict:
     """
     results = ranked["results"]
     index = [
-        {"path": r["path"], "score": r["score"], "terms": list(r["hits"].keys())}
+        {"path": r["path"], "score": r["score"], "date": r.get("date", ""),
+         "age_days": r.get("age_days"), "terms": list(r["hits"].keys())}
         for r in results[:index_top]
     ]
     timeline = sorted(
@@ -253,14 +300,49 @@ def self_test() -> int:
               lay["layers"]["full"] == raw["results"])
         check("3layer: confident is carried through unchanged",
               lay["confident"] == raw["confident"])
-        check("3layer: index is compact (path/score/terms only) and capped by index_top",
+        check("3layer: index is compact and capped by index_top",
               len(lay["layers"]["index"]) <= 3
-              and all(set(e.keys()) == {"path", "score", "terms"} for e in lay["layers"]["index"]))
+              and all(set(e.keys()) == {"path", "score", "date", "age_days", "terms"}
+                      for e in lay["layers"]["index"]))
         tl_dates = [e["date"] for e in lay["layers"]["timeline"] if e["date"]]
         check("3layer: timeline is newest-first by filename date",
               tl_dates == sorted(tl_dates, reverse=True)
               and "2026-06-20" in tl_dates and "2026-01-10" in tl_dates
               and tl_dates.index("2026-06-20") < tl_dates.index("2026-01-10"))
+
+        # v3.1 newest-first presentation (decision 2026-07-17 freshness-newest-first)
+        names = [Path(x["path"]).name for x in raw["results"]]
+        check("v3.1 newest-first: dated hits are presented newest-first",
+              names.index("2026-06-20-091500_auth-new.md") < names.index("2026-01-10_auth-old.md"))
+        check("v3.1 newest-first: dateless hits come after dated ones",
+              names.index("2026-01-10_auth-old.md") < names.index("auth-design.md"))
+        check("v3.1 newest-first: dateless ties keep relevance order",
+              names.index("auth-design.md") < names.index("approval-flood.md"))
+        top_row = raw["results"][0]
+        check("v3.1 age_days: dated rows carry a non-negative age",
+              isinstance(top_row["age_days"], int) and top_row["age_days"] >= 0
+              and top_row["date"] == "2026-06-20")
+        check("v3.1 confidence: still computed from the relevance top score",
+              raw["confident"] is True)
+        # derived records ([Status] etc.) stay last even when they are the newest
+        (docs / "[Status] auth-weekly-2026-06-25.md").write_text("認証 認証 認証 の週次報告。\n", encoding="utf-8")
+        r = rank([dec, docs], AUTH, 10, 1.0)
+        names = [Path(x["path"]).name for x in r["results"]]
+        check("v3.1 derived demotion: newest [Status] still sorts after primary docs",
+              names.index("2026-01-10_auth-old.md") < names.index("[Status] auth-weekly-2026-06-25.md")
+              and r["results"][names.index("[Status] auth-weekly-2026-06-25.md")]["derived"] is True)
+
+        # v3.2: front-matter status demotion — a superseded doc never outranks the living one
+        (dec / "2026-07-01-120000_auth-superseded.md").write_text(
+            "---\nstatus: superseded\ndate: 2026-07-01\n---\n# 旧 認証方針\n認証 認証 認証 認証 認証 認証 で決定。\n",
+            encoding="utf-8")
+        r = rank([dec, docs], AUTH, 10, 1.0)
+        names = [Path(x["path"]).name for x in r["results"]]
+        sup = r["results"][names.index("2026-07-01-120000_auth-superseded.md")]
+        check("v3.2 status demotion: superseded doc sorts after living dated docs",
+              names.index("2026-06-20-091500_auth-new.md") < names.index("2026-07-01-120000_auth-superseded.md")
+              and names.index("2026-01-10_auth-old.md") < names.index("2026-07-01-120000_auth-superseded.md"))
+        check("v3.2 status carried in output rows", sup["status"] == "superseded")
 
     print(f"\n{'ALL PASS' if not failures else f'{len(failures)} FAILURES: ' + ', '.join(failures)}")
     return 0 if not failures else 1

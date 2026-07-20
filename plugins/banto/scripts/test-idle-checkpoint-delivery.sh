@@ -120,5 +120,18 @@ OUT=$(run_ss "$R" startup)
 [ ! -f "$F" ] && ok "E: >10d checkpoint GC'd out of the mailbox" || bad "E: >10d checkpoint not GC'd"
 [ -f "$(consumed_path "$F")" ] && ok "E: >10d checkpoint archived to consumed/" || bad "E: >10d checkpoint not archived"
 
+# === F: mailbox が空でも consumed/ の >14 日 checkpoint は GC される ===
+# 回帰: 旧実装は GC を「mailbox に checkpoint がある（CHECKPOINT_FILES 非空）」ガード内に
+# 置いていたため、mailbox が空になると consumed/ の 14 日削除が二度と走らなかった。
+reset_ck
+mkdir -p "$SESS/consumed/tester"
+OLDC="$SESS/consumed/tester/checkpoint-2001-01-01-0000-old.md"
+printf '# old consumed checkpoint\n' > "$OLDC"
+set_days_ago "$OLDC" 20
+[ -z "$(ls "$SESS"/checkpoint-*.md 2>/dev/null)" ] || bad "F: precondition — mailbox should be empty"
+run_ss "$R" startup >/dev/null 2>&1
+[ ! -f "$OLDC" ] && ok "F: consumed GC runs even with an empty mailbox (>14d deleted)" \
+    || bad "F: consumed checkpoint survived with empty mailbox (GC was gated by mailbox)"
+
 echo
 [ "$fail" = "0" ] && { echo "ALL OK (test-idle-checkpoint-delivery)"; exit 0; } || { echo "FAILURES (test-idle-checkpoint-delivery)"; exit 1; }

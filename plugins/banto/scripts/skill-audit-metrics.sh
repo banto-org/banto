@@ -24,13 +24,20 @@ SKILL_MD="$DIR/SKILL.md"
 
 FILES="$SKILL_MD"
 if [ -d "$DIR/references" ]; then
-    for f in "$DIR"/references/*.md; do
+    for f in "$DIR"/references/*.md "$DIR"/references/*/*.md; do
         [ -f "$f" ] && FILES="$FILES $f"
+    done
+fi
+# scripts/ は散文計測の対象外だが、存在の把握のため (a) にサイズだけ出す
+SCRIPT_FILES=""
+if [ -d "$DIR/scripts" ]; then
+    for f in "$DIR"/scripts/*; do
+        [ -f "$f" ] && SCRIPT_FILES="$SCRIPT_FILES $f"
     done
 fi
 
 echo "=== (a) file size ==="
-for f in $FILES; do
+for f in $FILES $SCRIPT_FILES; do
     bytes=$(wc -c < "$f" | tr -d ' ')
     lines=$(wc -l < "$f" | tr -d ' ')
     printf '%s\tbytes=%s\tlines=%s\n' "$f" "$bytes" "$lines"
@@ -38,11 +45,13 @@ done
 
 echo "=== (b) description length ==="
 DESC=$(awk '
-  /^description:/ { inblock = 1; next }
-  inblock && /^[A-Za-z_-]+:/ { inblock = 0 }
+  /^description:[ \t]*\|/ { inblock = 1; next }                     # ブロック形式 description: |
+  /^description:/ { sub(/^description:[ \t]*/, ""); print; next }   # 単一行形式
+  inblock && (/^[A-Za-z_-]+:/ || /^---[ \t]*$/) { inblock = 0 }     # 次のキーか frontmatter 終端で停止
   inblock { print }
 ' "$SKILL_MD")
-DESC_LEN=$(printf '%s' "$DESC" | wc -m | tr -d ' ')
+# LC_ALL を UTF-8 に固定して文字数を数える（C ロケールの wc -m はバイト数を返す）
+DESC_LEN=$(printf '%s' "$DESC" | LC_ALL=en_US.UTF-8 wc -m | tr -d ' ')
 echo "description chars=$DESC_LEN"
 
 echo "=== (c) process-history meta-info pattern hits ==="

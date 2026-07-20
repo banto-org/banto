@@ -1,9 +1,18 @@
 # Task lifecycle (next / phase-done / auto-archive / split)
 
+## The always-update duty (task mirror)
+
+tasks.md (the store canon) and the built-in task UI (TaskCreate / TaskUpdate) are **both updated every time work moves**. The moment SessionStart injects tasks.md, create UI tasks via TaskCreate for any open item this session will touch. Three operating rules:
+
+1. **On start**: locate the item in tasks.md and set the UI task to in_progress
+2. **On completion**: check the item off in tasks.md (`- [x]`) and set the UI task to completed — never finish only one side
+3. **A new request**: when asked for work that is not in tasks.md, append it to tasks.md first, then start (the record lives in the current workspace's tasks.md; if the topic falls outside the workspace's scope, propose /ws switch / new first)
+
+
 <!-- merged from next.md -->
 ## next — task navigator (merged the former sdd-core skill)
 
-Identify the next incomplete task from `active.md`, gather context, and carry it through to implementation and verification.
+Identify the next incomplete task from the effective tasks file (`workspaces/<author>/<topic>/tasks.md`), gather context, and carry it through to implementation and verification.
 
 Invocation: `/ai-context next`, or ai-context fires on natural language like "continue", "next", "next task", "go ahead" and enters this procedure.
 
@@ -12,7 +21,7 @@ Invocation: `/ai-context next`, or ai-context fires on natural language like "co
 The search order, the rule of respecting the project's main files, and the new-creation decision follow SKILL.md "Task management rules" (single source of truth). Summary:
 
 1. Respect the project's existing `tasks.md` / `TODO.md` / `ROADMAP.md` if present
-2. Otherwise use / create `{base}/tasks/active.md` (`{base}` is resolved for central/legacy)
+2. Otherwise use / create the current WS's `tasks.md` (`workspaces/<author>/<topic>/tasks.md`) — legacy `{base}/tasks/active.md` is a read fallback only, never auto-created
 
 ## Navigation flow
 
@@ -86,7 +95,7 @@ Example: `feat(diagnosis): Task 4.2 implement QuestionCard`
 
 Confirm whether the current Phase is complete, verify it, and get ready to proceed to the next Phase.
 
-Invocation: `/ai-context phase-done [Phase number]` (explicit). When omitted, the latest Phase in active.md.
+Invocation: `/ai-context phase-done [Phase number]` (explicit). When omitted, the latest Phase in the effective tasks file (tasks.md).
 
 ## Execution procedure
 

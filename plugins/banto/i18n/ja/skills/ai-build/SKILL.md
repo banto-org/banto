@@ -73,7 +73,7 @@ odd.yaml = **L3（Autopilot＝継続実行＋例外時のみ owner 要求）**�
 
 | ガード | hook | 効果 |
 |---|---|---|
-| churn 停止 | `odd-gate.sh`（PreToolUse） | 連続失敗で edit をブロック → root cause へ |
+| churn 停止 | TF カウンタ（`auto-test.sh`）+ ループ手順 | 連続失敗で周回停止 → root cause へ（`odd-gate.sh` の強制ブロックは opt-in） |
 | 偽 green 防止 | `verify-claim-guard.sh`（Stop） | eval が red のまま「完了」主張をブロック |
 | 外部流出 | `egress-guard.sh` | client パスへの内部名 / PII 流出を遮断（eval ケースに本番データを混ぜない） |
 

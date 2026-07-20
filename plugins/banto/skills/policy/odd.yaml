@@ -1,0 +1,27 @@
+# ODD Spec for policy
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: policy
+autonomy_level: L1  # Lightweight utility (launching the policy console and editing policy.json)
+
+in_scope:
+  - Generating and displaying the listing HTML of policy (grants / ignore) across all stores × projects (dashboard)
+  - Starting and stopping the 127.0.0.1-bound editing console (serve)
+  - Editing policy.json from conversation + syncing to the store (same canon as the GUI)
+
+out_of_scope:
+  - A one-off grants change made only in conversation (the ai-context skill's grants management)
+  - Resolving or enforcing the effect of grants / ignore (release-guard / prod-guard / policy-guard hooks)
+  - Creating or migrating the store itself (ai-context bootstrap / migrate)
+
+safety_boundaries:
+  - Writes are limited to {store}/{project}/meta/policy.json (serve's POST is limited to enumerated projects)
+  - serve is bound to 127.0.0.1 and requires a random token (a mismatch returns 403)
+  - Sync to the store goes through ai-context-sync.sh (delegating to the existing guard that requires the .ai-context-store marker)
+
+kill_switch_conditions:
+  - A write is requested to anything other than meta/policy.json
+  - Starting serve on an external bind such as 0.0.0.0 is requested
+
+approval_gates: []

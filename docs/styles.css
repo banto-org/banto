@@ -560,3 +560,38 @@ body[data-lang="ja"] .band h2.center{ max-width:20em; }
   .flow,.lp-flow,.ctx-flow,.ws-arc,.loop-run{ stroke-dashoffset:0; }
   .gate-stamp{ opacity:1; transform:rotate(-6deg); }
 }
+
+/* ---------- narrow phones: keep the header inside 375px ---------- */
+@media(max-width:400px){
+  .nav-inner{ gap:8px; }
+  .nav-right{ gap:8px; }
+  .brand-kanji{ display:none; }
+  .gh{ padding:6px 8px; }
+  .lang-toggle button{ padding:5px 8px; }
+}
+
+/* ---------- scrollable tables: visible scroll shadows + sticky first column ---------- */
+div.store-table-wrap{
+  background:
+    linear-gradient(to right, var(--card) 30%, rgba(255,253,248,0)),
+    linear-gradient(to left, var(--card) 30%, rgba(255,253,248,0)),
+    radial-gradient(farthest-side at 0 50%, rgba(28,24,20,.22), transparent),
+    radial-gradient(farthest-side at 100% 50%, rgba(28,24,20,.22), transparent)
+    var(--card);
+  background-position: 0 0, 100% 0, 0 0, 100% 0;
+  background-repeat: no-repeat;
+  background-size: 44px 100%, 44px 100%, 16px 100%, 16px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+@media(max-width:640px){
+  div.store-table-wrap th:first-child,
+  div.store-table-wrap td:first-child{
+    position:sticky; left:0; background:var(--card); box-shadow:2px 0 0 var(--line);
+  }
+}
+
+/* ---------- mobile: wide diagrams scroll at readable size instead of shrinking ---------- */
+@media(max-width:640px){
+  :has(> svg.diagram[viewBox^="0 0 92"]){ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  svg.diagram[viewBox^="0 0 92"]{ min-width:680px; }
+}

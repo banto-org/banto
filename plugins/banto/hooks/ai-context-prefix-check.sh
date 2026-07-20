@@ -44,8 +44,24 @@ if [ -f "$MAPPING" ]; then
 fi
 
 case "$FILE_PATH" in
-    *"/.ai-context/docs/research/"*|"$STORE_ROOT"/*/docs/research/*) exit 0 ;;
-    *"/.ai-context/docs/specs/"*|"$STORE_ROOT"/*/docs/specs/*) exit 0 ;;
+    *"/.ai-context/docs/research/"*|"$STORE_ROOT"/*/docs/research/*|*"/.ai-context/docs/specs/"*|"$STORE_ROOT"/*/docs/specs/*)
+        # front-matter 最小スキーマの警告（decision 2026-07-17: 監査で research 5% / specs 0% と判明。
+        # provenance の機械抽出（検索 age_days / 学習 export）に必要。warn-only・never block）
+        case "$FILE_PATH" in *.md) ;; *) exit 0 ;; esac
+        [ -f "$FILE_PATH" ] || exit 0
+        if [ "$(head -1 "$FILE_PATH" 2>/dev/null)" != "---" ]; then
+            cat >&2 << FM_WARN
+[AI Context - Front-matter] research/specs files should start with minimal YAML front-matter
+(provenance for search freshness + training export):
+  ---
+  date: YYYY-MM-DD
+  topic: {one line}
+  status: active    # research: active|stale / specs: draft|accepted|shipped|superseded
+  ---
+Add it to: $(basename "$FILE_PATH")  (warn-only; the filename date stays the freshness source of truth)
+FM_WARN
+        fi
+        exit 0 ;;
     *"/.ai-context/docs/knowledges/"*|"$STORE_ROOT"/*/docs/knowledges/*) exit 0 ;;
     *"/.ai-context/docs/"*|"$STORE_ROOT"/*/docs/*) ;;
     *) exit 0 ;;

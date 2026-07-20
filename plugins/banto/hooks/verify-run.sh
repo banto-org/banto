@@ -5,7 +5,7 @@
 #
 #   exit 0 = all green (or nothing to verify) / 2 = something red.
 #   - records the result to verify-last-<session> (read by verify-claim-guard)
-#   - red bumps the shared test-failure counter (odd-gate circuit breaker); green resets it
+#   - red bumps the shared test-failure counter (odd-gate opt-in circuit breaker); green resets it
 #   - API smoke runs the project's package script with NODE_ENV=test + BANTO_VERIFY=1
 #     (staging / read-only convention; never hits production — that is the smoke script's job)
 #   - test seam: BANTO_VERIFY_CMDS_FILE overrides detection for hermetic unit tests

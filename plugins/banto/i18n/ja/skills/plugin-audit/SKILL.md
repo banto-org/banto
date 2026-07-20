@@ -91,7 +91,7 @@ ${CLAUDE_PLUGIN_ROOT}/scripts/plugin-audit-odd.sh <plugin_dir>
 - `plugin-audit-interface.sh`: argument-hint が skill の実サブコマンドと一致するかを検査（Axis 1 拡張。詳細は scoring.md Axis 1）
 - `plugin-audit-shapeup.sh`: 軽量化トリガー（重量 + 死蔵 + 近似重複）を出す。閾値はゲートではなくレビュー対象（Axis 2 拡張。詳細は scoring.md Axis 2）
 - `plugin-audit-consistency.sh`: 全 skill 横断で「同一 store パスを別の綴りで参照する乖離」をクラスタリング検出（Axis 15）。store-map-lint がマニフェスト対照なのに対し、こちらは**マニフェスト無しで綴り不一致そのものを炙り出す**（接頭辞 `{base}` への正準化を推奨）。`--strict` で乖離時 exit 1
-- `plugin-audit-odd.sh`: 全 skill の `odd.yaml` を `templates/odd/odd.schema.yaml` で検証（Axis 10 拡張）— required キー欠落 / 未定義キー（`additionalProperties:false`）/ autonomy 範囲外（L4/L5）/ skill 名↔ディレクトリ不一致 / `schema_version` を deterministic に検出。**並走セッションの revert や貼り戻しで odd が pre-schema 形へ崩れるのを CI/SessionStart で弾く**（diff 目視では見落とす構造崩れを機械検知）。`--strict` で違反時 exit 1。パス綴りの skill 間ドリフトは Axis 15 が担当（役割分担）
+- `plugin-audit-odd.sh`: 全 skill の `odd.yaml` を `templates/odd/odd.schema.yaml` で検証（Axis 10 拡張）— required キー欠落 / 未定義キー（`additionalProperties:false`）/ autonomy 範囲外（L4/L5）/ skill 名↔ディレクトリ不一致 / `schema_version` を deterministic に検出。odd.yaml が 1 つも無いプラグイン（ODD 未採用）は採用ゲートで N/A 1 行を出して終了する — ODD は任意機構であり、未採用プラグインへの提案条件は scoring.md Axis 10 の「リスク駆動推奨」が正本。**並走セッションの revert や貼り戻しで odd が pre-schema 形へ崩れるのを CI/SessionStart で弾く**（diff 目視では見落とす構造崩れを機械検知）。`--strict` で違反時 exit 1。パス綴りの skill 間ドリフトは Axis 15 が担当（役割分担）
 
 **判定軸 — サブエージェントで実行**（Reviewer = Fresh Agent: 判定はメインセッションの self-evaluation bias を避けるため独立した `general-purpose` サブエージェントに委譲）:
 

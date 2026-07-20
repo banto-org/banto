@@ -1,0 +1,22 @@
+# i18n coverage exemptions — consumed by scripts/i18n-coverage-check.sh.
+# Every language-bearing distribution file that is NOT managed under i18n/ja/ must be listed
+# here with an explicit reason category; anything unlisted fails CI. Format (one per line):
+#   <category> <glob-relative-to-plugin-root>     (POSIX `case` glob; `*` crosses `/`)
+# Categories:
+#   lang-specific   — JA-only by nature; deployment is language-gated at setup time, never translated
+#   output-template — skeleton for user artifacts; document language is chosen at generation time
+#                     (orthogonal to the harness language; html-doc carries its own en/ variants)
+#   dev-doc         — maintainer-facing documentation; JA trigger exemplars are legitimate content
+#   active-only     — deliberately bilingual / runtime files kept out of the i18n trees
+#                     (set-language invariant: the switcher must survive materialization)
+#   neutral         — no natural-language prose worth localizing (schemas, samples)
+lang-specific   templates/rules/writing-ja.md
+lang-specific   templates/ja-style-core.md
+output-template templates/html-doc/*
+output-template templates/specs/*
+output-template templates/ci/*
+output-template templates/CLAUDE.md.template
+dev-doc         templates/README.md
+dev-doc         templates/docs/_common-pattern.md
+active-only     skills/set-language/*
+neutral         templates/odd/*

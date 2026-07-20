@@ -108,7 +108,7 @@ Before starting external research, **first launch the `search` skill to check th
 
 Supplementary checks (for context `search` may not pick up — optional, can run in parallel):
 - **WS related documents**: check `## 関連ドキュメント` in the current WS entity `workspaces/<author>/<topic>/workspace.md` (pointer: `<git-dir>/banto-ws-pointer.md`; `{base}/WORKSPACE.md` outside git) for any URL that is a primary source for the topic (if present, use it as the primary source for that subtopic in Step 1)
-- **active.md**: Read the current task file and understand how the research topic relates to the current task
+- **tasks.md**: Read the current WS's effective tasks file (`workspaces/<author>/<topic>/tasks.md`) and understand how the research topic relates to the current task
 
 **Decision rules**:
 - `search` surfaces existing research **within 14 days** → ask "I found existing research ({filename}, {date}). Want to update it?"

@@ -23,7 +23,7 @@ compatibility: Claude Code (requires bash, jq)
 ## 実行
 
 1. [`references/procedure.md`](references/procedure.md) の手順で `scripts/skill-audit-metrics.sh` を実行し、機械計測を得る
-2. [`references/axes.md`](references/axes.md) の 7 軸それぞれを、機械計測 + Read した TARGET の内容で判定する
+2. [`references/axes.md`](references/axes.md) の 7 軸それぞれを、機械計測 + Read した TARGET の内容（SKILL.md と references/ 全ファイル。scripts/ があれば docstring も）で判定する
 3. 想定 AI との整合判定（A6）等、主観の入る軸は Agent（general-purpose、model: opus）に委譲する（Reviewer = Fresh Agent 原則。plugin-audit / harness-audit と同一原則）
 4. 軸ごとに PASS / WARN / FAIL + 根拠行番号 + 修正案 1 文で報告する（レポート形式は procedure.md）
 

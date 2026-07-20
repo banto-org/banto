@@ -5,6 +5,15 @@
 
 Save **immediately** when a design decision occurs. Don't wait for a commit. If the base (store / provisional local side) hasn't been created yet, scaffold creates it automatically (don't write to a relative `.ai-context/`). Don't ask for permission.
 
+## Style — no verbatim quotes
+
+- Never transcribe conversational remarks verbatim. **Round them to their substance**
+  - ✗ owner said: "handle this one together too"
+  - ✓ owner instruction (summary): handle issue #109 in the same PR
+- If colloquial phrasing survives inside quotation marks, rewrite it. A decision is an artifact —
+  the canon that later sessions search and learn from — and colloquial residue lowers its quality
+- The `ja-lint` hook warns on colloquial quotes in writes under decisions/ (deterministic backstop)
+
 ## What to save
 
 - Decisions on design direction ("let's go with B instead of A")
@@ -50,36 +59,49 @@ For the GitHub account name use `gh api user --jq '.login'`, falling back to `gi
 {何を決めたか、なぜか。2〜3行}
 ```
 
-## Full (large decisions, includes Glaser friction)
+## Full (large decisions — fixed skeleton, checked by the section hook)
 
 ```markdown
-## {タイトル}: {決定内容の一行サマリー}
+---
+status: accepted        # accepted | provisional
+date: YYYY-MM-DD
+topic: {one-line summary}
+supersedes: []          # older decisions this replaces (optional; freshness truth is the filename date — this is a traversal link)
+relates: []
+---
 
-- **日付**: YYYY-MM-DD
-- **タグ**: architecture, security, performance, etc.
+# {Title}: {one-line summary of the decision}
 
-## 出発点
-{なぜこの判断が必要になったか}
+## Background
+{Why this decision became necessary (the starting point)}
 
-## 検討した選択肢
+## Decision
+{What was decided. One decision per file, assertive}
 
-| 選択肢 | メリット | デメリット |
-|---------|----------|------------|
+## Rationale
+{The deciding factor. Why this option won}
+
+## Considered Alternatives
+
+| Option | Summary | Rejection reason |
+|---|---|---|
 | A | ... | ... |
 | B | ... | ... |
 
-## 決め手
-{最終的にどれを選び、なぜか}
+## Consequences and Limits
+{Impact of this decision, known limits and trade-offs}
 
-## 捨てた理由
-{他の選択肢を不採用にした理由}
+## Friction (pre/mid-work detours and surprises, per Glaser)
+{Keep the failures, detours, "stuck here", "not what I expected". This is the real learning. Optional}
 
-## フリクション（着手前/着手中の違和感・遠回り、Glaser 反映）
-{失敗・遠回り・「ここで詰まった」「想定と違った」を残す。学習の本体}
+## Lessons
+{Reusable insights and pitfalls for next time. Optional}
 
-## 学んだこと
-{次回に活かせる知見、再利用可能なパターン、回避すべき落とし穴}
+## Verification
+{How it was confirmed / what counts as green. Optional}
 ```
+
+**Why a fixed skeleton** (decision 2026-07-17): (1) search queries like "why didn't we do X" hit "Considered Alternatives + rejection reason" directly; (2) for future training-data export ([B-03] export skill), the section headings become the mechanical extraction units for decision-context pairs / synthetic QA generation. **Required 4 sections = Background / Decision / Rationale / Considered Alternatives** (the rest are optional). Missing sections are warned by the `ai-context-decisions-numbering.sh` hook (warn-only; small decisions in the lightweight format below are exempt).
 
 ## Why leave friction in (from Robert Glaser's "When Everyone Has AI")
 

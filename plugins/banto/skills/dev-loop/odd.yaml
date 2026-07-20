@@ -3,7 +3,7 @@
 
 schema_version: 1
 skill: dev-loop
-autonomy_level: L3  # Autopilot (continuous execution + user requested on exceptions). Explicit stops are deterministic hooks (odd-gate/verify-claim-guard); human gates are the Phase0 decomposition-plan confirmation + push/PR/main
+autonomy_level: L3  # Autopilot (continuous execution + user requested on exceptions). Explicit stops are verify-claim-guard (hook) + stopping the loop at 3 consecutive TF-counter failures (odd-gate enforcement is opt-in); human gates are the Phase0 decomposition-plan confirmation + push/PR/main
 
 in_scope:
   - Auto-decompose a big task (spec / document / large task) into small tasks (spec skill)
@@ -28,7 +28,7 @@ safety_boundaries:
   - Parallel fan-out capped at 5 workers
 
 kill_switch_conditions:
-  - 3 consecutive test failures (odd-gate.sh TF counter threshold) → stop the loop · escalate to owner
+  - 3 consecutive test failures (auto-test.sh TF counter threshold) → stop the loop · escalate to owner (forced blocking by odd-gate.sh is opt-in)
   - Claiming completion while verify-last is red (verify-claim-guard.sh blocks it on Stop)
   - goal fork / ambiguous spec where no adopted interpretation holds → stop · escalate to owner
   - Request for an irreversible / outward-facing op (push・PR・delete・external post) → stop · escalate to owner

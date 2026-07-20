@@ -48,8 +48,10 @@ MODEL_DISPLAY=""
 # banto の永続タスク（per-workspace tasks.md、legacy は tasks/active.md）を単一ソースとして読む。
 # store base は cwd の git root basename から高速解決（重い base 解決スクリプトは hot path で使わない）。
 TASK_DISPLAY=""
+LOCAL_DISPLAY=""
 if [ -n "$WORKSPACE" ]; then
-    PROJ=$(basename "$(cd "$WORKSPACE" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null || echo "$WORKSPACE")")
+    TOP=$(cd "$WORKSPACE" 2>/dev/null && git rev-parse --show-toplevel 2>/dev/null || echo "$WORKSPACE")
+    PROJ=$(basename "$TOP")
     STORE_BASE="$HOME/ai-context-store/$PROJ"
     TASKS_FILE=$(ls -t "$STORE_BASE"/workspaces/*/*/tasks.md 2>/dev/null | head -1)
     [ -f "$TASKS_FILE" ] || TASKS_FILE="$STORE_BASE/tasks/active.md"
@@ -58,6 +60,14 @@ if [ -n "$WORKSPACE" ]; then
         if [ -n "$OPEN_TASKS" ] && [ "$OPEN_TASKS" -gt 0 ] 2>/dev/null; then
             TASK_DISPLAY=" | 📋 ${OPEN_TASKS}"
         fi
+    fi
+    # 📍local: cwd の repo が local mapping に在り central mapping に無ければ「中央 store 未昇格（GitHub 未連携）」を常時表示。
+    # 未登録 repo は一時ローカル store（~/ai-context-local）へ自動作成されるため、1 回きり通知を見逃しても気づけるようにする。
+    LMAP="${AI_CONTEXT_LOCAL_ROOT:-$HOME/ai-context-local}/.mapping.json"
+    CMAP="${AI_CONTEXT_STORE_ROOT:-$HOME/ai-context-store}/.mapping.json"
+    if [ -f "$LMAP" ] && jq -e --arg k "$TOP" '.projects[$k]' "$LMAP" >/dev/null 2>&1 \
+       && ! { [ -f "$CMAP" ] && jq -e --arg k "$TOP" '.projects[$k]' "$CMAP" >/dev/null 2>&1; }; then
+        LOCAL_DISPLAY=" | 📍local"
     fi
 fi
 
@@ -73,4 +83,4 @@ if [ -n "$SESSION_ID" ]; then
     fi
 fi
 
-printf "%s%s%s%s%s\n" "$MODEL_DISPLAY" "$DIR_DISPLAY" "$TASK_DISPLAY" "$CKPT_DISPLAY" "$PCT_DISPLAY"
+printf "%s%s%s%s%s%s\n" "$MODEL_DISPLAY" "$DIR_DISPLAY" "$TASK_DISPLAY" "$LOCAL_DISPLAY" "$CKPT_DISPLAY" "$PCT_DISPLAY"

@@ -7,9 +7,11 @@
 # later `i18n-materialize.sh` then silently REVERTS the edit by overwriting skills/ from the stale
 # canonical. This gate makes that divergence a hard CI failure.
 #
-# Direction: every canonical file under i18n/<lang>/{skills,agents} must have an identical
-# materialized copy. The active set MAY contain extra active-only files (set-language invariant) —
-# those are allowed; we only flag canonical files that are missing or differ in the active set.
+# Direction: every canonical file under i18n/<lang>/{skills,agents,templates} must have an
+# identical materialized copy. The active set MAY contain extra active-only files (set-language
+# invariant, lang-specific templates) — those are allowed; we only flag canonical files that are
+# missing or differ in the active set. The reverse direction (active file with no canonical and
+# no declared exemption) is enforced by i18n-coverage-check.sh.
 #
 # No-op (exit 0) when i18n/ja does not exist (pre-migration trees). exit 1 on drift.
 # Wired into CI (.github/workflows/ci.yml) and scripts/pre-push-check.sh. POSIX sh.

@@ -12,7 +12,7 @@
 
 ```
 {base}/                            (store: ~/ai-context-store/<project>/ or ~/ai-context-local/<project>/)
-├── WORKSPACE.md                   ← lightweight pointer (per-checkout local, gitignore. WS name + branch + entity path)
+├── WORKSPACE.md                   ← pointer fallback for non-git environments (the effective pointer is <git-dir>/banto-ws-pointer.md, per-checkout)
 ├── WORKSPACE-refs.md              ← exists only during /ws multi (list of reference WS, local)
 ├── DASHBOARD.md                   ← hook-managed bird's-eye view (local, gitignore)
 └── workspaces/
@@ -25,6 +25,6 @@
         └── old/                   ← completed WS (cold memory)
 ```
 
-**Design principle (B2)**: `WORKSPACE.md` is **a lightweight pointer (plain file), not a symlink**. The central store sits outside cwd and a relative symlink breaks across worktrees, so symlinks were abolished (design decision made). Being a plain file, **no Windows fallback is needed** either.
+**Design principle (B2)**: the WS pointer is **a lightweight pointer (plain file), not a symlink**. The effective pointer lives at `<git-dir>/banto-ws-pointer.md` (per-checkout, independent per worktree); only non-git environments fall back to `{base}/WORKSPACE.md`. The central store sits outside cwd and a relative symlink breaks across worktrees, so symlinks were abolished (design decision made). Being a plain file, **no Windows fallback is needed** either.
 
 **legacy compatibility**: unmigrated projects stay directly under `workspaces/*.md` (old layout). The hook keeps them non-destructively via read fallback, and this skill too operates on the legacy paths when it detects the legacy layout.

@@ -67,6 +67,29 @@ run_write "/x/short.md" "これはです。" | grep -q . \
 run_edit "/x/report.md" "$VIOLATIONS" | grep -q "sentence ends with" \
     && ok "Edit(new_string) is scanned the same as Write(content)" || bad "Edit path not scanned"
 
+# === decisions/ 限定: 口語の逐語引用検出（issue: 会話の口語が decision に混入する） ===
+COLLOQ='# 決定
+
+owner 指示:「これも一緒に対応しておいて」を受けて方針を確定する。
+背景の説明をここに書く。日本語の分量を閾値以上に確保するための本文である。
+'
+OUT_D=$(run_write "/store/decisions/2026-07-21-test.md" "$COLLOQ")
+echo "$OUT_D" | grep -q "colloquial verbatim quote" \
+    && ok "decisions: colloquial quote detected" || bad "decisions: colloquial quote not detected ($OUT_D)"
+
+OUT_ND=$(run_write "/x/notes.md" "$COLLOQ")
+echo "$OUT_ND" | grep -q "colloquial verbatim quote" \
+    && bad "non-decisions: colloquial check should not fire" || ok "non-decisions: colloquial check scoped to decisions/"
+
+ROUNDED='# 決定
+
+owner 指示（要旨）: issue #109 を同一 PR で対応する。
+背景の説明をここに書く。日本語の分量を閾値以上に確保するための本文である。
+'
+OUT_R=$(run_write "/store/decisions/2026-07-21-test2.md" "$ROUNDED")
+echo "$OUT_R" | grep -q "colloquial verbatim quote" \
+    && bad "decisions: rounded summary wrongly flagged" || ok "decisions: rounded summary passes"
+
 # === fail-open ===
 printf 'not-json' | sh "$HOOK" >/dev/null 2>&1; [ $? -eq 0 ] \
     && ok "fail-open: garbage payload exits 0" || bad "fail-open: garbage payload non-zero"

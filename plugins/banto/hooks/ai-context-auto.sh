@@ -239,6 +239,7 @@ if echo "$PROMPT" | grep -qiE "$DECISION_KEYWORDS"; then
 [AI Context Auto-Save] Design decision detected. You must save it:
   Destination: ${AI_CTX}/decisions/$(date +%Y-%m-%d-%H%M%S)_{topic-slug}_${GITHUB_USER}.md
   Replace secrets (sk-*, ghp_*, Bearer *) with [MASKED]
+  会話の逐語引用を書かない: 発言は要旨へ丸める（例: owner 指示（要旨）: X を実装する）。口語のまま残さない
 EOF
 fi
 

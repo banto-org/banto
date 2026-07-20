@@ -24,6 +24,12 @@ SENTENCE_END_NG = ("です。", "ます。", "だ。", "である。")
 # 経緯メタ情報パターン（正本ドキュメントに残すべきでない一時的な注記）
 META_PATTERNS = ("（最新）", "（新規）", "新規追加", "今回追加", "従来は", "から変更", "旧版では")
 
+# decisions/ 限定: 会話の逐語引用（口語で終わる「」引用）。decision は生成物・学習物の正本なので
+# 発言は要旨へ丸める（例: owner 指示（要旨）: X を実装する）。warn only。
+COLLOQUIAL_QUOTE = re.compile(
+    r"(てほしい|ておいて|てもらえるか|てもらえますか|でしょうか|ましょうか|ますか|ですか|かな|よね|ですね|だよな|ください|頼む|お願い)」"
+)
+
 
 def strip_code_fences(text: str) -> str:
     # 3連バッククォートのフェンスブロックを丸ごと除去（開始行・終了行も含む）
@@ -37,7 +43,7 @@ def count_ja(text: str) -> int:
     return len(HIRAGANA_KATAKANA.findall(text))
 
 
-def check_lines(text: str):
+def check_lines(text: str, is_decision: bool = False):
     findings = []
     for i, raw in enumerate(text.split("\n"), start=1):
         line = raw.rstrip()
@@ -46,6 +52,14 @@ def check_lines(text: str):
             continue
         if not line:
             continue
+
+        # (d) decisions/ 限定: 会話の逐語引用（口語終わりの「」）
+        if is_decision:
+            m = COLLOQUIAL_QUOTE.search(line)
+            if m:
+                findings.append(
+                    f"L{i}: colloquial verbatim quote `…{m.group(0)}` in a decision — 発言は要旨へ丸める（例: owner 指示（要旨）: X を実装する）"
+                )
 
         # (a) 文末規則
         for ng in SENTENCE_END_NG:
@@ -95,7 +109,7 @@ def main():
     if count_ja(body) < JA_THRESHOLD:
         sys.exit(0)
 
-    findings = check_lines(body)
+    findings = check_lines(body, is_decision="/decisions/" in file_path)
     if not findings:
         sys.exit(0)
 

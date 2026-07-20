@@ -1,8 +1,11 @@
 #!/bin/sh
 # i18n-materialize.sh <ja|en> — apply a language to the ACTIVE plugin dirs.
 #
-# Copies every file under i18n/<lang>/{skills,agents} onto the corresponding active
-# path (skills/, agents/), then stamps skills/.banto-lang with "<lang> <plugin-version>".
+# Copies every file under i18n/<lang>/{skills,agents,templates} onto the corresponding active
+# path (skills/, agents/, templates/), then stamps skills/.banto-lang with "<lang> <plugin-version>".
+# templates/ is only partially language-managed: files absent from the i18n trees (lang-specific
+# assets like rules/writing-ja.md, output templates, neutral configs) stay in place untouched;
+# i18n-coverage-check.sh enforces that every language-bearing template is explicitly classified.
 #
 # Incremental by design: only files that exist under i18n/<lang> are applied, so during
 # the migration the not-yet-translated skills stay as shipped. Once every skill/agent is
@@ -72,7 +75,7 @@ VER=$(jq -r '.version // "?"' "$PLUGIN_ROOT/.claude-plugin/plugin.json" 2>/dev/n
 applied=0
 tmp_state=$(mktemp)
 printf '{"lang":"%s","files":{}}' "$LANG_SEL" > "$tmp_state"
-for sub in skills agents; do
+for sub in skills agents templates; do
     [ -d "$SRC/$sub" ] || continue
     for f in $(find "$SRC/$sub" -type f); do
         rel=${f#"$SRC"/}                 # e.g. skills/memo/SKILL.md

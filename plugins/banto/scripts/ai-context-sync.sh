@@ -1,5 +1,5 @@
 #!/bin/sh
-# ai-context-sync.sh — commits + pushes the central ai-context store (for hooks and manual use).
+# ai-context-sync.sh — pulls (rebase) + commits + pushes the central ai-context store (for hooks and manual use).
 #
 # Differences from nightly-push.sh:
 #   - Picks up not only "commit uncommitted changes" but also "push unpushed (ahead) commits"
@@ -15,7 +15,8 @@
 # Safety guards (misfire prevention; never direct-push a code repo to main):
 #   - Push only repos with the `.ai-context-store` marker above the target dir (knowledge stores only)
 #   - Push only when the current branch is main/master
-#   - No-op when there are no changes and nothing ahead
+#   - With an upstream, EVERY sync pulls (--rebase) to integrate other machines' knowledge;
+#     no-op only when there is no upstream and nothing to commit/push
 #   - --dry-run shows the content without actually pushing
 #
 # Usage:
@@ -78,6 +79,28 @@ if ! mkdir "$LOCKD" 2>/dev/null; then
 fi
 trap 'rmdir "$LOCKD" 2>/dev/null' EXIT INT TERM
 
+# ---- no_sync excludes: per-project {proj}/meta/policy.json の .ignore.no_sync[] を
+# store の .git/info/exclude（マーカー区間）へ再生成する。注意: git の exclude は
+# 「未追跡ファイル」にのみ効く。既に追跡済みのファイルは対象外（それは人間の判断で rm --cached）。
+if command -v jq >/dev/null 2>&1; then
+    EXCL="$GITDIR/info/exclude"
+    mkdir -p "$GITDIR/info" 2>/dev/null
+    TMPX="$EXCL.banto.tmp"
+    { [ -f "$EXCL" ] && sed '/^# BANTO-NO-SYNC BEGIN$/,/^# BANTO-NO-SYNC END$/d' "$EXCL"; } > "$TMPX" 2>/dev/null || : > "$TMPX"
+    {
+        echo "# BANTO-NO-SYNC BEGIN"
+        for _pol in "$STORE"/*/meta/policy.json; do
+            [ -f "$_pol" ] || continue
+            _proj=$(basename "$(dirname "$(dirname "$_pol")")")
+            jq -r '.ignore.no_sync[]? // empty' "$_pol" 2>/dev/null | while IFS= read -r _pat; do
+                [ -n "$_pat" ] && printf '%s/%s\n' "$_proj" "$_pat"
+            done
+        done
+        echo "# BANTO-NO-SYNC END"
+    } >> "$TMPX"
+    mv "$TMPX" "$EXCL" 2>/dev/null || rm -f "$TMPX"
+fi
+
 # Determine state
 DIRTY=0
 [ -n "$(git -C "$STORE" status --porcelain 2>/dev/null)" ] && DIRTY=1
@@ -87,8 +110,11 @@ if git -C "$STORE" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1; then
     AHEAD=$(git -C "$STORE" rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)
 fi
 
-if [ "$DIRTY" = "0" ] && [ "$AHEAD" = "0" ]; then
-    log "[ok] already in sync (no changes / ahead=0): $STORE"; exit 0
+HAS_UPSTREAM=0
+git -C "$STORE" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1 && HAS_UPSTREAM=1
+
+if [ "$DIRTY" = "0" ] && [ "$AHEAD" = "0" ] && [ "$HAS_UPSTREAM" = "0" ]; then
+    log "[ok] already in sync (no changes / ahead=0 / no upstream): $STORE"; exit 0
 fi
 
 TS=$(date '+%Y-%m-%d %H:%M')
@@ -101,6 +127,8 @@ if [ "$DRY" = "1" ]; then
 fi
 
 rc=0
+# 1) Commit local changes FIRST (protects them in a commit before any rebase;
+#    an aborted rebase then restores the tree exactly. Safer than pull-with-autostash).
 if [ "$DIRTY" = "1" ]; then
     git -C "$STORE" add -A
     if ! git -C "$STORE" commit -q -m "chore(ai-context): sync $TS"; then
@@ -116,10 +144,33 @@ if [ "$DIRTY" = "1" ]; then
     fi
 fi
 
-if git -C "$STORE" push -q origin "$branch"; then
-    log "[pushed] $STORE ($branch)"
-else
-    log "[ERROR] push failed: $STORE"; rc=1
+# 2) Pull EVERY sync (multi-machine stores: integrate remote knowledge before pushing).
+#    --rebase keeps the store history linear; --ff is implied for the behind-only case.
+#    On conflict: abort the rebase (local state fully restored) and surface an ERROR —
+#    conflict resolution is a human/AI checkpoint, never automated here.
+if [ "$HAS_UPSTREAM" = "1" ]; then
+    if git -C "$STORE" pull -q --rebase origin "$branch" 2>/dev/null; then
+        log "[pulled] $STORE ($branch)"
+    else
+        git -C "$STORE" rebase --abort >/dev/null 2>&1
+        log "[ERROR] pull --rebase failed (conflict or network). Local commits kept; resolve manually: $STORE"
+        rc=1
+    fi
+fi
+
+# 3) Push whatever is ahead after the pull (skip when the pull already failed).
+AHEAD=0
+if [ "$HAS_UPSTREAM" = "1" ]; then
+    AHEAD=$(git -C "$STORE" rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)
+fi
+if [ "$rc" = "0" ] && [ "$AHEAD" != "0" ]; then
+    if git -C "$STORE" push -q origin "$branch"; then
+        log "[pushed] $STORE ($branch)"
+    else
+        log "[ERROR] push failed: $STORE"; rc=1
+    fi
+elif [ "$rc" = "0" ]; then
+    log "[ok] in sync after pull (nothing to push): $STORE"
 fi
 
 exit $rc

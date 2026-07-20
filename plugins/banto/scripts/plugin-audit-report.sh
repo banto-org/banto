@@ -667,6 +667,16 @@ ODD_TOTAL=$(printf "%s\n" "$DATA" | awk -F'\t' '$1=="skill"' | wc -l | tr -d ' '
 ODD_APPLIED=$(printf "%s\n" "$DATA" | awk -F'\t' '$1=="skill" && $45=="1"' | wc -l | tr -d ' ')
 [ "$ODD_TOTAL" = "0" ] && ODD_TOTAL=1
 
+# Adoption gate: ODD is optional. Zero skills/*/odd.yaml = not adopted -> N/A, no per-skill
+# warns. Risk-driven recommendation (autonomous loop / destructive op / parallel fan-out /
+# external push) with the what/effect/merit/demerit explanation is the audit agent's job
+# (scoring.md Axis 10), not this report's.
+if [ "$ODD_APPLIED" = "0" ]; then
+echo "N/A — ODD not adopted (no skills/*/odd.yaml). ODD is an optional mechanism; per-skill"
+echo "warnings apply only to adopting plugins. See scoring.md Axis 10 for the risk-driven"
+echo "recommendation conditions."
+else
+
 echo "### Summary"
 echo ""
 echo "| Indicator | Value |"
@@ -727,6 +737,8 @@ if [ -n "$EMPTY_LV" ]; then
 else
     echo "✓ none"
 fi
+
+fi  # end ODD adoption gate
 
 echo ""
 echo "## References"

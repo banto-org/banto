@@ -25,7 +25,7 @@
 #   - rm -rf root/home/$HOME        → ODD_ALLOW_RM_RF_ROOT=1 で escape
 #   - rm が git 管理下ファイルを対象とする → warn のみ（block しない。escape 不要）
 #
-# Sibling: odd-gate.sh is the test-failure circuit breaker; this hook blocks dangerous git / secret / destructive actions.
+# Sibling: odd-gate.sh is the test-failure circuit breaker (opt-in, default off); this hook blocks dangerous git / secret / destructive actions.
 #
 # 入力: Claude Code hook 経由で stdin に JSON が渡される（payload に tool_name / tool_input 等）
 # 出力: block 時は stderr + exit 2、escape/warn 時は stderr + exit 0。

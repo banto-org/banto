@@ -160,7 +160,24 @@ if [ -d "$SK_DIR" ]; then
     for smd in "$SK_DIR"/*/SKILL.md; do
         [ -f "$smd" ] || continue
         sdir=$(dirname "$smd")
-        for ref in $(grep -oE 'references/[A-Za-z0-9_.-]+\.md' "$smd" 2>/dev/null | sort -u); do
+        # Cross-skill refs (skills/<other>/references/X.md) resolve from the skills root, never
+        # skill-local (issue #102: the partial match below misread them as local → false positive).
+        for ref in $(grep -oE 'skills/[A-Za-z0-9_-]+/references/[A-Za-z0-9_.-]+\.md' "$smd" 2>/dev/null | sort -u); do
+            case "$(basename "$ref" .md)" in
+                [XxYyZzNn]|foo|bar|baz|qux|example|name|topic|slug|path|sub|ext1|ext2) continue ;;
+            esac
+            rp="$SK_DIR/${ref#skills/}"
+            if [ ! -f "$rp" ]; then
+                REF_PROBLEMS="$REF_PROBLEMS
+- \`$(basename "$sdir")/SKILL.md\` → \`$ref\` (missing)"
+            elif [ ! -s "$rp" ]; then
+                REF_PROBLEMS="$REF_PROBLEMS
+- \`$(basename "$sdir")/SKILL.md\` → \`$ref\` (empty)"
+            fi
+        done
+        # Skill-local refs: strip cross-skill full paths first (same idiom as plugin-audit-assets.sh 3b)
+        # so 'references/X.md' inside a longer path is not extracted as a local ref.
+        for ref in $(sed -E 's#skills/[A-Za-z0-9_-]+/references/[A-Za-z0-9_.-]+\.md##g' "$smd" 2>/dev/null | grep -oE 'references/[A-Za-z0-9_.-]+\.md' | sort -u); do
             # placeholder/example names are prose, not links (same exclusion as plugin-audit-assets.sh 3b)
             case "$(basename "$ref" .md)" in
                 [XxYyZzNn]|foo|bar|baz|qux|example|name|topic|slug|path|sub|ext1|ext2) continue ;;

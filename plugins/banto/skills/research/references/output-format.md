@@ -20,6 +20,13 @@ Every research you save **without exception** must have a `## Sources` section l
 ## Template
 
 ```markdown
+---
+date: YYYY-MM-DD
+topic: {one-line summary}
+status: active        # flip to stale / superseded when it rots (search auto-demotes it)
+sources: {number of primary URLs}
+---
+
 # {topic} research results
 
 - **Date**: YYYY-MM-DD

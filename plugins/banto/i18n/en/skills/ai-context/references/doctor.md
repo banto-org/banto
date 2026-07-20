@@ -46,6 +46,19 @@ Report the lint output verbatim as the "health" section. In environments lacking
 
 > **interface (WT-C)**: `scripts/ai-context-lint.sh [cwd]` resolves base from cwd (defaults to $PWD) and **only detects and enumerates** high-confidence unhealthiness in decisions/ (broken links / orphans / contradiction candidates / staleness); it does not auto-fix.
 
+## Migration status (cross-project — surface what hasn't migrated)
+
+Lists, across projects, which ones have **not yet been migrated to the central store** (GitHub-backed) — read-only. An unregistered repo is auto-created non-blocking in a temporary local store (`~/ai-context-local/`), so data can pile up there GitHub-less and unnoticed; this surfaces it:
+
+```bash
+sh "$CLAUDE_PLUGIN_ROOT/scripts/ai-context-migration-status.sh" "$PWD" 2>/dev/null || echo "(jq missing → skip)"
+```
+
+Report the output verbatim as the "migration status" section. Breakdown:
+- **Promotable** (`local:false`, not in central): still local-only. Promote per repo with "I want to put this on GitHub" (`/ai-context bootstrap`), which append-migrates it to central. decisions / docs counts are shown so projects with real data can be prioritized.
+- **Pinned local** (`local:true`): intentionally local-only; no promotion needed.
+- **Current repo's in-repo `.ai-context/` leftover**: notes that it is auto-copied (non-destructive) to central at session start.
+
 ## Diagnostic items (base scope)
 
 **A. Missing directories**

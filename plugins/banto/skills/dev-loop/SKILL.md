@@ -27,7 +27,7 @@ The owner hands over a big task → decompose into small tasks → implement eac
 
 ## Autonomy level (L3 · Autopilot)
 
-odd.yaml = **L3 (Autopilot = continuous execution + user requested on exceptions)**. banto covers L0–L3 only (L4+ is envisioned as a separate plugin `banto-autonomy` — unimplemented; a scope-boundary declaration). Explicit stops are deterministic hooks (`odd-gate` / `verify-claim-guard`); human gates are the Phase 0 decomposition-plan confirmation and push/PR/main.
+odd.yaml = **L3 (Autopilot = continuous execution + user requested on exceptions)**. banto covers L0–L3 only (L4+ is envisioned as a separate plugin `banto-autonomy` — unimplemented; a scope-boundary declaration). Explicit stops are `verify-claim-guard` (deterministic hook) plus stopping the loop at 3 consecutive TF-counter failures (loop protocol; forced blocking by `odd-gate` is opt-in: `ODD_TEST_FAILURE_GATE=1`); human gates are the Phase 0 decomposition-plan confirmation and push/PR/main.
 
 ## Loop procedure
 
@@ -40,13 +40,13 @@ odd.yaml = **L3 (Autopilot = continuous execution + user requested on exceptions
 ### Phase 1: iterate (until tasks.md is exhausted)
 For each task:
 1. Get the next `[ ]` (with dependencies cleared) via `ai-context` next. Parallel-flagged groups fan out as multiple Agent calls in one message (implementation Agents use `model: "sonnet"` — the `implement` default in `templates/model-policy.json`); the rest run serially.
-2. **Implement** (Edit / Write). On each edit the PostToolUse `auto-test.sh` runs the related test. After 3 consecutive failures `odd-gate.sh` auto-blocks edits (churn prevention = the existing retry cap).
+2. **Implement** (Edit / Write). On each edit the PostToolUse `auto-test.sh` runs the related test and records the TF counter. At 3 consecutive failures, stop the loop (churn prevention = the existing retry cap; forced edit-blocking by `odd-gate.sh` is opt-in).
 3. **Full verify**: `sh "$CLAUDE_PLUGIN_ROOT/hooks/verify-run.sh" <project>` (aggregates build → test → api; exit 0=green / 2=red; result in `$HOME/.cache/banto/verify-last-<session>` as `green` or `red:<steps>`).
-4. **red** → fix the root cause with the `debugger` agent → back to 3. If you hit `odd-gate`'s 3-consecutive-failure guard, **stop the loop and escalate to the owner** (do not churn).
+4. **red** → fix the root cause with the `debugger` agent → back to 3. When the TF counter reaches 3 consecutive failures, **stop the loop and escalate to the owner** (do not churn).
 5. **green** → an audit Agent (`model: "opus"`, fresh and in a separate context from implementation, reviewing the diff + spec — the `audit` default in `templates/model-policy.json`; `audit_alt: "fable"` is an optional upgrade) confirms spec conformance → mark the `tasks.md` line `[x]`, commit to the branch (push / PR / main stay human-gated = existing safety).
 
 ### Phase 2: convergence / exception
-- tasks.md exhausted → completion report (summary of implementation, verification, adopted interpretations). If a phase is complete, archive to `tasks-old/` via `ai-context` phase-done.
+- tasks.md exhausted → completion report (summary of implementation, verification, adopted interpretations). If a phase is complete, archive to `tasks-old/` via `ai-context` phase-done. If the work was driven by a spec, **update that spec's Status to `shipped` and close it** (spec skill's Status lifecycle).
 - Exception (consecutive failures / goal fork / ambiguous spec / request for an irreversible operation) → **stop and escalate to the owner**.
 
 Detailed procedure, cadence, ML training loop: [`references/loop-protocol.md`](references/loop-protocol.md)
@@ -60,7 +60,7 @@ Detailed procedure, cadence, ML training loop: [`references/loop-protocol.md`](r
 
 | Guard | hook | Effect |
 |---|---|---|
-| Stop churn | `odd-gate.sh` (PreToolUse) | Block edits after 3 consecutive test failures → go to root cause |
+| Stop churn | TF counter (`auto-test.sh`) + loop protocol | Stop the loop after 3 consecutive test failures → go to root cause (forced blocking by `odd-gate.sh` is opt-in) |
 | Prevent false green | `verify-claim-guard.sh` (Stop) | Block "done" claims while verify-last is red |
 | External egress | `egress-guard.sh` + ⑤ sandbox | Block leakage of secrets / other-project names into client paths |
 

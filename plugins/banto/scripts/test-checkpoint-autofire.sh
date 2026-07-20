@@ -114,5 +114,48 @@ case "$OUT3" in
 esac
 case "$OUT3" in *"AUTO-FIRING"*) bad "5: no-claude-on-PATH wrongly claimed AUTO-FIRING" ;; *) ok "5: no-claude-on-PATH does not claim auto-fire" ;; esac
 
+# === 6. クールダウン経過後は同一セッションでも再発火する（永続ロックではない） ===
+# 3 で SID1 のロックは残っている。COOLDOWN=0 で即 stale 化 → idle 経路の再入が再び claude を呼ぶ。
+N_BEFORE6=$(count_lines "$LOG1")
+env HOME="$FAKE_HOME" TMPDIR="$FAKE_TMP" CLAUDE_CALL_LOG="$LOG1" FAKE_CLAUDE_RC=0 \
+    BANTO_CHECKPOINT_COOLDOWN_SEC=0 \
+    sh "$AUTOFIRE" "$SID1" "$TRANSCRIPT" "$CWD" "$FAKEBIN/claude" idle >/dev/null 2>&1
+N_AFTER6=$(count_lines "$LOG1")
+[ "$N_AFTER6" -gt "$N_BEFORE6" ] && ok "6: cooldown expiry allows re-fire in same session" \
+    || bad "6: re-fire did not happen after cooldown ($N_BEFORE6 -> $N_AFTER6)"
+
+# === 7. 上書き: 同一セッションの前回 auto-checkpoint を削除して貯めない ===
+# 実 store をモック（AI_CONTEXT_STORE_ROOT）し、fake claude が checkpoint を書く。
+STORE7="$TMP/store7"; mkdir -p "$STORE7"
+PH="$DIR/scripts/_ai-context-paths.sh"
+SID7="s-autofire-7"
+CWD7="$TMP/repo7"; mkdir -p "$CWD7"
+WS_BASE7=$(env HOME="$FAKE_HOME" AI_CONTEXT_STORE_ROOT="$STORE7" sh "$PH" --resolve "$CWD7" 2>/dev/null)
+if [ -n "$WS_BASE7" ]; then
+    mkdir -p "$WS_BASE7/sessions"
+    cat > "$FAKEBIN/claude-ck" <<'FAKECK'
+#!/bin/sh
+echo "$@" >> "$CLAUDE_CALL_LOG"
+[ -n "$CHECKPOINT_TARGET" ] && printf '# Checkpoint\n' > "$CHECKPOINT_TARGET"
+exit 0
+FAKECK
+    chmod +x "$FAKEBIN/claude-ck"
+    LOG7="$TMP/claude-calls-7.log"; : > "$LOG7"
+    CK_A="$WS_BASE7/sessions/checkpoint-2026-07-13-1200.md"
+    CK_B="$WS_BASE7/sessions/checkpoint-2026-07-13-1210.md"
+    env HOME="$FAKE_HOME" TMPDIR="$FAKE_TMP" AI_CONTEXT_STORE_ROOT="$STORE7" \
+        CLAUDE_CALL_LOG="$LOG7" CHECKPOINT_TARGET="$CK_A" BANTO_CHECKPOINT_COOLDOWN_SEC=0 \
+        sh "$AUTOFIRE" "$SID7" "$TRANSCRIPT" "$CWD7" "$FAKEBIN/claude-ck" idle >/dev/null 2>&1
+    [ -f "$CK_A" ] && ok "7: fire-1 created checkpoint A" || bad "7: fire-1 did not create A"
+    sleep 1  # CK_B の mtime を確実に CK_A より新しくして ls -t 順を確定させる
+    env HOME="$FAKE_HOME" TMPDIR="$FAKE_TMP" AI_CONTEXT_STORE_ROOT="$STORE7" \
+        CLAUDE_CALL_LOG="$LOG7" CHECKPOINT_TARGET="$CK_B" BANTO_CHECKPOINT_COOLDOWN_SEC=0 \
+        sh "$AUTOFIRE" "$SID7" "$TRANSCRIPT" "$CWD7" "$FAKEBIN/claude-ck" idle >/dev/null 2>&1
+    [ -f "$CK_B" ] && ok "7: fire-2 created checkpoint B" || bad "7: fire-2 did not create B"
+    [ ! -f "$CK_A" ] && ok "7: fire-2 overwrote (deleted) prior auto-checkpoint A" || bad "7: prior auto-checkpoint A was not deleted"
+else
+    ok "7: SKIP (store base did not resolve in test env)"
+fi
+
 [ "$fail" -eq 0 ] && echo "ALL GREEN"
 exit "$fail"

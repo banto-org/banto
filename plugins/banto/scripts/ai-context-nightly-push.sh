@@ -47,26 +47,39 @@ while IFS= read -r line; do
     log "[skip] not on main/master (branch=$branch): $store"; continue
   fi
 
-  if git -C "$store" diff --quiet --ignore-submodules HEAD 2>/dev/null && \
-     [ -z "$(git -C "$store" status --porcelain)" ]; then
-    log "[ok] no changes: $store"; continue
-  fi
+  DIRTY=0
+  [ -n "$(git -C "$store" status --porcelain)" ] && DIRTY=1
 
   if [ "$DRY" = "1" ]; then
-    log "[dry-run] commit+push target: $store"
+    log "[dry-run] pull+commit+push target (dirty=$DIRTY): $store"
     git -C "$store" status --short | sed 's/^/    /'
     continue
   fi
 
-  git -C "$store" add -A
-  if git -C "$store" commit -q -m "chore(ai-context): nightly sync $TS"; then
+  # commit local first → pull --rebase (every run; multi-machine stores) → push
+  if [ "$DIRTY" = "1" ]; then
+    git -C "$store" add -A
+    git -C "$store" commit -q -m "chore(ai-context): nightly sync $TS" || log "[warn] commit failed: $store"
+  fi
+
+  if git -C "$store" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1; then
+    if ! git -C "$store" pull -q --rebase origin "$branch" 2>/dev/null; then
+      git -C "$store" rebase --abort >/dev/null 2>&1
+      log "[ERROR] pull --rebase failed (conflict or network); resolve manually: $store"; rc=1; continue
+    fi
+    ahead=$(git -C "$store" rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)
+  else
+    ahead=1   # no upstream info; attempt the push and let git decide
+  fi
+
+  if [ "$ahead" != "0" ]; then
     if git -C "$store" push -q origin "$branch"; then
       log "[pushed] $store ($branch)"
     else
       log "[ERROR] push failed: $store"; rc=1
     fi
   else
-    log "[ok] no commit needed: $store"
+    log "[ok] in sync after pull (nothing to push): $store"
   fi
 done < "$STORES_LIST"
 
