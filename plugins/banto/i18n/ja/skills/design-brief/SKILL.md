@@ -3,7 +3,7 @@ name: design-brief
 description: |
   「おしゃれに」「いい感じに」という曖昧な UI 依頼を、目的・ターゲットを起点にした 14 観点のデザイン仕様（デザインブリーフ）へ変換する。concept（思想）→ design-brief（この skill、デザイン仕様化）→ spec（設計）→ 実装、の上流部品。
   トリガー: 「デザイン指定」「画面のデザイン依頼」「デザインブリーフ」「UI の指示」「おしゃれにしたい」「いい感じにしたい」。concept や spec を実施する際、画面や UI が絡む場合に先行して発火する。
-  使わない場面: UI が絡まない実装依頼、文章の受け手レベル調整（ja-writing skill の audience-levels.md）、実際の HTML / コード生成そのもの（html-doc skill や実装フェーズ）。
+  使わない場面: UI が絡まない実装依頼、文章の受け手レベル調整（docs skill の audience-levels.md）、実際の HTML / コード生成そのもの（docs skill や実装フェーズ）。
 allowed-tools: Read
 user-invocable: true
 argument-hint: "[デザインしたい画面 / サービス名]"

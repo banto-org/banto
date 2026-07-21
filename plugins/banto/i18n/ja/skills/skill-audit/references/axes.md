@@ -4,14 +4,14 @@
 
 ## A1: 情報の最小性
 
-実行に不要な情報（経緯・背景語り・自明な一般論）が SKILL.md に無いかを見る。
+実行に不要な情報（経緯・背景語り・自明な一般論）が SKILL.md と references/ の各ファイルに無いかを見る。
 
 判定手順:
-1. SKILL.md 本文を Read し、段落ごとに「実行判断か手順のどちらに寄与するか」を問う
+1. SKILL.md と references/ の全 .md を Read し、段落ごとに「実行判断か手順のどちらに寄与するか」を問う
 2. 寄与しない段落（沿革説明・一般論の前置き）を洗い出す
 3. `skill-audit-metrics.sh` の行数・バイト数と、実質手順数を突き合わせ、密度を見る
 
-合格基準: 本文の各段落が判断材料か実行手順のいずれかに寄与する。実行に不要な段落が無い。
+合格基準: SKILL.md・references の各段落が判断材料か実行手順のいずれかに寄与する。実行に不要な段落が無い。
 
 典型的な違反例: 「このスキルは旧スキルを統合して作られた」のような沿革説明が本文に残っている。
 
@@ -22,7 +22,7 @@
 判定手順:
 1. `skill-audit-metrics.sh` の経緯メタ情報パターンヒット行（「（最新）」「（新規）」「新規追加」「今回追加」「従来は」「から変更」「旧版では」）を確認する
 2. ヒット行が正本の記述として必要か、編集履歴の残骸かを判定する
-3. TODO・作者メモ・レビューコメント調の文（「〜した方がいい」等）を目視で追加確認する
+3. TODO・作者メモ・レビューコメント調の文（「〜した方がいい」等）を目視で追加確認する（SKILL.md と references/ の全ファイルが対象）
 
 合格基準: 変更履歴・作者メモ・TODO・経緯メタ情報が本文に無い。
 
@@ -43,15 +43,16 @@ SKILL.md はルーター（いつ使うか / references の選び方）に徹し
 
 ## A4: 実行モデル指定の適切さ
 
-odd.yaml の宣言、Agent 起動を含む skill なら model 指定の有無と `templates/model-policy.json` との整合を見る。
+odd.yaml の宣言（ODD 採用時のみ — ODD は banto 発の任意機構）、Agent 起動を含む skill なら model 指定の有無と `templates/model-policy.json` との整合を見る。
 
 判定手順:
-1. odd.yaml の autonomy_level 宣言を確認する（L0〜L3 の範囲内か）
-2. skill が Agent 起動を含むか（allowed-tools に Agent があるか）を確認する
-3. Agent 起動を含む場合、`skill-audit-metrics.sh` の model 指定抽出結果（`model:` / `model=` 行）を確認する
-4. model-policy.json（roles: design=inherit / implement=sonnet / mechanical=haiku / audit=opus）と役割が整合するか照合する
+1. TARGET に odd.yaml があるか確認する。無い場合は隣接 skill（`../*/odd.yaml`）を Glob し、1 つでもあれば部分採用ドリフトとして WARN、皆無なら ODD 未採用とみなして odd 項目を N/A にする（手順 3 以降のみで判定。presence を違反にしない）
+2. odd.yaml がある場合、autonomy_level 宣言を確認する（L0〜L3 の範囲内か）
+3. skill が Agent 起動を含むか（allowed-tools に Agent があるか）を確認する
+4. Agent 起動を含む場合、`skill-audit-metrics.sh` の model 指定抽出結果（`model:` / `model=` 行）を確認する
+5. model-policy.json（roles: design=inherit / implement=sonnet / mechanical=haiku / audit=opus）と役割が整合するか照合する
 
-合格基準: Agent 起動箇所に役割に応じた model 指定がある（判定系は opus、実装系は sonnet、機械的検索は haiku）。odd.yaml の autonomy_level が L0〜L3。
+合格基準: Agent 起動箇所に役割に応じた model 指定がある（判定系は opus、実装系は sonnet、機械的検索は haiku）。ODD 採用時は odd.yaml の autonomy_level が L0〜L3（未採用なら odd 項目は N/A）。
 
 典型的な違反例: 判定系の Agent 起動に model 指定が無く、既定モデルに委ねている。
 
@@ -73,7 +74,7 @@ frontmatter description の質、本文トークン量に対する情報密度�
 対象ホスト / モデルの想定を確認する。明示が無ければ Claude（Claude Code）前提とみなし、それで整合していれば合格。「汎用」を明示する skill は Claude 固有の記述が残っていれば違反。
 
 判定手順:
-1. skill 本文に対象ホスト / モデルの明示（「汎用」「ChatGPT」「他の AI」等）があるか確認する
+1. skill 本文（SKILL.md + references/）に対象ホスト / モデルの明示（「汎用」「ChatGPT」「他の AI」等）があるか確認する
 2. 明示が無ければ Claude（Claude Code）前提とみなす
 3. 「汎用」を明示する skill の場合、`skill-audit-metrics.sh` の Claude 固有トークン出現数（Task / Skill / CLAUDE_PLUGIN_ROOT / hook 等）を確認する
 4. 明示と本文の記述が整合しているか判定する（主観判定は Agent に委譲）
@@ -87,7 +88,7 @@ frontmatter description の質、本文トークン量に対する情報密度�
 skill の散文が約束している安全・品質規律のうち、hook で強制すべき / 既に強制済みのものが区別されているかを見る。
 
 判定手順:
-1. skill の散文が約束している安全・品質規律（「必ず」「禁止」等の強制表現）を洗い出す
+1. skill の散文（SKILL.md + references/。scripts があれば docstring も）が約束している安全・品質規律（「必ず」「禁止」等の強制表現）を洗い出す
 2. その規律が既存の hook（例: egress-guard.sh / lint-guard.sh / odd-kill-switch.sh）で既に強制されているか照合する
 3. hook 未カバーの強制表現があれば、hook 化候補として指摘する
 

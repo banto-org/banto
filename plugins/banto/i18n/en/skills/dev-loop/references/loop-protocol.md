@@ -46,7 +46,7 @@ while tasks.md has a [ ]:
         implement (Edit/Write)
     sh verify-run.sh <project>
     if red:
-        if TF counter >= 3 (odd-gate already blocked edits):
+        if TF counter >= 3 (threshold reached; with odd-gate enabled, edits are already blocked):
             STOP → escalate to owner (do not churn)
         else:
             fix with the debugger agent → re-run verify-run.sh
@@ -57,7 +57,7 @@ while tasks.md has a [ ]:
 
 ## Escalation conditions (the bantō brings only exceptions to the owner)
 
-- 3 consecutive test failures (odd-gate's TF threshold reached)
+- 3 consecutive test failures (TF counter threshold reached)
 - About to claim "done" while verify-last is red (verify-claim-guard blocks it on Stop)
 - goal fork (A/B changes acceptance criteria / impact surface / security meaning, or depends on owner-specific business knowledge)
 - ambiguous spec where no adopted interpretation holds
@@ -85,7 +85,7 @@ Same skeleton as the dev loop, **swapping only the verify step**:
 | `verify-run.sh` (build/test/api) | the training script's **eval** (emits a metric in one line) |
 | green = tests PASS | green = metric hits target or improves |
 | red = tests FAIL | red = metric regresses / misses |
-| retry cap = odd-gate (3 consecutive) | retry cap = no improvement for N iterations (plateau detection) |
+| retry cap = TF counter (3 consecutive) | retry cap = no improvement for N iterations (plateau detection) |
 | done = tasks.md exhausted | done = target reached or plateau |
 
 If the eval writes its green/red as a verify-last-compatible one-liner (`green` / `red:<metric>`), the verify-claim-guard and escalation machinery carry over as-is. To wire a training skill like `moe-pruning`, plug its eval into the verify step.

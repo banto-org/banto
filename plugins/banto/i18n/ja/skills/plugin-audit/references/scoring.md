@@ -19,7 +19,7 @@ banto 全資産（skill / agent / rule / hook）の品質評価軸。本書を `
 | 7 | 汎用性評価（絶対パス / 個人名 / 組織名 / ツール前提 / [global で +言語/文化/ライセンス]）| 静的 + 動的 | 静的 → `plugin-audit` / 意味判定 → `plugin-audit eval` |
 | 8 | 汎用化適性 / rule 外部化（rule を動的読み込みか、ハードコードか）| 静的 + Agent | `plugin-audit` + `plugin-audit fix`（refactor 提案）|
 | 9 | Layer 3 ハーネスエンジニアリング整合性（path-scoped 化推奨 / hook enforce 候補）| 静的 | `plugin-audit` |
-| 10 | ODD (Operational Design Domain) 適用状況（skill ごとの odd.yaml + autonomy_level 妥当性）| 静的 | `plugin-audit` |
+| 10 | ODD (Operational Design Domain) 適用状況（skill ごとの odd.yaml + autonomy_level 妥当性。ODD 採用プラグインのみ — 未採用は N/A）| 静的 | `plugin-audit` |
 | 11 | 使用度（commits + 言及 + 最終更新 → active/dormant/likely-trim）| 静的 | `plugin-audit-usage.sh` |
 | 12 | 権限スコープ最小性（**12a** 過剰付与=最小性 / **12b** 宣言漏れ=runtime 正当性）| 静的 + Agent | `plugin-audit-permissions.sh` → `plugin-audit` |
 | 13 | 封じ込め整合（hook の危険コマンド / secret 生出力）| 設計 | hook 対象 |
@@ -319,24 +319,51 @@ skill 同士の境界が曖昧だと Claude のルーティング判断がブレ
 
 ## Axis 10: ODD (Operational Design Domain) 適用状況
 
-### 検出シグナル（skill のみ評価）
+### 適用条件（ODD 採用プラグインのみ検査）
+
+ODD は banto 発の任意機構であり、Claude Code 公式プラグイン仕様には存在しない。本軸と schema lint は**採用プラグインのみ**に適用する:
+
+- **採用判定**: 対象プラグインの `skills/*/odd.yaml` が 1 つでも存在すれば「ODD 採用」とみなす
+- **採用プラグイン**: 下記の検出シグナル + schema lint を全て実施する（部分採用のドリフト検出が本軸の仕事）
+- **未採用プラグイン**: 本軸は N/A（「ODD 未採用 — 任意機構」の 1 行のみ）。未適用 Warning は出さない。提案を出してよいのは下記「リスク駆動推奨」の条件を満たす場合だけ
+
+### 検出シグナル（skill のみ評価・採用プラグイン限定）
 
 | シグナル | 意味 | 推奨アクション |
 |---------|------|--------------|
-| `has_odd_yaml = 0` | skill ディレクトリに odd.yaml が無い | L1-L3 skill では推奨。L0 軽量 utility（search / status 等）は 10 行ルールで適用任意 |
+| `has_odd_yaml = 0` | 採用プラグイン内で odd.yaml が無い skill（部分採用ドリフト） | L1-L3 skill では推奨。L0 軽量 utility（search / status 等）は 10 行ルールで適用任意 |
 | `odd_autonomy_level = L4 / L5` | autonomy_level が banto 範囲外 | 別 plugin (`banto-autonomy`) に分離するか autonomy_level を見直し |
 | `has_odd_yaml = 1` + `odd_autonomy_level = empty` | odd.yaml はあるが autonomy_level 抽出失敗 | フォーマット確認（`autonomy_level: L2  # ...` 形式必須） |
 
 ### 出力
 
-- **サマリ**: ODD 適用率 + autonomy_level 分布
-- **Warning**: ODD 未適用 skill 一覧（L0 含む全件、人間が L0 任意性を判断）
+- **サマリ**: ODD 適用率 + autonomy_level 分布（採用プラグインのみ）
+- **Warning**: ODD 未適用 skill 一覧（採用プラグイン内のみ。L0 含む全件、人間が L0 任意性を判断）
 - **Critical**: autonomy_level が L4 / L5 の skill 一覧
 - **Info**: autonomy_level 抽出失敗一覧（フォーマットエラー）
+- **N/A**: 未採用プラグインは 1 行のみ（`plugin-audit-report.sh` / `plugin-audit-odd.sh` とも）
+
+### リスク駆動推奨（未採用プラグイン向け・このテンプレートが正本）
+
+presence 推奨はしない — 「odd.yaml を置きましょう」という名前だけの指摘は禁止。監査中に次のいずれかの高リスクシグナルを持つ skill を検出した場合に限り、**Info で 1 回だけ**セット採用（odd.yaml + schema lint の CI 配線 + enforcement hook）を提案する:
+
+- 自律ループ（自走実装・反復実行・自動リトライを宣言する skill）
+- 破壊的操作（削除・履歴書き換え・本番環境変更）
+- 並列 agent fan-out
+- 対外操作（push / PR / 外部サービスへの公開・投稿）
+
+推奨文には次の 4 点を必ず含める（名前だけの推奨は不可）:
+
+1. **ODD とは**: skill 単位の運用設計領域宣言（`odd.yaml`）。自律度（autonomy_level L0-L3）・in_scope / out_of_scope・kill-switch 条件を機械可読で固定する
+2. **効果**: 宣言単体では何も強制しない。enforcement hooks（kill-switch / parallel-track / cost-gate 等）+ schema lint の CI 配線とセットで初めて、決定論的な安全境界として機能する
+3. **メリット**: 自律境界が監査可能になる / kill-switch と連動できる / 採用解釈の許容範囲（spec-fidelity 系ルール）を autonomy_level で機械的に決められる
+4. **デメリット**: 宣言の維持費が掛かる（skill の挙動変更のたびに odd.yaml も更新が要る）。構造ドリフトは lint で捕まるが、宣言した autonomy_level と実挙動の意味ドリフトは lint では捕まらず、定期的な監査が要る
+
+維持費が価値を上回る低リスクのユーティリティプラグインには、推奨自体を出さない。
 
 ### schema lint（`plugin-audit-odd.sh` — deterministic）
 
-presence / autonomy 抽出だけでなく **odd.yaml の構造妥当性**を `templates/odd/odd.schema.yaml` で検証する。並走セッションの revert や貼り戻しで odd が pre-schema 形（`domain:` ラッパ・`human_oversight` の混入・`.ai-context/` パス等）へ崩れるのは diff 目視では見落とすため、CI / SessionStart で deterministic に弾く:
+presence / autonomy 抽出だけでなく **odd.yaml の構造妥当性**を `templates/odd/odd.schema.yaml` で検証する。odd.yaml が 1 つも無いプラグインは採用ゲートで N/A 1 行を出して終了する（未採用プラグインに per-skill warn を出さない）。並走セッションの revert や貼り戻しで odd が pre-schema 形（`domain:` ラッパ・`human_oversight` の混入・`.ai-context/` パス等）へ崩れるのは diff 目視では見落とすため、CI / SessionStart で deterministic に弾く:
 
 | 検査 | 重大度 |
 |---|---|

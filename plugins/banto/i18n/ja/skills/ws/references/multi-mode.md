@@ -11,7 +11,7 @@ primary="<ws1>"
 references="<ws2> <ws3> ..."
 ```
 
-### Step 2: primary の WORKSPACE.md（軽量ポインタ）を書き換え
+### Step 2: primary の実効ポインタ（`<git-dir>/banto-ws-pointer.md`、非 git は WORKSPACE.md）を書き換え
 
 `/ws switch <ws1>` と同じ手順（ポインタ Write + branch 自動切替）だが、**未コミット変更があっても警告のみ**（multi はドラフト中心なので許容）。
 
@@ -56,7 +56,7 @@ single モードに戻すには /ws solo。
 rm -f "{base}/WORKSPACE-refs.md"
 ```
 
-ポインタ WORKSPACE.md（primary）はそのまま、references だけ削除。報告: 「single モードに戻しました。primary: [scope] topic」。
+primary の実効ポインタ（`<git-dir>/banto-ws-pointer.md`、非 git は WORKSPACE.md）はそのまま、references だけ削除。報告: 「single モードに戻しました。primary: [scope] topic」。
 
 ## multi モードの hook 連携（設計メモ）
 

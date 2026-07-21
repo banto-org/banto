@@ -37,12 +37,17 @@ banto_lang() { [ -f "$LANG_FILE" ] && tr -d ' \n' < "$LANG_FILE" || echo en; }
 LANG_NOW=$(banto_lang)
 # 注: 日本語（多バイト）テキストに隣接する展開は ${LANG_NOW} とブレースで囲む（名前解釈の崩れ回避）
 
-# writing-ja は言語固有ルール（A 案）: JA のときだけ配置対象に含める。
-# それ以外の rules は言語非依存。
+# writing-ja は言語固有かつ opt-in ルール: JA かつ preference=on のときだけ配置対象に含める。
+# preference は ~/.claude/banto-writing-ja（writing-ja-toggle.sh が永続化。無し = off）。
+# それ以外の rules は i18n 管理: 正本は i18n/<lang>/templates/rules/ にあり、set-language /
+# i18n-reconcile が選択言語を active の templates/rules/ へ materialize 済み。ここはその
+# active コピーを配るだけなので、配布物は常に選択言語版になる（ここに言語分岐は無い）。
+WJ_FILE=${BANTO_WJ_FILE:-$HOME/.claude/banto-writing-ja}
+wj_pref() { [ -f "$WJ_FILE" ] && tr -d ' \n' < "$WJ_FILE" || echo off; }
 is_lang_specific() { [ "$(basename "$1")" = "writing-ja.md" ]; }
 want_rule() {
-    is_lang_specific "$1" || return 0          # 言語非依存 → 常に対象
-    [ "${LANG_NOW}" = "ja" ]                      # 言語固有 → ja のときだけ
+    is_lang_specific "$1" || return 0          # i18n 管理ルール → 常に対象（中身は選択言語版）
+    [ "${LANG_NOW}" = "ja" ] && [ "$(wj_pref)" = on ]  # 言語固有 → ja かつ opt-in のときだけ
 }
 
 # ── ルール配置（copy。差分があっても上書きせず報告。個人カスタムを保護）──────────
@@ -53,7 +58,7 @@ deploy_rules() {  # $1 = dest dir, $2 = plan|apply
         [ -f "$f" ] || continue
         base=$(basename "$f"); target="$dest/$base"
         if ! want_rule "$f"; then
-            printf '    skip (lang=%s, JA 専用): %s\n' "${LANG_NOW}" "$base"
+            printf '    skip (JA 専用 opt-in: lang=%s, writing-ja=%s): %s\n' "${LANG_NOW}" "$(wj_pref)" "$base"
             continue
         fi
         if [ ! -e "$target" ]; then
@@ -70,9 +75,12 @@ deploy_rules() {  # $1 = dest dir, $2 = plan|apply
 # ── settings.json 冪等マージ（その他を保持・hooks には絶対触れない）─────────────
 merge_settings() {  # $1 = plan|apply
     act=$1; sj="$HOME/.claude/settings.json"
-    command -v jq >/dev/null 2>&1 || { echo "    (jq 不在 → settings.json マージは skip)"; return 0; }
+    command -v jq >/dev/null 2>&1 || { echo "    ⚠ jq 不在: settings.json マージ（statusLine 配線含む）を skip。jq を入れて再実行するまで statusline は表示されない"; return 0; }
     [ -f "$sj" ] || { [ "$act" = apply ] && { mkdir -p "$HOME/.claude"; echo '{}' > "$sj"; }; }
-    have_sl=$(jq -r 'if .statusLine then "yes" else "no" end' "$sj" 2>/dev/null || echo no)
+    # ours=banto の token-monitor（壊れた旧パスでも修復対象）/ custom=ユーザー独自（保護）/ none=未設定
+    sl_kind=$(jq -r '
+      if (.statusLine|type)=="object" and (((.statusLine.command // "")|test("token-monitor"))) then "ours"
+      elif .statusLine then "custom" else "none" end' "$sj" 2>/dev/null || echo none)
     echo "    permissions.allow += mcp__playwright__* / mcp__ide__* / Bash(git -C ~/ai-context-store:*)"
     echo "                       + Bash(git push:*) / Bash(gh pr create:*)（会話承認で実行可 — main 直 push / force push / 未承認 PR 作成は hook が決定論で block）"
     echo "    permissions.deny  += AskUserQuestion（テキスト対話ポリシー）"
@@ -86,11 +94,11 @@ merge_settings() {  # $1 = plan|apply
         echo "             egress-guard hook と二層安全弁。denyRead で秘匿 + allowedDomains で egress 制限）"
         echo "             failIfUnavailable=false（Windows/WSL1 で起動拒否を避ける）"
     fi
-    if [ "$have_sl" = yes ]; then
-        echo "    statusLine: 既存のカスタム設定を保持（skip）"
-    else
-        echo "    statusLine = token-monitor.sh"
-    fi
+    case "$sl_kind" in
+        ours)   echo "    statusLine: banto の token-monitor を正規パス（絶対）へ修復/更新" ;;
+        custom) echo "    statusLine: 既存のカスタム設定を保持（skip）" ;;
+        *)      echo "    statusLine = token-monitor.sh を配線" ;;
+    esac
     # autoUpdate: サードパーティ marketplace は既定 off のため、banto-marketplace に autoUpdate=true を
     # 設定してリリース追従を自動化（source は known_marketplaces.json の実登録を優先して保持）
     km="$HOME/.claude/plugins/known_marketplaces.json"
@@ -102,7 +110,7 @@ merge_settings() {  # $1 = plan|apply
     echo "    extraKnownMarketplaces.banto-marketplace.autoUpdate = true（リリース自動追従）"
     [ "$act" = apply ] || return 0
     tmp=$(mktemp)
-    jq --argjson kmsrc "$km_src" '
+    jq --argjson kmsrc "$km_src" --arg slcmd "$HOME/.claude/statuslines/token-monitor.sh" '
       .extraKnownMarketplaces["banto-marketplace"] =
         ((.extraKnownMarketplaces["banto-marketplace"] // {source: $kmsrc}) + {autoUpdate: true}) |
       .permissions.allow = ((.permissions.allow // []) + [
@@ -126,8 +134,11 @@ merge_settings() {  # $1 = plan|apply
           ] }
         }
       end) |
-      (if .statusLine then . else
-        .statusLine = {type:"command", command:"~/.claude/statuslines/token-monitor.sh", padding:0, refreshInterval:10}
+      (if (.statusLine|type)=="object" and (((.statusLine.command // "")|test("token-monitor"))) then
+        .statusLine = {type:"command", command:$slcmd, padding:0, refreshInterval:10}
+      elif .statusLine then .
+      else
+        .statusLine = {type:"command", command:$slcmd, padding:0, refreshInterval:10}
       end)
     ' "$sj" > "$tmp" && mv "$tmp" "$sj"
     # statusline 本体

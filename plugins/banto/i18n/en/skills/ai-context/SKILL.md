@@ -23,7 +23,7 @@ Interpret the first token of `$ARGUMENTS` as a subcommand, Read the correspondin
 |---|---|---|
 | `bootstrap` | Create / register a store + migrate the provisional local (`ai-context-local`) → store (absorbs init) | "Store bootstrap" below |
 | `local` | Pin this repo to local-only (mapping `local:true`; never sent to GitHub by bootstrap / migration) | "Pin to local" below |
-| `doctor` | Health diagnostics (subsumes status, no writes; calls the store health lint) | `references/doctor.md` |
+| `doctor` | Health diagnostics (subsumes status, no writes; calls the store health lint + cross-project migration status [projects not yet promoted to central]) | `references/doctor.md` |
 | `sort` | Interactively sort misplaced files inside `{base}/` (writes) | `references/sort.md` |
 | `sort project` | Organize scattered documents across the whole project | `references/sort.md` |
 | `next` | Identify the next open task and carry it through to implementation | `references/task-lifecycle.md` |
@@ -37,7 +37,7 @@ Interpret the first token of `$ARGUMENTS` as a subcommand, Read the correspondin
 
 If the argument is empty or unknown, show usage.
 
-**Firing from natural language**: in addition to explicit subcommands, route automatically from context: "continue" / "next" / "next task" / "go ahead" → `next`; "organize the docs" / "it's a mess" → `sort project`; "phase done" → `phase-done`; "make a note" / "jot this down" / "summarize and save this conversation" → `memo`; "turn into knowledge" / "promote to knowledge" / "list the drafts" / "save as a lesson" → `knowledge`; "create a store" / "set up ai-context-store" / "I want to push this to GitHub" and the SessionStart hook's bootstrap prompt → `bootstrap`; "keep this repo local-only" / "don't push to GitHub" / "pin local" → `local`; "health check" / "health diagnostics" / "show me the status" / "tell me what's here" → `doctor`; "allow PR creation for this repo" / "allow production work" / "grant standing approval for push" / "standing approval" / "grant permission" → "Standing approval (grants)".
+**Firing from natural language**: in addition to explicit subcommands, route automatically from context: "continue" / "next" / "next task" / "go ahead" → `next`; "organize the docs" / "it's a mess" → `sort project`; "phase done" → `phase-done`; "make a note" / "jot this down" / "summarize and save this conversation" → `memo`; "turn into knowledge" / "promote to knowledge" / "list the drafts" / "save as a lesson" → `knowledge`; "create a store" / "set up ai-context-store" / "I want to push this to GitHub" and the SessionStart hook's bootstrap prompt → `bootstrap`; "keep this repo local-only" / "don't push to GitHub" / "pin local" → `local`; "health check" / "health diagnostics" / "show me the status" / "tell me what's here" / "what hasn't migrated" / "check migration status" → `doctor`; "allow PR creation for this repo" / "allow production work" / "grant standing approval for push" / "standing approval" / "grant permission" → "Standing approval (grants)".
 
 **Central store operations (teams / multiple projects)**: the end-to-end procedure for aggregating, syncing, and running the central store across a team (setup → migrate `migrate` → reference → push) lives in [`references/central-store-guide.md`](references/central-store-guide.md).
 

@@ -30,6 +30,10 @@ printf 'active-only switcher\n' > "$FIX/skills/switcher/SKILL.md"
 
 export BANTO_PLUGIN_ROOT="$FIX"
 export BANTO_LANG_FILE="$PREF"
+# writing-ja toggle isolation: never touch the real ~/.claude (rules dir + preference marker)
+export BANTO_WJ_FILE="$FIX/banto-writing-ja"
+export BANTO_RULES_DIR="$FIX/rules"
+mkdir -p "$FIX/rules"
 
 # 1) record manifest + sync-check green
 sh "$SC/i18n-gen.sh" --record >/dev/null 2>&1
@@ -87,6 +91,26 @@ if sh "$SC/i18n-materialize.sh" ja >/dev/null 2>&1; then ok "legitimate canonica
 if grep -q 'updated canonical' "$FIX/skills/foo/SKILL.md" 2>/dev/null; then ok "active reflects the updated canonical"; else no "active did not pick up the canonical update"; fi
 printf 'JA skill\n' > "$FIX/i18n/ja/skills/foo/SKILL.md"   # restore fixture
 
+# 6c) writing-ja is OPT-IN: set-language ja alone must NOT deploy it (no preference = off)
+if [ ! -e "$FIX/rules/writing-ja.md" ]; then ok "writing-ja not deployed by default (opt-in)"; else no "writing-ja deployed without opt-in"; fi
+# 6d) toggle on (lang=ja) → preference persisted + rule deployed
+sh "$SC/writing-ja-toggle.sh" on >/dev/null 2>&1
+if [ "$(tr -d ' \n' < "$FIX/banto-writing-ja" 2>/dev/null)" = "on" ]; then ok "writing-ja preference persisted = on"; else no "writing-ja preference not persisted"; fi
+if [ -e "$FIX/rules/writing-ja.md" ]; then ok "toggle on deployed writing-ja.md"; else no "toggle on did not deploy writing-ja.md"; fi
+# 6e) language switch reconciles the rule: en removes it, ja (pref still on) redeploys it
+sh "$SC/set-language.sh" en >/dev/null 2>&1
+if [ ! -e "$FIX/rules/writing-ja.md" ]; then ok "en switch removed writing-ja.md"; else no "writing-ja.md survived en switch"; fi
+sh "$SC/set-language.sh" ja >/dev/null 2>&1
+if [ -e "$FIX/rules/writing-ja.md" ]; then ok "ja switch redeployed writing-ja.md (pref on)"; else no "writing-ja.md not redeployed on ja with pref on"; fi
+# 6f) toggle off removes the unmodified copy; a personally edited copy is protected
+sh "$SC/writing-ja-toggle.sh" off >/dev/null 2>&1
+if [ ! -e "$FIX/rules/writing-ja.md" ]; then ok "toggle off removed unmodified copy"; else no "toggle off left unmodified copy"; fi
+sh "$SC/writing-ja-toggle.sh" on >/dev/null 2>&1
+printf 'personal edit\n' >> "$FIX/rules/writing-ja.md"
+sh "$SC/writing-ja-toggle.sh" off >/dev/null 2>&1
+if [ -e "$FIX/rules/writing-ja.md" ]; then ok "toggle off protected a modified copy"; else no "toggle off deleted a modified copy"; fi
+rm -f "$FIX/rules/writing-ja.md"
+
 # 7) reconcile NO-OP when marker already matches preference + version
 m1=$(cat "$FIX/skills/.banto-lang")
 sh "$HK/i18n-reconcile.sh" >/dev/null 2>&1
@@ -115,6 +139,28 @@ fi
 if [ "$(cat "$FIX/i18n/en/skills/foo/SKILL.md")" = "$before_en" ]; then ok "existing EN left untouched on translate failure"; else no "EN file was overwritten with empty/invalid output"; fi
 printf 'JA skill\n' > "$FIX/i18n/ja/skills/foo/SKILL.md"   # restore fixture
 sh "$SC/i18n-gen.sh" --record >/dev/null 2>&1
+
+# 10) TEMPLATES: i18n-managed templates follow the language on materialize; files kept out of
+#     the i18n trees (lang-specific assets like writing-ja.md) must survive untouched.
+mkdir -p "$FIX/i18n/ja/templates/rules" "$FIX/i18n/en/templates/rules" "$FIX/templates/rules"
+printf 'JA rule\n' > "$FIX/i18n/ja/templates/rules/r1.md"
+printf 'EN rule\n' > "$FIX/i18n/en/templates/rules/r1.md"
+printf 'lang-specific asset\n' > "$FIX/templates/rules/lang-only.md"
+sh "$SC/i18n-gen.sh" --record >/dev/null 2>&1
+sh "$SC/i18n-materialize.sh" en >/dev/null 2>&1
+if grep -q 'EN rule' "$FIX/templates/rules/r1.md" 2>/dev/null; then ok "materialize en applied to managed template"; else no "managed template not materialized to en"; fi
+sh "$SC/i18n-materialize.sh" ja >/dev/null 2>&1
+if grep -q 'JA rule' "$FIX/templates/rules/r1.md" 2>/dev/null; then ok "materialize ja applied to managed template"; else no "managed template not materialized back to ja"; fi
+if grep -q 'lang-specific asset' "$FIX/templates/rules/lang-only.md" 2>/dev/null; then ok "materialize preserves non-managed template (lang-specific invariant)"; else no "non-managed template wiped by materialize"; fi
+
+# 11) COVERAGE: every language-bearing file must be managed or explicitly exempted.
+#     Unclassified here: templates/rules/lang-only.md + skills/switcher/SKILL.md (active-only).
+if sh "$SC/i18n-coverage-check.sh" >/dev/null 2>&1; then no "coverage should FAIL on unclassified files"; else ok "coverage flags unmanaged, unexempted files"; fi
+{
+    printf 'active-only skills/switcher/*\n'
+    printf 'lang-specific templates/rules/lang-only.md\n'
+} > "$FIX/i18n/.coverage-exemptions"
+if sh "$SC/i18n-coverage-check.sh" >/dev/null 2>&1; then ok "coverage green once every file is classified (managed r1.md needs no exemption)"; else no "coverage still failing after exemptions"; fi
 
 echo ""
 echo "i18n tests: $pass passed, $fail failed"

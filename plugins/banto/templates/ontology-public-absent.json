@@ -4,7 +4,6 @@
     "skill:harness-audit",
     "skill:banto-port",
     "script:migrate-store-layout",
-    "script:migrate-store-v2",
-    "script:migrate-to-store"
+    "script:migrate-store-v2"
   ]
 }

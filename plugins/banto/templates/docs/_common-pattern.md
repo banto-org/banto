@@ -35,9 +35,9 @@ Generated artifacts are written **in the user's conversation language by default
 
 ---
 
-## 1.6. Japanese writing-style rule (apply when the artifact is Japanese)
+## 1.6. Japanese writing-style rule (apply when the artifact is Japanese AND the rule is enabled)
 
-When the generated document is **Japanese**, follow `~/.claude/rules/writing-ja.md` (an always-on rule whose own scope explicitly names .md / decisions / status / memo / audit reports — but skills must apply it deliberately, not rely on it being ambient). Run these checks before saving:
+The writing-ja rule is **opt-in** (toggled via `/set-language`; managed by `writing-ja-toggle.sh`). It is enabled iff `~/.claude/rules/writing-ja.md` exists — when the file is absent the user has opted out: skip this section and write natural Japanese prose. When the generated document is **Japanese** and the file exists, follow it (skills must apply it deliberately, not rely on it being ambient). Run these checks before saving:
 
 - **No だ・である・です・ます at sentence ends** — use 体言止め (noun-ending) or the plain 終止形.
 - **Reduce katakana-English** — write plain Japanese where a plain word exists (canonical → 正本, deterministic → 毎回同じ動き, etc.).
@@ -66,8 +66,8 @@ Step 4: Show the user a summary ordered by priority (Critical/High first)
 
 ```
 Step 1: Determine arguments / mode ($ARGUMENTS present or not, sub-arguments)
-Step 2: Collect context (conversation history / active.md / git log / decisions/, etc.)
-Step 3: Fill the template and Write to `.ai-context/docs/[<Prefix>] <slug>-<YYYY-MM-DD>.md`
+Step 2: Collect context (conversation history / tasks.md / git log / decisions/, etc.)
+Step 3: Fill the template and Write to `{base}/docs/[<Prefix>] <slug>-<YYYY-MM-DD>.md`
 Step 4: Report completion + summary to the user
 ```
 

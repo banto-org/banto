@@ -1,0 +1,27 @@
+# ODD Spec for docs
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: docs
+autonomy_level: L2  # 中規模ワークフロー（形式選択 → 執筆 → スイープ / 検証 → 保存まで自走）
+
+in_scope:
+  - 日本語説明資料の生成（HTML / xlsx / pptx / docx / 表）と形式選択表による形式決定
+  - writing-core の 3 層（認知 / 説得 / 場面）に沿った文章の執筆・修正
+  - 用語スイープ / 表現スイープ / HTML 検証（scripts/ のチェッカー）の実行と修正反映
+  - テーマファイル（theme-default / theme-custom）による色・フォントの差し替え
+
+out_of_scope:
+  - アプリ / 画面の UI 実装（ui-design skill があればそちら）
+  - 図の記法そのものの選択と作法（diagram skill）
+  - 内部メモ・decision 記録（Markdown で十分）
+
+safety_boundaries:
+  - 外部リクエストゼロを保つ（CDN フォント・外部 CSS・トラッキング禁止）
+  - 確認できない外部起源の主張を書かない（出典 URL は到達と主張一致を確認してから記載）
+  - クライアント向け成果物では内部名・他社名・PII をマスクする（pii-protection ルール / egress-guard 準拠）
+  - 生成物の上書きは既存ファイルを Read してから（Write 規約に従う）
+
+kill_switch_conditions: []
+
+approval_gates: []

@@ -184,3 +184,66 @@
     }
   });
 })();
+
+/* ---------- tool card modal (toolset only: main.tool-modal-enabled) ---------- */
+(function () {
+  'use strict';
+  var root = document.querySelector('main.tool-modal-enabled');
+  if (!root) return;
+  var modal = document.createElement('div');
+  modal.className = 'tool-modal';
+  modal.hidden = true;
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.innerHTML =
+    '<div class="tm-backdrop"></div>' +
+    '<div class="tm-panel"><button class="tm-close" type="button" aria-label="Close">×</button>' +
+    '<div class="tm-body"></div></div>';
+  document.body.appendChild(modal);
+  var tmBody = modal.querySelector('.tm-body');
+  var closeBtn = modal.querySelector('.tm-close');
+  var lastFocus = null;
+
+  function openCard(card) {
+    tmBody.innerHTML = '';
+    for (var i = 0; i < card.children.length; i++) {
+      tmBody.appendChild(card.children[i].cloneNode(true));
+    }
+    lastFocus = card;
+    modal.hidden = false;
+    document.body.classList.add('tm-lock');
+    closeBtn.focus();
+  }
+  function closeModal() {
+    modal.hidden = true;
+    document.body.classList.remove('tm-lock');
+    if (lastFocus) lastFocus.focus();
+  }
+
+  var cards = root.querySelectorAll('.cards .card');
+  for (var i = 0; i < cards.length; i++) {
+    (function (card) {
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-haspopup', 'dialog');
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('a')) return; /* links inside a card keep working */
+        openCard(card);
+      });
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCard(card); }
+      });
+    })(cards[i]);
+  }
+  closeBtn.addEventListener('click', closeModal);
+  modal.querySelector('.tm-backdrop').addEventListener('click', closeModal);
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !modal.hidden) closeModal();
+  });
+
+  /* deep link: toolset.html#docs opens that card's modal */
+  if (location.hash) {
+    var target = root.querySelector('.cards .card' + location.hash.replace(/[^-#A-Za-z0-9_]/g, ''));
+    if (target) setTimeout(function () { openCard(target); }, 150);
+  }
+})();

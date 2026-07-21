@@ -71,7 +71,9 @@ Self-driving implementation verifies before claiming done (Option A — explicit
 - `verify-run.sh <dir>` (helper, invoked by the loop — not a registered hook) runs
   build → full test → API smoke, writes `~/.cache/banto/verify-last-<session>`
   (`green` | `red:<steps>`), and bumps / resets the shared `test-failures-<session>`
-  counter, so a red verify also feeds `odd-gate.sh`. API smoke runs the project's package
+  counter, so a red verify also feeds `odd-gate.sh` (opt-in breaker: blocks only with
+  `ODD_TEST_FAILURE_GATE=1`; default is counter-only, stopping is the loop protocol's job).
+  API smoke runs the project's package
   script with `NODE_ENV=test BANTO_VERIFY=1` (staging / read-only convention; never production).
 - `verify-claim-guard.sh` (Stop) blocks a completion claim while the most-recent
   `verify-last-*` is red (in addition to its error-trace heuristic; one-shot via `stop_hook_active`).

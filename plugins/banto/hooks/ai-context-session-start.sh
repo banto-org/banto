@@ -117,6 +117,13 @@ echo ""
 
 DECISIONS="$AI_BASE/decisions"
 SESSIONS="$AI_BASE/sessions"
+
+# consumed/ の 14 日超 checkpoint を削除する housekeeping。下の HAS_CONTENT early-exit や
+# mailbox の空・非空に依らず **常時** 実行する（有界化はプロジェクトの活性度に依存させない）。
+# 旧実装はこの GC を checkpoint 配送ブロック内に置いていたため、mailbox が空 / base に content が
+# 無いと二度と走らず、consumed/ の古い checkpoint が無期限に残留していた。consumed/ のみを対象と
+# し mailbox には触れないので、配送ロジックより前に置いても /clear の any-age 注入を壊さない。
+[ -d "$SESSIONS/consumed" ] && find "$SESSIONS/consumed" -name 'checkpoint-*.md' -mtime +14 -delete 2>/dev/null
 # 実効 tasks: 新 layout（workspaces/<author>/<topic>/tasks.md）→ legacy active.md フォールバック
 TASKS="$AI_BASE/tasks/active.md"
 command -v _ai_context_active_tasks >/dev/null 2>&1 && TASKS=$(_ai_context_active_tasks "$AI_BASE" "$CWD")
@@ -201,20 +208,22 @@ if [ -d "$SESSIONS" ]; then
             fi
         fi
 
-        # GC(1): mailbox 直下で未消費のまま保持日数を越えた checkpoint を consumed/ へ退避（有界化）。
-        #        /clear で拾える「安く再開の窓」= この日数（既定 10 日）。別 ws 宛て・/clear されず
-        #        古びたものを mailbox から回収する。受動ヒントは別枠（24h）なので延ばしても増えない。
-        #        BANTO_IDLE_CHECKPOINT_RETAIN_DAYS で調整可（consumed 側 14 日削除より短くして復元余地を残す）。
-        _RETAIN_DAYS=${BANTO_IDLE_CHECKPOINT_RETAIN_DAYS:-10}
-        case "$_RETAIN_DAYS" in ''|*[!0-9]*) _RETAIN_DAYS=10 ;; esac
-        mkdir -p "$CONSUMED" 2>/dev/null
-        find "$SESSIONS" -maxdepth 1 -name 'checkpoint-*.md' -mtime +"$_RETAIN_DAYS" 2>/dev/null | while IFS= read -r f; do
-            [ -f "$f" ] || continue
-            mv -f "$f" "$CONSUMED/" 2>/dev/null || rm -f "$f"
-        done
-        # GC(2): 新 per-user パス + 旧フラット consumed/ 直下（移行前データ）を 14 日で削除
-        find "$SESSIONS/consumed" -name 'checkpoint-*.md' -mtime +14 -delete 2>/dev/null
     fi
+
+    # GC(1): mailbox 直下で未消費のまま保持日数を越えた checkpoint を consumed/ へ退避（有界化）。
+    #        checkpoint 配送の有無（CHECKPOINT_FILES 非空ガード）に依らず走らせる。mailbox に
+    #        checkpoint があれば HAS_CONTENT=1 でここに到達する。/clear で拾える「安く再開の窓」=
+    #        この日数（既定 10 日）。別 ws 宛て・/clear されず古びたものを mailbox から回収する。
+    #        受動ヒントは別枠（24h）なので延ばしても増えない。consumed/ 側の 14 日削除は上流の
+    #        無条件 housekeeping（HAS_CONTENT ゲート前）に分離済み。
+    #        BANTO_IDLE_CHECKPOINT_RETAIN_DAYS で調整可（consumed 側 14 日削除より短くして復元余地を残す）。
+    _RETAIN_DAYS=${BANTO_IDLE_CHECKPOINT_RETAIN_DAYS:-10}
+    case "$_RETAIN_DAYS" in ''|*[!0-9]*) _RETAIN_DAYS=10 ;; esac
+    mkdir -p "$CONSUMED" 2>/dev/null
+    find "$SESSIONS" -maxdepth 1 -name 'checkpoint-*.md' -mtime +"$_RETAIN_DAYS" 2>/dev/null | while IFS= read -r f; do
+        [ -f "$f" ] || continue
+        mv -f "$f" "$CONSUMED/" 2>/dev/null || rm -f "$f"
+    done
 fi
 
 # --- ダッシュボード（鳥瞰図・前回生成分）があれば注入 ---
@@ -286,6 +295,7 @@ fi
 if [ -f "$TASKS" ]; then
     echo "=== Tasks in progress (${TASKS#$AI_BASE/}) ==="
     cat "$TASKS"
+    echo "[Task mirror] 上記の未完了項目のうち今セッションで扱うものが組み込みタスク UI に無ければ TaskCreate で立てる。作業の開始・完了のたびに tasks.md と UI の両方を都度更新する（開始 = in_progress / 完了 = チェック + completed）。tasks.md に無い新しい依頼は、まず tasks.md へ追記してから着手する。"
     echo ""
 fi
 

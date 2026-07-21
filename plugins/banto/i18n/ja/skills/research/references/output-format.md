@@ -20,6 +20,13 @@
 ## テンプレート
 
 ```markdown
+---
+date: YYYY-MM-DD
+topic: {一行サマリー}
+status: active        # 後に陳腐化したら stale / superseded へ（検索が自動で降格する）
+sources: {主要 URL 数}
+---
+
 # {トピック} 調査結果
 
 - **調査日**: YYYY-MM-DD

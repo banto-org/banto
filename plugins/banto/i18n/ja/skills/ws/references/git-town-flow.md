@@ -50,7 +50,7 @@ git-town **なし**の場合: 各操作の「fallback」を使い、初回のみ
 
 発話例: 「この作業終わった」「task 完了」/ tasks.md の全項目チェックを検知した時に提案
 
-1. テスト実行 → PASS 確認（FAIL なら done を中止して報告。連続失敗は odd-gate が止める）
+1. テスト実行 → PASS 確認（FAIL なら done を中止して報告。連続失敗は TF カウンタで周回を止める）
 2. **親確認（安全チェック・必須）**: マージ先が意図した epic か検証
    ```bash
    git config "git-town-branch.$(git branch --show-current).parent"   # → epic 名のはず

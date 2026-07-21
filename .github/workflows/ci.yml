@@ -44,6 +44,8 @@ jobs:
         run: |
           sh plugins/banto/scripts/test-ai-context-paths-wiring.sh
           sh plugins/banto/scripts/test-resolve-store-path.sh
+          sh plugins/banto/scripts/test-setup-bootstrap.sh
+          sh plugins/banto/scripts/test-migration-status.sh
           sh plugins/banto/scripts/test-scaffold-root-guard.sh
           sh plugins/banto/scripts/test-store-first-session.sh
           sh plugins/banto/scripts/test-idle-checkpoint-delivery.sh
@@ -58,12 +60,14 @@ jobs:
           sh plugins/banto/scripts/test-cross-check.sh
           sh plugins/banto/scripts/test-export-agents-md.sh
           sh plugins/banto/scripts/test-harness-drift-autoupdate.sh
+          sh plugins/banto/scripts/test-harness-drift-refcheck.sh
           sh plugins/banto/scripts/test-lexicon-distill-autoapply.sh
           sh plugins/banto/scripts/test-knowledge-draft-autoreview.sh
           sh plugins/banto/scripts/test-knowledge-draft-review.sh
           sh plugins/banto/scripts/test-ai-context-workspace-autoregister.sh
           sh plugins/banto/scripts/test-checkpoint-autofire.sh
           sh plugins/banto/scripts/test-skill-audit-metrics.sh
+          sh plugins/banto/scripts/test-plugin-audit-odd.sh
           sh plugins/banto/scripts/test-ontology.sh
           sh plugins/banto/scripts/test-i18n.sh
 
@@ -82,6 +86,14 @@ jobs:
           # Detects EN files that are a leaked agent / Stop-hook note or a collapsed stub instead
           # of a faithful translation — corruption that hash-based i18n-sync-check cannot see.
           sh plugins/banto/scripts/i18n-en-sanity.sh plugins/banto --strict
+
+      - name: i18n coverage (every language-bearing file is managed or explicitly exempted)
+        run: |
+          # Total-classification gate: templates/skills/agents files must exist in i18n/ja
+          # (managed) or be listed in i18n/.coverage-exemptions with a reason category.
+          # Catches mixed-language files that never entered the i18n trees — the gap the
+          # three gates above cannot see (they only inspect files already inside the trees).
+          sh plugins/banto/scripts/i18n-coverage-check.sh
 
       - name: Runtime i18n guard (user-facing hook output respects banto-language)
         run: |

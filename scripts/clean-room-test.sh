@@ -58,10 +58,12 @@ grep -n "command not found\|syntax error\|No such file" /tmp/r.md /tmp/m.md && f
 
 note 8 "hook synthetic payloads (dash)"
 H=plugins/banto/hooks
-# 8a decisions-numbering: expects naming injection when decisions/ exists
-mkdir -p /tmp/proj/.ai-context/decisions
-out=$(printf '{"cwd":"/tmp/proj","hook_event_name":"PreToolUse","tool_input":{"file_path":"/tmp/proj/.ai-context/decisions/new.md"}}' | sh $H/ai-context-decisions-numbering.sh)
-case "$out" in *"[Decisions Naming]"*) echo "  8a naming injection: ok";; *) echo "  8a naming injection: FAIL"; fail=1;; esac
+# 8a decisions-numbering: PostToolUse warns on stderr for a date-named decisions file that
+#    misses the convention (PreToolUse injection removed 2026-07-02; base resolves into the
+#    central store since in-repo .ai-context was abolished)
+mkdir -p /tmp/proj /tmp/store/proj/decisions
+out=$(printf '{"cwd":"/tmp/proj","hook_event_name":"PostToolUse","tool_input":{"file_path":"/tmp/store/proj/decisions/2026-01-01-bad.md"}}' | AI_CONTEXT_STORE_ROOT=/tmp/store sh $H/ai-context-decisions-numbering.sh 2>&1 >/dev/null)
+case "$out" in *"[Decisions Naming]"*) echo "  8a naming warn (PostToolUse): ok";; *) echo "  8a naming warn (PostToolUse): FAIL"; fail=1;; esac
 # 8b egress-guard: no registry -> must be a silent no-op exit 0
 out=$(printf '{"cwd":"/tmp/proj","tool_input":{"file_path":"/tmp/proj/x.md","content":"hello"}}' | sh $H/egress-guard.sh); rc=$?
 echo "  8b egress-guard no-registry: exit=$rc (expect 0)"; [ $rc -eq 0 ] || fail=1

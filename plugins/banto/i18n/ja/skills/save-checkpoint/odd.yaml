@@ -12,7 +12,7 @@ in_scope:
 out_of_scope:
   - /compact・/clear の実行そのもの（このスキルは決して自分で実行しない）
   - 設計判断の記録（ai-context skill の decisions/）
-  - タスクファイル（active.md）の編集（ai-context skill）
+  - タスクファイル（tasks.md）の編集（ai-context skill）
 
 safety_boundaries:
   - Write は {base}/sessions/ 配下の新規ファイルのみ（既存ファイルの上書きをしない）

@@ -19,7 +19,7 @@ Quality evaluation axes for every Banto asset (skill / agent / rule / hook). Thi
 | 7 | Generality evaluation (absolute paths / personal names / org names / tool assumptions / [+language/culture/license under global]) | Static + dynamic | static → `plugin-audit` / semantic → `plugin-audit eval` |
 | 8 | Generalization fitness / rule externalization (whether a rule is loaded dynamically or hardcoded) | Static + Agent | `plugin-audit` + `plugin-audit fix` (refactor proposal) |
 | 9 | Layer 3 harness-engineering consistency (path-scoping recommendations / hook enforce candidates) | Static | `plugin-audit` |
-| 10 | ODD (Operational Design Domain) application status (per-skill odd.yaml + autonomy_level validity) | Static | `plugin-audit` |
+| 10 | ODD (Operational Design Domain) application status (per-skill odd.yaml + autonomy_level validity; ODD-adopting plugins only — otherwise N/A) | Static | `plugin-audit` |
 | 11 | Usage (commits + mentions + last update → active/dormant/likely-trim) | Static | `plugin-audit-usage.sh` |
 | 12 | Permission-scope minimality (**12a** over-grant = minimality / **12b** under-declaration = runtime legitimacy) | Static + Agent | `plugin-audit-permissions.sh` → `plugin-audit` |
 | 13 | Containment consistency (dangerous commands in hooks / raw secret output) | Design | hook target |
@@ -319,24 +319,51 @@ These are recommendations, not enforcement. The final call is a human's.
 
 ## Axis 10: ODD (Operational Design Domain) application status
 
-### Detection signals (skills only)
+### Applicability (ODD-adopting plugins only)
+
+ODD is an optional mechanism originated by banto; it does not exist in the official Claude Code plugin spec. This axis and the schema lint apply **only to adopting plugins**:
+
+- **Adoption test**: the target plugin counts as "ODD-adopting" if at least one `skills/*/odd.yaml` exists
+- **Adopting plugin**: run all the detection signals + the schema lint below (catching partial-adoption drift is this axis's job)
+- **Non-adopting plugin**: this axis is N/A (a single line: "ODD not adopted — optional mechanism"). Do not emit missing-ODD warnings. A suggestion is allowed only when the "risk-driven recommendation" conditions below are met
+
+### Detection signals (skills only, adopting plugins only)
 
 | Signal | Meaning | Recommended action |
 |---------|------|--------------|
-| `has_odd_yaml = 0` | the skill directory has no odd.yaml | recommended for L1–L3 skills. For L0 lightweight utilities (search / status etc.), application is optional under the 10-line rule |
+| `has_odd_yaml = 0` | a skill without odd.yaml inside an adopting plugin (partial-adoption drift) | recommended for L1–L3 skills. For L0 lightweight utilities (search / status etc.), application is optional under the 10-line rule |
 | `odd_autonomy_level = L4 / L5` | autonomy_level is outside Banto's range | split it into a separate plugin (`banto-autonomy`) or reconsider the autonomy_level |
 | `has_odd_yaml = 1` + `odd_autonomy_level = empty` | odd.yaml exists but autonomy_level extraction failed | check the format (`autonomy_level: L2  # ...` form required) |
 
 ### Output
 
-- **Summary**: ODD adoption rate + autonomy_level distribution
-- **Warning**: list of skills without ODD (all, including L0; a human judges the L0 optionality)
+- **Summary**: ODD adoption rate + autonomy_level distribution (adopting plugins only)
+- **Warning**: list of skills without ODD (inside adopting plugins only; all, including L0; a human judges the L0 optionality)
 - **Critical**: list of skills whose autonomy_level is L4 / L5
 - **Info**: list of autonomy_level extraction failures (format errors)
+- **N/A**: non-adopting plugins get a single line (both `plugin-audit-report.sh` and `plugin-audit-odd.sh`)
+
+### Risk-driven recommendation (for non-adopting plugins — this template is canonical)
+
+No presence recommendation — a name-only finding like "add an odd.yaml" is forbidden. Only when the audit detects a skill carrying one of the following high-risk signals, propose **once, as Info**, adopting the full set (odd.yaml + schema lint wired into CI + an enforcement hook):
+
+- autonomous loop (a skill declaring self-driving implementation, repeated execution, or auto-retry)
+- destructive operations (deletion, history rewriting, production changes)
+- parallel agent fan-out
+- outward operations (push / PR / publishing or posting to external services)
+
+The recommendation text must include all four of these points (a name-only recommendation is not acceptable):
+
+1. **What ODD is**: a per-skill operational design domain declaration (`odd.yaml`). It pins the autonomy level (autonomy_level L0-L3), in_scope / out_of_scope, and kill-switch conditions in machine-readable form
+2. **What it does**: the declaration alone enforces nothing. Only together with enforcement hooks (kill-switch / parallel-track / cost-gate etc.) plus the schema lint wired into CI does it work as a deterministic safety boundary
+3. **Merits**: the autonomy boundary becomes auditable / it can drive a kill-switch / the allowed range of adopted interpretations (spec-fidelity-class rules) is decided mechanically by autonomy_level
+4. **Demerits**: the declaration has a maintenance cost (every behavior change to the skill requires updating odd.yaml too). Structural drift is caught by the lint, but semantic drift between the declared autonomy_level and actual behavior is not — it needs periodic audits
+
+For low-risk utility plugins where the maintenance cost exceeds the value, do not emit the recommendation at all.
 
 ### schema lint (`plugin-audit-odd.sh` — deterministic)
 
-Beyond presence / autonomy extraction, validate the **structural validity of odd.yaml** against `templates/odd/odd.schema.yaml`. When a parallel session's revert or paste-back decays an odd into the pre-schema shape (a `domain:` wrapper, a stray `human_oversight`, an `.ai-context/` path, etc.), a visual diff misses it, so reject it deterministically at CI / SessionStart:
+Beyond presence / autonomy extraction, validate the **structural validity of odd.yaml** against `templates/odd/odd.schema.yaml`. A plugin with no odd.yaml at all exits through the adoption gate with a single N/A line (no per-skill warns for non-adopting plugins). When a parallel session's revert or paste-back decays an odd into the pre-schema shape (a `domain:` wrapper, a stray `human_oversight`, an `.ai-context/` path, etc.), a visual diff misses it, so reject it deterministically at CI / SessionStart:
 
 | Inspection | Severity |
 |---|---|

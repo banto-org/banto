@@ -28,6 +28,10 @@ sh "$DIR/plugins/banto/scripts/i18n-materialize-check.sh" || fail=1
 # 2b''. i18n: EN が翻訳でなく漏れたノート/スタブに破損していないか（hash では見えない内容 sanity）
 sh "$DIR/plugins/banto/scripts/i18n-en-sanity.sh" "$DIR" --strict || fail=1
 
+# 2b'''. i18n: 全数分類 — 言語を持つ配布ファイルは i18n 管理か明示 exemption のどちらかであること
+#（templates/ に混在言語ファイルが「未分類のまま」入るのを push 前に止める）
+sh "$DIR/plugins/banto/scripts/i18n-coverage-check.sh" || fail=1
+
 # 2c. markdown リンクが解決するか（壊れた相対リンク / README の言語フリップを push しない）
 sh "$DIR/scripts/check-md-links.sh" || fail=1
 

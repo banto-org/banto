@@ -175,12 +175,21 @@ spec 生成が完了したら、以下を提示する:
 
 Tier 別の推奨組み合わせ（個人〜エンタープライズ）は `${CLAUDE_PLUGIN_ROOT}/templates/specs/README.md` が正本。ティアが指定されなければ、Spec Kit を推奨してユーザーの判断を仰ぐ。
 
+## Status ライフサイクル（spec を閉じる）
+
+spec の front-matter / Status 行は生き物として扱う（decision 2026-07-17。監査で「Draft のまま出荷済み」が常態化し誤答源になっていた）:
+
+- 生成時: `status: draft` を YAML front-matter に書く（`date` / `topic` も。prefix-check hook が欠落を警告する）
+- 実装完了・出荷時: **Status を `shipped`（+ 版数・日付）へ更新して閉じる**。実装した本人（dev-loop / 自走セッション）の完了報告に含める
+- 設計が覆ったとき: 覆した decision を書いたその場で、旧 spec の Status を `superseded` にし冒頭へ「→ 最新: {decision パス}」注記を追記する（検索 v3.2 が status を見て自動降格する）
+
 ## 禁止事項
 
 - ❌ spec を書いている間に実装コードに触れる（設計と実装は厳密に分離）
 - ❌ テンプレート変数 `{{...}}` を「あとで」と未記入のまま残す（採用解釈で埋め、Step 7 で開示する）
 - ❌ ゴール分岐レベルの曖昧さを採用解釈で進める（事前確認が必須）
 - ❌ 設計だけを求められたのに実装まで進む（設計で止まる）
+- ❌ 実装完了後に spec の Status を Draft のまま放置する（上記ライフサイクルで閉じる）
 
 ## 関連
 

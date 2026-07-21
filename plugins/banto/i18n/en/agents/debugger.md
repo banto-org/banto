@@ -33,7 +33,7 @@ Focus on fixing the underlying problem, not the symptoms.
 
 ## When invoked under odd-gate (consecutive-test-failure block)
 
-When called in a situation where tests are failing repeatedly and odd-gate is blocking Write/Edit:
+When called in a situation where tests are failing repeatedly and odd-gate is blocking Write/Edit (only occurs with the opt-in `ODD_TEST_FAILURE_GATE=1` enabled):
 - Identify the root cause using **Read / Grep / Glob only**, and **return a proposed fix (as a diff) to the parent, then finish** (do not use Edit — it will be blocked)
 - Applying the fix is the parent session's responsibility. If needed, advise the parent that "a temporary escape is possible with `ODD_ALLOW_TEST_FAILURES=1` (on the condition that a reason is stated)"
 

@@ -49,6 +49,6 @@
 
 ## 受け手レベルとの関係
 
-banto の `skills/ja-writing/references/audience-levels.md` が扱う受け手レベル（L1-L3）は文章の
+banto の `skills/docs/references/audience-levels.md` が扱う受け手レベル（L1-L3）は文章の
 読みやすさを決める軸、本ファイルが扱うターゲットは画面の見た目を決める軸で、互いに独立して
 指定する。

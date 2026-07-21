@@ -46,7 +46,7 @@ while tasks.md に [ ] が残る:
         実装（Edit/Write）
     sh verify-run.sh <project>
     if red:
-        if TF カウンタ >= 3（odd-gate が edit を既にブロック）:
+        if TF カウンタ >= 3（閾値到達。odd-gate 有効時は edit がブロック済み）:
             STOP → owner にエスカレーション（churn しない）
         else:
             debugger agent で修正 → verify-run.sh を再実行
@@ -57,7 +57,7 @@ while tasks.md に [ ] が残る:
 
 ## エスカレーション条件（番頭は例外だけ主人に持っていく）
 
-- テスト 3 連続失敗（odd-gate の TF 閾値到達）
+- テスト 3 連続失敗（TF カウンタ閾値到達）
 - verify-last が red のまま「完了」と言いそう（verify-claim-guard が Stop でブロック）
 - goal fork（A/B で受け入れ基準・影響範囲・セキュリティ意味が変わる／owner 固有のビジネス知識依存）
 - 仕様が曖昧で採用解釈が立たない
@@ -85,7 +85,7 @@ dev ループと同じ骨格で、**検証段だけ差し替える**:
 | `verify-run.sh`（build/test/api） | 学習スクリプトの **eval**（指標を 1 行で出す） |
 | green = テスト PASS | green = 指標が目標達成 or 改善 |
 | red = テスト FAIL | red = 指標が悪化 / 未達 |
-| retry cap = odd-gate（3 連続） | retry cap = 改善なし N 周（plateau 検出） |
+| retry cap = TF カウンタ（3 連続） | retry cap = 改善なし N 周（plateau 検出） |
 | 完了 = tasks.md 尽きる | 完了 = 目標到達 or plateau |
 
 eval の green/red 判定を verify-last 互換の 1 行（`green` / `red:<metric>`）で書けば、verify-claim-guard・エスカレーションの仕組みをそのまま流用できる。`moe-pruning` 等の学習スキルと接続する場合は、その eval を検証段に差す。

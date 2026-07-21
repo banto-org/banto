@@ -26,9 +26,23 @@ REASON=${5:-idle}
 [ -z "$SESSION_ID" ] || [ -z "$TRANSCRIPT" ] || [ -z "$CWD" ] || [ -z "$CLAUDE_BIN" ] && exit 0
 [ -f "$TRANSCRIPT" ] || exit 0
 
-# セッション単位の排他ロック（mkdir はアトミック）。idle 経路と context 経路のどちらが先に
-# 到達しても、同一セッション内では 1 回しか実際の fork を起動しない。
+# 二重発火防止ロック（mkdir はアトミック）。idle 経路と context 経路が近接発火しても
+# COOLDOWN 秒以内は 1 回しか fork しない。ただし永続ではなく **クールダウン式** にする —
+# しきい値（既定 5 分）を越えて再び無操作になったら、同一セッションでも再発火して
+# checkpoint を更新できるようにするため（旧実装は永続ロックで 1 セッション 1 回きりだった）。
+# COOLDOWN < idle しきい値（300s）なので、正規の再発火は必ず通り、近接二重だけを弾く。
 LOCK="${TMPDIR:-/tmp}/banto-checkpoint-autofire-${SESSION_ID}.lock"
+COOLDOWN=${BANTO_CHECKPOINT_COOLDOWN_SEC:-120}
+case "$COOLDOWN" in ''|*[!0-9]*) COOLDOWN=120 ;; esac
+# クールダウンを過ぎた古いロックは掃除して再取得を許す（stale lock GC）。
+if [ -d "$LOCK" ]; then
+    LMT=$(stat -c %Y "$LOCK" 2>/dev/null || stat -f %m "$LOCK" 2>/dev/null)
+    case "$LMT" in ''|*[!0-9]*) LMT=0 ;; esac
+    LNOW=$(date +%s 2>/dev/null)
+    if [ -n "$LNOW" ] && [ "$LMT" != "0" ] && [ $(( LNOW - LMT )) -ge "$COOLDOWN" ]; then
+        rmdir "$LOCK" 2>/dev/null
+    fi
+fi
 mkdir "$LOCK" 2>/dev/null || exit 0
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] auto-firing /save-checkpoint (reason=${REASON}, fork of ${SESSION_ID})"
@@ -76,13 +90,32 @@ PH="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." 2>/dev/null && pwd)}/scripts
 if [ "$RC" = "0" ] && [ -f "$PH" ]; then
     WS_BASE=$(sh "$PH" --resolve "$CWD" 2>/dev/null)
     WS_KEY=$(sh "$PH" --ws-key "$CWD" 2>/dev/null)
-    if [ -n "$WS_BASE" ] && [ -n "$WS_KEY" ] && [ -d "$WS_BASE/sessions" ]; then
+    if [ -n "$WS_BASE" ] && [ -d "$WS_BASE/sessions" ]; then
         NEWEST=$(ls -t "$WS_BASE/sessions"/checkpoint-*.md 2>/dev/null | head -1)
-        if [ -n "$NEWEST" ] && [ -f "$NEWEST" ] && ! grep -q '^<!-- banto-ws: ' "$NEWEST" 2>/dev/null; then
-            NMT=$(stat -c %Y "$NEWEST" 2>/dev/null || stat -f %m "$NEWEST" 2>/dev/null)
-            case "$NMT" in ''|*[!0-9]*) NMT=0 ;; esac
-            NOW=$(date +%s 2>/dev/null)
-            if [ -n "$NOW" ] && [ "$NMT" != "0" ] && [ $(( NOW - NMT )) -le 180 ]; then
+        NMT=$(stat -c %Y "$NEWEST" 2>/dev/null || stat -f %m "$NEWEST" 2>/dev/null)
+        case "$NMT" in ''|*[!0-9]*) NMT=0 ;; esac
+        NOW=$(date +%s 2>/dev/null)
+        # 直近 checkpoint が今の fork の産物（180s 以内）のときだけ、上書きと刻印を行う
+        if [ -n "$NEWEST" ] && [ -f "$NEWEST" ] && [ -n "$NOW" ] && [ "$NMT" != "0" ] && [ $(( NOW - NMT )) -le 180 ]; then
+            # --- 上書き: 同一セッションの前回 auto-checkpoint を削除して貯めない ---
+            # マーカーには本 autofire が作った checkpoint のパスだけを記録するので、手動
+            # checkpoint は決して消さない。case パターンで sessions/ 配下の checkpoint-*.md に
+            # 厳密一致するときのみ削除（誤削除ガード）。
+            LAST_AUTO_MARK="${TMPDIR:-/tmp}/banto-checkpoint-last-auto-${SESSION_ID}"
+            if [ -f "$LAST_AUTO_MARK" ]; then
+                PRIOR=$(cat "$LAST_AUTO_MARK" 2>/dev/null)
+                case "$PRIOR" in
+                    "$WS_BASE/sessions/checkpoint-"*.md)
+                        if [ "$PRIOR" != "$NEWEST" ] && [ -f "$PRIOR" ]; then
+                            rm -f "$PRIOR" 2>/dev/null \
+                                && echo "[$(date '+%Y-%m-%d %H:%M:%S')] overwrote prior auto-checkpoint $(basename "$PRIOR")"
+                        fi ;;
+                esac
+            fi
+            printf '%s\n' "$NEWEST" > "$LAST_AUTO_MARK" 2>/dev/null
+
+            # --- ws 宛先マーカー刻印（未マーカー時のみ。WS_KEY があるときだけ） ---
+            if [ -n "$WS_KEY" ] && ! grep -q '^<!-- banto-ws: ' "$NEWEST" 2>/dev/null; then
                 TMP_CK="$NEWEST.wsstamp.$$"
                 if { printf '<!-- banto-ws: %s -->\n' "$WS_KEY"; cat "$NEWEST"; } > "$TMP_CK" 2>/dev/null; then
                     mv -f "$TMP_CK" "$NEWEST" 2>/dev/null || rm -f "$TMP_CK" 2>/dev/null

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flow — Banto / 開発の流れ</title>
+<meta name="description" content="How a day with Banto runs: four always-on habits (auto-checkpoint 💾 then /clear, /save-checkpoint at milestones, context colors, ws-driven workspaces), then the flows — new development from concept to ship, AI features with eval, and store-first research." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="subpage.css" />
+<style>
+  /* ---- page-specific: step timeline + flow animation ---- */
+  .steps{ list-style:none; margin:0; padding:0; counter-reset:fs; max-width:820px; }
+  .steps > li{ position:relative; padding:0 0 30px 58px; counter-increment:fs; }
+  .steps > li::before{ content:counter(fs); position:absolute; left:0; top:0; width:38px; height:38px;
+    display:grid; place-items:center; background:var(--ink); color:#EDE6D6; border-radius:50%;
+    font-family:var(--serif); font-size:17px; }
+  .steps > li::after{ content:""; position:absolute; left:18px; top:44px; bottom:6px; width:2px; background:var(--line-2); }
+  .steps > li:last-child{ padding-bottom:0; }
+  .steps > li:last-child::after{ display:none; }
+  .steps > li.step-opt::before{ background:var(--ink-soft); }
+  .steps h3{ font-family:var(--serif); font-size:17px; margin:7px 0 10px; }
+  .steps p{ font-size:14px; color:var(--ink-2); line-height:1.75; margin:12px 0 0; max-width:680px; }
+  .steps .tflow{ margin-top:0; }
+  @media (prefers-reduced-motion: no-preference){
+    .flowpage .tflow .tf-a{ animation:tfPulse 4.8s ease-in-out infinite; }
+    .flowpage .tflow .tf-b{ animation:tfPulse 4.8s ease-in-out infinite 1.6s; }
+    .flowpage .tflow .tf-c{ animation:tfPulse 4.8s ease-in-out infinite 3.2s; }
+  }
+</style>
+</head>
+<body data-lang="en">
+
+<div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+
+<header class="nav" id="nav">
+ <div class="nav-inner">
+  <a class="brand" href="index.html" aria-label="Banto">
+    <span class="seal" aria-hidden="true">番</span>
+    <span class="brand-word">Banto<span class="brand-kanji">番頭</span></span>
+  </a>
+  <nav class="nav-links" aria-label="primary">
+    <div class="nav-item has-menu">
+      <a href="index.html" class="lx" lang="en" aria-haspopup="true">Home</a><a href="index.html" class="lx" lang="ja" aria-haspopup="true">ホーム</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="index.html#why"><span class="lx" lang="en">The contract</span><span class="lx" lang="ja">番頭の契約</span></a>
+          <a href="index.html#flagships"><span class="lx" lang="en">Flagships</span><span class="lx" lang="ja">3 つの目玉</span></a>
+          <a href="index.html#checkpoint"><span class="lx" lang="en">Folding a session</span><span class="lx" lang="ja">セッションを畳む</span></a>
+          <a href="index.html#pipeline"><span class="lx" lang="en">Pipeline</span><span class="lx" lang="ja">SDD パイプライン</span></a>
+          <a href="index.html#safety"><span class="lx" lang="en">Safety</span><span class="lx" lang="ja">決定論的な安全</span></a>
+          <a href="index.html#feel"><span class="lx" lang="en">How it feels</span><span class="lx" lang="ja">使い心地</span></a>
+          <a href="index.html#install"><span class="lx" lang="en">Install</span><span class="lx" lang="ja">インストール</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item">
+      <a href="flow.html" class="lx" lang="en">Flow</a><a href="flow.html" class="lx" lang="ja">開発の流れ</a>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="toolset.html" class="lx" lang="en" aria-haspopup="true">Toolset</a><a href="toolset.html" class="lx" lang="ja" aria-haspopup="true">道具一式</a>
+      <div class="nav-menu">
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Pipeline (SDD)</span><span class="nav-menu-head lx" lang="ja">パイプライン（SDD）</span>
+          <a href="toolset.html#concept"><b>concept</b><span class="lx" lang="en">forge the ideology</span><span class="lx" lang="ja">思想を鍛える</span></a>
+          <a href="toolset.html#design-brief"><b>design-brief</b><span class="lx" lang="en">vague ask → design spec</span><span class="lx" lang="ja">曖昧な依頼をデザイン仕様へ</span></a>
+          <a href="toolset.html#spec"><b>spec</b><span class="lx" lang="en">interactive design docs</span><span class="lx" lang="ja">対話で設計書</span></a>
+          <a href="toolset.html#dev-loop"><b>dev-loop</b><span class="lx" lang="en">self-driving build</span><span class="lx" lang="ja">自走ビルド</span></a>
+          <a href="toolset.html#ai-build"><b>ai-build</b><span class="lx" lang="en">AI feature flow · eval</span><span class="lx" lang="ja">AI 構築フロー · eval</span></a>
+          <a href="toolset.html#model-lab"><b>model-lab</b><span class="lx" lang="en">train models · verify · paper</span><span class="lx" lang="ja">モデル学習 · 検証 · 論文</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Knowledge &amp; context</span><span class="nav-menu-head lx" lang="ja">知識 &amp; コンテキスト</span>
+          <a href="toolset.html#ai-context"><b>ai-context</b><span class="lx" lang="en">decisions · memo · store</span><span class="lx" lang="ja">決定 · メモ · ストア</span></a>
+          <a href="toolset.html#search"><b>search</b><span class="lx" lang="en">internal search, no web</span><span class="lx" lang="ja">内部検索（web なし）</span></a>
+          <a href="toolset.html#research"><b>research</b><span class="lx" lang="en">external, saved to store</span><span class="lx" lang="ja">外部調査 → ストア</span></a>
+          <a href="toolset.html#save-checkpoint"><b>save-checkpoint</b><span class="lx" lang="en">session snapshot</span><span class="lx" lang="ja">セッション保存</span></a>
+          <a href="toolset.html#webread"><b>webread</b><span class="lx" lang="en">full-text, no summary</span><span class="lx" lang="ja">要約なし全文取得</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Documents &amp; writing</span><span class="nav-menu-head lx" lang="ja">資料 &amp; 文章</span>
+          <a href="toolset.html#docs"><b>docs</b><span class="lx" lang="en">every document, one skill</span><span class="lx" lang="ja">資料作成を 1 つに統合</span></a>
+          <a href="toolset.html#diagram"><b>diagram</b><span class="lx" lang="en">14 diagram patterns</span><span class="lx" lang="ja">図解 14 パターン</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Workspace &amp; meta</span><span class="nav-menu-head lx" lang="ja">ワークスペース &amp; メタ</span>
+          <a href="toolset.html#ws"><b>ws</b><span class="lx" lang="en">workspace &amp; fleet</span><span class="lx" lang="ja">ワークスペース &amp; 艦隊</span></a>
+          <a href="toolset.html#set-language"><b>set-language</b><span class="lx" lang="en">JA ⇄ EN, sticky</span><span class="lx" lang="ja">日英切替（永続）</span></a>
+          <a href="toolset.html#plugin-dev"><b>plugin-dev</b><span class="lx" lang="en">scaffold &amp; refactor</span><span class="lx" lang="ja">生成 &amp; 改修</span></a>
+          <a href="toolset.html#plugin-audit"><b>plugin-audit</b><span class="lx" lang="en">15-axis quality audit</span><span class="lx" lang="ja">15 軸品質監査</span></a>
+          <a href="toolset.html#skill-audit"><b>skill-audit</b><span class="lx" lang="en">7-axis context audit</span><span class="lx" lang="ja">7 軸コンテキスト監査</span></a>
+          <a href="toolset.html#kit"><b>kit</b><span class="lx" lang="en">discover everything</span><span class="lx" lang="ja">全機能カタログ</span></a>
+          <a href="toolset.html#policy"><b>policy</b><span class="lx" lang="en">grants &amp; guards console</span><span class="lx" lang="ja">許可と保護の一覧管理</span></a>
+        </div>
+        <div class="nav-menu-col">
+          <span class="nav-menu-head lx" lang="en">Agents</span><span class="nav-menu-head lx" lang="ja">エージェント</span>
+          <a href="toolset.html#architect"><b>architect</b><span class="lx" lang="en">design &amp; tradeoffs</span><span class="lx" lang="ja">設計 &amp; トレードオフ</span></a>
+          <a href="toolset.html#debugger"><b>debugger</b><span class="lx" lang="en">reproduce · fix · verify</span><span class="lx" lang="ja">再現 · 修正 · 検証</span></a>
+          <a href="toolset.html#qa-tester"><b>qa-tester</b><span class="lx" lang="en">E2E across web/desktop/mobile</span><span class="lx" lang="ja">web/desktop/mobile 横断 E2E</span></a>
+          <a href="toolset.html#research-agent"><b>research-agent</b><span class="lx" lang="en">parallel web research</span><span class="lx" lang="ja">並列 web 調査</span></a>
+          <a href="toolset.html#search-agent"><b>search-agent</b><span class="lx" lang="en">parallel internal grep (haiku)</span><span class="lx" lang="ja">並列内部検索（haiku）</span></a>
+          <a href="toolset.html#context-keeper"><b>context-keeper</b><span class="lx" lang="en">search-index maintenance</span><span class="lx" lang="ja">検索インデックス保守</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="mechanism.html" class="lx" lang="en" aria-haspopup="true">Mechanism</a><a href="mechanism.html" class="lx" lang="ja" aria-haspopup="true">仕組み</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="mechanism.html#hooks"><span class="lx" lang="en">The whole picture</span><span class="lx" lang="ja">全体像</span></a>
+          <a href="mechanism.html#flagship"><span class="lx" lang="en">The 7 flagship hooks</span><span class="lx" lang="ja">目玉 7 hook</span></a>
+          <a href="mechanism.html#principles"><span class="lx" lang="en">Design principles</span><span class="lx" lang="ja">設計原則</span></a>
+          <a href="mechanism.html#odd"><span class="lx" lang="en">ODD — declared autonomy</span><span class="lx" lang="ja">ODD — 自律性の宣言</span></a>
+          <a href="mechanism.html#enforce"><span class="lx" lang="en">Declaration → enforcement</span><span class="lx" lang="ja">宣言 → 強制</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="store.html" class="lx" lang="en" aria-haspopup="true">Store</a><a href="store.html" class="lx" lang="ja" aria-haspopup="true">ストア</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="store.html#store"><span class="lx" lang="en">What accumulates</span><span class="lx" lang="ja">何が貯まるか</span></a>
+          <a href="store.html#search"><span class="lx" lang="en">Cross-store search</span><span class="lx" lang="ja">横断検索</span></a>
+          <a href="store.html#team"><span class="lx" lang="en">Git &amp; teams</span><span class="lx" lang="ja">git &amp; 複数人</span></a>
+          <a href="store.html#register"><span class="lx" lang="en">Register a project</span><span class="lx" lang="ja">プロジェクトを登録</span></a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item has-menu">
+      <a href="evidence.html" class="lx" lang="en" aria-haspopup="true">Evidence</a><a href="evidence.html" class="lx" lang="ja" aria-haspopup="true">実測</a>
+      <div class="nav-menu slim">
+        <div class="nav-menu-col">
+          <a href="evidence.html#claim"><span class="lx" lang="en">The claim</span><span class="lx" lang="ja">主張と実測</span></a>
+          <a href="evidence.html#resume"><span class="lx" lang="en">Resume</span><span class="lx" lang="ja">「続き」は通じるか</span></a>
+          <a href="evidence.html#knowledge"><span class="lx" lang="en">Knowledge</span><span class="lx" lang="ja">知識はどこから来るか</span></a>
+          <a href="evidence.html#boundary"><span class="lx" lang="en">Boundary</span><span class="lx" lang="ja">残る差は何か</span></a>
+          <a href="evidence.html#cost"><span class="lx" lang="en">Cost</span><span class="lx" lang="ja">思い出す方が安いか</span></a>
+          <a href="evidence.html#limitations"><span class="lx" lang="en">Limitations</span><span class="lx" lang="ja">限界の開示</span></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="nav-right">
+    <button class="nav-burger" aria-label="menu" aria-expanded="false" aria-controls="nav"><span></span></button>
+    <div class="lang-toggle" role="group" aria-label="language">
+      <button data-setlang="en" class="on">EN</button>
+      <button data-setlang="ja">日本語</button>
+    </div>
+    <a class="gh" href="https://github.com/banto-org/banto" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      <span>GitHub</span>
+    </a>
+  </div>
+ </div>
+</header>
+
+<main id="top" class="flowpage">
+
+<section class="doc-hero">
+  <div class="crumb"><a href="index.html" class="lx" lang="en">← Home</a><a href="index.html" class="lx" lang="ja">← ホーム</a></div>
+  <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">The daily flow</span><span class="lx" lang="ja">開発の流れ</span></div>
+  <h1><span class="lx" lang="en">Say what you want. The harness runs the steps.</span><span class="lx" lang="ja">やりたいことを言えば、ハーネスが段取りを回す。</span></h1>
+  <p class="lede lx" lang="en">This page shows how a day with Banto actually runs. First come four habits shared by every flow. Then three scenario flows: building something new, building an AI feature, and starting from a question. Every step is written the same way — the phrase you say, what happens, and what remains afterwards.</p>
+  <p class="lede lx" lang="ja">この頁は banto での 1 日の回し方を示す。最初に全フロー共通の 4 つの習慣、続いて 3 つの場面別フロー（新規開発・AI 機能・調べもの）。各ステップは「言うフレーズ → 起きること → 残るもの」の同じ型で書く。</p>
+</section>
+
+<!-- ============ 0. ALWAYS ============ -->
+<section class="sec" id="basics">
+  <div class="sec-head">
+    <span class="ghost">0</span>
+    <div class="sub">always</div>
+    <h2><span class="lx" lang="en">Four habits that apply to every flow</span><span class="lx" lang="ja">どの流れでも使う、4 つの習慣</span></h2>
+    <p><span class="lx" lang="en">Context management and workspace management. Everything else is scenario-specific.</span><span class="lx" lang="ja">コンテキストの管理と、作業場の管理。それ以外は場面ごとの流れに任せてよい。</span></p>
+  </div>
+
+  <div class="cards" style="margin-top:16px">
+    <div class="card" id="habit-clear">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">💾 <span class="lx" lang="en">When 💾 shows, /clear is safe</span><span class="lx" lang="ja">💾 が出たら、安心して /clear</span></h4>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>A statusline mark like 💾 01:14 means an auto-checkpoint was saved at 01:14.</strong></span>
+        <span class="lx" lang="ja"><strong>statusline の「💾 01:14」は、01:14 に自動チェックポイントが保存済みという印。</strong></span>
+      </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a">💾 01:14</span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">/clear</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">restored at next start</span><span class="lx" lang="ja">次の開始時に自動復元</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">The harness saves a checkpoint by itself after 5 idle minutes, or when context pressure rises. You do nothing.</span><span class="lx" lang="ja">放置 5 分、またはコンテキスト逼迫で、ハーネスが裏でチェックポイントを自動保存する。あなたの操作は要らない。</span></li>
+        <li><span class="lx" lang="en">Once the mark shows, type <code>/clear</code> freely. The next session start re-injects the saved state, so the thread survives.</span><span class="lx" lang="ja">印が出ていれば <code>/clear</code> してよい。次のセッション開始時に保存内容が再注入されるので、作業の筋は途切れない。</span></li>
+        <li><span class="lx" lang="en">Clearing gives the whole context window back — responses get faster and cheaper.</span><span class="lx" lang="ja">クリアするとコンテキストウィンドウを丸ごと取り戻せる。応答は速く、安くなる。</span></li>
+      </ul>
+    </div>
+
+    <div class="card" id="habit-checkpoint">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px"><span class="lx" lang="en">At a good stopping point, /save-checkpoint</span><span class="lx" lang="ja">いい区切りで /save-checkpoint</span></h4>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>When work reaches a milestone, say /save-checkpoint (or just "save the state").</strong></span>
+        <span class="lx" lang="ja"><strong>区切りがついたら /save-checkpoint と打つ（「状態保存して」でも動く）。</strong></span>
+      </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a">/save-checkpoint</span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">save-checkpoint</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">"now compact" or "now clear"</span><span class="lx" lang="ja">compact か clear を提示</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">It writes what you are doing, how it got here, and what was decided — as a structured snapshot in the store.</span><span class="lx" lang="ja">今の作業・経緯・確定した決定を、構造化スナップショットとして store に書く。</span></li>
+        <li><span class="lx" lang="en">Afterwards it recommends exactly one of <code>compact</code> or <code>clear</code>. Follow the recommendation.</span><span class="lx" lang="ja">保存後に <code>compact</code> か <code>clear</code> のどちらか一方だけを推奨する。表示に従えばよい。</span></li>
+        <li><span class="lx" lang="en">It never runs either command itself — you type it. That keeps the timing in your hands.</span><span class="lx" lang="ja">どちらのコマンドも自動では実行されない。打つのはあなたなので、タイミングは手の中に残る。</span></li>
+      </ul>
+    </div>
+
+    <div class="card" id="habit-context">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px"><span class="lx" lang="en">Watch the context color, not the token count</span><span class="lx" lang="ja">コンテキスト残量は色で見る</span></h4>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>The statusline usage indicator changes color at 40% / 60% / 80%.</strong></span>
+        <span class="lx" lang="ja"><strong>statusline の使用率表示は 40% / 60% / 80% で色が変わる。</strong></span>
+      </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">color advances</span><span class="lx" lang="ja">色が進む</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">/save-checkpoint</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">fold before it gets costly</span><span class="lx" lang="ja">高くつく前に畳む</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">When the color advances, plan a <code>/save-checkpoint</code> → <code>/clear</code> at the next stopping point.</span><span class="lx" lang="ja">色が進んだら、次の区切りで <code>/save-checkpoint</code> → <code>/clear</code> を予定する。</span></li>
+        <li><span class="lx" lang="en">A hook reads the same number and starts recommending a fold before the window becomes expensive.</span><span class="lx" lang="ja">同じ数値を hook も読んでいて、窓が高くつく前に畳む推奨が出る。</span></li>
+      </ul>
+    </div>
+
+    <div class="card" id="habit-ws">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px"><span class="lx" lang="en">Leave branches and tasks to ws</span><span class="lx" lang="ja">タスクと作業場は ws に任せる</span></h4>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>You never type a git command. State the intent, and ws drives branches, worktrees, and merges.</strong></span>
+        <span class="lx" lang="ja"><strong>git コマンドは打たない。意図を言えば、ws がブランチ・worktree・マージを駆動する。</strong></span>
+      </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"start the payment redesign"</span><span class="lx" lang="ja">「決済のリデザインを始める」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">ws</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">branch + workspace open</span><span class="lx" lang="ja">ブランチと作業場が開く</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">"Start ~" opens an epic branch plus an isolated worktree. Parallel topics get parallel workspaces.</span><span class="lx" lang="ja">「〜を始める」で epic ブランチと分離された worktree が開く。並行する話題は並行する workspace になる。</span></li>
+        <li><span class="lx" lang="en">"This work is done" runs test → merge → sync → cleanup on its own.</span><span class="lx" lang="ja">「この作業終わった」で、テスト → merge → sync → 後片付けまで自動で進む。</span></li>
+        <li><span class="lx" lang="en">"Ship it" always stops for your confirmation before a PR is opened.</span><span class="lx" lang="ja">「main に入れて」「出して」は、PR 作成の前に必ず確認が入る。</span></li>
+        <li><span class="lx" lang="en">"Keep going on the next task" finds the next unchecked item in <code>tasks.md</code> and implements it through to done.</span><span class="lx" lang="ja">「次のタスク進めて」で、<code>tasks.md</code> の未完了項目を見つけて実装まで完遂する。</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 1. NEW DEVELOPMENT ============ -->
+<section class="sec" id="new-dev">
+  <div class="sec-head">
+    <span class="ghost">1</span>
+    <div class="sub">concept → ship</div>
+    <h2><span class="lx" lang="en">Something new: ideology → spec → self-driving build</span><span class="lx" lang="ja">新規開発は、思想 → 仕様 → 自走の一本道</span></h2>
+    <p><span class="lx" lang="en">Say each phrase in order. If there is no UI, skip step 2.</span><span class="lx" lang="ja">順にフレーズを言うだけで、思想の確定から main への合流まで進む。画面が無いなら手順 2 は飛ばす。</span></p>
+  </div>
+
+  <ol class="steps" style="margin-top:20px">
+    <li>
+      <h3><span class="lx" lang="en">Solidify the ideology</span><span class="lx" lang="ja">思想を固める</span></h3>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"solidify the vision"</span><span class="lx" lang="ja">「思想を固めて」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">concept</span><span class="tf-arrow">→</span><span class="tf-step tf-c">CONCEPT.md</span>
+      </div>
+      <p><span class="lx" lang="en">A dialogue fixes why the product exists, who it repels, and what world it projects — six phases for a real product, one line for a throwaway experiment. The result is injected into CLAUDE.md and becomes the judgment filter every later step reads.</span><span class="lx" lang="ja">なぜ作るか・誰を弾くか・どんな世界観かを対話で確定する。本物の製品なら 6 Phase、使い捨ての実験なら 1 行で済む。結果は CLAUDE.md へ注入され、以後の全ステップが読む判断フィルターになる。</span></p>
+    </li>
+    <li class="step-opt">
+      <h3><span class="lx" lang="en">If there is a screen: a design brief</span><span class="lx" lang="ja">画面があるなら、デザインブリーフ</span></h3>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"give me a design brief"</span><span class="lx" lang="ja">「デザインブリーフ作って」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">design-brief</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">14-axis design spec</span><span class="lx" lang="ja">14 観点のデザイン仕様</span></span>
+      </div>
+      <p><span class="lx" lang="en">"Make it look nice" becomes a 14-axis brief, starting from who uses the screen and in what mood. The finished brief hands over to spec.</span><span class="lx" lang="ja">「おしゃれに」という曖昧な依頼が、誰が・どんな気分で使うかを起点にした 14 観点のブリーフになる。仕上がったブリーフは spec へ引き継がれる。</span></p>
+    </li>
+    <li>
+      <h3><span class="lx" lang="en">Design first, build later</span><span class="lx" lang="ja">まず設計だけを作る</span></h3>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"design only first"</span><span class="lx" lang="ja">「まず設計だけして」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">spec</span><span class="tf-arrow">→</span><span class="tf-step tf-c">spec / plan / tasks</span>
+      </div>
+      <p><span class="lx" lang="en">spec picks a format that matches the task's weight — PRD, Design Doc, RFC, ADR and more — and talks the design through with you. The three documents are saved to the store, so any later session can pick them up.</span><span class="lx" lang="ja">spec がタスクの重さに合う形式（PRD・Design Doc・RFC・ADR など 6 種）を選び、対話で設計を詰める。3 点の文書は store に保存されるので、後のどのセッションからでも拾える。</span></p>
+    </li>
+    <li>
+      <h3><span class="lx" lang="en">Let it build itself</span><span class="lx" lang="ja">自走で作らせる</span></h3>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"run the whole spec autonomously"</span><span class="lx" lang="ja">「この spec を自走で全部やって」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">dev-loop</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">tasks all green</span><span class="lx" lang="ja">タスクが全部 green</span></span>
+      </div>
+      <p><span class="lx" lang="en">The spec is broken into small tasks, then implement → verify → fix loops until everything is green. You are called exactly twice: when an interpretation of the spec splits, and right before anything enters main.</span><span class="lx" lang="ja">spec が小型タスクへ分解され、実装 → 検証 → 修正が green になるまで周回する。あなたが呼ばれるのは 2 回だけ — 仕様の解釈が割れたときと、main に入れる直前。</span></p>
+    </li>
+    <li>
+      <h3><span class="lx" lang="en">Close the work, then ship</span><span class="lx" lang="ja">作業を閉じて、出す</span></h3>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"this work is done"</span><span class="lx" lang="ja">「この作業終わった」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">ws</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">merged; PR after your OK</span><span class="lx" lang="ja">マージ。PR は確認後</span></span>
+      </div>
+      <p><span class="lx" lang="en">ws tests, merges, syncs, and cleans up. Saying "ship it" opens the PR — always after an explicit confirmation. Merging stays in your hands.</span><span class="lx" lang="ja">ws がテスト → merge → sync → 後片付けを行う。「出して」で PR 作成へ進むが、必ず明示の確認を挟む。マージはあなたの操作のまま残る。</span></p>
+    </li>
+  </ol>
+</section>
+
+<!-- ============ 2. AI DEVELOPMENT ============ -->
+<section class="sec" id="ai-dev">
+  <div class="sec-head">
+    <span class="ghost">2</span>
+    <div class="sub">ai-build / model-lab</div>
+    <h2><span class="lx" lang="en">An AI feature follows the same shape, plus eval</span><span class="lx" lang="ja">AI 開発は同じ型に、eval が足される</span></h2>
+    <p><span class="lx" lang="en">Adding an LLM to your app is ai-build. Creating or training a model itself is model-lab.</span><span class="lx" lang="ja">アプリに LLM を組み込むなら ai-build、モデルそのものを作る・学習するなら model-lab を使う。</span></p>
+  </div>
+
+  <div class="cards" style="margin-top:16px">
+    <div class="card" id="flow-ai-build">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">ai-build</h4>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>"I want to build a RAG" runs requirements → design → build → eval as one flow.</strong></span>
+        <span class="lx" lang="ja"><strong>「RAG を組みたい」の一言で、要件 → 設計 → 実装 → eval まで一気通貫で進む。</strong></span>
+      </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"I want to build a RAG"</span><span class="lx" lang="ja">「RAG を組みたい」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">ai-build</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">feature + eval score</span><span class="lx" lang="ja">機能 + eval の採点</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">First it searches the store for what you already know. If the method or model information is more than 14 days old, it researches the latest first.</span><span class="lx" lang="ja">まず store を検索して既知の情報を確かめる。手法やモデルの情報が 14 日より古ければ、先に最新を調査する。</span></li>
+        <li><span class="lx" lang="en">Then it picks prompt / RAG / fine-tune, implements, and scores the result with an LLM-as-judge eval. "It runs" is not the finish line.</span><span class="lx" lang="ja">そのうえで prompt・RAG・fine-tune を選んで実装し、LLM-as-judge の eval で採点する。「動いた」では終わらせない。</span></li>
+        <li><span class="lx" lang="en">Model ids, pricing, and API parameters are looked up in the claude-api reference, never answered from memory.</span><span class="lx" lang="ja">モデル id・価格・API パラメータは記憶で答えず、claude-api リファレンスを引く。</span></li>
+      </ul>
+    </div>
+
+    <div class="card" id="flow-model-lab">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">model-lab</h4>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Training a model runs verification-first, from pretraining to a published paper.</strong></span>
+        <span class="lx" lang="ja"><strong>モデルを学習するなら、事前学習から論文公開までを検証中心で自走させる。</strong></span>
+      </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"fine-tune and write it up"</span><span class="lx" lang="ja">「fine-tune して論文まで」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">model-lab</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">verified results + paper</span><span class="lx" lang="ja">検証済み結果 + 論文</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">The sequence is Frame → Survey → Design → Implement → Run (Mac → Nvidia → cloud) → Verify (eval, ablation, statistics) → Paper &amp; publish.</span><span class="lx" lang="ja">Frame → Survey → Design → Implement → Run（Mac → Nvidia → cloud）→ Verify（eval・ablation・統計）→ 論文公開の順で進む。</span></li>
+        <li><span class="lx" lang="en">A hook blocks any "done" claim that lacks a backing experiment. Paid compute and publishing always stop at a human gate.</span><span class="lx" lang="ja">裏づけ実験のない「完了」主張は hook が止める。有料計算の起動と公開は必ず人間ゲートで止まる。</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. RESEARCH-FIRST DAYS ============ -->
+<section class="sec" id="research-day">
+  <div class="sec-head">
+    <span class="ghost">3</span>
+    <div class="sub">store-first</div>
+    <h2><span class="lx" lang="en">Questions go store-first, then the web</span><span class="lx" lang="ja">調べものは store が先、web は後</span></h2>
+    <p><span class="lx" lang="en">Both paths leave their results in the store, so the same question is never researched twice.</span><span class="lx" lang="ja">どちらの経路も結果が store に残る。同じ調査を二度しない。</span></p>
+  </div>
+
+  <div class="cards" style="margin-top:16px">
+    <div class="card" id="flow-search">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">search</h4>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>"What did we decide about this?" searches decisions and past chats. No web.</strong></span>
+        <span class="lx" lang="ja"><strong>「これ前に何て決めたっけ」で、決定ログと過去チャットを検索する。web には触れない。</strong></span>
+      </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"what did we decide"</span><span class="lx" lang="ja">「前に何て決めたっけ」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">search</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">the file and the line</span><span class="lx" lang="ja">該当ファイルと行</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">The query expands across synonyms and English/Japanese variants, then greps the store. The answer is a file and a line — not a guess.</span><span class="lx" lang="ja">クエリを同義語・英日表記ゆれへ展開して store を grep する。返るのは該当ファイルと行であって、推測ではない。</span></li>
+      </ul>
+    </div>
+
+    <div class="card" id="flow-research">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">research</h4>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>"Look up the latest ~" checks the store first, then escalates to the web only on a miss.</strong></span>
+        <span class="lx" lang="ja"><strong>「最新の〜を調べて」は、まず store を確認し、確信ヒットが無いときだけ web へ出る。</strong></span>
+      </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"look up the latest"</span><span class="lx" lang="ja">「最新の〜調べて」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">research</span><span class="tf-arrow">→</span><span class="tf-step tf-c">docs/research/</span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Parallel agents find the sources and read the full text — no summarized guesses.</span><span class="lx" lang="ja">並列エージェントが情報源を特定し、本文の全文を読む。要約頼みの推測はしない。</span></li>
+        <li><span class="lx" lang="en">Findings are saved under <code>docs/research/</code>, so the next session simply remembers them.</span><span class="lx" lang="ja">結果は <code>docs/research/</code> に保存され、次のセッションはそれを「思い出す」だけで済む。</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RELATED ============ -->
+<section class="sec" id="related">
+  <div class="sec-head">
+    <div class="sub">links</div>
+    <h2><span class="lx" lang="en">Related</span><span class="lx" lang="ja">関連</span></h2>
+  </div>
+  <div class="cards" style="margin-top:16px">
+    <div class="card"><p class="tm-lead"><span class="lx" lang="en"><a href="toolset.html">Toolset</a> — every tool on this page, with details in a click-to-open modal.</span><span class="lx" lang="ja"><a href="toolset.html">道具一式</a> — この頁に出た道具の詳細。クリックでモーダル表示。</span></p></div>
+    <div class="card"><p class="tm-lead"><span class="lx" lang="en"><a href="mechanism.html">Mechanism</a> — why the safety is enforced by hooks, not promises.</span><span class="lx" lang="ja"><a href="mechanism.html">仕組み</a> — 安全が約束ではなく hook で強制される理由。</span></p></div>
+    <div class="card"><p class="tm-lead"><span class="lx" lang="en"><a href="store.html">Store</a> — where checkpoints, decisions, and research actually live.</span><span class="lx" lang="ja"><a href="store.html">ストア</a> — チェックポイント・決定・調査が実際に置かれる場所。</span></p></div>
+  </div>
+</section>
+
+</main>
+
+<footer class="doc-foot">
+  <span class="lx" lang="en">Banto — a self-driving harness for Claude Code. Enforced by deterministic hooks.</span>
+  <span class="lx" lang="ja">Banto — Claude Code のための自走ハーネス。決定論的な hook が強制する。</span>
+  <span><a href="toolset.html" class="lx" lang="en">← Back to the toolset</a><a href="toolset.html" class="lx" lang="ja">← 道具一式へ戻る</a></span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

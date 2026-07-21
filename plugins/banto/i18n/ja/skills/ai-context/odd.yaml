@@ -9,7 +9,7 @@ in_scope:
   - サブコマンド router (bootstrap / local / doctor / sort / sort project / next / phase-done / ignore / tasks split / memo / knowledge)
   - 決定ログ保存 ({base}/decisions/)
   - チェックポイント保存 ({base}/sessions/)
-  - active.md 編集 + Phase 単位分割
+  - tasks.md 編集 + Phase 単位分割
   - 次タスクナビ（next、v5.16.0 で sdd-core 統合）
   - Phase 完了チェック + アーカイブ（phase-done、v5.16.0 で phase-done skill 統合）
   - プロジェクト全体ドキュメント整理（sort project、v5.16.0 で doc-sort 統合）
@@ -38,4 +38,4 @@ kill_switch_conditions:
 approval_gates:
   - sort サブコマンドの実移動操作
   - ignore サブコマンドでのパス追加
-  - active.md の Phase 単位分割の確定
+  - tasks.md の Phase 単位分割の確定

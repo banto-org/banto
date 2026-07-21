@@ -50,7 +50,7 @@ Utterance examples: "do the API in parallel", "put this in a separate worktree"
 
 Utterance examples: "this work is done", "task complete" / propose it when detecting that all items in tasks.md are checked
 
-1. Run tests → confirm PASS (if FAIL, abort done and report. consecutive failures are stopped by odd-gate)
+1. Run tests → confirm PASS (if FAIL, abort done and report. consecutive failures stop the loop via the TF counter)
 2. **Parent check (safety check, mandatory)**: verify the merge target is the intended epic
    ```bash
    git config "git-town-branch.$(git branch --show-current).parent"   # → should be the epic name

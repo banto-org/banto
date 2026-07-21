@@ -176,12 +176,21 @@ When the user selects multiple (e.g. "1 + 5" = Spec Kit + ADR):
 
 The recommended combination per tier (personal through enterprise) is canonically defined in `${CLAUDE_PLUGIN_ROOT}/templates/specs/README.md`. If no tier is specified, recommend Spec Kit and ask for the user's call.
 
+## Status lifecycle (closing the spec)
+
+Treat the spec's front-matter / Status line as a living field (decision 2026-07-17; the audit found "still Draft though shipped" was the norm and a source of wrong answers):
+
+- At creation: write `status: draft` in the YAML front-matter (plus `date` / `topic`; the prefix-check hook warns when missing)
+- At implementation/ship: **update Status to `shipped` (+ version, date) and close it**. The implementer (dev-loop / self-driving session) includes this in the completion report
+- When the design is overturned: in the same breath as writing the overturning decision, set the old spec's Status to `superseded` and prepend a note 「→ 最新: {decision path}」 (search v3.2 reads the status and auto-demotes)
+
 ## Prohibited
 
 - ❌ Touching implementation code while writing the spec (design and implementation are strictly separated)
 - ❌ Leaving template variables `{{...}}` unfilled as "later" (fill with adopted interpretations and disclose in Step 7)
 - ❌ Proceeding on goal-fork-level ambiguity with an adopted interpretation (advance confirmation is mandatory)
 - ❌ Proceeding to implementation when only design was requested (stop at design)
+- ❌ Leaving a spec's Status as Draft after the implementation shipped (close it via the lifecycle above)
 
 ## Related
 

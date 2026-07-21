@@ -4,14 +4,14 @@ Each axis lists a judgment procedure (2-4 mechanically traceable steps), a pass 
 
 ## A1: Information minimality
 
-Checks whether SKILL.md carries information that execution does not need — history, background narrative, or self-evident generalities.
+Checks whether SKILL.md and each file under references/ carries information that execution does not need — history, background narrative, or self-evident generalities.
 
 Judgment procedure:
-1. Read the SKILL.md body and, paragraph by paragraph, ask whether it feeds a decision or a step.
+1. Read SKILL.md and every `.md` file under references/, and, paragraph by paragraph, ask whether it feeds a decision or a step.
 2. Flag paragraphs that feed neither (backstory, generic preambles).
 3. Cross-check `skill-audit-metrics.sh`'s line/byte counts against the actual number of steps to gauge density.
 
-Pass criterion: every paragraph in the body feeds either a decision or an execution step. No paragraph is there purely for execution-irrelevant context.
+Pass criterion: every paragraph in SKILL.md and the references feeds either a decision or an execution step. No paragraph is there purely for execution-irrelevant context.
 
 Representative violation: a backstory paragraph like "this skill was created by merging a legacy skill" persists in the body.
 
@@ -22,7 +22,7 @@ Checks for change history, author notes, TODOs, or process-history annotations (
 Judgment procedure:
 1. Check `skill-audit-metrics.sh`'s process-history pattern hits (the Japanese markers meaning "(latest)", "(new)", "newly added", "added this time", "previously was", "changed from", "in the old version").
 2. Judge whether each hit line is canonical content or leftover edit residue.
-3. Manually scan for TODOs, author notes, or review-comment-style sentences ("might be better to...").
+3. Manually scan for TODOs, author notes, or review-comment-style sentences ("might be better to...") (covers SKILL.md and every file under references/).
 
 Pass criterion: the body has no change history, author notes, TODOs, or process-history annotations.
 
@@ -43,15 +43,16 @@ Representative violation: the same execution procedure is written out in full in
 
 ## A4: Appropriateness of the execution-model directive
 
-Checks the odd.yaml declaration, and — for skills that launch an Agent — whether a model directive is present and consistent with `templates/model-policy.json`.
+Checks the odd.yaml declaration (only when ODD is adopted — ODD is an optional banto-originated mechanism), and — for skills that launch an Agent — whether a model directive is present and consistent with `templates/model-policy.json`.
 
 Judgment procedure:
-1. Check odd.yaml's `autonomy_level` declaration (must fall within L0-L3).
-2. Check whether the skill launches an Agent (whether `allowed-tools` includes Agent).
-3. If it does, check `skill-audit-metrics.sh`'s model-directive extraction (`model:` / `model=` lines).
-4. Cross-check the role against model-policy.json (roles: design=inherit / implement=sonnet / mechanical=haiku / audit=opus).
+1. Check whether TARGET has an odd.yaml. If not, Glob the sibling skills (`../*/odd.yaml`): if at least one exists, flag WARN as partial-adoption drift; if none exist, treat ODD as not adopted and mark the odd items N/A (judge with steps 3+ only; presence itself is never a violation).
+2. If odd.yaml exists, check its `autonomy_level` declaration (must fall within L0-L3).
+3. Check whether the skill launches an Agent (whether `allowed-tools` includes Agent).
+4. If it does, check `skill-audit-metrics.sh`'s model-directive extraction (`model:` / `model=` lines).
+5. Cross-check the role against model-policy.json (roles: design=inherit / implement=sonnet / mechanical=haiku / audit=opus).
 
-Pass criterion: every Agent launch carries a model directive matching its role (judgment work uses opus, implementation work uses sonnet, mechanical search uses haiku). odd.yaml's `autonomy_level` is L0-L3.
+Pass criterion: every Agent launch carries a model directive matching its role (judgment work uses opus, implementation work uses sonnet, mechanical search uses haiku). When ODD is adopted, odd.yaml's `autonomy_level` is L0-L3 (when not adopted, the odd items are N/A).
 
 Representative violation: a judgment-role Agent launch has no model directive and is left to the default model.
 
@@ -73,7 +74,7 @@ Representative violation: the description is so abstract it has no trigger phras
 Checks the stated target host/model. Absent any statement, assume Claude (Claude Code) and pass if the body is consistent with that. A skill that states "general-purpose" fails if Claude-specific wording remains.
 
 Judgment procedure:
-1. Check whether the skill body states a target host/model ("general-purpose", "ChatGPT", "another AI," etc.).
+1. Check whether the skill body (SKILL.md + references/) states a target host/model ("general-purpose", "ChatGPT", "another AI," etc.).
 2. If no statement is present, assume Claude (Claude Code).
 3. For skills stating "general-purpose," check `skill-audit-metrics.sh`'s Claude-specific token counts (Task / Skill / CLAUDE_PLUGIN_ROOT / hook, etc.).
 4. Judge whether the statement is consistent with the body's actual content (delegate the subjective call to an Agent).
@@ -87,7 +88,7 @@ Representative violation: a skill states "general-purpose, works with any AI" wh
 Checks whether the safety/quality discipline the skill's prose promises is clearly split between what a hook should enforce (or already enforces) and what remains a prose-level convention.
 
 Judgment procedure:
-1. Enumerate the safety/quality discipline the skill's prose promises (enforcement wording such as "must" / "never").
+1. Enumerate the safety/quality discipline the skill's prose (SKILL.md + references/; also scripts/ docstrings, if present) promises (enforcement wording such as "must" / "never").
 2. Cross-check whether that discipline is already enforced by an existing hook (e.g. egress-guard.sh / lint-guard.sh / odd-kill-switch.sh).
 3. Flag any enforcement wording not covered by a hook as a hook-enforcement candidate.
 

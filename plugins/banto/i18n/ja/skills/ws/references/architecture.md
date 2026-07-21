@@ -12,7 +12,7 @@
 
 ```
 {base}/                            （store: ~/ai-context-store/<project>/ または ~/ai-context-local/<project>/）
-├── WORKSPACE.md                   ← 軽量ポインタ（per-checkout ローカル・gitignore。WS名+ブランチ+実体パス）
+├── WORKSPACE.md                   ← 非 git 環境用ポインタ fallback（実効ポインタは <git-dir>/banto-ws-pointer.md・per-checkout）
 ├── WORKSPACE-refs.md              ← /ws multi 時のみ存在（参照 WS の一覧・ローカル）
 ├── DASHBOARD.md                   ← hook 管理の鳥瞰図（ローカル・gitignore）
 └── workspaces/
@@ -25,6 +25,6 @@
         └── old/                   ← 完了 WS（cold memory）
 ```
 
-**設計方針（B2）**: `WORKSPACE.md` は **symlink ではなく軽量ポインタ**（プレーンファイル）。中央 store は cwd 外にあり相対 symlink が worktree 跨ぎで壊れるため symlink を廃止（設計判断済み）。プレーンファイルなので **Windows fallback も不要**。
+**設計方針（B2）**: WS ポインタは **symlink ではなく軽量ポインタ**（プレーンファイル）。実体は `<git-dir>/banto-ws-pointer.md`（per-checkout・worktree ごとに独立）で、非 git 環境のみ `{base}/WORKSPACE.md` を fallback に使う。中央 store は cwd 外にあり相対 symlink が worktree 跨ぎで壊れるため symlink を廃止（設計判断済み）。プレーンファイルなので **Windows fallback も不要**。
 
 **legacy 互換**: 未移行案件は `workspaces/*.md` 直下（旧構成）のまま。hook が読取フォールバックで無破壊維持し、本 skill も legacy 構成を検出したら従来パスで操作する。

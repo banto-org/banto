@@ -3,7 +3,7 @@
 
 schema_version: 1
 skill: diagram
-autonomy_level: L1  # 軽量ユーティリティ（reference 参照のみ。レンダ実行は html-doc skill 側）
+autonomy_level: L1  # 軽量ユーティリティ（reference 参照のみ。レンダ実行は呼び出し元）
 
 in_scope:
   - mermaid / draw.io / 手描き SVG のどれを選ぶかの判断基準の提示
@@ -11,9 +11,9 @@ in_scope:
   - mermaid で崩れるレイアウトに対する手描き SVG の作法（viewBox・グリッド・配色）の提示
 
 out_of_scope:
-  - HTML 資料全体の生成・レンダ手順そのもの（html-doc skill）
+  - HTML 資料全体の生成（docs skill）
   - Figma 上での図表作成（figma-generate-diagram skill）
-  - 図の自動レンダリング実行（呼び出し元が html-doc skill の render-diagram.sh を使う）
+  - 図の自動レンダリング実行（呼び出し元が references/render-pipeline.md の手順で scripts/render-diagram.sh を使う）
 
 safety_boundaries:
   - 本 skill 自体はファイルを書かない（reference を Read し、呼び出し元が成果物に反映する）

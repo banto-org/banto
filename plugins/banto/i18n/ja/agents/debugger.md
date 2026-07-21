@@ -33,7 +33,7 @@ memory: project
 
 ## odd-gate（連続テスト失敗ブロック）下で呼び出された場合
 
-テストが繰り返し失敗し、odd-gate が Write/Edit をブロックしている状況で呼び出された場合:
+テストが繰り返し失敗し、odd-gate が Write/Edit をブロックしている状況（opt-in の `ODD_TEST_FAILURE_GATE=1` 有効時のみ発生）で呼び出された場合:
 - **Read / Grep / Glob のみ**で根本原因を特定し、**修正案を（diff として）親に返してから終了する**（Edit は使わない — ブロックされる）
 - 修正の適用は親セッションの責任です。必要に応じて、「`ODD_ALLOW_TEST_FAILURES=1` で一時的にエスケープ可能（理由の明記を条件とする）」と親に助言する
 

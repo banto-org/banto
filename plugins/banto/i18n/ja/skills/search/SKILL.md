@@ -66,6 +66,7 @@ python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_search_rank.py" \
 
 - 出力 JSON の `confident: false`（top score < 1.0）は**ゼロヒット**として扱う → Step 4 へ
 - `confident: true` → Step 3 へ
+- `results` の提示順は **newest-first**（v3.1）：スコアは関連ゲート（top-N 選抜）にのみ使われ、並びはファイル名日付の降順。一次文書が派生記録（`derived: true`）より先、無日付は末尾。各行に `date` / `age_days` / `status`（front-matter 由来。`superseded` / `stale` は score ×0.3 + 末尾へ降格 — v3.2）が付く — **上から順に読む = 最新から読む**
 
 ### Step 2.5: 3 層取得（トークン予算の制御。ヒット過多 / 全件俯瞰のとき）
 
@@ -79,7 +80,7 @@ python3 "$CLAUDE_PLUGIN_ROOT/scripts/ai_context_search_rank.py" \
 
 出力は `{confident, layers:{index, timeline, full}}`（`--layered` 無しの `{confident, results}` は従来どおり・互換）。各層の読み方と表示順：
 
-1. **index（最安・まず読む）**：上位 `--index-top` 件を `path / score / terms（一致語）` の 1 行に圧縮した索引。まずこれだけ提示し、開く候補を絞る
+1. **index（最安・まず読む）**：上位 `--index-top` 件を `path / date / age_days / score / terms（一致語）` の 1 行に圧縮した索引。まずこれだけ提示し、開く候補を絞る
 2. **timeline（時系列の文脈）**：全ヒットをファイル名先頭の日付（`YYYY-MM-DD`）で **新しい順** に並べた列。経緯・supersede 関係の俯瞰に使う（日付の無いものは末尾）
 3. **full（最後・Read 直前）**：従来の `score / path / hits` 詳細行。index と timeline で開くと決めたファイルだけを Read する
 
@@ -109,14 +110,14 @@ sh "$CLAUDE_PLUGIN_ROOT/scripts/store-query.sh" --related <relpath の一意な�
 - 芋づった先の decision を Read で検証してから Step 3 へ進む（派生記録の内容だけで答えない）
 - R8 実測の教訓：checkpoint / 台帳への誤着地から一次文書へ遡れず誤答した。派生記録で止めない。
 
-### Step 3: 検証（Read して判断）
+### Step 3: 検証（最新から Read して判断）
 
-上位 3〜5 ファイルを Read し、**関連性を自分で判断**する：
+提示順の先頭（= 最新の一次文書）から 3〜5 ファイルを Read し、**関連性を自分で判断**する。**答えの既定は最新ヒット**で、古いヒットは経緯の補強にのみ使う：
 
+- **最新から読む**：先頭ヒットを Read → 過去の経緯が必要なときだけ、その front-matter の `supersedes:` / `relates:` と Step 2.8 の `--related` で遡る。古い方を根拠に答えない。`age_days` の大きい情報**だけ**で答えるときは、その古さを報告に明示する
 - 多義語の不一致を除外する（例：「harness」が配線を意味するドキュメント）
 - 自己参照を除外する（いま書いている当のドキュメント、クエリを引用しただけの評価表）
-- supersede 関係を確認する（古い決定が新しい決定に上書きされていないか？）
-- 派生記録に着地していないか確認する — 着地したら Step 2.8 の `--related` で一次文書へ遡る
+- 派生記録（`derived: true` — checkpoint / [Status] / [Index] 等）に着地していないか確認する — 着地したら `--related` で一次文書へ遡る
 - ヒットが `[Ref]` カード（doc_type=ref）なら実体はリモート — 中身が要るときは `research` で本文を取り込む
 
 ### Step 4: ゼロヒット時の 2 巡目（1 回だけ）
@@ -168,7 +169,7 @@ Step 7 の報告で追記の有無を必ず申告する（省略を可視化す�
 - {summary of matched context}
 
 ### Notes
-- {supersede relations, explicit "not confident", etc.}
+- {supersede relations, staleness disclosure (age_days) when answering from old hits only, explicit "not confident", etc.}
 
 ### Search method: {fast (ranking vN) / fast+layered (index→timeline→full) / fts5 (store-query.sh, project|all) / deep (haiku xN parallel, wall time Xs) / cross-store: {store names,...}}
 

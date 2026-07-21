@@ -23,7 +23,7 @@ compatibility: Claude Code (requires bash, git, jq)
 |---|---|---|
 | `bootstrap` | store の作成 / 登録 + 仮ローカル（`ai-context-local`）→ store 移行（init を吸収） | 下記「store ブートストラップ」 |
 | `local` | この repo をローカル固定（mapping `local:true`。bootstrap / 移行で GitHub へ送らない） | 下記「ローカル固定」 |
-| `doctor` | 健全性診断（status を統合・書き込みなし。store health lint を呼ぶ） | `references/doctor.md` |
+| `doctor` | 健全性診断（status 統合・書き込みなし。store health lint + 横断の移行ステータス〔中央未昇格プロジェクト〕を呼ぶ） | `references/doctor.md` |
 | `sort` | `{base}/` 内の誤配置ファイルを対話的に振り分け（書き込みあり） | `references/sort.md` |
 | `sort project` | プロジェクト全体の散在ドキュメントを整理 | `references/sort.md` |
 | `next` | 次の未完了タスクを特定し実装まで完遂 | `references/task-lifecycle.md` |
@@ -37,7 +37,7 @@ compatibility: Claude Code (requires bash, git, jq)
 
 引数が空または不明な場合は使い方を表示する。
 
-**自然言語からの発火**: 明示サブコマンドに加えて、文脈から自動ルーティングする: 「続き」「次」「次のタスク」「進めて」 / "continue", "next", "next task", "go ahead" → `next`; 「ドキュメント整理」「散らかってる」 / "organize the docs", "it's a mess" → `sort project`; 「Phase 完了」 / "phase done" → `phase-done`; 「メモして」「書き留めて」「この会話を要約して保存」 → `memo`; 「ナレッジにして」「ナレッジ昇格」「下書き一覧」「教訓として残して」 → `knowledge`; 「store を作って」「ai-context-store をセットアップ」「GitHub に上げたい」・SessionStart hook の bootstrap 案内 → `bootstrap`; 「この repo はローカルだけで」「GitHub に上げないで」「ローカル固定」 → `local`; 「健康診断」「健全性チェック」「状態を見せて」「何があるか教えて」 → `doctor`; 「このリポジトリでは PR 作成を許可して」「本番作業を許可」「push を常設許可」「常設許可」「許可設定」 → 「常設許可（grants）」。
+**自然言語からの発火**: 明示サブコマンドに加えて、文脈から自動ルーティングする: 「続き」「次」「次のタスク」「進めて」 / "continue", "next", "next task", "go ahead" → `next`; 「ドキュメント整理」「散らかってる」 / "organize the docs", "it's a mess" → `sort project`; 「Phase 完了」 / "phase done" → `phase-done`; 「メモして」「書き留めて」「この会話を要約して保存」 → `memo`; 「ナレッジにして」「ナレッジ昇格」「下書き一覧」「教訓として残して」 → `knowledge`; 「store を作って」「ai-context-store をセットアップ」「GitHub に上げたい」・SessionStart hook の bootstrap 案内 → `bootstrap`; 「この repo はローカルだけで」「GitHub に上げないで」「ローカル固定」 → `local`; 「健康診断」「健全性チェック」「状態を見せて」「何があるか教えて」「未移行を確認」「移行できてないもの」「移行状況」 → `doctor`; 「このリポジトリでは PR 作成を許可して」「本番作業を許可」「push を常設許可」「常設許可」「許可設定」 → 「常設許可（grants）」。
 
 **中央 store 運用（チーム / 複数プロジェクト）**: 中央 store の集約・同期・チーム運用（セットアップ → 移行 `migrate` → 参照 → push）の end-to-end 手順は [`references/central-store-guide.md`](references/central-store-guide.md) にある。
 

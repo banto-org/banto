@@ -23,7 +23,7 @@ Stated AI: if the skill body carries no explicit statement ("general-purpose", "
 ## Execution
 
 1. Run `scripts/skill-audit-metrics.sh` per [`references/procedure.md`](references/procedure.md) to get the mechanical measurements.
-2. Judge each of the 7 axes in [`references/axes.md`](references/axes.md) against the measurements plus what you Read from TARGET.
+2. Judge each of the 7 axes in [`references/axes.md`](references/axes.md) against the measurements plus what you Read from TARGET (SKILL.md and every file under references/; also scripts/ docstrings, if present).
 3. Delegate axes with a subjective judgment call (e.g. A6, stated-AI consistency) to an Agent (general-purpose, model: opus) — the Reviewer = Fresh Agent principle, the same one plugin-audit and harness-audit use.
 4. Report each axis as PASS / WARN / FAIL with a supporting line number and a one-sentence fix proposal (report format in procedure.md).
 

@@ -38,6 +38,19 @@ if [ ! -d "$SKILLS_DIR" ]; then
     exit 0
 fi
 
+# Adoption gate: ODD is an optional (banto-originated) mechanism, not part of the official
+# plugin spec. A plugin with no skills/*/odd.yaml at all has not adopted it — report N/A
+# instead of per-skill warns. Risk-driven adoption recommendation (with the what/effect/
+# merit/demerit explanation) is the audit agent's job: scoring.md Axis 10.
+ADOPTED=0
+for d in "$SKILLS_DIR"/*/; do
+    [ -f "${d}odd.yaml" ] && { ADOPTED=1; break; }
+done
+if [ "$ADOPTED" -eq 0 ]; then
+    echo "N/A — ODD not adopted (no skills/*/odd.yaml under \`$PLUGIN_DIR\`; optional mechanism, nothing to lint)"
+    exit 0
+fi
+
 # Allowed top-level keys (mirror of templates/odd/odd.schema.yaml properties).
 ALLOWED=" schema_version skill autonomy_level in_scope out_of_scope safety_boundaries kill_switch_conditions approval_gates metrics "
 REQUIRED="schema_version skill autonomy_level in_scope out_of_scope"

@@ -46,6 +46,19 @@ lint の出力をそのまま「health」セクションとして報告する。
 
 > **interface（WT-C）**: `scripts/ai-context-lint.sh [cwd]` は cwd（省略時 $PWD）から base を解決し、decisions/ の高確度な不健全（リンク切れ / 孤立 / 矛盾候補 / 陳腐化）を**検出して列挙するのみ**で、自動修正はしない。
 
+## 移行ステータス（横断・未移行の可視化）
+
+「どのプロジェクトがまだ中央 store（GitHub 連携）へ移行できていないか」を横断で列挙する（読み取りのみ）。未登録 repo は非ブロッキングで一時ローカル store（`~/ai-context-local/`）に自動作成されるため、GitHub 連携せず気づかないまま溜まりうる。それを表面化する:
+
+```bash
+sh "$CLAUDE_PLUGIN_ROOT/scripts/ai-context-migration-status.sh" "$PWD" 2>/dev/null || echo "(jq 不在 → スキップ)"
+```
+
+出力をそのまま「移行ステータス」セクションとして報告する。内訳:
+- **昇格候補**（`local:false`・中央未登録）: 一時ローカルのまま。各 repo で「GitHub に上げたい」（`/ai-context bootstrap`）で中央へ追記移行。decisions / docs 件数を併記するので、実データを持つものを優先できる。
+- **ローカル固定**（`local:true`）: 意図的にローカルのみ。昇格不要。
+- **現 repo の in-repo `.ai-context/` 残存**: セッション開始時に中央へ自動コピー（非破壊）される旨を通知。
+
 ## 診断項目（base 範囲）
 
 **A. 欠損ディレクトリ**

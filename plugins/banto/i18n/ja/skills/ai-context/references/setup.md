@@ -26,7 +26,7 @@ repo 内の既存 `.ai-context/`（legacy 案件）の資産を中央 store（`~
    `PROJ=$(basename "$(sh "$CLAUDE_PLUGIN_ROOT/scripts/_ai-context-paths.sh" --derive <abs-path>)")`
    → `.mapping.json` の `.projects[<abs-path>] = {"project": $PROJ}`（未登録時のみ追加）。
 2. **dry-run**: `sh "$CLAUDE_PLUGIN_ROOT/scripts/migrate-to-store.sh" <path>` で移行対象を確認。
-3. **apply**: `... --apply <path>`（repo 内 `.ai-context/` 配下の**全ファイル**を copy = decisions/docs/tasks/archive/audit/concept 等 + `WORKSPACE.md` / `config.json`。再生成物（`*-combined.txt`）・`.obsidian/`・`.git/`・`.DS_Store` は除外。既存はスキップ。v5.21.7+）。
+3. **apply**: `... --apply <path>`（repo 内 `.ai-context/` 配下のファイルを copy = decisions/docs/tasks/archive/audit/concept 等 + `config.json`。`WORKSPACE.md` / `WORKSPACE-refs.md` / `DASHBOARD.md`（checkout ローカルのポインタ）と再生成物（`*-combined.txt`）・`.obsidian/`・`.git/`・`.DS_Store` は除外。既存はスキップ。v5.21.7+）。
 4. **検索層**: hook が自動再生成（手動不要）。
 5. **報告**: 移行ファイル数 / store path / 元 legacy は保持（撤去は hook が自動化）。
 

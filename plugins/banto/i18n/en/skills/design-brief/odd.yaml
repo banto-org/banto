@@ -11,8 +11,8 @@ in_scope:
   - Presenting combined visual-style and tone-and-manner specifications
 
 out_of_scope:
-  - Generating HTML/code itself (html-doc skill or the implementation phase)
-  - Adjusting prose for a reader's technical level (ja-writing skill's audience-levels.md)
+  - Generating HTML/code itself (docs skill or the implementation phase)
+  - Adjusting prose for a reader's technical level (docs skill's audience-levels.md)
   - Persisting the design brief (left to the caller / spec skill)
   - Creating diagrams (diagram skill)
 

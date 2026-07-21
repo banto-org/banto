@@ -138,4 +138,18 @@ WS_CHECK_MSG
     fi
 fi
 
+# WS 鮮度リマインダー（decision 2026-07-17）: 新しい decision / spec の保存は WS 本文の古い記述を
+# 陳腐化させ得る。どの行が矛盾するかの意味判定は決定論では不可能なのでモデルへ委譲する（warn-only）。
+case "$FILE_PATH" in
+    */decisions/*.md|*/docs/specs/*.md)
+        if [ -f "$WS_FILE" ]; then
+            cat << WS_FRESH_MSG
+[Workspace freshness] A new decision/spec was saved. Re-read the current workspace.md body and
+check for statements this file has made stale (purpose / policy / notes). If found:
+strike them through (~~old text~~) and append 「→ 最新: $REL_PATH」. Never delete the old lines.
+WS_FRESH_MSG
+        fi
+        ;;
+esac
+
 exit 0

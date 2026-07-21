@@ -1,0 +1,27 @@
+# ODD Spec for policy
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: policy
+autonomy_level: L1  # 軽量ユーティリティ（policy console の起動と policy.json 編集）
+
+in_scope:
+  - 全 store × project のポリシー（grants / ignore）一覧 HTML の生成と表示（dashboard）
+  - 127.0.0.1 束縛の編集コンソール（serve）の起動・停止
+  - 会話からの policy.json 編集 + store 同期（GUI と同一正典）
+
+out_of_scope:
+  - 会話での単発の grants 変更のみ（ai-context skill の grants 管理）
+  - grants / ignore の効力解決・強制（release-guard / prod-guard / policy-guard hooks）
+  - store そのものの作成・移行（ai-context bootstrap / migrate）
+
+safety_boundaries:
+  - 書き込みは {store}/{project}/meta/policy.json のみ（serve の POST は列挙済み project 限定）
+  - serve は 127.0.0.1 束縛 + ランダムトークン必須（不一致は 403）
+  - store への同期は ai-context-sync.sh 経由（.ai-context-store マーカー必須の既存ガードに委譲）
+
+kill_switch_conditions:
+  - meta/policy.json 以外への書き込みを要求された場合
+  - 0.0.0.0 など外部束縛での serve 起動を要求された場合
+
+approval_gates: []

@@ -11,7 +11,7 @@ primary="<ws1>"
 references="<ws2> <ws3> ..."
 ```
 
-### Step 2: rewrite the primary's WORKSPACE.md (lightweight pointer)
+### Step 2: rewrite the primary's effective pointer (`<git-dir>/banto-ws-pointer.md`; WORKSPACE.md when non-git)
 
 Same procedure as `/ws switch <ws1>` (pointer Write + branch auto-switch), but **only warn even if there are uncommitted changes** (multi is draft-centric, so it is allowed).
 
@@ -56,7 +56,7 @@ To return to single mode, /ws solo.
 rm -f "{base}/WORKSPACE-refs.md"
 ```
 
-The pointer WORKSPACE.md (primary) stays as is, only references are deleted. Report: "Returned to single mode. primary: [scope] topic".
+The primary's effective pointer (`<git-dir>/banto-ws-pointer.md`; WORKSPACE.md when non-git) stays as is, only references are deleted. Report: "Returned to single mode. primary: [scope] topic".
 
 ## multi-mode hook integration (design note)
 

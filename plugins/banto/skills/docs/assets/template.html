@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI文章の品質チェック 実践ガイド</title>
+<style>
+  :root{
+    --bg:#FAF7F1; --card:#ffffff; --ink:#000000; --ink-soft:#404040; --line:#DDE1E6;
+    --accent:#113160; --accent-soft:#E8EDF5; --accent-2:#FF9900;
+    --warn-bg:#FFF6E5; --good-bg:#E9F6EF; --bad-bg:#FFEFEF;
+    --shadow:0 1px 2px rgba(17,49,96,.05),0 8px 24px rgba(17,49,96,.05);
+    --radius:14px; --maxw:820px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic","Meiryo",system-ui,sans-serif;
+    line-height:1.85;font-size:17px;letter-spacing:.01em;-webkit-font-smoothing:antialiased}
+  .progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--accent);z-index:100;transition:width .1s}
+  header.hero{padding:56px 20px 24px;text-align:center;max-width:var(--maxw);margin:0 auto}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;color:var(--accent);
+    background:var(--accent-soft);padding:5px 12px;border-radius:999px;font-weight:700}
+  h1{font-size:2.0rem;line-height:1.35;margin:.6em 0 .3em;font-weight:800}
+  .lede{color:var(--ink-soft);font-size:1.03rem;margin:0 auto;max-width:640px}
+  .bigmd{margin-top:18px;background:var(--accent);color:#fff;border:none;border-radius:10px;
+    padding:10px 20px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+  .bigmd:hover{background:#0B3E8D}
+  main{padding-bottom:60px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:32px 30px;margin:20px auto;max-width:var(--maxw);position:relative}
+  h2{font-size:1.45rem;margin:.1em 0 .2em;font-weight:800;line-height:1.4}
+  h2 .num{color:var(--accent);font-weight:800;margin-right:.4em}
+  .part-tag{font-size:12.5px;letter-spacing:.12em;color:var(--accent);font-weight:700;text-transform:uppercase}
+  h3{font-size:1.14rem;margin:1.8em 0 .5em;font-weight:700;border-left:4px solid var(--accent);padding-left:12px;line-height:1.5}
+  h4{font-size:1.0rem;margin:1.3em 0 .3em;font-weight:700}
+  p{margin:.7em 0}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(24,107,96,.3)}
+  a:hover{border-bottom-color:var(--accent)}
+  ul,ol{padding-left:1.3em;margin:.6em 0}
+  li{margin:.35em 0}
+  .soft{color:var(--ink-soft)}
+
+  .t{border-bottom:2px dotted #0B3E8D;cursor:help;position:relative;font-weight:600}
+  .t .tip{visibility:hidden;opacity:0;position:absolute;bottom:135%;left:50%;transform:translateX(-50%);
+    background:#14273E;color:#E8EDF5;padding:10px 13px;border-radius:9px;
+    font-size:13px;line-height:1.65;font-weight:400;width:min(300px,78vw);z-index:60;
+    transition:opacity .15s;box-shadow:0 6px 18px rgba(0,0,0,.25);pointer-events:none}
+  .t .tip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);
+    border:7px solid transparent;border-top-color:#14273E}
+  .t:hover .tip,.t:focus .tip{visibility:visible;opacity:1}
+
+  .src{font-size:11.5px;color:var(--accent);border:1px solid #C9D6E8;background:var(--accent-soft);
+    border-radius:999px;padding:1px 8px;margin-left:4px;white-space:nowrap;vertical-align:1px}
+  .src:hover{background:#D9E3F2}
+
+  .legend{background:#F4F7FB;border:1px solid #C9D6E8;border-radius:12px;padding:16px 20px;margin:18px auto 0;
+    max-width:var(--maxw);font-size:14.5px}
+  .legend b{color:#0B3E8D}
+  .keybox{background:var(--accent-soft);border:1px solid #C9D6E8;border-radius:12px;padding:20px 22px;margin:8px 0 4px}
+  .keybox h4{margin:0 0 .4em;color:var(--accent)}
+  .note{border-radius:10px;padding:14px 16px;margin:16px 0;font-size:15.5px;line-height:1.7}
+  .note.good{background:var(--good-bg);border:1px solid #87E7B0}
+  .note.warn{background:var(--warn-bg);border:1px solid #EDC58F}
+  .note .lab{font-weight:700;display:block;margin-bottom:2px}
+  .caveat{font-size:14px;color:var(--ink-soft);background:#F0F2F5;border-left:3px solid #C8C8CB;padding:10px 14px;border-radius:6px;margin:14px 0}
+
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+  .ba .cell{border-radius:10px;padding:14px 16px;font-size:15px;line-height:1.7}
+  .ba .before{background:var(--bad-bg);border:1px solid #FFD1D1}
+  .ba .after{background:var(--good-bg);border:1px solid #87E7B0}
+  .ba .tag{font-weight:700;font-size:12.5px;letter-spacing:.06em;display:block;margin-bottom:6px}
+  .ba .before .tag{color:#B32800}
+  .ba .after .tag{color:#113160}
+  @media(max-width:640px){.ba{grid-template-columns:1fr}}
+
+  .tw{overflow-x:auto;margin:18px 0}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:480px}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:#EEF1F5;font-weight:700}
+  tbody tr:nth-child(even){background:#FAF8F3}
+
+  figure{margin:22px 0;padding:18px;background:#FCFBF8;border:1px solid var(--line);border-radius:12px}
+  figcaption{font-size:13.5px;color:var(--ink-soft);margin-top:10px;text-align:center;line-height:1.7}
+  svg{display:block;margin:0 auto;max-width:100%;height:auto}
+
+  .check{list-style:none;padding-left:0}
+  .check li{position:relative;padding-left:30px;margin:.5em 0}
+  .check li::before{content:"✓";position:absolute;left:0;top:0;color:var(--accent);font-weight:800}
+
+  code{background:#EEF1F5;padding:1px 6px;border-radius:5px;font-size:14px;
+    font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace}
+  .promptbox{background:#14273E;border-radius:12px;padding:18px 20px;margin:16px 0;
+    font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:13.5px;line-height:1.75;color:#E8EDF5;overflow-x:auto}
+  .promptbox .c{color:#8FA5C4}
+  .gl dt{font-weight:700;margin-top:14px}
+  .gl dt .en{font-weight:400;color:var(--ink-soft);font-size:13px;margin-left:6px}
+  .gl dd{margin:2px 0 0 0;font-size:15px;color:#404040}
+  footer{max-width:var(--maxw);margin:0 auto;padding:26px 30px 60px;color:var(--ink-soft);font-size:13.5px}
+  .srcgrid a{display:block;padding:4px 0}
+  hr.s{border:none;border-top:1px solid var(--line);margin:24px 0}
+
+  /* ▼ セクションMDボタン */
+  .mdbtn{position:absolute;top:16px;right:16px;font-size:11.5px;border:1px solid var(--line);
+    background:#F0F2F5;border-radius:7px;padding:3px 10px;cursor:pointer;color:var(--ink-soft);font-family:inherit}
+  .mdbtn:hover{border-color:var(--accent);color:var(--accent)}
+
+  /* ▼ Notion風 右側目次 */
+  #tocw{position:fixed;top:50%;right:14px;transform:translateY(-50%);z-index:95}
+  #tocw .rail{display:flex;flex-direction:column;gap:7px;padding:10px 6px;cursor:pointer;align-items:flex-end}
+  #tocw .rail i{display:block;height:3px;border-radius:2px;background:#C8C8CB;width:22px;transition:.15s}
+  #tocw .rail i.l3{width:13px}
+  #tocw .rail i.on{background:var(--accent);width:26px}
+  #tocw .panel{display:none;position:absolute;right:38px;top:50%;transform:translateY(-50%);
+    background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);
+    padding:12px 8px;width:250px;max-height:72vh;overflow:auto}
+  #tocw:hover .panel,#tocw.open .panel{display:block}
+  #tocw .panel a{display:block;padding:5px 10px;border-radius:7px;color:var(--ink-soft);font-size:13px;border:none;line-height:1.5}
+  #tocw .panel a.l3{padding-left:24px;font-size:12.5px}
+  #tocw .panel a.on{background:var(--accent-soft);color:var(--accent);font-weight:700}
+  #tocw .panel a:hover{background:#EEF1F5}
+  #tocbtn{display:none;width:46px;height:46px;border-radius:50%;background:var(--accent);color:#fff;
+    border:none;box-shadow:var(--shadow);cursor:pointer;font-size:17px;align-items:center;justify-content:center}
+  @media(max-width:1120px){
+    #tocw{top:auto;bottom:18px;right:16px;transform:none}
+    #tocw .rail{display:none}
+    #tocbtn{display:flex}
+    #tocw .panel{position:fixed;right:16px;bottom:74px;top:auto;transform:none}
+  }
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+
+<!-- Notion風 右側目次（折りたたみ）。中身はJSが自動生成 -->
+<div id="tocw" aria-label="目次">
+  <div class="rail" id="tocrail" title="目次"></div>
+  <button id="tocbtn" aria-label="目次を開く">☰</button>
+  <nav class="panel" id="tocpanel"></nav>
+</div>
+
+<header class="hero">
+  <span class="eyebrow">PRACTICE GUIDE · 2026-07-19</span>
+  <h1>AI文章の品質チェック 実践ガイド</h1>
+  <p class="lede">AIが書いた文章を公開する前に、何を・どの順で確認するか。3つの典型問題と対策を、チェックリストとプロンプトまで落とし込んだ実務ガイド。</p>
+  <button class="bigmd" id="mdall">📄 全文をMarkdownでダウンロード</button>
+</header>
+
+<div class="legend">
+  <b>この資料の読み方</b> ――
+  ① <span class="t" tabindex="0">点線の語<span class="tip">このように、ホバー（スマホはタップ）すると短い説明が出ます。</span></span>はホバー/タップで意味が出ます。
+  ② 主張の直後の「出典↗」は一次情報へのリンクです。
+  ③ <b>画面右端のバー</b>にカーソルを載せると目次が開きます（スマホは右下の☰）。
+  ④ 各セクション右上の「MD↓」で、そのセクションだけをMarkdownで保存できます。
+</div>
+
+<main>
+
+<section id="s1">
+  <div class="part-tag">STEP 1 ― 知る</div>
+  <h2><span class="num">1</span>AI文章の3つの典型問題</h2>
+  <p>AIが書いた文章には、直すべき箇所に型がある。まず3つの型を知れば、レビューは速くなる。</p>
+
+  <h3>問題① 中身の薄い決まり文句</h3>
+  <p>低品質なAI生成文は<span class="t" tabindex="0">AIスロップ<span class="tip">AI slop。slop は「残飯」。流暢だが情報の薄いAI生成文の蔑称。2025年に辞書出版社 Merriam-Webster の「今年の単語」に選ばれた。</span></span>と呼ばれ、研究では「情報の有用性・情報の質・文体の質」の3軸で測定される<a class="src" href="https://arxiv.org/abs/2509.19163" target="_blank" rel="noopener">Shaib+ 2025↗</a>。日本語では「〜を最適化」「〜を実現」「〜を推進」のような、<strong>具体的な動作が見えない動詞</strong>が典型。読んだ気にはなるが、何をするのか分からない。</p>
+
+  <h3>問題② 未定義・誤展開の略語</h3>
+  <p>読み手が知らない略語をいきなり使う。さらに、実在の略語を文脈依存で取り違える（AIが事実でないことをもっともらしく書く<span class="t" tabindex="0">ハルシネーション<span class="tip">hallucination（幻覚）。AIが事実に基づかない内容を、もっともらしい断定調で生成してしまう現象の総称。略語の誤展開もその一類型。</span></span>の一類型）。医療分野では <code>BP</code> を血圧（blood pressure）と生検（biopsy）で取り違えた例が報告されている<a class="src" href="https://www.medrxiv.org/content/10.1101/2025.02.28.25323115v1.full" target="_blank" rel="noopener">医療AI研究↗</a>。</p>
+
+  <h3>問題③ その一文だけでは意味が取れない文</h3>
+  <p>「これ」「それ」の指す先が遠く、文を単独で読むと意味が取れない。AIは長い文脈の<strong>中盤</strong>の情報を見落としやすく（<span class="t" tabindex="0">Lost in the Middle<span class="tip">「真ん中で迷子」現象。AIは入力の冒頭と末尾はよく参照するが、中盤の情報を見落としやすい。曖昧な指示語が生まれる一因。</span></span><a class="src" href="https://aclanthology.org/2024.findings-acl.890/" target="_blank" rel="noopener">ACL 2024↗</a>）、これが曖昧な指示語の一因になる。</p>
+  <div class="ba">
+    <div class="cell before"><span class="tag">✗ 単独で読めない</span>これにより、それらは大幅に改善されます。</div>
+    <div class="cell after"><span class="tag">✓ 主語と対象を明示</span>この自動化により、経理チームの月次締め作業は約6時間短縮されます。</div>
+  </div>
+</section>
+
+<section id="s2">
+  <div class="part-tag">STEP 2 ― 直す</div>
+  <h2><span class="num">2</span>対策の3つの柱</h2>
+  <p>3つの問題には、それぞれ1対1で対応する対策がある。</p>
+
+  <figure>
+    <svg viewBox="0 0 620 280" role="img" aria-label="AI文章の3つの問題と3つの対策の対応図">
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="#113160"/></marker></defs>
+      <text x="140" y="26" font-size="13.5" font-weight="700" text-anchor="middle" fill="#B32800">問題</text>
+      <text x="480" y="26" font-size="13.5" font-weight="700" text-anchor="middle" fill="#113160">対策</text>
+      <rect x="30" y="40"  width="220" height="46" rx="9" fill="#FFEFEF" stroke="#FFD1D1"/>
+      <text x="140" y="60" font-size="13" text-anchor="middle" fill="#B32800">① 中身の薄い決まり文句</text>
+      <text x="140" y="77" font-size="11.5" text-anchor="middle" fill="#B32800">「〜を最適化」「〜を実現」</text>
+      <rect x="30" y="104" width="220" height="46" rx="9" fill="#FFEFEF" stroke="#FFD1D1"/>
+      <text x="140" y="124" font-size="13" text-anchor="middle" fill="#B32800">② 未定義・誤展開の略語</text>
+      <text x="140" y="141" font-size="11.5" text-anchor="middle" fill="#B32800">「BP」「2FA」をいきなり使う</text>
+      <rect x="30" y="168" width="220" height="46" rx="9" fill="#FFEFEF" stroke="#FFD1D1"/>
+      <text x="140" y="188" font-size="13" text-anchor="middle" fill="#B32800">③ 単独で読めない文</text>
+      <text x="140" y="205" font-size="11.5" text-anchor="middle" fill="#B32800">「これ」「それ」の指す先が不明</text>
+      <rect x="370" y="40"  width="220" height="46" rx="9" fill="#E9F6EF" stroke="#87E7B0"/>
+      <text x="480" y="60" font-size="13" text-anchor="middle" fill="#1D7A4E">具体的な動作・数値に置換</text>
+      <text x="480" y="77" font-size="11.5" text-anchor="middle" fill="#113160">「月6時間短縮する」</text>
+      <rect x="370" y="104" width="220" height="46" rx="9" fill="#E9F6EF" stroke="#87E7B0"/>
+      <text x="480" y="124" font-size="13" text-anchor="middle" fill="#1D7A4E">初出で定義 ＋ 用語集</text>
+      <text x="480" y="141" font-size="11.5" text-anchor="middle" fill="#113160">「二要素認証（2FA）」</text>
+      <rect x="370" y="168" width="220" height="46" rx="9" fill="#E9F6EF" stroke="#87E7B0"/>
+      <text x="480" y="188" font-size="13" text-anchor="middle" fill="#1D7A4E">一文を自己完結させる</text>
+      <text x="480" y="205" font-size="11.5" text-anchor="middle" fill="#113160">主語と対象を文の中に明示</text>
+      <line x1="252" y1="63"  x2="368" y2="63"  stroke="#113160" stroke-width="2" marker-end="url(#ah)"/>
+      <line x1="252" y1="127" x2="368" y2="127" stroke="#113160" stroke-width="2" marker-end="url(#ah)"/>
+      <line x1="252" y1="191" x2="368" y2="191" stroke="#113160" stroke-width="2" marker-end="url(#ah)"/>
+      <rect x="30" y="234" width="560" height="36" rx="9" fill="#EEF1F5" stroke="#DDE1E6"/>
+      <text x="310" y="257" font-size="13" text-anchor="middle" fill="#404040">共通の土台：スタイルガイド ＋ 公開前の人手レビュー</text>
+    </svg>
+    <figcaption>3つの問題と3つの対策は1対1で対応する。土台として、公開前の人手レビューを必ず挟む。</figcaption>
+  </figure>
+
+  <h3>柱① 決まり文句を具体語に置き換える</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th>✗ 薄い決まり文句</th><th>✓ 具体語</th></tr></thead>
+    <tbody>
+      <tr><td>業務を最適化する</td><td>締め作業を月6時間短縮する</td></tr>
+      <tr><td>顧客体験を向上させる</td><td>問い合わせの初回返信を24時間以内にする</td></tr>
+      <tr><td>ソリューションを提供する</td><td>請求書を自動発行する</td></tr>
+      <tr><td>シナジーを創出する</td><td>営業とサポートで顧客情報を1画面に統合する</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>柱② 略語は初出で定義し、用語集を持つ</h3>
+  <p>初出で「<strong>正式名称（略語）</strong>」の形にする。例：<code>二要素認証（2FA: Two-Factor Authentication）</code>。以降は略語でよい。Google・Microsoft・米国政府（18F）のガイドは共通して「専門語は避けられるなら避ける／避けられないなら初出で定義」の二段構えを取る<a class="src" href="https://developers.google.com/style/jargon" target="_blank" rel="noopener">Google↗</a><a class="src" href="https://guides.18f.gov/content-guide/our-style/abbreviations-and-acronyms/" target="_blank" rel="noopener">18F↗</a>。</p>
+
+  <h3>柱③ 一文を自己完結させる</h3>
+  <p>その一文だけを抜き出しても意味が通るように書く。Google のガイドは「<strong>名詞と代名詞が5語以上離れるなら、代名詞をやめて名詞を繰り返す</strong>」という具体的な基準を示す<a class="src" href="https://developers.google.com/style/pronouns" target="_blank" rel="noopener">Google↗</a>。この原則は、社内文書をAIに検索させる仕組み（<span class="t" tabindex="0">RAG<span class="tip">ラグ：Retrieval-Augmented Generation。社内文書などを検索し、その内容を根拠にAIが回答する仕組み。文書の断片が自己完結していないと検索精度が落ちる。</span></span>）の設計でも独立に再発見されている<a class="src" href="https://weaviate.io/blog/chunking-strategies-for-rag" target="_blank" rel="noopener">Weaviate↗</a>。<strong>人に分かりにくい文は、AIにも検索できない。</strong></p>
+</section>
+
+<section id="s3">
+  <div class="part-tag">STEP 3 ― 日本語特有</div>
+  <h2><span class="num">3</span>日本語チェックの4観点</h2>
+  <ul>
+    <li><strong>翻訳調</strong>：英語を一語ずつ直訳した不自然な言い回し（<span class="t" tabindex="0">カルク<span class="tip">calque（仏語）。外国語の表現を一語ずつ直訳して作られた借用表現。「あなた自身を置き換える」のような英語直訳調の日本語が典型。</span></span>）。機械的なチェックでは拾いにくく、文脈での読み直しが要る。</li>
+    <li><strong>通じない和製英語・カタカナ語</strong>：AIに渡す前に、元の日本語から曖昧なカタカナ語を排除しておくと、出力の精度も上がる。</li>
+    <li><strong>二重敬語・冗長表現</strong>：「お伺いさせていただきます」型。校正チェッカーの併用が有効。</li>
+    <li><strong>リズムの均一さ</strong>：日本語の実測研究（7モデル×406本を形態素解析）は、AIらしさの正体が語彙より<strong>文長・段落構造の均一さ</strong>にあると示した<a class="src" href="https://zenn.dev/coji/articles/natural-japanese-ai-smell-lint" target="_blank" rel="noopener">実測研究↗</a>。文の長さを意図的に変えると自然になる。</li>
+  </ul>
+  <div class="caveat">用語の表記は「日本で定着した語はカタカナ」（ワーキングメモリ、チャンク等）、「学術訳語が標準の語は漢字」（処理流暢性、認知負荷理論等）。読者にとっての定着語を基準に選ぶ。</div>
+</section>
+
+<section id="s4">
+  <div class="part-tag">STEP 4 ― 運用する</div>
+  <h2><span class="num">4</span>チェックリストとプロンプト</h2>
+
+  <h4>公開前チェックリスト</h4>
+  <ul class="check">
+    <li>調べないと分からない語が残っていないか。略語・専門語は<strong>初出で定義</strong>したか。</li>
+    <li>数値・研究・規格に、<strong>その場で出典（リンク）</strong>が付いているか。</li>
+    <li>各文は<strong>単独で読んでも</strong>意味が取れるか。</li>
+    <li>結論は先頭にあるか。一文は50〜60字以内・一文一義か。</li>
+    <li>「最適化」「実現」など<strong>中身の薄い決まり文句</strong>を具体語に直したか。</li>
+    <li>翻訳調・和製英語・二重敬語はないか。文の長さに<strong>変化</strong>があるか。</li>
+    <li>検証できない主張を残していないか。</li>
+  </ul>
+
+  <h4>そのまま使えるプロンプト指示</h4>
+  <div class="promptbox">
+<span class="c"># 読者と目的</span>
+読者は【対象読者・専門度】。目的は【読者にしてほしいこと】。
+
+<span class="c"># 文章ルール</span>
+- 結論を最初の一文で述べる。
+- 一文は一義。50〜60字を目安に短く。文の長さは意図的に変える。
+- 略語・専門語は初出で正式名称と定義を添える。
+- 各文は単独で意味が通るように書く。指示語は指す先が
+  同じ文か直前にある場合だけ使う。無ければ名詞を繰り返す。
+- 決まり文句（最適化/活用/実現/創出）を避け、具体的な動作・数値で書く。
+- 数値・研究・規格を挙げたら、その場に出典URLを添える。
+  </div>
+  <div class="note warn"><span class="lab">最後に一言</span>読みやすい文は「正しく」見えてしまう（処理流暢性の効果）。だからこそ、<strong>読みやすさと、内容の正しさは別々に検証する</strong>。</div>
+</section>
+
+<section id="s5">
+  <div class="part-tag">巻末</div>
+  <h2><span class="num">＋</span>用語集</h2>
+  <dl class="gl">
+    <dt>AIスロップ<span class="en">AI slop</span></dt>
+    <dd>流暢だが情報の薄いAI生成文の蔑称。2025年 Merriam-Webster「今年の単語」。<a href="https://arxiv.org/abs/2509.19163" target="_blank" rel="noopener">測定研究↗</a></dd>
+    <dt>ハルシネーション<span class="en">hallucination</span></dt>
+    <dd>AIが事実に基づかない内容を、もっともらしい断定調で生成する現象。略語の誤展開もその一類型。</dd>
+    <dt>Lost in the Middle</dt>
+    <dd>AIが入力文の中盤の情報を見落としやすい現象。曖昧な指示語が生まれる一因。<a href="https://aclanthology.org/2024.findings-acl.890/" target="_blank" rel="noopener">ACL 2024↗</a></dd>
+    <dt>RAG<span class="en">ラグ：Retrieval-Augmented Generation</span></dt>
+    <dd>社内文書などを検索し、その内容を根拠にAIが回答する仕組み。文書の断片が「自己完結した文」でないと検索精度が落ちる。</dd>
+    <dt>カルク<span class="en">calque ／ 翻訳調</span></dt>
+    <dd>外国語の表現を一語ずつ直訳して作られた不自然な言い回し。AI生成の日本語に混入しやすい。</dd>
+    <dt>初出定義<span class="en">define on first use</span></dt>
+    <dd>略語・専門語を最初に使う箇所で「正式名称（略語）」の形で定義する原則。Google・Microsoft・18F のガイドで共通。</dd>
+  </dl>
+</section>
+
+</main>
+
+<footer>
+  <hr class="s">
+  <p><strong>関連資料（このプロジェクト内）</strong></p>
+  <div class="srcgrid">
+    <a href="[Guide]%20readable-writing-and-diagrams-2026-07-19.html">読みやすい文章と分かりやすい図（本編・全出典つき）</a>
+    <a href="guides/[Guide]%20ai-writing-countermeasures-2026-07-19.md">AI文章対策ガイド（Markdown版）</a>
+    <a href="research/2026-07-19_ai-jargon-standalone-sentences.md">元リサーチ：AI生成文の弱点と対策</a>
+  </div>
+  <hr class="s">
+  <p class="soft">この資料はインタラクティブ機能（右側折りたたみ目次・Markdown出力）のサンプルを兼ねています。作成日 2026-07-19。</p>
+</footer>
+
+<script>
+/* ========== 読了プログレスバー ========== */
+var prog=document.getElementById('prog');
+function updProg(){var h=document.documentElement;var sc=h.scrollTop||document.body.scrollTop;
+  var mx=(h.scrollHeight-h.clientHeight)||1;prog.style.width=(sc/mx*100)+'%';}
+document.addEventListener('scroll',updProg,{passive:true});updProg();
+
+/* ========== Notion風 右側目次 ========== */
+(function(){
+  var heads=[].slice.call(document.querySelectorAll('main section h2, main section h3'));
+  var rail=document.getElementById('tocrail'), panel=document.getElementById('tocpanel'),
+      wrap=document.getElementById('tocw'), btn=document.getElementById('tocbtn');
+  heads.forEach(function(h,i){
+    if(!h.id) h.id='h-'+i;
+    var lv=h.tagName==='H2'?2:3;
+    var bar=document.createElement('i'); if(lv===3) bar.className='l3';
+    bar.dataset.i=i; rail.appendChild(bar);
+    var a=document.createElement('a'); a.href='#'+h.id; a.textContent=h.textContent.replace(/^[＋\d]+\s*/,'');
+    if(lv===3) a.className='l3';
+    a.dataset.i=i; panel.appendChild(a);
+    a.addEventListener('click',function(){ wrap.classList.remove('open'); });
+  });
+  function setActive(){
+    var y=window.scrollY+140, cur=0;
+    heads.forEach(function(h,i){ if(h.offsetTop<=y) cur=i; });
+    [].slice.call(rail.children).forEach(function(b,i){ b.classList.toggle('on',i===cur); });
+    [].slice.call(panel.children).forEach(function(a,i){ a.classList.toggle('on',i===cur); });
+  }
+  document.addEventListener('scroll',setActive,{passive:true}); setActive();
+  btn.addEventListener('click',function(){ wrap.classList.toggle('open'); });
+  rail.addEventListener('click',function(){ wrap.classList.toggle('open'); });
+  document.addEventListener('click',function(e){ if(!wrap.contains(e.target)) wrap.classList.remove('open'); });
+})();
+
+/* ========== HTML→Markdown 変換とダウンロード ========== */
+(function(){
+  var SLUG='ai-writing-quality-check';
+
+  function inlineMd(node){
+    var out='';
+    [].slice.call(node.childNodes).forEach(function(n){
+      if(n.nodeType===3){ out+=n.textContent.replace(/\s+/g,' '); return; }
+      if(n.nodeType!==1) return;
+      var cl=n.classList;
+      if(cl.contains('tip')||cl.contains('mdbtn')||cl.contains('num')) return; /* ツールチップ本文・ボタン・見出し番号は出力しない */
+      var tag=n.tagName;
+      if(tag==='BR'){ out+='  \n'; return; }
+      var inner=inlineMd(n);
+      if(tag==='STRONG'||tag==='B') out+='**'+inner.trim()+'**';
+      else if(tag==='CODE') out+='`'+inner.trim()+'`';
+      else if(tag==='A'){
+        var h=n.getAttribute('href')||'', t=inner.trim().replace(/↗\s*$/,'');
+        out+=(h.charAt(0)==='#') ? t : '['+t+']('+h+')';
+      }
+      else out+=inner;
+    });
+    return out;
+  }
+
+  function blockMd(el){
+    var tag=el.tagName, cl=el.classList, md='';
+    if(cl.contains('part-tag')||tag==='NAV'||tag==='BUTTON'||tag==='svg'||tag==='SVG') return '';
+    if(tag==='H2') return '## '+inlineMd(el).trim()+'\n\n';
+    if(tag==='H3') return '### '+inlineMd(el).trim()+'\n\n';
+    if(tag==='H4') return '#### '+inlineMd(el).trim()+'\n\n';
+    if(tag==='P'){ var t=inlineMd(el).trim(); return t?t+'\n\n':''; }
+    if(tag==='UL'||tag==='OL'){
+      var i=1;
+      [].slice.call(el.children).forEach(function(li){
+        if(li.tagName!=='LI') return;
+        md+=(tag==='OL'?(i++)+'. ':'- ')+inlineMd(li).trim()+'\n';
+      });
+      return md+'\n';
+    }
+    if(tag==='TABLE'){
+      var rows=el.querySelectorAll('tr');
+      [].slice.call(rows).forEach(function(r,ri){
+        var cells=[].slice.call(r.children).map(function(c){return inlineMd(c).trim().replace(/\|/g,'\\|');});
+        md+='| '+cells.join(' | ')+' |\n';
+        if(ri===0) md+='|'+cells.map(function(){return ' --- ';}).join('|')+'|\n';
+      });
+      return md+'\n';
+    }
+    if(tag==='FIGURE'){
+      var cap=el.querySelector('figcaption');
+      return '> 【図】'+(cap?inlineMd(cap).trim():'（図）')+'\n\n';
+    }
+    if(tag==='DL'){
+      [].slice.call(el.children).forEach(function(x){
+        if(x.tagName==='DT') md+='**'+inlineMd(x).trim()+'**\n';
+        else if(x.tagName==='DD') md+=': '+inlineMd(x).trim()+'\n\n';
+      });
+      return md;
+    }
+    if(tag==='DIV'){
+      if(cl.contains('promptbox')) return '```\n'+el.textContent.trim()+'\n```\n\n';
+      if(cl.contains('ba')){
+        [].slice.call(el.querySelectorAll('.cell')).forEach(function(c){ md+='> '+inlineMd(c).trim()+'\n>\n'; });
+        return md+'\n';
+      }
+      if(cl.contains('note')||cl.contains('caveat')) return '> '+inlineMd(el).trim()+'\n\n';
+      if(cl.contains('keybox')){
+        var inner2='';
+        [].slice.call(el.children).forEach(function(ch){ inner2+=blockMd(ch); });
+        return inner2.trim().split('\n').map(function(l){return l?'> '+l:'>';}).join('\n')+'\n\n';
+      }
+      if(cl.contains('tw')||true){ /* 汎用divは中身を再帰 */
+        [].slice.call(el.children).forEach(function(ch){ md+=blockMd(ch); });
+        return md;
+      }
+    }
+    return '';
+  }
+
+  function sectionMd(sec){
+    var md='';
+    [].slice.call(sec.children).forEach(function(ch){ md+=blockMd(ch); });
+    return md;
+  }
+  function fullMd(){
+    var md='# '+document.querySelector('h1').textContent.trim()+'\n\n';
+    var lede=document.querySelector('.lede'); if(lede) md+=inlineMd(lede).trim()+'\n\n';
+    [].slice.call(document.querySelectorAll('main section')).forEach(function(sec){ md+=sectionMd(sec); });
+    return md;
+  }
+  function download(name,text){
+    var blob=new Blob([text],{type:'text/markdown;charset=utf-8'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },200);
+  }
+
+  /* 全文ボタン */
+  document.getElementById('mdall').addEventListener('click',function(){
+    download(SLUG+'.md', fullMd());
+  });
+  /* 各セクションにMDボタンを自動挿入 */
+  [].slice.call(document.querySelectorAll('main section')).forEach(function(sec){
+    var b=document.createElement('button');
+    b.className='mdbtn'; b.textContent='MD↓'; b.title='このセクションをMarkdownでダウンロード';
+    b.addEventListener('click',function(){
+      download(SLUG+'-'+sec.id+'.md', sectionMd(sec));
+      b.textContent='✓ 保存'; setTimeout(function(){ b.textContent='MD↓'; },1500);
+    });
+    sec.appendChild(b);
+  });
+})();
+</script>
+</body>
+</html>

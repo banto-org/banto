@@ -3,7 +3,7 @@
 
 schema_version: 1
 skill: diagram
-autonomy_level: L1  # Lightweight utility (reference lookup only; rendering itself runs via the html-doc skill)
+autonomy_level: L1  # Lightweight utility (reference lookup only; rendering itself runs by the caller)
 
 in_scope:
   - Presenting the criteria for choosing between mermaid / draw.io / hand-drawn SVG
@@ -11,9 +11,9 @@ in_scope:
   - Presenting hand-drawn SVG patterns (viewBox, grid, color) for layouts mermaid cannot render
 
 out_of_scope:
-  - Generating the whole HTML document or the render pipeline itself (html-doc skill)
+  - Generating the whole HTML document (docs skill)
   - Creating diagrams inside Figma (figma-generate-diagram skill)
-  - Actually executing diagram rendering (the caller uses the html-doc skill's render-diagram.sh)
+  - Actually executing diagram rendering (the caller uses scripts/render-diagram.sh per references/render-pipeline.md)
 
 safety_boundaries:
   - This skill never writes files itself (it Reads references; the caller applies them to the deliverable)
