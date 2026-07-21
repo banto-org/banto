@@ -1,9 +1,9 @@
 ---
 name: diagram
 description: |
-  Practical patterns and notation choice for building diagrams, explanatory illustrations, sequence diagrams, and architecture diagrams in SVG / mermaid / draw.io. Complete SVG code is provided for 14 patterns: correspondence mapping, ✗/✓ comparison, capacity stack, flowchart, ranking bar, pyramid structure, logic tree, 2-axis matrix (four quadrants), Venn diagram, cycle diagram (PDCA), Gantt chart, funnel, roadmap, and swimlane. Assumes the html-doc skill's render pipeline (theme header, render-diagram.sh, SVG embedding) and specializes in choosing a notation and writing it without breaking layout.
+  Practical patterns and notation choice for building diagrams, explanatory illustrations, sequence diagrams, and architecture diagrams in SVG / mermaid / draw.io. Complete SVG code is provided for 14 patterns: correspondence mapping, ✗/✓ comparison, capacity stack, flowchart, ranking bar, pyramid structure, logic tree, 2-axis matrix (four quadrants), Venn diagram, cycle diagram (PDCA), Gantt chart, funnel, roadmap, and swimlane. The render pipeline (theme header, render-diagram.sh, SVG embedding) lives in references/render-pipeline.md; the skill specializes in choosing a notation and writing it without breaking layout.
   Triggers: "diagram this", "turn this into a diagram", "flowchart", "logic tree", "as a matrix", "four quadrants", "Venn diagram", "Gantt chart", "funnel", "roadmap", "swimlane", "sequence diagram", "architecture diagram", "AWS architecture diagram", "in mermaid", "in draw.io", "draw an SVG diagram".
-  Do not use when: generating the whole HTML document or the render pipeline itself (html-doc skill's diagrams.md); creating diagrams inside Figma (figma-generate-diagram skill); charting real data as bar/line/scatter plots (chart libraries).
+  Do not use when: generating the whole HTML document (docs skill); creating diagrams inside Figma (figma-generate-diagram skill); charting real data as bar/line/scatter plots (chart libraries).
 allowed-tools: Read
 user-invocable: true
 compatibility: Claude Code
@@ -11,8 +11,8 @@ compatibility: Claude Code
 
 # diagram — Choosing a diagram notation and practical patterns
 
-The html-doc skill's `diagrams.md` owns the render pipeline (SVG rendering via mermaid / draw.io,
-theming, embedding). This skill specializes in what comes before that: **choosing which notation
+`references/render-pipeline.md` owns the render pipeline (SVG rendering via mermaid / draw.io,
+theming, embedding). The body of this skill specializes in what comes before that: **choosing which notation
 fits the structure you want to convey, and how to write it without breaking layout.** It does not
 restate the pipeline.
 
@@ -23,6 +23,7 @@ restate the pipeline.
 - Sequence diagrams, state diagrams, and auto-generated Gantt charts with dependencies →
   `references/mermaid.md`
 - AWS architecture diagrams (nested VPC / subnet / AZ, icon sets) → `references/drawio-aws.md`
+- Rendering .mmd / .drawio to SVG and embedding it in a document → `references/render-pipeline.md`
 
 For explanatory diagrams, start by choosing from the 14 patterns in svg-patterns.md. Switch to
 mermaid's automatic layout only for strict flows with many decision branches, or diagrams whose
@@ -85,7 +86,7 @@ mermaid's `sequenceDiagram`; for state transitions, use `stateDiagram-v2` (see m
 
 ## Common principles
 
-- The render pipeline and the mermaid / draw.io themes are owned by the html-doc skill's
-  diagrams.md / color-themes.md. The explanatory diagrams in svg-patterns.md use the navy-based
-  color tokens defined at the top of that file — don't invent new colors.
+- The render pipeline is owned by `references/render-pipeline.md`; color tokens are owned by the
+  docs skill's theme-default.md (or theme-custom.md when present). The explanatory diagrams in
+  svg-patterns.md use the same theme tokens — don't invent new colors.
 - Deliver output as a `<figure>` + SVG + `<figcaption>` (one conclusion sentence) set.

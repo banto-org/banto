@@ -74,10 +74,8 @@ compatibility: Claude Code (requires bash, git, jq)
 | `skill-audit` | 「skill 監査して」「この skill をコンテキストエンジニアリング監査」（plugin-audit は plugin 全体、skill-audit は skill 単体のコンテキスト効率） |
 | `ws` | 「ワークスペース」「作業切り替え」「並走」「ブランチ分けて」「worktree」「epic」「この作業終わった」「マージして」「リリースして」 |
 | `set-language` | 「言語を日本語にして」「英語に切り替えて」「言語設定」「make banto japanese/english」（永続。再起動で反映） |
-| `ja-writing` | 「報告書書いて」「日本語の資料」「Excel に書いて」「PR 説明」「相手に合わせて書き分けて」（受け手レベル別の実務パターン） |
-| `diagram` | 「図解して」「シーケンス図」「構成図」「mermaid で」「draw.io で」（記法選択と実務パターン） |
-| `b2b-docs` | 「提案書作って」「営業資料」「パワポで」「pptx で」（章立てと HTML/PowerPoint の使い分け） |
-| `html-doc` | 「HTML 資料」「HTML で出して」「報告書作って」「手順書」「資料にまとめて」（自己完結な単一 HTML を雛形から生成。用途 4 種 × 日英 × テーマ 7 種・図は事前レンダ SVG） |
+| `docs` | 「資料を作って」「レポート」「説明資料」「提案書」「報告書」「スライドで」「Excel で」「Word で」（目的から形式 — HTML / xlsx / pptx / docx / 表 — を選ぶ統合ドキュメント作成。文章規範と受け手レベル別の書き分けを内蔵） |
+| `diagram` | 「図解して」「シーケンス図」「構成図」「mermaid で」「draw.io で」（記法選択と実務パターン。SVG 化・埋め込みのレンダ手順を内蔵） |
 
 > **intent-first 全面適用**: 上記の skill は旧 `disable-model-invocation` を解除し、自然文で発見・起動できるようにした（北極星「人間は呼び出しを考えない」）。コマンドは deterministic エイリアスとして維持。
 

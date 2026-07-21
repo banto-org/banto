@@ -11,8 +11,8 @@ in_scope:
   - ビジュアルスタイル・トーン&マナーの組み合わせ指定の提示
 
 out_of_scope:
-  - HTML / コードの生成そのもの（html-doc skill や実装フェーズ）
-  - 文章の受け手レベル調整（ja-writing skill の audience-levels.md）
+  - HTML / コードの生成そのもの（docs skill や実装フェーズ）
+  - 文章の受け手レベル調整（docs skill の audience-levels.md）
   - デザインブリーフの永続保存（呼び出し元 / spec skill が判断）
   - 図の作成（diagram skill）
 

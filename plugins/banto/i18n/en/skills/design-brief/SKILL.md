@@ -3,7 +3,7 @@ name: design-brief
 description: |
   Converts a vague UI request ("make it stylish", "make it look nice") into a 14-dimension design specification (a design brief) anchored on purpose and target audience. Sits upstream in the pipeline: concept (ideology) → design-brief (this skill, design specification) → spec (design doc) → implementation.
   Triggers: "spec out this design", "I need a design brief for this screen", "give me UI direction", "I want this to look stylish", "make this screen look nice". Fires ahead of concept or spec whenever a screen or UI is involved.
-  Do not use when: the request has no UI involved; adjusting prose for a reader's technical level (ja-writing skill's audience-levels.md); generating the actual HTML/code (html-doc skill or the implementation phase).
+  Do not use when: the request has no UI involved; adjusting prose for a reader's technical level (docs skill's audience-levels.md); generating the actual HTML/code (docs skill or the implementation phase).
 allowed-tools: Read
 user-invocable: true
 argument-hint: "[screen or service you want designed]"

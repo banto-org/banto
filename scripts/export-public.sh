@@ -56,7 +56,7 @@ plugins/banto
 #                          deterministic watchdog (harness-drift-check.sh + dead-skill-report.sh,
 #                          run at SessionStart / nightly) stays; only the manual model-judged skill
 #                          is held back from the public surface.
-PLUGIN_EXCLUDE="skills/status skills/harness-audit skills/banto-port skills/html-doc skills/ja-writing skills/b2b-docs workflows/harness-audit.workflow.js scripts/migrate-store-layout.sh scripts/migrate-store-v2.sh"
+PLUGIN_EXCLUDE="skills/status skills/harness-audit skills/banto-port workflows/harness-audit.workflow.js scripts/migrate-store-layout.sh scripts/migrate-store-v2.sh"
 
 mkdir -p "$TARGET"
 for p in $ALLOW; do

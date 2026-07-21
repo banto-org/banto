@@ -1,9 +1,9 @@
 ---
 name: diagram
 description: |
-  図解・説明図・シーケンス図・構成図を SVG / mermaid / draw.io で作るときの図種選択とパターン集。対応マッピング・✗✓比較・容量積み木・フローチャート・ランキング横棒・ピラミッドストラクチャー・ロジックツリー・2軸マトリクス（四象限）・ベン図・サイクル図（PDCA）・ガントチャート・ファネル・ロードマップ・スイムレーンの 14 種は完全な SVG コード付き。html-doc skill のレンダ手順（テーマヘッダ・render-diagram.sh・SVG 埋め込み）を前提に、図種の選び方と崩さない作法に特化する。
+  図解・説明図・シーケンス図・構成図を SVG / mermaid / draw.io で作るときの図種選択とパターン集。対応マッピング・✗✓比較・容量積み木・フローチャート・ランキング横棒・ピラミッドストラクチャー・ロジックツリー・2軸マトリクス（四象限）・ベン図・サイクル図（PDCA）・ガントチャート・ファネル・ロードマップ・スイムレーンの 14 種は完全な SVG コード付き。レンダ手順（テーマヘッダ・render-diagram.sh・SVG 埋め込み）は references/render-pipeline.md が持ち、図種の選び方と崩さない作法に特化する。
   トリガー：「図解して」「図にして」「フローチャート」「ロジックツリー」「マトリクスで」「四象限」「ベン図」「ガントチャート」「ファネル」「ロードマップ」「スイムレーン」「シーケンス図」「構成図」「AWS 構成図」「mermaid で」「draw.io で」「SVG で図を描いて」。
-  使わない場面：HTML 資料全体の生成・レンダ手順そのもの（html-doc skill の diagrams.md）。Figma 上での図表作成（figma-generate-diagram skill）。実データの棒・折れ線・散布図（チャートライブラリ）。
+  使わない場面：HTML 資料全体の生成（docs skill）。Figma 上での図表作成（figma-generate-diagram skill）。実データの棒・折れ線・散布図（チャートライブラリ）。
 allowed-tools: Read
 user-invocable: true
 compatibility: Claude Code
@@ -11,8 +11,8 @@ compatibility: Claude Code
 
 # diagram — 図種の選択と実務パターン
 
-html-doc skill の `diagrams.md` はレンダ手順（mermaid / draw.io 経由の SVG 化・テーマ・埋め込み）を
-持つ。本 skill はその手前、**伝えたい構造からどの図種を選び、どう崩さず書くか**に特化する。
+レンダ手順（mermaid / draw.io 経由の SVG 化・テーマ・埋め込み）は `references/render-pipeline.md` が
+持つ。本文はその手前、**伝えたい構造からどの図種を選び、どう崩さず書くか**に特化する。
 手順の再掲はしない。
 
 ## references の選び方
@@ -21,6 +21,7 @@ html-doc skill の `diagrams.md` はレンダ手順（mermaid / draw.io 経由�
   複製してテキスト・色・座標を差し替える）
 - シーケンス図・状態遷移図・依存関係つきガントの自動生成 → `references/mermaid.md`
 - AWS 構成図（VPC / サブネット / AZ の入れ子・アイコンセット）→ `references/drawio-aws.md`
+- .mmd / .drawio を SVG 化して資料へ埋め込む手順 → `references/render-pipeline.md`
 
 説明図はまず svg-patterns.md の 14 種から選ぶ。判断分岐が多い厳密なフローや、要素数が各パターンの
 上限を超える図だけ mermaid の自動レイアウトへ切り替える。
@@ -71,7 +72,7 @@ mermaid `sequenceDiagram`、状態遷移は `stateDiagram-v2`（mermaid.md 参�
 
 ## 共通原則
 
-- レンダ手順と mermaid / draw.io のテーマは html-doc skill の diagrams.md / color-themes.md を
-  正本とする。svg-patterns.md の説明図は同ファイル冒頭の紺基調カラートークンを使い、新色を
-  発明しない。
+- レンダ手順は `references/render-pipeline.md`、カラートークンは docs skill の theme-default.md
+  （theme-custom.md があればそちら）を正本とする。svg-patterns.md の説明図も同テーマのトークンを
+  使い、新色を発明しない。
 - 出力は `<figure>` + SVG + `<figcaption>`（結論 1 文）のセットで渡す。

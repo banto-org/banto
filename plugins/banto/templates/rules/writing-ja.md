@@ -92,7 +92,7 @@ paths:
 ## 8. 経緯メタ情報の禁止
 
 - 成果物（ファイル・資料・skill 記述）に「（最新）」「（新規）」「新規追加」「今回追加」「従来は〜」「〜から変更」を書かない。経緯は git log と decisions が持つ。
-- パターンは `ja-writing` skill の references を参照。
+- パターンは `docs` skill の references（writing-core.md / audience-levels.md）を参照。
 
 ## 推敲チェック（書き終わってから機械的に回す）
 

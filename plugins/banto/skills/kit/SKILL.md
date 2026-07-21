@@ -74,10 +74,8 @@ Pattern shared by the document-creation skills: `${CLAUDE_PLUGIN_ROOT}/templates
 | `skill-audit` | "audit this skill", "context-engineering audit this skill" (plugin-audit covers the whole plugin; skill-audit covers one skill's context efficiency) |
 | `ws` | "workspace", "switch work", "run in parallel", "split off a branch", "worktree", "epic", "this work is done", "merge it", "release it" |
 | `set-language` | "set the language to Japanese", "switch to English", "language settings", "make banto japanese/english" (persistent; applied on restart) |
-| `ja-writing` | "write a report", "a Japanese document", "write it in Excel", "a PR description", "write it for this audience" (practical patterns by audience level) |
-| `diagram` | "make a diagram", "a sequence diagram", "an architecture diagram", "in mermaid", "in draw.io" (notation choice and practical patterns) |
-| `b2b-docs` | "write a proposal", "a sales deck", "in PowerPoint", "as a pptx" (chapter structure and choosing HTML vs. PowerPoint) |
-| `html-doc` | "make an HTML report", "write a runbook", "turn this into a document", "proposal", "explainer" (self-contained single-HTML deliverables from templates; 4 document types × EN/JA × 7 color themes, diagrams pre-rendered to inline SVG) |
+| `docs` | "make a document", "a report", "an explainer", "a proposal", "as slides", "in Excel", "in Word" (unified document creation — picks the best-fit format among HTML / xlsx / pptx / docx / tables from the document's purpose; ships a writing canon and audience-level guidance) |
+| `diagram` | "make a diagram", "a sequence diagram", "an architecture diagram", "in mermaid", "in draw.io" (notation choice and practical patterns; ships the SVG render-and-embed pipeline) |
 
 > **Intent-first applied across the board**: the skills above have had the old `disable-model-invocation` lifted so they can be discovered and launched from natural language (north star: "humans never think about invocation"). Commands are kept as deterministic aliases.
 

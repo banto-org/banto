@@ -1,13 +1,13 @@
 # Building an AWS architecture diagram in draw.io
 
-The existing html-doc skill's diagrams.md covers the minimal draw.io skeleton and the SVG-export
+This skill's render-pipeline.md covers the minimal draw.io skeleton and the SVG-export
 pipeline (falling back to shipping the `.drawio` for client-side editing when no CLI is available).
 This guide builds on that, specializing in notation specific to AWS architecture diagrams — the
 icon set, nested VPC/subnet/AZ structure, and naming conventions.
 
 ## Basic .drawio XML structure (not restated — differences only)
 
-Use diagrams.md's skeleton (`mxfile` → `diagram` → `mxGraphModel` → `root`) as-is. For AWS diagrams,
+Use render-pipeline.md's skeleton (`mxfile` → `diagram` → `mxGraphModel` → `root`) as-is. For AWS diagrams,
 add AWS-specific shape declarations to each `mxCell`'s `style` attribute. Since AWS diagrams tend to
 be wide, use `pageWidth="1169" pageHeight="827"` (landscape A4) as the baseline page size.
 
@@ -85,7 +85,7 @@ drawio --export --format svg --output vpc-overview.svg vpc-overview.drawio
 ```
 
 In an environment without it installed (as is currently the case in this repo's verification
-environment too), follow the html-doc skill's `render-diagram.sh` draw.io fallback (ship the
+environment too), follow render-pipeline.md's draw.io fallback (ship the
 `.drawio` plus guidance text). Only propose installing it when SVG output is actually required, and
 proceed with the user's confirmation.
 

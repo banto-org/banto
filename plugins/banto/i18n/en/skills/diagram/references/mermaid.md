@@ -1,8 +1,8 @@
 # Practical mermaid patterns
 
-The existing html-doc skill's diagrams.md covers the theme-header format, the render pipeline via
+This skill's render-pipeline.md covers the theme-header format, the render pipeline via
 `render-diagram.sh`, and inline SVG embedding. This guide specializes in what comes before that:
-practical patterns for the notation itself. See diagrams.md for the render pipeline — not restated here.
+practical patterns for the notation itself. See render-pipeline.md for the render pipeline — not restated here.
 
 ## Choosing which diagram type to use
 
@@ -116,7 +116,7 @@ the document's tone. A bad diagram has any of the following:
 - 4-level subgraph nesting with elements overlapping each other
 - Node labels over 20 characters, overflowing without a `<br/>` break
 - Three independent tasks forced into gantt as horizontal bars (a table would suffice)
-- Pasted into the document still on the default purple theme (diagrams.md's theme header not applied)
+- Pasted into the document still on the default purple theme (render-pipeline.md's theme header not applied)
 
 ## Self-check
 
@@ -124,4 +124,4 @@ the document's tone. A bad diagram has any of the following:
 - Are node IDs alphanumeric only, and are Japanese labels over 12 characters `<br/>`-wrapped?
 - Is subgraph nesting capped at 2 levels?
 - Is the `.mmd` kept alongside the document, with both it and the SVG committed?
-- Does the theme header match the document's color scheme (see diagrams.md)?
+- Does the theme header match the document's color scheme (see render-pipeline.md)?

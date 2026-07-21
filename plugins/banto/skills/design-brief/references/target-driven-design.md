@@ -49,6 +49,6 @@ generic. Pairing it — "make it modern, but avoid anything that feels cold" —
 
 ## Relationship to audience level
 
-Banto's `skills/ja-writing/references/audience-levels.md` covers audience level (L1-L3), the axis that
+Banto's `skills/docs/references/audience-levels.md` covers audience level (L1-L3), the axis that
 determines how readable a piece of writing is. This file covers the design target, the axis that
 determines how a screen looks. The two are specified independently of each other.

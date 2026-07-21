@@ -1,10 +1,10 @@
 # draw.io で AWS 構成図を作る手順
 
-既存 html-doc skill の diagrams.md は draw.io 経路の最小スケルトンと SVG 化の手順（CLI がなければ `.drawio` を併納してクライアント編集に委ねる）を扱う。本ガイドはその応用として、AWS 構成図に特有の記法（アイコンセット・VPC / サブネット / AZ の入れ子・命名規則）に特化する。
+同 skill の render-pipeline.md は draw.io 経路の最小スケルトンと SVG 化の手順（CLI がなければ `.drawio` を併納してクライアント編集に委ねる）を扱う。本ガイドはその応用として、AWS 構成図に特有の記法（アイコンセット・VPC / サブネット / AZ の入れ子・命名規則）に特化する。
 
 ## .drawio XML の基本構造（再掲なし・差分のみ）
 
-diagrams.md のスケルトン（`mxfile` → `diagram` → `mxGraphModel` → `root`）をそのまま使い、AWS 図では `mxCell` の `style` 属性に AWS 専用の shape 指定を追加する。ページサイズは横長構成図が多いため `pageWidth="1169" pageHeight="827"`（A4 横）を基準にする。
+render-pipeline.md のスケルトン（`mxfile` → `diagram` → `mxGraphModel` → `root`）をそのまま使い、AWS 図では `mxCell` の `style` 属性に AWS 専用の shape 指定を追加する。ページサイズは横長構成図が多いため `pageWidth="1169" pageHeight="827"`（A4 横）を基準にする。
 
 ## AWS アイコンセット（shape ライブラリ名）
 
@@ -62,7 +62,7 @@ draw.io デスクトップアプリ（`brew install --cask drawio`）を導入�
 drawio --export --format svg --output vpc-overview.svg vpc-overview.drawio
 ```
 
-未導入の環境（現状このリポジトリの検証環境も未導入）では、html-doc の `render-diagram.sh` の draw.io フォールバック（`.drawio` 併納 + 案内文）に従う。SVG 化が必須な場合のみ導入を提案し、ユーザー確認の上で進める。
+未導入の環境（現状このリポジトリの検証環境も未導入）では、render-pipeline.md の draw.io フォールバック（`.drawio` 併納 + 案内文）に従う。SVG 化が必須な場合のみ導入を提案し、ユーザー確認の上で進める。
 
 ## セルフチェック
 

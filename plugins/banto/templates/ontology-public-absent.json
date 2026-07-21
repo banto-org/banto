@@ -3,9 +3,6 @@
     "skill:status",
     "skill:harness-audit",
     "skill:banto-port",
-    "skill:html-doc",
-    "skill:ja-writing",
-    "skill:b2b-docs",
     "script:migrate-store-layout",
     "script:migrate-store-v2"
   ]
