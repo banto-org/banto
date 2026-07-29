@@ -12,7 +12,7 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/ai-context-session-start.sh",
-            "timeout": 10
+            "timeout": 20
           },
           {
             "type": "command",
@@ -58,6 +58,11 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scope-detect.sh",
+            "timeout": 3
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/task-router.sh",
             "timeout": 3
           }
         ]
@@ -125,11 +130,6 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/agent-guard.sh",
-            "timeout": 3
-          },
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/model-role-guard.sh",
             "timeout": 3
           }
         ]
@@ -227,6 +227,11 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/ai-context-prefix-check.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/checkpoint-ws-stamp.sh",
             "timeout": 5
           },
           {

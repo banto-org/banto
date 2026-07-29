@@ -125,7 +125,10 @@ if [ "$_commit" = "1" ] && command -v git >/dev/null 2>&1; then
     _branch=$(git -C "$DIR" symbolic-ref --quiet --short HEAD 2>/dev/null || true)
     case "$_branch" in
         main|master)
-            if [ -f "$DIR/.ai-context-store" ]; then
+            # marker は store の git ルートに置かれる。project サブディレクトリから commit しても
+            # 見つかるよう、git ルートまで遡って確認する（従来は $DIR 直下 1 階層だけで見失っていた）。
+            _store_top=$(git -C "$DIR" rev-parse --show-toplevel 2>/dev/null)
+            if [ -f "$DIR/.ai-context-store" ] || { [ -n "$_store_top" ] && [ -f "$_store_top/.ai-context-store" ]; }; then
                 warn "commit on main in ai-context store (allowed: knowledge store)"
             elif [ "${BANTO_ALLOW_MAIN_COMMIT:-0}" = "1" ]; then
                 warn "commit on main/master (allowed via BANTO_ALLOW_MAIN_COMMIT=1)"

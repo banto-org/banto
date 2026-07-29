@@ -57,7 +57,7 @@ if [ "$ON_MAIN" = "1" ]; then
     cat <<EOF
 2. **Create a worktree** (currently on the ${BRANCH} branch) → isolate large work
    - e.g. \`git worktree add -b feat/<topic> ../<repo>-<topic> ${BRANCH}\`
-   - or use the ws skill / \`claude -w <name>\`
+   - or use the ws skill (independent/non-conflicting subtasks → fan-out Agent; conflicting/long-running → task worktree)
 EOF
 elif [ -z "$BRANCH" ]; then
     # 非 git ディレクトリ（旧実装は「既に \`\` ブランチ上」と空名を表示していた）

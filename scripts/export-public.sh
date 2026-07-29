@@ -111,6 +111,16 @@ done
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
 
+## 0.5.0
+
+- **Always-on rules slimmed from 6 to 3 (10 → 7 rule files).** Following the direction of Claude Code's own system-prompt reduction (drop prohibition lists, delegate judgment to the model), the `testing` and `code-editing` rules were removed — the lockfile discipline moved into `dependencies` (still deterministically enforced by `lint-guard.sh`) — and `quality` / `evidence-first` were compressed. The contracts only prose can carry (`safety`, `pii-protection`, `spec-fidelity`) stay.
+- **Model selection is now the main AI's judgment — no prescriptive roles.** The "implement = sonnet / audit = opus / mechanical = haiku" defaults and the `model-role-guard` warn hook are gone (49 registered hooks). Rules now prescribe only fan-out **granularity** (1 agent = 1 independent subtask: acceptance criterion stateable in one line, no sequential dependency, clear file boundary) and **parallelism** (about 5 agents per message as a guideline; declare scale and reason first when 8+). `model-policy.json` keeps only operational plumbing: `summarize` (the idle-checkpoint background fork) and `verify_external` (cross-check).
+- **New skill: thinking-core — the former always-on work contract, now on demand.** The 7-section contract (acceptance criteria → evidence → minimal change → boundaries → verify → report → exceptions) loads only for sonnet / haiku fan-outs and older-generation models. It is strictly never loaded for 5-generation frontier models, where prescriptive procedure text constrains performance instead of helping. 21 public skills.
+- **Prompts become tasks automatically.** A UserPromptSubmit router detects implementation/research asks and defer-markers in your messages and nudges them into the active workspace's `tasks.md` — capture-first, no modal interruptions.
+- **Checkpoint delivery made deterministic.** The workspace marker on auto-saved checkpoints is now stamped by a deterministic hook instead of the model (the reader always matched exactly; now the writer does too), and checkpoints that cannot be delivered because no workspace is resolved surface a one-line recovery note at session start instead of silently piling up.
+- **Fan-out hygiene: fold what you spawn.** Throwaway fan-out agents must not be given a `name` (named agents persist in the mailbox across session resumes); results are collected on completion and idle agents are stopped, not abandoned.
+- **Store hygiene fixes.** Creation-index records why each store file was created; knowledge-store markers are recognized from subdirectories; docs/ naming is unified on a date-prefix canon with a hook check; `ws` degrades gracefully when git-town is not installed.
+
 ## 0.4.0
 
 - **New skill: docs — one skill for every document.** It replaces html-doc / ja-writing / b2b-docs (removed in this release): the best-fit format (HTML / xlsx / pptx / docx / tables) is chosen from the document's purpose, the writing follows a 25-rule three-layer canon (readability / persuasion / document-scene fit) shared across all formats, stiff phrasing is swept by a wording-swap canon plus bundled machine checks, and the default ivory-and-navy theme passes WCAG contrast checks.
@@ -221,7 +231,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.4.0"
+PUB_VERSION="0.5.0"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"

@@ -30,8 +30,8 @@ paths:
 # Dependencies — version & package-manager selection
 
 Path-scoped to manifests / lockfiles. Two decisions live here: which **version** to pin, and which
-**package manager** to run. Never hand-edit a lockfile — that belongs to `code-editing.md` (enforced
-deterministically by `lint-guard.sh`).
+**package manager** to run. Lockfiles are never edited by hand — always update them via the package
+manager (enforced deterministically by `lint-guard.sh`).
 
 ## 1. Choosing a version — the newest that is BOTH stable AND free of known vulnerabilities
 

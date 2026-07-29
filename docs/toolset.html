@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Toolset — Banto / 道具一式</title>
-<meta name="description" content="Banto's full toolset in one page: 20 skills and 6 agents across the SDD pipeline, knowledge and context, documents and writing, workspace and meta, agents, and the meta-tools that audit the plugin itself." />
+<meta name="description" content="Banto's full toolset in one page: 21 skills and 6 agents across the SDD pipeline, knowledge and context, documents and writing, workspace and meta, agents, and the meta-tools that audit the plugin itself." />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23C0392B'/><text x='16' y='24' font-size='21' text-anchor='middle' fill='white' font-family='serif'>%E7%95%AA</text></svg>" />
 <link rel="stylesheet" href="styles.css" />
 <link rel="stylesheet" href="subpage.css" />
@@ -66,6 +66,7 @@
           <span class="nav-menu-head lx" lang="en">Workspace &amp; meta</span><span class="nav-menu-head lx" lang="ja">ワークスペース &amp; メタ</span>
           <a href="toolset.html#ws"><b>ws</b><span class="lx" lang="en">workspace &amp; fleet</span><span class="lx" lang="ja">ワークスペース &amp; 艦隊</span></a>
           <a href="toolset.html#set-language"><b>set-language</b><span class="lx" lang="en">JA ⇄ EN, sticky</span><span class="lx" lang="ja">日英切替（永続）</span></a>
+          <a href="toolset.html#thinking-core"><b>thinking-core</b><span class="lx" lang="en">work contract, on demand</span><span class="lx" lang="ja">作業契約のオンデマンド読込</span></a>
           <a href="toolset.html#plugin-dev"><b>plugin-dev</b><span class="lx" lang="en">scaffold &amp; refactor</span><span class="lx" lang="ja">生成 &amp; 改修</span></a>
           <a href="toolset.html#plugin-audit"><b>plugin-audit</b><span class="lx" lang="en">15-axis quality audit</span><span class="lx" lang="ja">15 軸品質監査</span></a>
           <a href="toolset.html#skill-audit"><b>skill-audit</b><span class="lx" lang="en">7-axis context audit</span><span class="lx" lang="ja">7 軸コンテキスト監査</span></a>
@@ -139,9 +140,9 @@
 <section class="doc-hero">
   <div class="crumb"><a href="index.html" class="lx" lang="en">← Home</a><a href="index.html" class="lx" lang="ja">← ホーム</a></div>
   <div class="kicker" style="margin-top:14px"><span class="lx" lang="en">The full toolset</span><span class="lx" lang="ja">道具一式</span></div>
-  <h1><span class="lx" lang="en">20 skills, 6 agents. Each one, one behavior.</span><span class="lx" lang="ja">skill 20 個・agent 6 体。それぞれが担う、1 つの動作。</span></h1>
-  <p class="lede lx" lang="en">26 tools split into six roles: skills that forge the ideology before a spec exists, a loop that drives implementation to green on its own, a mechanism that searches decision logs and past chats across sessions, one skill that writes every document in its best-fit format, tools that drive branches and workspaces from intent, and meta-tools that audit Banto's own quality. Each entry's source of truth is its <code>SKILL.md</code> or agent definition — this page compresses each to one behavioral line plus a concrete example.</p>
-  <p class="lede lx" lang="ja">26 個の道具は 6 つの役割に分かれる：仕様の前に思想を固める skill、実装を green になるまで自走させるループ、決定ログと過去チャットを横断検索する仕組み、資料を目的に合う形式で作る skill、ブランチと workspace を意図から駆動する道具、そして自分自身の品質を監査するメタ道具。各項目の正本は <code>SKILL.md</code> か agent 定義そのもの。ここでは動作を 1 行と具体例に圧縮して示す。</p>
+  <h1><span class="lx" lang="en">21 skills, 6 agents. Each one, one behavior.</span><span class="lx" lang="ja">skill 21 個・agent 6 体。それぞれが担う、1 つの動作。</span></h1>
+  <p class="lede lx" lang="en">27 tools split into six roles: skills that forge the ideology before a spec exists, a loop that drives implementation to green on its own, a mechanism that searches decision logs and past chats across sessions, one skill that writes every document in its best-fit format, tools that drive branches and workspaces from intent, and meta-tools that audit Banto's own quality. Each entry's source of truth is its <code>SKILL.md</code> or agent definition — this page compresses each to one behavioral line plus a concrete example.</p>
+  <p class="lede lx" lang="ja">27 個の道具は 6 つの役割に分かれる：仕様の前に思想を固める skill、実装を green になるまで自走させるループ、決定ログと過去チャットを横断検索する仕組み、資料を目的に合う形式で作る skill、ブランチと workspace を意図から駆動する道具、そして自分自身の品質を監査するメタ道具。各項目の正本は <code>SKILL.md</code> か agent 定義そのもの。ここでは動作を 1 行と具体例に圧縮して示す。</p>
 </section>
 
 <!-- ============ 1. PIPELINE (SDD) ============ -->
@@ -483,6 +484,25 @@
       </div>
     </div>
 
+
+    <div class="card" id="thinking-core">
+      <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">thinking-core</h4>
+      <p class="tm-lead">
+        <span class="lx" lang="en"><strong>Loads the 7-section work contract on demand — for sonnet / haiku and older-generation models only.</strong></span>
+        <span class="lx" lang="ja"><strong>作業契約 7 節を必要なときだけ読み込む — 対象は sonnet / haiku と旧世代モデルのみ。</strong></span>
+      </p>
+      <div class="tflow" aria-hidden="true">
+        <span class="tf-step tf-a"><span class="lx" lang="en">"load the work contract"</span><span class="lx" lang="ja">「作業契約を読み込んで」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">thinking-core</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">7-section contract loaded</span><span class="lx" lang="ja">7 節の契約を読込</span></span>
+      </div>
+      <ul class="tm-points">
+        <li><span class="lx" lang="en">Attach it to sonnet / haiku fan-out prompts, or load it manually when a session temporarily runs on an older-generation model.</span><span class="lx" lang="ja">sonnet / haiku の fan-out プロンプトへ添付するか、旧世代モデルを一時的にメインへ使うセッションで手動ロードする。</span></li>
+        <li><span class="lx" lang="en">Never loaded for 5-generation Fable / Opus — prescriptive procedure text constrains frontier models rather than helping them, so this boundary is part of the skill's own contract.</span><span class="lx" lang="ja">5 系の Fable / Opus には読み込まない（不使用を徹底）— 規定的な手順書はフロンティアモデルの性能をかえって制約するため、この境界自体を skill の契約に含める。</span></li>
+      </ul>
+      <div class="trig">
+        <span class="lx" lang="en">"apply thinking-core"</span><span class="lx" lang="ja">「thinking-core を適用して」</span>
+      </div>
+    </div>
+
     <div class="card" id="plugin-dev">
       <h4 style="font-family:var(--serif);font-size:16px;margin:0 0 8px">plugin-dev</h4>
       <p class="tm-lead">
@@ -725,7 +745,7 @@
 
   <div class="note" style="margin-top:16px">
     <span class="seal" aria-hidden="true">番</span>
-    <div><span class="lx" lang="en">Dogfooded on Banto itself: these three tools audit and refactor Banto's own 20 skills and 6 agents, the same way they would audit yours.</span><span class="lx" lang="ja">Banto 自身でドッグフーディング：この 3 つの道具は、あなたの skill を監査するのと同じやり方で、Banto 自身の 20 skill・6 agent を監査・改修する。</span></div>
+    <div><span class="lx" lang="en">Dogfooded on Banto itself: these three tools audit and refactor Banto's own 21 skills and 6 agents, the same way they would audit yours.</span><span class="lx" lang="ja">Banto 自身でドッグフーディング：この 3 つの道具は、あなたの skill を監査するのと同じやり方で、Banto 自身の 21 skill・6 agent を監査・改修する。</span></div>
   </div>
 </section>
 

@@ -7,7 +7,7 @@ argv[1]: 名前レジストリ path（1 行 1 エントリ、# コメント可�
 exit 0: 許可（安全パス / ヒット無し / 解析不能は fail-open しない＝ブロックしない）
 exit 2: ブロック（客先パス × 名前ヒット）。stderr に理由 + マスク提案 + escape 手順。
 
-設計: .ai-context/decisions/2026-05-29_006_ai-context-pii-name-isolation.md
+設計: decisions/2026-05-30_001_ai-context-pii-name-isolation_tatsuru-okada-business.md
 """
 import sys, os, json, re
 

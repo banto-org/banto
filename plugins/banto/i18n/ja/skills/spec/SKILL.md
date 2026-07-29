@@ -161,7 +161,7 @@ spec 生成が完了したら、以下を提示する:
 
 ユーザーが「実装して進めて」/「続けて」と言ったら、**別の skill を起動せずにそのまま自走実装へ進む**（Claude が設計 → 実装 → テスト → レビューを駆動する）:
 - `/ai-context next` → tasks.md の最初の未完了タスクから順に実装する
-- 独立したタスクが複数あれば、1 メッセージで複数の Agent を起動する（自走 fan-out）。実装 Agent は `model: "sonnet"`（`templates/model-policy.json` の `implement` 既定）
+- 独立したタスクが複数あれば、1 メッセージで複数の Agent を起動する（自走 fan-out。モデル選定はメイン AI の判断 — quality.md の粒度・並列度規範に従う）
 
 ## 組み合わせフォーマット
 

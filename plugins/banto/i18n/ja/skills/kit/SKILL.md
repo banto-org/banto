@@ -52,6 +52,7 @@ compatibility: Claude Code (requires bash, git, jq)
 | `/skill-audit [path]` | skill 単体をコンテキストエンジニアリング視点で監査（情報の最小性 / 人間専用情報の混入 / 構成の分担等 7 軸。plugin-audit は plugin 全体） |
 | `/set-language [ja/en]` | Banto の言語を日英で切替。選択は永続（プラグイン更新をまたいで保持）。反映には Claude Code の再起動が必要 |
 | `/ai-context sort project` | プロジェクト全体に散らかったドキュメントを整理 |
+| `/thinking-core` | 作業契約 7 節をオンデマンドで読み込む（sonnet / haiku・旧世代モデル向け。5 系の Fable / Opus には不使用を徹底） |
 | `/kit` | このカタログを表示 |
 
 ## 自然言語から自動発火するスキル
@@ -74,6 +75,7 @@ compatibility: Claude Code (requires bash, git, jq)
 | `skill-audit` | 「skill 監査して」「この skill をコンテキストエンジニアリング監査」（plugin-audit は plugin 全体、skill-audit は skill 単体のコンテキスト効率） |
 | `ws` | 「ワークスペース」「作業切り替え」「並走」「ブランチ分けて」「worktree」「epic」「この作業終わった」「マージして」「リリースして」 |
 | `set-language` | 「言語を日本語にして」「英語に切り替えて」「言語設定」「make banto japanese/english」（永続。再起動で反映） |
+| `thinking-core` | 「作業契約を読み込んで」「thinking-core を適用して」（sonnet / haiku の fan-out 添付・旧世代モデルの手動ロード専用。5 系 Fable / Opus には不使用） |
 | `docs` | 「資料を作って」「レポート」「説明資料」「提案書」「報告書」「スライドで」「Excel で」「Word で」（目的から形式 — HTML / xlsx / pptx / docx / 表 — を選ぶ統合ドキュメント作成。文章規範と受け手レベル別の書き分けを内蔵） |
 | `diagram` | 「図解して」「シーケンス図」「構成図」「mermaid で」「draw.io で」（記法選択と実務パターン。SVG 化・埋め込みのレンダ手順を内蔵） |
 
@@ -126,7 +128,5 @@ compatibility: Claude Code (requires bash, git, jq)
 | `quality` | コード品質（不要な抽象化なし、スコープ内に留まる） |
 | `safety` | 安全性（force-push なし、シークレット保護、`.env` の生出力なし、デバッグトレースなし） |
 | `spec-fidelity` | 仕様にない挙動を推測しない — 質問する（Ambiguity Questionnaire） |
-| `testing` | テスト規約（1 テスト 1 アサーション、モック最小） |
-| `code-editing` | コード編集の制約（lockfile / 特定ファイルタイプの編集ガード、パススコープ適用） |
 | `pii-protection` | PII / 内部名の保護（クライアント成果物への内部名・他社名・個人情報の書き込みを禁止。egress-guard で決定論的に強制） |
 | `writing-ja` | 日本語ライティング規約（重点先行・一文一義・文末の だ/である/です/ます を使わない・カタカナ英語を減らす） |

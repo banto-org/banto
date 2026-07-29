@@ -8,7 +8,7 @@
 1. Read the project's `{base}/config.json`
 2. Confirm the scope type (use default_scope if set, otherwise dialogue)
 3. Confirm the topic name (English, hyphen-separated recommended)
-4. **Confirm whether this is an implementation WS** (default = implementation; propose a design WS for clearly design-led scopes such as `[design]`). Implementation WS worktree launches are guided with `claude --model sonnet` (the `implement` default in `templates/model-policy.json`); design WS get no flag (keep the session's own model = fable/opus)
+4. **Confirm whether this is an implementation WS** (default = implementation; propose a design WS for clearly design-led scopes such as `[design]`). Manual worktree parallel launches are guided as plain `claude` with no model flag (model selection is a per-case judgment — no prescriptive default)
 5. If a current WS exists: choose keep (save and switch) or archive (move to `workspaces/<author>/old/`)
 6. Create the entity dir `{base}/workspaces/<author>/[scope] topic-name/` and write `workspace.md` and `tasks.md` (scaffold):
 

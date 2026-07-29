@@ -1,6 +1,6 @@
 # 変更安全性ルール
 
-AI 全般の行動規範（常時適用）。lockfile / 特定ファイル種別の編集制約は `code-editing.md`（path-scoped）に分離。
+AI 全般の行動規範（常時適用）。lockfile / マニフェストの編集制約は `dependencies.md`（path-scoped）に分離。
 
 ## 操作の安全性
 

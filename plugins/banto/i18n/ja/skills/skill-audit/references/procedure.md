@@ -20,7 +20,7 @@ sh "$CLAUDE_PLUGIN_ROOT/scripts/skill-audit-metrics.sh" <skill-dir>
 
 ## 3. 7 軸の判定
 
-[`axes.md`](axes.md) の各軸の判定手順に沿って、機械計測 + Read した SKILL.md / references の内容を突き合わせる。A6（想定 AI の明示と整合）のような主観の入る判定は、Agent（general-purpose、`model: opus`）に委譲する（Reviewer = Fresh Agent 原則。plugin-audit / harness-audit と同じ model-policy.json の `audit` ロールを使う）。委譲プロンプトには TARGET の SKILL.md・references/ 全ファイル・scripts/（docstring と構造）を Read する指示を必ず含める — SKILL.md 単体の監査は references に埋まる違反（壊れた参照・重複・経緯メタ）を見逃す。
+[`axes.md`](axes.md) の各軸の判定手順に沿って、機械計測 + Read した SKILL.md / references の内容を突き合わせる。A6（想定 AI の明示と整合）のような主観の入る判定は、Agent（general-purpose。モデル選定はメイン AI の判断）に委譲する（Reviewer = Fresh Agent 原則）。委譲プロンプトには TARGET の SKILL.md・references/ 全ファイル・scripts/（docstring と構造）を Read する指示を必ず含める — SKILL.md 単体の監査は references に埋まる違反（壊れた参照・重複・経緯メタ）を見逃す。
 
 ## 4. 報告
 

@@ -52,6 +52,7 @@ Pattern shared by the document-creation skills: `${CLAUDE_PLUGIN_ROOT}/templates
 | `/skill-audit [path]` | Audit a single skill from a context-engineering angle (7 axes: information minimality / leakage of human-only information / division of labor in structure, etc. plugin-audit covers the whole plugin) |
 | `/set-language [ja/en]` | Switch Banto's language between Japanese and English. The choice persists (survives plugin updates). A Claude Code restart is required to apply it |
 | `/ai-context sort project` | Tidy up documents scattered across the whole project |
+| `/thinking-core` | Load the 7-section work contract on demand (for sonnet / haiku and older-generation models; strictly never for 5-generation Fable / Opus) |
 | `/kit` | Display this catalog |
 
 ## Skills that auto-fire from natural language
@@ -74,6 +75,7 @@ Pattern shared by the document-creation skills: `${CLAUDE_PLUGIN_ROOT}/templates
 | `skill-audit` | "audit this skill", "context-engineering audit this skill" (plugin-audit covers the whole plugin; skill-audit covers one skill's context efficiency) |
 | `ws` | "workspace", "switch work", "run in parallel", "split off a branch", "worktree", "epic", "this work is done", "merge it", "release it" |
 | `set-language` | "set the language to Japanese", "switch to English", "language settings", "make banto japanese/english" (persistent; applied on restart) |
+| `thinking-core` | "load the work contract", "apply thinking-core" (for sonnet/haiku fan-out attachment and older-generation manual load only; never for 5-gen Fable/Opus) |
 | `docs` | "make a document", "a report", "an explainer", "a proposal", "as slides", "in Excel", "in Word" (unified document creation — picks the best-fit format among HTML / xlsx / pptx / docx / tables from the document's purpose; ships a writing canon and audience-level guidance) |
 | `diagram` | "make a diagram", "a sequence diagram", "an architecture diagram", "in mermaid", "in draw.io" (notation choice and practical patterns; ships the SVG render-and-embed pipeline) |
 
@@ -126,7 +128,5 @@ The Layer-3 harness-engineering principle of "isolating exploration / audit / ev
 | `quality` | Code quality (no unnecessary abstraction, stay within scope) |
 | `safety` | Safety (no force-push, secret protection, no raw `.env` output, no debug traces) |
 | `spec-fidelity` | Don't guess behavior that isn't in the spec — ask (Ambiguity Questionnaire) |
-| `testing` | Testing conventions (one assertion per test, minimal mocks) |
-| `code-editing` | Code-editing constraints (edit guards for lockfiles / specific file types, applied path-scoped) |
 | `pii-protection` | PII / internal-name protection (forbids writing internal names, other companies' names, or personal info into client deliverables; enforced deterministically by egress-guard) |
 | `writing-ja` | Japanese writing conventions (lead with the point, one idea per sentence, don't end sentences with だ/である/です/ます, reduce katakana English) |

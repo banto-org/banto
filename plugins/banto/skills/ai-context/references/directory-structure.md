@@ -100,7 +100,7 @@ Non-blocking provisional local (SessionStart provisions it immediately for an un
 | Folder | Writing skill / hook | prefix / format |
 |---|---|---|
 | `decisions/` | `ai-context` (decision records) / `spec`・`dev-loop` (decision derivatives) | No prefix. `YYYY-MM-DD-HHMMSS_<slug>_{github-account}.md` (flat, author attribution) |
-| `docs/` (top level) | `memo` (`ai-context memo`) / `status` / `harness-audit` / `plugin-audit` / `qa-tester` (caller saves) | One of the "fixed prefixes" below is required. E.g. `[Memo] ...` / `[Status] ...` / `[Audit] ...`. Extension is `.md` or `.html` (HTML materials follow the same prefix rule) |
+| `docs/` (top level) | `docs` (documents in every format) / `memo` (`ai-context memo`) / `status` / `harness-audit` / `plugin-audit` / `qa-tester` (caller saves) | One of the "fixed prefixes" below is required + **date goes first**. `[Prefix] {YYYY-MM-DD}_{slug}[_{variant}].ext` (date prefix, `_` separator; `_variant` is an optional suffix like a model name; a dateless name is allowed only for non-dated materials such as `[Index]`). The slug defaults to English; **only distributable office documents (docx / xlsx / pptx) may use a Japanese name**. Extension is `.md` / `.html` / `.docx` / `.xlsx` / `.pptx` |
 | `docs/research/` | `research` (emitted by `research-agent`) | `YYYY-MM-DD_<topic>.md` (no prefix) |
 | `docs/knowledges/` | `knowledge` (`ai-context knowledge`) promotion target | No prefix (**exception**). Title = filename `{topic}.md` |
 | `docs/knowledges/drafts/` | `ai-context-auto.sh` (hook auto-saves) → review / promote via `knowledge` | `{topic}.md`. SessionStart surfaces them once the threshold (`BANTO_DRAFT_REVIEW_MIN`, default 10) is exceeded |
@@ -139,6 +139,6 @@ Enforced by a hook.
 
 How to choose: design / plan / proposal → `[Design]` / explanation / procedure / overview → `[Guide]` / progress / status → `[Status]` /
 audit / analysis → `[Audit]`.
-Example: `[Design] payment-redesign-2026-06-23.md` / `[Guide] onboarding-2026-06-23.md`
+Example: `[Design] 2026-06-23_payment-redesign.md` / `[Guide] 2026-07-19_banto-clear-doc_fable.html` (`_fable` is an optional suffix like a model name) / `[Guide] 2026-07-20_売上報告.docx` (distributable office documents may use a Japanese name)
 
 **NEVER**: invent a new prefix on your own. Consult the user if one is needed.

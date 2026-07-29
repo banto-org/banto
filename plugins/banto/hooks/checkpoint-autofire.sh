@@ -114,6 +114,19 @@ if [ "$RC" = "0" ] && [ -f "$PH" ]; then
             fi
             printf '%s\n' "$NEWEST" > "$LAST_AUTO_MARK" 2>/dev/null
 
+            # --- 見出し日時を実 date へ補正（headless fork には信頼できる時計参照がなく、
+            # モデルが記憶で書いた見出し日時が mtime より先行することがあるため決定論で担保） ---
+            REAL_TS=$(date '+%Y-%m-%d %H:%M')
+            TMP_TS="$NEWEST.tsfix.$$"
+            if awk -v ts="$REAL_TS" '
+                !done && /^# Checkpoint - / { print "# Checkpoint - " ts; done=1; next }
+                { print }
+            ' "$NEWEST" > "$TMP_TS" 2>/dev/null; then
+                mv -f "$TMP_TS" "$NEWEST" 2>/dev/null || rm -f "$TMP_TS" 2>/dev/null
+            else
+                rm -f "$TMP_TS" 2>/dev/null
+            fi
+
             # --- ws 宛先マーカー刻印（未マーカー時のみ。WS_KEY があるときだけ） ---
             if [ -n "$WS_KEY" ] && ! grep -q '^<!-- banto-ws: ' "$NEWEST" 2>/dev/null; then
                 TMP_CK="$NEWEST.wsstamp.$$"

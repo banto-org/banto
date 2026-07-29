@@ -162,7 +162,7 @@ When spec generation completes, present:
 
 If the user says "go ahead and implement" / "continue", **proceed straight into self-driving implementation without invoking another skill** (Claude drives design → implementation → tests → review):
 - `/ai-context next` → implement from the first incomplete task in tasks.md, in order
-- If multiple independent tasks exist, launch multiple Agents in a single message (self-driving fan-out). Implementation Agents use `model: "sonnet"` (the `implement` default in `templates/model-policy.json`)
+- If multiple independent tasks exist, launch multiple Agents in a single message (self-driving fan-out; model selection is the main AI's judgment — follow quality.md's granularity/parallelism norms)
 
 ## Combined formats
 

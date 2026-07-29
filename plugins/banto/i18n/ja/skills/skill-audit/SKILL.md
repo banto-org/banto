@@ -37,4 +37,3 @@ compatibility: Claude Code (requires bash, jq)
 ## 参照
 
 - Skills（公式）: https://code.claude.com/docs/en/skills
-- model-policy: `templates/model-policy.json`（audit=opus / audit_alt=fable）

@@ -16,7 +16,7 @@ out_of_scope:
   - 内部の {base}/ 探索（search skill）
   - 単純な事実確認 1 件（メインセッションで webread 1 回で十分）
   - 既存リサーチ要約のみ（直接 Read）
-  - コード実装に関する調査（自走実装 / code-editing rule 側で実施）
+  - コード実装に関する調査（自走実装側で実施）
 
 safety_boundaries:
   - research-agent の並列数: 上限 10

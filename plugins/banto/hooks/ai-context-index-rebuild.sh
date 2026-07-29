@@ -51,6 +51,57 @@ case "$FILE_PATH" in
     *) exit 0 ;;
 esac
 
+# 作成インデックス（{AI_BASE}/meta/creation-index.md）への 1 行 upsert。
+# decisions/ docs/ への書き込み 1 件ごとに O(1) で該当行のみ差し替える（同期・FTS5 再生成とは独立）。
+# fail-open: mktemp / mkdir が失敗しても以降の索引再生成を壊さない。
+REL=${FILE_PATH#"$AI_BASE/"}
+case "$FILE_PATH" in
+    "$AI_BASE/decisions/"*)
+        DOC_TYPE="decision"
+        # 「## 背景」/「## 背景 / 出発点」節（サフィックス揺れも許容）の最初の非空行
+        REASON=$(awk '
+            /^##[[:space:]]*背景/ { f=1; next }
+            f && /^##[[:space:]]/ { exit }
+            f && NF>0 { print; exit }
+        ' "$FILE_PATH" 2>/dev/null)
+        ;;
+    *)
+        DOCS_FILENAME=$(basename "$FILE_PATH")
+        DOC_TYPE=$(printf '%s' "$DOCS_FILENAME" | sed -n 's/^\(\[[A-Za-z]*\]\).*/\1/p')
+        [ -z "$DOC_TYPE" ] && DOC_TYPE="doc"
+        REASON=""
+        case "$FILE_PATH" in
+            *.md)
+                if [ -f "$FILE_PATH" ] && [ "$(head -1 "$FILE_PATH" 2>/dev/null)" = "---" ]; then
+                    REASON=$(awk '
+                        NR==1 { next }
+                        /^---$/ { exit }
+                        /^reason:[[:space:]]*/ { sub(/^reason:[[:space:]]*/, ""); print; exit }
+                    ' "$FILE_PATH" 2>/dev/null)
+                fi
+                ;;
+        esac
+        ;;
+esac
+REASON=$(printf '%s' "$REASON" | sed 's/|/\\|/g')
+
+IDX_DIR="$AI_BASE/meta"
+IDX="$IDX_DIR/creation-index.md"
+mkdir -p "$IDX_DIR" 2>/dev/null
+TMP_IDX=$(mktemp 2>/dev/null)
+if [ -n "$TMP_IDX" ]; then
+    if [ -f "$IDX" ]; then
+        grep -vF "| $REL |" "$IDX" > "$TMP_IDX" 2>/dev/null
+    else
+        {
+            printf '| 日付 | パス | 種別 | 理由 |\n'
+            printf '|---|---|---|---|\n'
+        } > "$TMP_IDX"
+    fi
+    printf '| %s | %s | %s | %s |\n' "$(date +%Y-%m-%d)" "$REL" "$DOC_TYPE" "$REASON" >> "$TMP_IDX"
+    mv "$TMP_IDX" "$IDX" 2>/dev/null || rm -f "$TMP_IDX"
+fi
+
 # silent failure 防止: python3 が無い時は stderr に 1 行出して可視化
 if ! command -v python3 >/dev/null 2>&1; then
     printf '[AI Context] index rebuild skipped: python3 is not installed. Search results may go stale.\n' >&2

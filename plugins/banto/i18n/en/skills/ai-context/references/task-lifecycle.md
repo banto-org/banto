@@ -6,7 +6,7 @@ tasks.md (the store canon) and the built-in task UI (TaskCreate / TaskUpdate) ar
 
 1. **On start**: locate the item in tasks.md and set the UI task to in_progress
 2. **On completion**: check the item off in tasks.md (`- [x]`) and set the UI task to completed — never finish only one side
-3. **A new request**: when asked for work that is not in tasks.md, append it to tasks.md first, then start (the record lives in the current workspace's tasks.md; if the topic falls outside the workspace's scope, propose /ws switch / new first)
+3. **A new request (implementation or investigation alike; includes deferred/additional instructions like "also", "and", "later")**: when asked for work that is not in tasks.md, append it to tasks.md first as `- [ ] {concise task}`, then start (the record lives in the current workspace's tasks.md; if the topic falls outside the workspace's scope, propose /ws switch / new first). Do not task-ify questions, chit-chat, or immediate trivial edits. The `task-router.sh` UserPromptSubmit hook nudges this entry per-prompt (nudge only, not enforced)
 
 
 <!-- merged from next.md -->

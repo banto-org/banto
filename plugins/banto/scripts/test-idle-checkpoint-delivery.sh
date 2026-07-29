@@ -133,5 +133,21 @@ run_ss "$R" startup >/dev/null 2>&1
 [ ! -f "$OLDC" ] && ok "F: consumed GC runs even with an empty mailbox (>14d deleted)" \
     || bad "F: consumed checkpoint survived with empty mailbox (GC was gated by mailbox)"
 
+# === G: ポインタ未解決（WS_KEY 空）+ marker 付き → 配送不能診断（fail-closed 無警告の解消） ===
+# 回帰: 旧実装は WS ポインタ不在で WS_KEY 空だと marker 付き checkpoint が完全一致に失敗し、
+# /clear でも永久に未配送・警告も無かった（サイレント滞留 → GC）。診断 1 行 + 復旧を検証する。
+reset_ck
+mv "$BASE/WORKSPACE.md" "$BASE/WORKSPACE.md.bak"           # ポインタを外す → WS_KEY 空
+[ -z "$(paths --ws-key "$R")" ] && ok "G: ws-key empty when pointer absent" || bad "G: ws-key should be empty"
+F=$(mk_ck 0 "<!-- banto-ws: [test] alpha -->")
+OUT=$(run_ss "$R" clear)
+case "$OUT" in *"配送できません"*) ok "G: undeliverable diagnostic shown when pointer unresolved";; *) bad "G: missing undeliverable diagnostic";; esac
+case "$OUT" in *"=== Checkpoint (user-confirmed) ==="*) bad "G: marked checkpoint injected while unresolved";; *) ok "G: marked checkpoint not injected while unresolved";; esac
+[ -f "$F" ] && ok "G: marked checkpoint preserved while unresolved" || bad "G: marked checkpoint wrongly consumed"
+# 復旧: ポインタを戻して /clear すると配送される
+mv "$BASE/WORKSPACE.md.bak" "$BASE/WORKSPACE.md"
+OUT=$(run_ss "$R" clear)
+case "$OUT" in *"=== Checkpoint (user-confirmed) ==="*) ok "G: delivered after pointer restored (recovery)";; *) bad "G: not delivered after restore";; esac
+
 echo
 [ "$fail" = "0" ] && { echo "ALL OK (test-idle-checkpoint-delivery)"; exit 0; } || { echo "FAILURES (test-idle-checkpoint-delivery)"; exit 1; }

@@ -1,6 +1,6 @@
 # Change safety rules
 
-Code of conduct for AI behavior in general (always applied). Editing constraints for lockfiles / specific file types are split into `code-editing.md` (path-scoped).
+Code of conduct for AI behavior in general (always applied). Editing constraints for lockfiles / manifests are split into `dependencies.md` (path-scoped).
 
 ## Operational safety
 

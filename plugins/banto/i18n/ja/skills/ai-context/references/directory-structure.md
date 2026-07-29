@@ -97,7 +97,7 @@ knowledge は中央 store に集まり、repo は code だけを持つ（store-f
 | フォルダ | 書く skill / hook | prefix / 形式 |
 |---|---|---|
 | `decisions/` | `ai-context`（決定記録）/ `spec`・`dev-loop`（決定の派生）| プレフィックスなし。`YYYY-MM-DD-HHMMSS_<slug>_{github-account}.md`（フラット・author 帰属）|
-| `docs/`（直下）| `memo`（`ai-context memo`）/ `status` / `harness-audit` / `plugin-audit` / `qa-tester`（呼出元が保存）| 下記「固定プレフィックス」必須。例 `[Memo] ...` / `[Status] ...` / `[Audit] ...`。拡張子は `.md` または `.html`（HTML 資料も同じプレフィックス規則で置く）|
+| `docs/`（直下）| `docs`（各形式の資料）/ `memo`（`ai-context memo`）/ `status` / `harness-audit` / `plugin-audit` / `qa-tester`（呼出元が保存）| 下記「固定プレフィックス」必須 + **日付は先頭**。`[Prefix] {YYYY-MM-DD}_{slug}[_{variant}].ext`（日付プレフィックス・`_` 区切り。`_variant` はモデル名等の任意接尾辞。日付なしは `[Index]` 等の非日付資料のみ許容）。slug は英語が既定、**配布用オフィス文書（docx / xlsx / pptx）のみ日本語名可**。拡張子は `.md` / `.html` / `.docx` / `.xlsx` / `.pptx`|
 | `docs/research/` | `research`（`research-agent` が出力）| `YYYY-MM-DD_<topic>.md`（プレフィックスなし）|
 | `docs/knowledges/` | `knowledge`（`ai-context knowledge`）昇格先 | プレフィックスなし（**例外**）。タイトル = ファイル名 `{topic}.md` |
 | `docs/knowledges/drafts/` | `ai-context-auto.sh`（hook が自動保存）→ `knowledge` でレビュー / 昇格 | `{topic}.md`。閾値（`BANTO_DRAFT_REVIEW_MIN` 既定 10）超で SessionStart が提示 |
@@ -136,6 +136,6 @@ hook で強制される。
 
 選び方: 設計・計画・提案 → `[Design]` / 説明・手順・概説 → `[Guide]` / 進捗・状況 → `[Status]` /
 監査・分析 → `[Audit]`。
-例: `[Design] payment-redesign-2026-06-23.md` / `[Guide] onboarding-2026-06-23.md`
+例: `[Design] 2026-06-23_payment-redesign.md` / `[Guide] 2026-07-19_banto-clear-doc_fable.html`（`_fable` はモデル名等の任意接尾辞）/ `[Guide] 2026-07-20_売上報告.docx`（配布用オフィス文書は日本語名可）
 
 **NEVER**: 新しいプレフィックスを勝手に作る。必要ならユーザーに相談。

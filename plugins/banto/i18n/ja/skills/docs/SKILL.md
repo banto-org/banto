@@ -20,6 +20,10 @@ compatibility: Claude Code (requires bash, python3)
 4. **形式別リファレンスを読む** — `references/format-html.md` / `references/format-xlsx.md` / `references/format-pptx.md` / `references/format-docx.md` のうち該当するもの。表を使うなら `references/format-tables.md` も
 5. **執筆・作図・検証する** — shared-rules.md の手順に従う。`scripts/` のチェッカー
    （term-sweep=用語 / style-sweep=表現 / verify-html=HTML）を必ず実行する
+6. **保存する** — 保存先・命名は ai-context の `docs/` 正典（`skills/ai-context/references/directory-structure.md`）に従い、自己流の命名をしない。`{base}/docs/[Prefix] {YYYY-MM-DD}_{slug}[_{variant}].ext`:
+   - **プレフィックスは意図で選ぶ**: 解説・手順・概説 → `[Guide]` / 提案・計画・設計 → `[Design]` / 進捗・報告 → `[Status]` / 監査・分析 → `[Audit]`
+   - **日付は先頭・`_` 区切り**。日時は `date +%Y-%m-%d` を実行して得た値を使う（記憶で書かない）。`_variant` はモデル比較等の任意接尾辞（例 `_fable`）
+   - **slug の言語**: 既定は英語。**配布用オフィス文書（docx / xlsx / pptx）のみ日本語 slug** にして本文と平仄を揃える。HTML・md は英語 slug（URL 可搬性・構造物のため）
 
 ## 形式選択表
 

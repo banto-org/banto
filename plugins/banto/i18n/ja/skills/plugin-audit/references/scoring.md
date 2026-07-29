@@ -33,7 +33,7 @@ banto 全資産（skill / agent / rule / hook）の品質評価軸。本書を `
 
 判定系 skill（`plugin-audit eval` / `plugin-audit fix` / `harness-audit`）は **必ずサブエージェントで判定** する。メインセッションには作業履歴コンテキスト汚染があり、self-evaluation bias が発生する。
 
-judge / reviewer Agent の既定モデルは `model: "opus"`（`templates/model-policy.json` の `audit` 既定、`audit_alt: "fable"` は任意アップグレード）。
+judge / reviewer Agent のモデル選定はメイン AI の判断（Reviewer = Fresh Agent 原則は維持）。
 
 | skill | Reviewer | model |
 |-------|---------|-------|

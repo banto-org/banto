@@ -49,6 +49,7 @@ jobs:
           sh plugins/banto/scripts/test-scaffold-root-guard.sh
           sh plugins/banto/scripts/test-store-first-session.sh
           sh plugins/banto/scripts/test-idle-checkpoint-delivery.sh
+          sh plugins/banto/scripts/test-checkpoint-ws-stamp.sh
           sh plugins/banto/scripts/test-release-guard.sh
           sh plugins/banto/scripts/test-prod-guard.sh
           sh plugins/banto/scripts/test-odd-kill-switch.sh
@@ -56,7 +57,6 @@ jobs:
           sh plugins/banto/scripts/test-hook-payloads.sh
           sh plugins/banto/scripts/test-drift-commit-guard.sh
           sh plugins/banto/scripts/test-ja-lint.sh
-          sh plugins/banto/scripts/test-model-role-guard.sh
           sh plugins/banto/scripts/test-cross-check.sh
           sh plugins/banto/scripts/test-export-agents-md.sh
           sh plugins/banto/scripts/test-harness-drift-autoupdate.sh
@@ -130,7 +130,17 @@ jobs:
           expected=$((total - pending))
           grep -q "^${expected} skills / " README.md || { echo "README.md skill count != ${expected}"; exit 1; }
           grep -q "^${expected} skill / " README.ja.md || { echo "README.ja.md skill count != ${expected}"; exit 1; }
-          echo "declarations OK (version=$pv, public skills=$expected)"
+          # hook count: unique scripts wired in hooks.json must match the ledger declarations.
+          # Two digits or more only — one-digit "N hooks" phrases are section labels (the 7 headline hooks).
+          # Covers the ledger lines, not every prose mention; it is an early warning, not a full sweep.
+          hooks=$(jq -r '[.. | objects | select(has("command")) | .command] | .[]' plugins/banto/hooks/hooks.json | grep -oE '[a-z0-9_-]+\.(sh|py)' | sort -u | wc -l | tr -d ' ')
+          for f in README.md README.ja.md CLAUDE.md docs/index.html docs/mechanism.html; do
+            [ -f "$f" ] || continue
+            for n in $(tr '\n' ' ' < "$f" | grep -oE '[0-9]{2,} +(registered +)?(deterministic +)?hooks|[0-9]{2,} フック' | grep -oE '^[0-9]+'); do
+              [ "$n" = "$hooks" ] || { echo "hook-count drift in $f: declares $n (actual $hooks)"; exit 1; }
+            done
+          done
+          echo "declarations OK (version=$pv, public skills=$expected, hooks=$hooks)"
 
       - name: Brand gate (no legacy names)
         run: |

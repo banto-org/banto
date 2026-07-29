@@ -112,6 +112,12 @@ if [ "$_main_push" = "1" ]; then
         # push ポリシー分離: コード repo=PR ゲート / 知識 store=auto-push（decisions/2026-05-29_005, 2026-05-30_002）。
         store_ok=0
         [ -f ".ai-context-store" ] && store_ok=1
+        # marker は store の git ルートに置かれるため、project サブディレクトリからでも
+        # 見つかるよう CWD の git ルートまで遡って確認する（従来は 1 階層だけで見失っていた）。
+        if [ "$store_ok" = "0" ]; then
+            _cwd_top=$(git rev-parse --show-toplevel 2>/dev/null)
+            [ -n "$_cwd_top" ] && [ -f "$_cwd_top/.ai-context-store" ] && store_ok=1
+        fi
         if [ "$store_ok" = "0" ]; then
             # `git -C <dir>` / `cd <dir>` から対象 dir を抽出して marker で knowledge store を判定。
             cand=$(printf '%s' "$CMD" | grep -oE 'git -C +[^ ;&|]+' | head -1 | sed -E 's/^git -C +//')
@@ -125,7 +131,13 @@ if [ "$_main_push" = "1" ]; then
                 "~")   cand="$HOME" ;;
                 "~/"*) cand="$HOME/${cand#"~/"}" ;;
             esac
-            [ -n "$cand" ] && [ -f "$cand/.ai-context-store" ] && store_ok=1
+            if [ -n "$cand" ]; then
+                [ -f "$cand/.ai-context-store" ] && store_ok=1
+                if [ "$store_ok" = "0" ]; then
+                    _cand_top=$(git -C "$cand" rev-parse --show-toplevel 2>/dev/null)
+                    [ -n "$_cand_top" ] && [ -f "$_cand_top/.ai-context-store" ] && store_ok=1
+                fi
+            fi
         fi
         if [ "$store_ok" = "1" ]; then
             warn "main push to ai-context store (allowed: knowledge store)"

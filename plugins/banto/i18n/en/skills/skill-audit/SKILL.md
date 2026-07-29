@@ -37,4 +37,3 @@ Applying any fix requires user approval — the audit itself is read-only.
 ## References
 
 - Skills (official): https://code.claude.com/docs/en/skills
-- model-policy: `templates/model-policy.json` (audit=opus / audit_alt=fable)

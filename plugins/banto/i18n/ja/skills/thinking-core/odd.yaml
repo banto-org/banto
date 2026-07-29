@@ -1,0 +1,22 @@
+# ODD Spec for thinking-core
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: thinking-core
+autonomy_level: L0  # 情報表示（作業契約テキストの読み込み・添付のみ。書き込みなし）
+
+in_scope:
+  - 作業契約 7 節の読み込みと、sonnet / haiku サブエージェントのプロンプトへの添付
+  - 旧世代モデル（Opus 4.8 等級以前）をメインに使うセッションでの手動ロード
+
+out_of_scope:
+  - 5 系の Fable / Opus への添付・ロード（不使用を徹底 — 規定的な手順書はフロンティアモデルの性能を制約する）
+  - ファイルの作成・編集（本 skill は読み込み専用）
+  - モデル選定そのもの（fan-out のモデル選定はメイン AI の判断 — quality.md）
+
+safety_boundaries:
+  - Read のみ（Write / Edit / Bash を使わない）
+
+kill_switch_conditions: []
+
+approval_gates: []

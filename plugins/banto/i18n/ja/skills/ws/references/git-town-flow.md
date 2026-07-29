@@ -37,7 +37,7 @@ git-town **なし**の場合: 各操作の「fallback」を使い、初回のみ
    git worktree add "../$(basename "$PWD")-wt-<task-name>" <task-name>
    ```
    - fallback: `git checkout -b <task-name> <epic>` + 同 worktree add（parent 追跡なし＝sync 不可、rebase 手動）
-2. 案内: 「`../<repo>-wt-<task>` に物理分離しました。別セッションで並走するなら there で `claude` を起動（`claude -w` は新しい worktree を別途作る臨時分離のため、この task 並走では使わない）」。実装 WS なら `claude --model sonnet`（`templates/model-policy.json` の `implement` 既定）、設計 WS はフラグなし（セッション本体のモデルを維持）
+2. 案内: 「`../<repo>-wt-<task>` に物理分離しました。既定は banto が実行を駆動します（独立・非競合なら fan-out Agent、それ以外はこのセッションのまま worktree の作業を進めます）。真に独立した長時間の並走が必要なときだけ、there で素の `claude` を手動起動するオプションがあります（`claude -w` は新しい worktree を別途作る臨時分離のため、この task 並走では使わない）」。手動起動を選ぶ場合はフラグなしの素の `claude` を既定とする（モデル選定は都度の判断 — 処方的な既定は置かない）
 3. 並走時は session-registry / 艦隊 dashboard に自動で載る（P4 core）。同一ブランチ衝突は pending で警告される
 
 ## sync — drift 伝播（帳簿系: 黙って自動）
@@ -45,6 +45,7 @@ git-town **なし**の場合: 各操作の「fallback」を使い、初回のみ
 - **いつ**: task セッションの開始時 / done の直前 / epic に直接コミットが入った後
 - **何を**: `git town sync`（epic→全 task へ連鎖伝播。**worktree 内からも動作することを実証済み**）
 - conflict が出たら止めて報告（自動解決しない）
+- fallback（git-town なし）: sync は使えない。task worktree 内で `git merge <epic>`（または `git rebase <epic>`）で epic の更新を手動同期する。エラーではなく想定内の degraded 動作である旨を初回のみ明示する（毎回言わない）
 
 ## done — 小枠完了（L3: 自動実行・結果報告のみ）
 
@@ -56,6 +57,7 @@ git-town **なし**の場合: 各操作の「fallback」を使い、初回のみ
    git config "git-town-branch.$(git branch --show-current).parent"   # → epic 名のはず
    ```
    親が main や別ブランチなら**中止して報告**（append を打つ場所を誤った可能性）
+   - parent config が空の場合（git-town 不在 or plain-git で作成したブランチ）: この git-town 依存チェックをスキップし、現在ブランチの分岐元を口頭確認する代替に置き換える（空を「親不一致」と誤判定して中止しない）
 3. task ブランチ上で: `git town merge`（**親 epic へマージ + task ブランチ自動削除**。実証済み。
    `git town ship` は使わない — main 行き専用で stacked 子では「親ごと ship」拒否になる）
    - マージ方式はツール既定（通常 merge）。squash が必要な場合のみ手動 `git checkout <epic> && git merge --squash <task>`

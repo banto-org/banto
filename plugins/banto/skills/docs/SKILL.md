@@ -20,6 +20,10 @@ Only the format-specific vessel-building steps change.
 4. **Read the format-specific reference** — the matching one of `references/format-html.md` / `references/format-xlsx.md` / `references/format-pptx.md` / `references/format-docx.md`. Also read `references/format-tables.md` if you're using tables
 5. **Write, draw, and verify** — follow the steps in shared-rules.md. Always run the `scripts/` checkers
    (term-sweep = terminology / style-sweep = phrasing / verify-html = HTML)
+6. **Save** — follow the ai-context `docs/` canon (`skills/ai-context/references/directory-structure.md`) for save location and naming; do not invent your own naming. `{base}/docs/[Prefix] {YYYY-MM-DD}_{slug}[_{variant}].ext`:
+   - **Pick the prefix by intent**: explainer / how-to / overview → `[Guide]` / proposal / plan / design → `[Design]` / progress / report → `[Status]` / audit / analysis → `[Audit]`
+   - **Date goes first, `_` separator**. Get the date by running `date +%Y-%m-%d` (do not write it from memory). `_variant` is an optional suffix for model comparisons etc. (e.g. `_fable`)
+   - **Slug language**: English by default. **Only distributable office documents (docx / xlsx / pptx) use a Japanese slug** to match the body; HTML and md use an English slug (URL portability / structural artifacts)
 
 ## Format-selection table
 

@@ -36,7 +36,7 @@ Don't propose an epic for one-off work that doesn't warrant one (avoid the burea
 
 ## Self-initiated parallelism proposals (fan-out Agent vs worktree)
 
-Even when the user doesn't say "in parallel", if you judge that the work splits into multiple independent subtasks (**no shared files touched, no sequential dependency**), don't run them serially — **proactively propose** parallelizing them (an extension of intent-first). Criteria for choosing between a fan-out Agent (reads/independent edits, short-lived, leanest) and a task worktree (parallel branches, conflicts, long-running), plus the 3 splittability test conditions: [`references/parallel-proposal.md`](references/parallel-proposal.md).
+Even when the user doesn't say "in parallel", if you judge that the work splits into multiple independent subtasks (**no shared files touched, no sequential dependency**), don't run them serially — **proactively propose** parallelizing them (an extension of intent-first). Criteria for choosing between a fan-out Agent (reads/independent edits, short-lived, leanest) and a task worktree (parallel branches, conflicts, long-running), plus the 3 splittability test conditions: [`references/parallel-proposal.md`](references/parallel-proposal.md). The default is banto's own fan-out Agent execution; manually starting a separate session in a worktree is an explicit opt-in only when genuinely independent, long-running parallel work is required.
 
 ## Usage (alias list — every command is reachable via natural language)
 
@@ -61,7 +61,7 @@ Detailed procedures, fallbacks, safety checks: [`references/git-town-flow.md`](r
 
 Key points (verified on git-town 23.x):
 - **epic**: `git town hack <epic>` (branches off main, tracks the parent). At the same time create a WS (`[feat] <epic>`)
-- **task**: **always run `git town append <task>` while checked out on the epic** (it becomes a child of current) → `git worktree add ../<repo>-wt-<task> <task>` for physical separation → `cd` into that directory and start a new session with plain `claude` (`claude -w` creates yet another worktree outside banto's 3-tier parent tracking — do not use it here)
+- **task**: **always run `git town append <task>` while checked out on the epic** (it becomes a child of current) → `git worktree add ../<repo>-wt-<task> <task>` for physical separation → by default banto drives the execution (independent, non-conflicting subtasks via fan-out Agent; otherwise the orchestrating session advances the worktree's work directly). Only when a genuinely independent, long-running parallel session is needed, manually start plain `claude` in that directory (explicit opt-in; `claude -w` creates yet another worktree outside banto's 3-tier parent tracking — do not use it here)
 - **drift propagation**: `git town sync` (epic updates → cascade to all tasks; works from inside a worktree too). Runs automatically at the start of a task session and before done
 - **done**: confirm tests PASS → `git town merge` on the task branch (merges into the parent epic + auto-deletes the branch) → `git town sync` → worktree remove. **Never use `git town ship`** (main-only; it's been demonstrated to be rejected on stacked children)
 - **ship**: `git town propose` (creates the PR; gh fallback available). **PR/main is a human gate** — fires on utterances like "ship it" and confirms exactly once before creation
