@@ -20,4 +20,4 @@ sh "$SCRIPT_DIR/i18n-materialize.sh" "$LANG_SEL"
 # 個人改変されたコピーは削除しない）。
 sh "$SCRIPT_DIR/writing-ja-toggle.sh" sync
 
-echo "set-language: preference saved ($LANG_FILE = $LANG_SEL). Restart Claude Code to load the '$LANG_SEL' skill set."
+echo "set-language: preference saved ($LANG_FILE = $LANG_SEL). Run /reload-plugins (or restart Claude Code) to load the '$LANG_SEL' skill set."

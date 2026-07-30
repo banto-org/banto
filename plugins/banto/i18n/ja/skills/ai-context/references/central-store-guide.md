@@ -95,7 +95,7 @@ git にしない運用なら Time Machine / rsync 等でディレクトリごと
 - SessionStart hook が `[AI Context - 中央 store 運用] ... ベース: <絶対パス>` を注入 →
   decisions / docs / tasks は常に**注入された絶対パス配下**を Read/Write
 - 検索は `/search <query>`（store の decisions/docs が対象）。検索対象の追加は `config.json` の `extra_docs_dirs`
-- plugin 更新・mapping 変更は **Claude Code 再起動**で反映
+- plugin 更新・mapping 変更は **/reload-plugins または Claude Code 再起動**で反映
 
 ## 関連
 

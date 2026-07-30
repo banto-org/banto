@@ -50,7 +50,7 @@ Pattern shared by the document-creation skills: `${CLAUDE_PLUGIN_ROOT}/templates
 | `/plugin-dev {description}` | Scaffold a new plugin / refactor an existing skill |
 | `/plugin-audit [path]` | Audit an existing plugin / single skill against official best practices |
 | `/skill-audit [path]` | Audit a single skill from a context-engineering angle (7 axes: information minimality / leakage of human-only information / division of labor in structure, etc. plugin-audit covers the whole plugin) |
-| `/set-language [ja/en]` | Switch Banto's language between Japanese and English. The choice persists (survives plugin updates). A Claude Code restart is required to apply it |
+| `/set-language [ja/en]` | Switch Banto's language between Japanese and English. The choice persists (survives plugin updates). Apply with /reload-plugins or a restart |
 | `/ai-context sort project` | Tidy up documents scattered across the whole project |
 | `/thinking-core` | Load the 7-section work contract on demand (for sonnet / haiku and older-generation models; strictly never for 5-generation Fable / Opus) |
 | `/kit` | Display this catalog |
@@ -74,7 +74,7 @@ Pattern shared by the document-creation skills: `${CLAUDE_PLUGIN_ROOT}/templates
 | `plugin-audit` | "check this skill's quality", "review it on the 15 axes", "compare SKILL.md against best practice" |
 | `skill-audit` | "audit this skill", "context-engineering audit this skill" (plugin-audit covers the whole plugin; skill-audit covers one skill's context efficiency) |
 | `ws` | "workspace", "switch work", "run in parallel", "split off a branch", "worktree", "epic", "this work is done", "merge it", "release it" |
-| `set-language` | "set the language to Japanese", "switch to English", "language settings", "make banto japanese/english" (persistent; applied on restart) |
+| `set-language` | "set the language to Japanese", "switch to English", "language settings", "make banto japanese/english" (persistent; applied via /reload-plugins or restart) |
 | `thinking-core` | "load the work contract", "apply thinking-core" (for sonnet/haiku fan-out attachment and older-generation manual load only; never for 5-gen Fable/Opus) |
 | `docs` | "make a document", "a report", "an explainer", "a proposal", "as slides", "in Excel", "in Word" (unified document creation — picks the best-fit format among HTML / xlsx / pptx / docx / tables from the document's purpose; ships a writing canon and audience-level guidance) |
 | `diagram` | "make a diagram", "a sequence diagram", "an architecture diagram", "in mermaid", "in draw.io" (notation choice and practical patterns; ships the SVG render-and-embed pipeline) |

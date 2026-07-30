@@ -9,6 +9,7 @@
 - **Checkpoint delivery made deterministic.** The workspace marker on auto-saved checkpoints is now stamped by a deterministic hook instead of the model (the reader always matched exactly; now the writer does too), and checkpoints that cannot be delivered because no workspace is resolved surface a one-line recovery note at session start instead of silently piling up.
 - **Fan-out hygiene: fold what you spawn.** Throwaway fan-out agents must not be given a `name` (named agents persist in the mailbox across session resumes); results are collected on completion and idle agents are stopped, not abandoned.
 - **Store hygiene fixes.** Creation-index records why each store file was created; knowledge-store markers are recognized from subdirectories; docs/ naming is unified on a date-prefix canon with a hook check; `ws` degrades gracefully when git-town is not installed.
+- **Docs: `/reload-plugins` is documented as sufficient to load a new skill / hook set.** A full restart is only needed when you want SessionStart hooks to re-run; the language switcher, kit catalog, and update instructions now say so.
 
 ## 0.4.0
 

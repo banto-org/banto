@@ -133,7 +133,7 @@ To switch the skill / agent set to Japanese, run this **once**:
 /set-language ja
 ```
 
-then **restart Claude Code** to load the Japanese set. The choice is persisted and **survives plugin updates**, so you **never need to do it again** (use `/set-language en` + restart only to switch back).
+then run **/reload-plugins** (or restart Claude Code) to load the Japanese set. The choice is persisted and **survives plugin updates**, so you **never need to do it again** (use `/set-language en` + reload only to switch back).
 
 ## How it feels
 

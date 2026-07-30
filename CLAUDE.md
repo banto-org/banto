@@ -31,7 +31,7 @@ it.** (The concept → spec → autonomous-implementation pipeline is dogfooded 
 
 - **Keep the edit repo = the live plugin in sync**: after editing skills/hooks, bump the version and run
   `claude plugin marketplace update banto-marketplace && claude plugin update banto@banto-marketplace`,
-  then restart Claude Code. Never leave same-version different-content drift.
+  then run /reload-plugins (or restart Claude Code). Never leave same-version different-content drift.
 - Meta tools: `/plugin-audit` (15-axis skill quality) / `/skill-audit` (7-axis single-skill context-
   engineering audit) / `/harness-audit` (5-axis whole-harness system audit) / `/plugin-dev` (generate
   & refactor). Self-check consistency with harness-audit after changes.
