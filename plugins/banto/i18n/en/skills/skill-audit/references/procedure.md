@@ -20,7 +20,7 @@ Output:
 
 ## 3. Judge the 7 axes
 
-Follow each axis's judgment procedure in [`axes.md`](axes.md), cross-referencing the mechanical measurements against what you Read from SKILL.md and its references. Delegate subjective judgment calls — such as A6 (stated-AI consistency) — to an Agent (general-purpose, `model: opus`) — the Reviewer = Fresh Agent principle, using the same `audit` role from model-policy.json that plugin-audit and harness-audit use. The delegation prompt must always instruct the agent to Read TARGET's SKILL.md, every file under references/, and scripts/ (docstrings and structure) — auditing SKILL.md alone misses violations buried in references (broken references, duplication, process-history metadata).
+Follow each axis's judgment procedure in [`axes.md`](axes.md), cross-referencing the mechanical measurements against what you Read from SKILL.md and its references. Delegate subjective judgment calls — such as A6 (stated-AI consistency) — to an Agent (general-purpose; model selection is the main AI's judgment) — the Reviewer = Fresh Agent principle. The delegation prompt must always instruct the agent to Read TARGET's SKILL.md, every file under references/, and scripts/ (docstrings and structure) — auditing SKILL.md alone misses violations buried in references (broken references, duplication, process-history metadata).
 
 ## 4. Report
 

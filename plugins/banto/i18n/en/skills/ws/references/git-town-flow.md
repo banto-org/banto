@@ -37,7 +37,7 @@ Utterance examples: "do the API in parallel", "put this in a separate worktree"
    git worktree add "../$(basename "$PWD")-wt-<task-name>" <task-name>
    ```
    - fallback: `git checkout -b <task-name> <epic>` + the same worktree add (no parent tracking = no sync, manual rebase)
-2. Guidance: "Physically separated to `../<repo>-wt-<task>`. To run in parallel in a separate session, start `claude` there (do not use `claude -w` for this — it creates a separate ad-hoc worktree outside the task hierarchy)". For an implementation WS, use `claude --model sonnet` (the `implement` default in `templates/model-policy.json`); for a design WS, no flag (keep the session's own model)
+2. Guidance: "Physically separated to `../<repo>-wt-<task>`. By default banto drives the execution (independent, non-conflicting → fan-out Agent; otherwise this session advances the worktree's work). Only when genuinely independent, long-running parallel work is needed is there an option to manually start plain `claude` there (do not use `claude -w` for this — it creates a separate ad-hoc worktree outside the task hierarchy)". If you choose manual startup, plain `claude` with no flag is the default (model selection is a per-case judgment — no prescriptive default)
 3. When running in parallel it is automatically listed in the session-registry / fleet dashboard (P4 core). Same-branch collisions are warned as pending
 
 ## sync — drift propagation (bookkeeping: silently automatic)
@@ -45,6 +45,7 @@ Utterance examples: "do the API in parallel", "put this in a separate worktree"
 - **When**: at the start of a task session / right before done / after a direct commit lands on the epic
 - **What**: `git town sync` (epic→all tasks cascade propagation. **proven to work from inside a worktree too**)
 - If a conflict appears, stop and report (do not auto-resolve)
+- fallback (no git-town): sync is unavailable. Manually sync the epic's updates from inside the task worktree with `git merge <epic>` (or `git rebase <epic>`). State once, the first time only, that this is expected degraded behavior, not an error (don't repeat it every time)
 
 ## done — finish a small scope (L3: auto-execute, report only)
 
@@ -56,6 +57,7 @@ Utterance examples: "this work is done", "task complete" / propose it when detec
    git config "git-town-branch.$(git branch --show-current).parent"   # → should be the epic name
    ```
    If the parent is main or another branch, **abort and report** (the append may have been issued in the wrong place)
+   - If the parent config is empty (git-town absent, or the branch was created with plain git): skip this git-town-dependent check and substitute a verbal confirmation of the current branch's fork point instead (do not misread empty as a "parent mismatch" and abort)
 3. On the task branch: `git town merge` (**merges into the parent epic + auto-deletes the task branch**. proven.
    Do not use `git town ship` — it is main-only and on stacked children it rejects with "ship the parent too")
    - The merge method is the tool default (usually merge). Only when a squash is needed, do it manually with `git checkout <epic> && git merge --squash <task>`

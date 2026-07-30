@@ -120,11 +120,11 @@ if [ "$DRIFT_VER" = "1" ] && [ "$EDIT_VER" = "$RUN_VER" ]; then
 fi
 
 # Rule-declared lockfiles must all be enforced by lint-guard.sh (declaration ⊆ hook; H-20 recurrence check)
-CE_RULE="$CWD/plugins/banto/templates/rules/code-editing.md"
+DEP_RULE="$CWD/plugins/banto/templates/rules/dependencies.md"
 LG_HOOK="$CWD/plugins/banto/hooks/lint-guard.sh"
-if [ -f "$CE_RULE" ] && [ -f "$LG_HOOK" ]; then
+if [ -f "$DEP_RULE" ] && [ -f "$LG_HOOK" ]; then
     MISSING_LF=""
-    for lf in $(grep -oE '"\*\*/[^"]+"' "$CE_RULE" 2>/dev/null | tr -d '"' | sed 's#\*\*/##' \
+    for lf in $(grep -oE '"\*\*/[^"]+"' "$DEP_RULE" 2>/dev/null | tr -d '"' | sed 's#\*\*/##' \
                 | grep -E '(\.lock|\.lockb|^go\.sum$|^package-lock\.json$)' | sort -u); do
         grep -F "$lf" "$LG_HOOK" >/dev/null 2>&1 || MISSING_LF="$MISSING_LF $lf"
     done
@@ -132,7 +132,7 @@ if [ -f "$CE_RULE" ] && [ -f "$LG_HOOK" ]; then
         [ -n "$OUT" ] && OUT="$OUT
 "
         OUT="${OUT}## ⚠️ Lockfile declaration drift (${TODAY})
-- code-editing.md declares lockfiles not enforced by lint-guard.sh:${MISSING_LF} → add them to the hook case (declaration must not exceed enforcement)."
+- dependencies.md declares lockfiles not enforced by lint-guard.sh:${MISSING_LF} → add them to the hook case (declaration must not exceed enforcement)."
     fi
 fi
 

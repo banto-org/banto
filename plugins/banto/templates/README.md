@@ -12,7 +12,7 @@ remove (or re-home) its template.
 | `ja-style-core.md` | Compact Japanese style block appended to fan-out agent prompts (the `quality` rule prescribes it; banto's own agents embed it) |
 | `workspace-rule.md` | Workspace rule installed per project (`ws` skill; also i18n-managed) |
 | `docs/_common-pattern.md` | Shared invocation pattern for document-producing skills (`kit` / `plugin-dev` / `status` skills; `hooks/ai-context-prefix-check.sh`) |
-| `model-policy.json` | Model role policy — canonical mapping of fan-out roles to models (`model-role-guard.sh`, `checkpoint-autofire.sh`, `idle-checkpoint-watch.sh`) |
+| `model-policy.json` | Operational model defaults — `summarize` (idle-checkpoint background fork: `checkpoint-autofire.sh`, `idle-checkpoint-watch.sh`) and `verify_external` (`scripts/cross-check.sh`). Fan-out model selection is delegated to the main AI (no prescriptive roles; `quality` rule prescribes only granularity and parallelism) |
 | `odd/odd.schema.yaml` | Schema for each skill's `odd.yaml` (`plugin-audit-odd.sh`; referenced from every skill's ODD header) |
 | `ontology-schema.json` | Ontology TBox (`ontology-gen.sh` / `ontology-lint.sh` / `test-ontology.sh`) |
 | `store-layout.json` | Canonical ai-context store layout (`ai-context-session-start.sh`, `store-map-gen.sh` / `store-map-lint.sh`, `ontology-gen.sh`) |
@@ -22,7 +22,8 @@ remove (or re-home) its template.
 
 ## Rule scopes
 
-Always-on rules (`quality` / `safety` / `evidence-first` / `spec-fidelity` / `pii-protection` /
-`thinking-core`) apply to every file; path-scoped rules (`testing` / `code-editing` /
-`dependencies`) are injected only for matching paths; `writing-ja` is opt-in via the
-`set-language` skill.
+Always-on rules (`quality` / `safety` / `evidence-first` / `spec-fidelity` / `pii-protection`)
+apply to every file; the path-scoped rule (`dependencies`) is injected only for matching paths;
+`writing-ja` is opt-in via the `set-language` skill. The former `thinking-core` rule now ships as
+the on-demand `thinking-core` skill (for sonnet / haiku and older-generation models only — never
+loaded for 5-generation Fable / Opus).

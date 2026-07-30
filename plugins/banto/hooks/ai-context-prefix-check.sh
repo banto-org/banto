@@ -1,6 +1,7 @@
 #!/bin/sh
 # AI Context Prefix Check Hook (PostToolUse: Write|Edit)
-# .ai-context/docs/ 配下（research/ specs/ 除く）に固定プレフィックスを強制
+# .ai-context/docs/ 配下（research/ specs/ 除く）に固定プレフィックスを強制（block）+
+# 命名正典（2026-07-23）の日付プレフィックス位置を検査（warn-only）
 # POSIX互換: macOS / Linux / WSL
 #
 # 重要: printf '%s' "$INPUT" | jq は JSON 内の $() 等がシェル展開されて壊れるため、
@@ -84,4 +85,41 @@ Rename this file.
 PREFIX_ERR
     exit 2
 fi
+
+# 日付位置チェック（命名正典 2026-07-23: docs/ は日付プレフィックス `[Prefix] YYYY-MM-DD_slug`）。
+# 日付を含むのに先頭・`_` 区切りになっていない（末尾サフィックス等）ものを警告。
+# 日付を含まない資料（[Index] 等）は対象外。warn-only（既存ファイルの移行を壊さない）。
+if echo "$FILENAME" | grep -qE '[0-9]{4}-[0-9]{2}-[0-9]{2}' \
+   && ! echo "$FILENAME" | grep -qE '^\[[A-Za-z]+\] [0-9]{4}-[0-9]{2}-[0-9]{2}_'; then
+    cat >&2 << DATE_WARN
+[AI Context - Naming] docs/ の命名は日付プレフィックス: [Prefix] YYYY-MM-DD_slug[_variant].ext
+  File: $FILENAME
+  日付が先頭・_ 区切りになっていない（末尾サフィックス等の可能性）。
+  例: [Guide] 2026-07-19_banto-clear-doc_fable.html （warn-only; 日付なしの [Index] 等は対象外）
+DATE_WARN
+fi
+
+# reason: front-matter 警告（docs/ 直下、.md 限定。research/specs は専用スキーマで上流にて
+# warn 済み、knowledges/ は front-matter 対象外で既に除外済み。HTML/office は front-matter
+# 不可なので対象外。warn-only・block しない — 作成インデックスの reason 抽出元）
+case "$FILE_PATH" in
+    *.md)
+        [ -f "$FILE_PATH" ] || exit 0
+        HAS_REASON=0
+        if [ "$(head -1 "$FILE_PATH" 2>/dev/null)" = "---" ] \
+           && awk 'NR==1{next} /^---$/{exit} /^reason:/{f=1; exit} END{exit !f}' "$FILE_PATH" >/dev/null 2>&1; then
+            HAS_REASON=1
+        fi
+        if [ "$HAS_REASON" -eq 0 ]; then
+            cat >&2 << REASON_WARN
+[AI Context - Front-matter] docs/ files should include a one-line reason: in front-matter
+(why this file was created — feeds {base}/meta/creation-index.md):
+  ---
+  reason: {one line}
+  ---
+Add it to: $(basename "$FILE_PATH")  (warn-only)
+REASON_WARN
+        fi
+        ;;
+esac
 exit 0

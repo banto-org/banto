@@ -30,13 +30,15 @@ Save to: `{base}/sessions/checkpoint-{YYYY-MM-DD}-{HHMM}.md`
 
 Save with the Write tool in the following format:
 
-Put a workspace address marker on the first line (reuse the value of the injected
-"# Workspace: <topic>" line verbatim; omit the line if there is none). SessionStart uses this
-marker to deliver only checkpoints addressed to this workspace on /clear, preventing
-misdelivery to an unrelated session (decision 2026-07-08 idle-checkpoint-delivery).
+Do not write the workspace address marker (`<!-- banto-ws: ... -->`). A deterministic hook
+(checkpoint-ws-stamp.sh) stamps it with the canonical key after the file is saved. SessionStart
+uses this marker to deliver only checkpoints addressed to this workspace on /clear (decision
+2026-07-08 idle-checkpoint-delivery). A model-written marker fails the exact match (e.g. dropped
+prefix), so the marker's writer is unified onto the deterministic hook.
+
+Do not write the heading and filename timestamps from memory. Always run `date '+%Y-%m-%d %H:%M'` (for the heading) and `date '+%Y-%m-%d-%H%M'` (for the filename) and use their output verbatim.
 
 ```markdown
-<!-- banto-ws: <current workspace topic; omit this whole line if none> -->
 # Checkpoint - YYYY-MM-DD HH:MM
 
 ## What is being worked on now

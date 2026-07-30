@@ -90,7 +90,7 @@ Time-boxed approvals are also supported (e.g. "only allow it for a week"): set t
 Details: [`references/decisions.md`](references/decisions.md)
 
 - **When**: the moment a design decision occurs (don't wait for a commit). Save = design direction / technology choice / architecture change / trade-off / root cause. Don't save = plain implementation / typo / a mere factual answer.
-- **Where**: `{base}/decisions/YYYY-MM-DD-HHMMSS_{topic-slug}_{github-account}.md` (the PreToolUse hook injects the recommended name; the old `YYYY-MM-DD_NNN_` format is still valid).
+- **Where**: `{base}/decisions/YYYY-MM-DD-HHMMSS_{topic-slug}_{github-account}.md` (derive the timestamp from `date`, do not write it from memory; the old `YYYY-MM-DD_NNN_` format is still valid).
 - **Format**: lightweight (title + decision) / full (starting point / options / deciding factor / why rejected / **friction** / **lessons learned**). Friction and lessons are the core of organizational learning.
 - **Secrets** (ironclad rule): don't write `sk-*` / `ghp_*` / `Bearer *` / `.env` values into decisions / checkpoints → replace with `{SECRET}`. On exposure, **revoke / rotate** immediately (it stays in the chat history).
 

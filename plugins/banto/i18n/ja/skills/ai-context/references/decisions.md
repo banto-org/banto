@@ -33,14 +33,13 @@
 ## 命名規則 (秒精度タイムスタンプ, v5.21.4+)
 
 - ファイル名は秒精度の時刻で一意化（`YYYY-MM-DD-HHMMSS_topic_author`）。チーム並行・オフラインでも同日衝突しない（NNN 連番は廃止）
-- 推奨名は `ai-context-decisions-numbering.sh` hook が PreToolUse で context に注入
 - 旧 `YYYY-MM-DD_NNN_`（連番）形式の既存ファイルはそのまま valid（リネーム不要）
 
 ## ファイル名の決定手順
 
-1. PreToolUse hook が「推奨ファイル名（秒精度タイムスタンプ）」を表示
-2. その名前で `YYYY-MM-DD-HHMMSS_{topic}_{user}.md` を Write
-3. PostToolUse hook が命名規則を検証（日付始まりだが規約外なら git mv 推奨を提示）
+1. タイムスタンプは記憶で書かない。`date +%Y-%m-%d-%H%M%S`（ファイル名）と `date +%Y-%m-%d`（front-matter の `**日付**:` / `date:`）を実行し、その出力をそのまま使う（丸めない。`09:45:00` のようなキリの良い秒 `00` の推測値は不可）
+2. その値で `YYYY-MM-DD-HHMMSS_{topic}_{user}.md` を Write
+3. PostToolUse hook が検証（規約外の命名は git mv 推奨を提示。Write でファイル名日付が当日と異なれば「記憶で書いた疑い」を警告）
 
 GitHub アカウント名は `gh api user --jq '.login'`、失敗時は `git config user.name`。
 
@@ -67,7 +66,7 @@ status: accepted        # accepted | provisional
 date: YYYY-MM-DD
 topic: {一行サマリー}
 supersedes: []          # 置き換えた旧 decision（任意。鮮度の正はファイル名日付 — これは遡り用リンク）
-relates: []
+related: []
 ---
 
 # {タイトル}: {決定内容の一行サマリー}

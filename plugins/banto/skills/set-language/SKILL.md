@@ -1,7 +1,7 @@
 ---
 name: set-language
 description: |
-  **UTILITY SKILL** — Switch the Banto language between Japanese and English; persists the choice (survives plugin updates) and requires a Claude Code restart to load the new set. Also owns the opt-in toggle for the Japanese writing-style rule (writing-ja, default off).
+  **UTILITY SKILL** — Switch the Banto language between Japanese and English; persists the choice (survives plugin updates); load the new set with /reload-plugins (or a Claude Code restart). Also owns the opt-in toggle for the Japanese writing-style rule (writing-ja, default off).
   Triggers: "set language to japanese", "switch to english", "make banto japanese/english", 「言語を日本語にして」「英語に切り替えて」「言語設定」; writing-ja toggle: "turn the Japanese writing rule on/off", 「writing-ja をオンに/オフにして」「日本語ライティングルールを有効に/無効に」「文体ルールを外して/入れて」. Also invocable via /set-language.
   Do not use when: changing the *output* language of a single document (just write it in that language), or editing one skill's wording (direct Edit).
 user-invocable: true
@@ -48,7 +48,7 @@ preference and **re-materializes the same language automatically** (so the choic
 
 Tell the user, in their conversation language:
 - which language is now active,
-- that they must **restart Claude Code** for the new skill set to load,
+- that they must run **/reload-plugins** (or restart Claude Code) for the new skill set to load,
 - that the choice will persist across future plugin updates.
 
 ## Variant: writing-ja rule toggle (opt-in, default off)

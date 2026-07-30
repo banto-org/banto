@@ -2,9 +2,10 @@
 # ai-context-decisions-numbering.sh
 # decisions/ ファイルのタイムスタンプ命名 (YYYY-MM-DD-HHMMSS_topic_user.md) を支援する hook。
 #
-# - PostToolUse(Write|Edit): 日付始まりだが命名規約に合わない decisions 書き込みを警告
+# - PostToolUse(Write|Edit): 日付始まりだが命名規約に合わない decisions 書き込みを警告。
+#   さらに Write でファイル名日付が当日と異なる場合、タイムスタンプを記憶で書いた疑いとして警告。
 #   （PreToolUse の推奨名注入は 2026-07-02 監査で廃止 — PreToolUse の stdout はモデルに
-#    inject されず死にコードだった。CONTRACT.md:40）
+#    inject されず死にコードだった。CONTRACT.md:40。タイムスタンプの正は skill 側の date 取得指示）
 #
 # v5.14.0: 同日連番 NNN を導入。
 # v5.21.4: チーム並行・オフライン運用で NNN がローカル走査ゆえ衝突する問題を回避するため、
@@ -14,6 +15,7 @@
 INPUT=$(cat)
 CWD=$(printf '%s' "$INPUT" | jq -r '.cwd // empty' 2>/dev/null)
 EVENT=$(printf '%s' "$INPUT" | jq -r '.hook_event_name // empty' 2>/dev/null)
+TOOL=$(printf '%s' "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null)
 FILE=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 [ -z "$CWD" ] && exit 0
 
@@ -58,6 +60,20 @@ Recommended action:
 Reason: second-precision timestamp naming is recommended to avoid number collisions in parallel team work (v5.21.4+)
 END
             fi
+        fi
+
+        # タイムスタンプ精度チェック: 当日 Write なのにファイル名日付が当日と異なる場合、
+        # モデルが日付を記憶で書いた疑いとして警告する（skill は date からの取得を指示）。
+        # warn-only・Write のみ（Edit は既存 decision の改訂。意図的な back-date は無視可）。
+        NAME_DATE=$(echo "$BASENAME" | grep -oE '^[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        TODAY=$(echo "$NOW" | cut -d- -f1-3)
+        if [ "$TOOL" = "Write" ] && [ -n "$NAME_DATE" ] && [ "$NAME_DATE" != "$TODAY" ]; then
+            cat >&2 << END
+[Decisions Timestamp] filename date ${NAME_DATE} differs from today ${TODAY} — the timestamp may have been written from memory rather than read from the clock.
+If this decision is being saved now, use the real time:
+  git mv "$FILE" "$(dirname "$FILE")/${NOW}_<topic>_${AUTHOR}.md"
+Derive it from \`date +%Y-%m-%d-%H%M%S\` (do not round to a "nice" time). Intentional back-dating can be ignored.
+END
         fi
         # スケルトン節チェック（decision 2026-07-17 freshness-newest-first）: 大型 decision の
         # 必須 4 節（背景/決定/根拠/検討した代替案。JA/EN 見出しとも許容）の欠落を警告する。

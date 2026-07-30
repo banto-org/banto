@@ -30,12 +30,15 @@ compatibility: Claude Code (requires bash, git, jq)
 
 Write ツールで以下のフォーマットで保存する:
 
-先頭行に workspace 宛先マーカーを 1 行置く（注入済みの「# Workspace: <topic>」行の値をそのまま使う。
-無ければ省略可）。SessionStart 側はこのマーカーで「このワークスペース宛て」の checkpoint だけを
-/clear 時に配送し、別作業セッションへの誤配送を防ぐ（decision 2026-07-08 idle-checkpoint-delivery）。
+workspace 宛先マーカー（`<!-- banto-ws: ... -->`）は書かない。決定論 hook（checkpoint-ws-stamp.sh）が
+保存後に正準キーで自動刻印する。SessionStart 側はこのマーカーで「このワークスペース宛て」の checkpoint
+だけを /clear 時に配送する（decision 2026-07-08 idle-checkpoint-delivery）。マーカーをモデルが書くと
+プレフィックス欠落等で完全一致に失敗するため、書き手は決定論 hook に一本化している。
+
+見出しとファイル名の日時は記憶で書かない。必ず `date '+%Y-%m-%d %H:%M'`（見出し用）と
+`date '+%Y-%m-%d-%H%M'`（ファイル名用）を実行し、その出力をそのまま使う。
 
 ```markdown
-<!-- banto-ws: <現在の workspace topic。無ければこの行ごと省略> -->
 # Checkpoint - YYYY-MM-DD HH:MM
 
 ## What is being worked on now

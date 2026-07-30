@@ -33,7 +33,7 @@ Quality evaluation axes for every Banto asset (skill / agent / rule / hook). Thi
 
 The judgment-type skills (`plugin-audit eval` / `plugin-audit fix` / `harness-audit`) **must always render their judgment in a subagent**. The main session carries work-history context contamination, which produces self-evaluation bias.
 
-The default model for judge / reviewer Agents is `model: "opus"` (the `audit` default in `templates/model-policy.json`; `audit_alt: "fable"` is an optional upgrade).
+Judge / reviewer Agent model selection is the main AI's judgment (the Reviewer = Fresh Agent principle is kept).
 
 | skill | Reviewer | model |
 |-------|---------|-------|

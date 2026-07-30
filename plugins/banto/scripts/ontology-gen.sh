@@ -178,10 +178,11 @@ _doctitle() {
     [ -z "$t" ] && t=$(grep -m1 '^# ' "$1" 2>/dev/null | sed 's/^#[[:space:]]*//')
     printf '%s' "$t"
 }
-# frontmatter の related: リスト（素朴な YAML ブロック形式）を列挙
+# frontmatter の related: リスト（素朴な YAML ブロック形式）を列挙。
+# relates:（旧スケルトンの誤記。正典は related: へ統一済みだが既存ファイル互換のため両対応）も受理。
 _docrelated() {
     awk 'NR==1 && $0!="---"{exit} /^---$/{c++; if(c>1) exit; next}
-         c==1 && /^related:[[:space:]]*$/{f=1; next}
+         c==1 && (/^related:[[:space:]]*$/ || /^relates:[[:space:]]*$/){f=1; next}
          c==1 && f && /^[[:space:]]+-[[:space:]]/{sub(/^[[:space:]]+-[[:space:]]+/,""); print; next}
          c==1 && f{f=0}' "$1" 2>/dev/null
 }

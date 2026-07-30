@@ -1,0 +1,22 @@
+# ODD Spec for thinking-core
+# schema: ../../templates/odd/odd.schema.yaml
+
+schema_version: 1
+skill: thinking-core
+autonomy_level: L0  # Information display only (loading / attaching the working-contract text; no writes)
+
+in_scope:
+  - Loading the 7-section working contract and attaching it to sonnet / haiku subagent prompts
+  - Manual loading in sessions running an older-generation model (Opus 4.8-class or earlier) as main
+
+out_of_scope:
+  - Attaching or loading it for 5-generation Fable / Opus (strictly never use — a prescriptive procedure constrains a frontier model's performance)
+  - Creating or editing files (this skill is read-only)
+  - Model selection itself (fan-out model selection is the main AI's judgment — quality.md)
+
+safety_boundaries:
+  - Read only (never uses Write / Edit / Bash)
+
+kill_switch_conditions: []
+
+approval_gates: []

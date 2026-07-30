@@ -90,7 +90,7 @@ repo 単位の常設承認を `{base}/meta/grants.json` に記録する（「こ
 詳細: [`references/decisions.md`](references/decisions.md)
 
 - **いつ**: 設計判断が発生した瞬間（コミットを待たない）。保存する＝設計方針 / 技術選定 / アーキ変更 / トレードオフ / 根本原因。保存しない＝単純実装 / typo / 事実回答のみ。
-- **どこ**: `{base}/decisions/YYYY-MM-DD-HHMMSS_{topic-slug}_{github-account}.md`（PreToolUse hook が推奨名を注入; 旧 `YYYY-MM-DD_NNN_` 形式も有効）。
+- **どこ**: `{base}/decisions/YYYY-MM-DD-HHMMSS_{topic-slug}_{github-account}.md`（タイムスタンプは `date` から取得し記憶で書かない; 旧 `YYYY-MM-DD_NNN_` 形式も有効）。
 - **形式**: 軽量（タイトル + 判断）/ 完全（出発点 / 選択肢 / 決め手 / 不採用理由 / **フリクション** / **学んだこと**）。フリクションと学びが組織学習の核。
 - **シークレット**（鉄則）: `sk-*` / `ghp_*` / `Bearer *` / `.env` 値を decisions / チェックポイントに書かない → `{SECRET}` に置換。露出時は即 **revoke / rotation**（チャット履歴に残る）。
 

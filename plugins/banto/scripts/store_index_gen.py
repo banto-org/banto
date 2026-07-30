@@ -63,7 +63,8 @@ def frontmatter_field(text: str, field: str) -> str:
 
 def frontmatter_related(text: str):
     """frontmatter の related: リスト（YAML の素朴なブロック形式のみ）を決定論抽出する。
-    エントリは project 相対の生文字列（.md や author 接尾辞を欠くことが多い — 解決は参照側で prefix 一致）。"""
+    エントリは project 相対の生文字列（.md や author 接尾辞を欠くことが多い — 解決は参照側で prefix 一致）。
+    relates:（旧スケルトンの誤記。正典は related: へ統一済みだが既存ファイル互換のため両対応）も受理する。"""
     if not text.startswith("---"):
         return []
     end = text.find("\n---", 3)
@@ -71,7 +72,7 @@ def frontmatter_related(text: str):
         return []
     out, in_rel = [], False
     for line in text[:end].splitlines():
-        if re.match(r"^related:\s*$", line):
+        if re.match(r"^(?:related|relates):\s*$", line):
             in_rel = True
             continue
         if in_rel:

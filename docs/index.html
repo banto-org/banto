@@ -68,6 +68,7 @@
           <span class="nav-menu-head lx" lang="en">Workspace &amp; meta</span><span class="nav-menu-head lx" lang="ja">ワークスペース &amp; メタ</span>
           <a href="toolset.html#ws"><b>ws</b><span class="lx" lang="en">workspace &amp; fleet</span><span class="lx" lang="ja">ワークスペース &amp; 艦隊</span></a>
           <a href="toolset.html#set-language"><b>set-language</b><span class="lx" lang="en">JA ⇄ EN, sticky</span><span class="lx" lang="ja">日英切替（永続）</span></a>
+          <a href="toolset.html#thinking-core"><b>thinking-core</b><span class="lx" lang="en">work contract, on demand</span><span class="lx" lang="ja">作業契約のオンデマンド読込</span></a>
           <a href="toolset.html#plugin-dev"><b>plugin-dev</b><span class="lx" lang="en">scaffold &amp; refactor</span><span class="lx" lang="ja">生成 &amp; 改修</span></a>
           <a href="toolset.html#plugin-audit"><b>plugin-audit</b><span class="lx" lang="en">15-axis quality audit</span><span class="lx" lang="ja">15 軸品質監査</span></a>
           <a href="toolset.html#skill-audit"><b>skill-audit</b><span class="lx" lang="en">7-axis context audit</span><span class="lx" lang="ja">7 軸コンテキスト監査</span></a>
@@ -151,13 +152,15 @@
         <span class="lx" lang="ja">方針はあなたが決める。<br/><em>開発は番頭が回す。</em></span>
       </h1>
       <p class="lede reveal lx" lang="en">
-        A <strong>self-driving harness for Claude Code</strong>. It keeps your decisions, research,
+        A <strong>self-driving harness for Claude Code</strong>. A harness is the layer that holds your
+        context and drives the agent in your place. It keeps your decisions, research,
         and work-in-progress in a store, and re-injects them at every session start. Even after
         <code>/clear</code>, nothing is forgotten. <strong>Hooks stop</strong> pushes to main and production changes
         <em>before they run</em>. The only thing that reaches you is an exception worth deciding.
       </p>
       <p class="lede reveal lx" lang="ja">
-        <strong>Claude Code のための自走ハーネス</strong>。設計判断・調査・作業の続きをストアに残し、
+        <strong>Claude Code のための自走ハーネス</strong>。ハーネスとは、AI に方針と記憶を持たせ、
+        あなたの代わりに走らせる土台のことだ。設計判断・調査・作業の続きをストアに残し、
         セッションを開くたびに注入する。<code>/clear</code> しても「前に決めたこと」を忘れない。
         main への push や本番操作は <strong>hook が実行前に止める</strong>。あなたに届くのは、
         判断の要る例外だけ。
@@ -235,7 +238,7 @@
   <div class="stat-strip reveal">
     <div class="stat"><b class="count" data-to="20">0</b><span class="lx" lang="en">skills</span><span class="lx" lang="ja">スキル</span></div>
     <div class="stat"><b class="count" data-to="6">0</b><span class="lx" lang="en">agents</span><span class="lx" lang="ja">エージェント</span></div>
-    <div class="stat"><b class="count" data-to="49">0</b><span class="lx" lang="en">hooks</span><span class="lx" lang="ja">フック</span></div>
+    <div class="stat"><b class="count" data-to="50">0</b><span class="lx" lang="en">hooks</span><span class="lx" lang="ja">フック</span></div>
     <div class="stat"><b class="count" data-to="10">0</b><span class="lx" lang="en">rules</span><span class="lx" lang="ja">ルール</span></div>
     <div class="stat"><b>0</b><span class="lx" lang="en">MCP bundled</span><span class="lx" lang="ja">同梱 MCP</span></div>
   </div>
@@ -468,13 +471,13 @@
         ones, kept in lock-step by a hash manifest. The trick is the
         <strong>determinism split</strong>: translation is delegated to an LLM (non-deterministic),
         but verifying that the translation is current is <strong>fully deterministic</strong>. That is
-        the whole method. It's the one we most want others to adopt.
+        the whole method.
       </p>
       <p class="star-intro reveal lx" lang="ja">
         Banto は <strong>日本語を正本</strong>、<strong>英語を自動生成</strong>とし、ハッシュ
         マニフェストで同期を取る。鍵は<strong>決定論の分離</strong>だ。翻訳は LLM に委譲
         （非決定論）するが、その翻訳が最新かどうかの検証は<strong>完全に決定論</strong>だ。
-        これが方式の全てだ。最も真似してほしい型でもある。
+        これが方式の全てだ。
       </p>
 
       <!-- the pipeline diagram -->
@@ -836,11 +839,11 @@
       <span class="lx" lang="ja">箱の中身、すべて</span>
     </h2>
     <p class="section-lede reveal lx" lang="en">
-      20 skills, 6 agents, 49 hooks, 10 behavioral rules, and no bundled MCP. Code review and security
+      21 skills, 6 agents, 49 hooks, 7 behavioral rules, and no bundled MCP. Code review and security
       review are deliberately delegated to Anthropic's official plugins rather than reimplemented.
     </p>
     <p class="section-lede reveal lx" lang="ja">
-      20 スキル・6 エージェント・49 フック・10 行動ルール、そして MCP は同梱しない。コードレビューと
+      21 スキル・6 エージェント・49 フック・7 行動ルール、そして MCP は同梱しない。コードレビューと
       セキュリティレビューは再実装せず、Anthropic 公式プラグインへ意図的に委譲する。
     </p>
 

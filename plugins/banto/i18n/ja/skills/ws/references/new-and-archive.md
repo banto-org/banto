@@ -8,7 +8,7 @@
 1. プロジェクトの `{base}/config.json` を Read
 2. スコープタイプを確認（default_scope 設定があればそれ、なければ対話）
 3. トピック名を確認（英語、ハイフン区切り推奨）
-4. **実装 WS か確認**（既定 = 実装。`[design]` 系スコープなど明らかに設計主体なら設計 WS を提案）。実装 WS は worktree 並走起動時に `claude --model sonnet` を案内し（`templates/model-policy.json` の `implement` 既定）、設計 WS はフラグなし（セッション本体のモデル = fable/opus を維持）
+4. **実装 WS か確認**（既定 = 実装。`[design]` 系スコープなど明らかに設計主体なら設計 WS を提案）。worktree 並走の手動起動はフラグなしの素の `claude` を案内する（モデル選定は都度の判断 — 処方的な既定は置かない）
 5. 現在 WS がある場合: keep（保存して切替）or archive（`workspaces/<author>/old/` に移動）を選択
 6. 実体 dir `{base}/workspaces/<author>/[scope] topic-name/` を作成し、`workspace.md` と `tasks.md`（雛形）を書く:
 

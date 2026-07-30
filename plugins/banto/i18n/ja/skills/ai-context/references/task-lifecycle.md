@@ -6,7 +6,7 @@ tasks.md（store の正本）と組み込みタスク UI（TaskCreate / TaskUpda
 
 1. **着手時**: tasks.md の該当項目を確認し、UI 側を in_progress にする
 2. **完了時**: tasks.md をチェック（`- [x]`）し、UI 側を completed にする — どちらか片方で終えない
-3. **新しい依頼**: tasks.md に無い作業を頼まれたら、まず tasks.md へ追記してから着手する（記録の場所は現在 WS の tasks.md。話題が WS のスコープ外なら先に /ws switch / new を提案する）
+3. **新しい依頼（実装系・調査系のいずれも対象。「また」「とか」「これも」「後で」等の後回し・追加指示を含む）**: tasks.md に無い作業を頼まれたら、まず tasks.md へ `- [ ] {簡潔なタスク}` として追記してから着手する（記録の場所は現在 WS の tasks.md。話題が WS のスコープ外なら先に /ws switch / new を提案する）。質問・雑談・その場で完結する些末な編集はタスク化しない。UserPromptSubmit の `task-router.sh` がこの投入を per-prompt で促す（nudge のみ・強制しない）
 
 
 <!-- merged from next.md -->

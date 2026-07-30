@@ -17,8 +17,9 @@ Claude Code 以外のエージェント CLI への移植を段階的に進める
   検索ロジック。ホストがファイルシステム操作を持てば動く。
 - templates/rules の散文：quality / safety / evidence-first / spec-fidelity / pii-protection /
   writing-ja。Markdown の平文で、ホストの注入機構に依存しない。
-- thinking-core：全モデル共通の作業契約。散文のまま、どのホストの system prompt / AGENTS.md にも
-  差し込める。
+- thinking-core skill：作業契約 7 節（`skills/thinking-core/`）。散文のまま、どのホストの
+  system prompt / AGENTS.md にも差し込める（banto 内では sonnet / haiku・旧世代モデル向けの
+  オンデマンド skill — 5 系の Fable / Opus には不使用を徹底）。
 - ODD スキーマと skill 指示文本体：`odd.schema.yaml` の構造と SKILL.md の本文は agentskills.io 準拠に
   近く、ホスト非依存で読める。
 

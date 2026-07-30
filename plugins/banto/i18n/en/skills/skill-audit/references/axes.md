@@ -43,18 +43,18 @@ Representative violation: the same execution procedure is written out in full in
 
 ## A4: Appropriateness of the execution-model directive
 
-Checks the odd.yaml declaration (only when ODD is adopted — ODD is an optional banto-originated mechanism), and — for skills that launch an Agent — whether a model directive is present and consistent with `templates/model-policy.json`.
+Checks the odd.yaml declaration (only when ODD is adopted — ODD is an optional banto-originated mechanism), and — for skills that launch an Agent — whether the model directive is not a prescriptive fixation (selection is by default the main AI's judgment — quality.md).
 
 Judgment procedure:
 1. Check whether TARGET has an odd.yaml. If not, Glob the sibling skills (`../*/odd.yaml`): if at least one exists, flag WARN as partial-adoption drift; if none exist, treat ODD as not adopted and mark the odd items N/A (judge with steps 3+ only; presence itself is never a violation).
 2. If odd.yaml exists, check its `autonomy_level` declaration (must fall within L0-L3).
 3. Check whether the skill launches an Agent (whether `allowed-tools` includes Agent).
 4. If it does, check `skill-audit-metrics.sh`'s model-directive extraction (`model:` / `model=` lines).
-5. Cross-check the role against model-policy.json (roles: design=inherit / implement=sonnet / mechanical=haiku / audit=opus).
+5. If a model directive is present, check whether it is operational plumbing (model-policy.json's `summarize` / `verify_external`) or justified by skill-specific design rationale (e.g. search's deep path is designed around parallel haiku).
 
-Pass criterion: every Agent launch carries a model directive matching its role (judgment work uses opus, implementation work uses sonnet, mechanical search uses haiku). When ODD is adopted, odd.yaml's `autonomy_level` is L0-L3 (when not adopted, the odd items are N/A).
+Pass criterion: an unspecified model is the default ("the main AI decides per task by design" — quality.md's delegation principle). A prescriptive model fixation is acceptable only when it is operational plumbing or a skill-specific design rationale is documented. When ODD is adopted, odd.yaml's `autonomy_level` is L0-L3 (when not adopted, the odd items are N/A).
 
-Representative violation: a judgment-role Agent launch has no model directive and is left to the default model.
+Representative violation: a specific model is fixed without a documented design rationale, taking the selection judgment away from the main AI.
 
 ## A5: Context efficiency
 

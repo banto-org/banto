@@ -43,18 +43,18 @@ SKILL.md はルーター（いつ使うか / references の選び方）に徹し
 
 ## A4: 実行モデル指定の適切さ
 
-odd.yaml の宣言（ODD 採用時のみ — ODD は banto 発の任意機構）、Agent 起動を含む skill なら model 指定の有無と `templates/model-policy.json` との整合を見る。
+odd.yaml の宣言（ODD 採用時のみ — ODD は banto 発の任意機構）、Agent 起動を含む skill なら model 指定が処方的な固定になっていないかを見る（選定は原則メイン AI の判断 — quality.md）。
 
 判定手順:
 1. TARGET に odd.yaml があるか確認する。無い場合は隣接 skill（`../*/odd.yaml`）を Glob し、1 つでもあれば部分採用ドリフトとして WARN、皆無なら ODD 未採用とみなして odd 項目を N/A にする（手順 3 以降のみで判定。presence を違反にしない）
 2. odd.yaml がある場合、autonomy_level 宣言を確認する（L0〜L3 の範囲内か）
 3. skill が Agent 起動を含むか（allowed-tools に Agent があるか）を確認する
 4. Agent 起動を含む場合、`skill-audit-metrics.sh` の model 指定抽出結果（`model:` / `model=` 行）を確認する
-5. model-policy.json（roles: design=inherit / implement=sonnet / mechanical=haiku / audit=opus）と役割が整合するか照合する
+5. model 指定がある場合、それが運用配管（model-policy.json の summarize / verify_external）か、skill 固有の設計理由（例: search の deep パスは haiku 並列を前提に設計）に基づくか確認する
 
-合格基準: Agent 起動箇所に役割に応じた model 指定がある（判定系は opus、実装系は sonnet、機械的検索は haiku）。ODD 採用時は odd.yaml の autonomy_level が L0〜L3（未採用なら odd 項目は N/A）。
+合格基準: model 未指定が既定（「メイン AI が都度判断する設計」— quality.md の委譲原則）。処方的な model 固定は、運用配管または skill 固有の設計理由が明記されているときだけ許容する。ODD 採用時は odd.yaml の autonomy_level が L0〜L3（未採用なら odd 項目は N/A）。
 
-典型的な違反例: 判定系の Agent 起動に model 指定が無く、既定モデルに委ねている。
+典型的な違反例: 設計理由の明記なしに特定 model を固定し、メイン AI の選定判断を奪っている。
 
 ## A5: コンテキスト効率
 

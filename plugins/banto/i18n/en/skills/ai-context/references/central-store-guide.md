@@ -96,7 +96,7 @@ follow the `doctor` report; precondition: the store has been pushed).
 - The SessionStart hook injects `[AI Context - 中央 store 運用] ... ベース: <absolute path>` (the literal label the hook emits; "中央 store 運用" = central-store operation, "ベース" = base) →
   always Read/Write decisions / docs / tasks **under the injected absolute path**
 - Search is `/search <query>` (targets the store's decisions/docs). Add search targets via `config.json`'s `extra_docs_dirs`
-- Plugin updates / mapping changes take effect by **restarting Claude Code**
+- Plugin updates / mapping changes take effect via **/reload-plugins (or a Claude Code restart)**
 
 ## Related
 

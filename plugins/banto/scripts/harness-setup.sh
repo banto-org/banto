@@ -185,6 +185,13 @@ case "$MODE" in
   - PII / 内部名ガード: cp "<plugin>/templates/pii/name-registry.example" ~/.claude/banto-name-registry
   - コードレビュー / セキュリティ: ネイティブの /code-review・/security-review が利用可能
     （banto は再実装しない。自動 install もしない — 必要なら各自で導入）
+EOF
+    if command -v git-town >/dev/null 2>&1; then
+        echo '  - git-town: 導入済み（3 階層の親子追跡 + 自動 sync が有効）'
+    else
+        echo '  - git-town 未導入: ws は degraded モードで動作する（3 階層の親子追跡と自動 sync のみ無効）。フル機能には `brew install git-town`'
+    fi
+    cat <<'EOF'
   完了。Claude Code を再起動すると新しいルール / 設定が反映される。
 EOF
     ;;

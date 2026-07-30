@@ -152,7 +152,7 @@ echo ""
 # 空セッションへ dump もしない。これで「別セッション（startup/resume）が checkpoint を先に食う」
 # レースを構造的に断つ（旧実装は source を問わず無条件に注入 + 消費していた）。
 # 宛先キーは workspace トピック（/clear をまたいで安定。session_id は /clear で回るので不可）。
-# writer（idle-checkpoint-watch.sh）が `<!-- banto-ws: <topic> -->` を先頭行に刻む。未マーカーの
+# writer（checkpoint-ws-stamp.sh・決定論・正準キー）が `<!-- banto-ws: <topic> -->` を先頭行に刻む。未マーカーの
 # checkpoint は後方互換で「どの ws でも配送」。減衰: ≤24h=受動ヒスト表示 + /clear 配送 /
 # 1〜3日=明示 /clear でのみ配送・受動ヒントなし / >3日=consumed/ へ GC 退避。
 if [ -d "$SESSIONS" ]; then
@@ -205,6 +205,23 @@ if [ -d "$SESSIONS" ]; then
                     echo "[idle-checkpoint あり: このプロジェクトに続きのセッションがあります。/clear すると checkpoint から軽い文脈で安く再開できます]"
                     echo ""
                 fi
+            fi
+        fi
+
+        # --- 配送不能診断（fail-closed + 無警告の解消） ---
+        # WS ポインタ未解決（WS_KEY 空）だと marker 付き checkpoint は完全一致に失敗し、/clear でも
+        # 永久に未配送のまま GC される。件数と復旧手順を 1 行で可視化する（誤配送リスクなし）。
+        if [ -z "$WS_KEY" ]; then
+            _ck_marked=$(printf '%s\n' "$CHECKPOINT_FILES" | while IFS= read -r f; do
+                [ -f "$f" ] || continue
+                grep -q '^<!-- banto-ws: ' "$f" 2>/dev/null && echo x
+            done | wc -l | tr -d ' ')
+            case "$_ck_marked" in ''|*[!0-9]*) _ck_marked=0 ;; esac
+            if [ "$_ck_marked" -gt 0 ]; then
+                _rd=${BANTO_IDLE_CHECKPOINT_RETAIN_DAYS:-10}
+                case "$_rd" in ''|*[!0-9]*) _rd=10 ;; esac
+                echo "[idle-checkpoint: ${_ck_marked} 件がワークスペース宛先未解決で配送できません（このプロジェクトの WS ポインタが未設定）。/ws switch でワークスペースを設定すると /clear 時に配送されます。未設定のままだと約 ${_rd} 日で consumed/ へ自動退避されます]"
+                echo ""
             fi
         fi
 

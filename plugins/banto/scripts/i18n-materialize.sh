@@ -96,4 +96,4 @@ fi
 
 mkdir -p "$PLUGIN_ROOT/skills"
 printf '%s %s\n' "$LANG_SEL" "$VER" > "$PLUGIN_ROOT/skills/.banto-lang"
-echo "i18n-materialize: applied $applied files for lang=$LANG_SEL (plugin $VER). Restart Claude Code to load."
+echo "i18n-materialize: applied $applied files for lang=$LANG_SEL (plugin $VER). Run /reload-plugins (or restart Claude Code) to load."

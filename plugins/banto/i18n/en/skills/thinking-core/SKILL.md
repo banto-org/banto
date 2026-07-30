@@ -1,9 +1,24 @@
-# Thinking Core — Working Contract (all models)
+---
+name: thinking-core
+description: |
+  A thinking-procedure skill that loads the 7-section working contract (acceptance criteria → evidence → minimal change → boundary → verification → report → exceptions) only when needed. The on-demand version of the former always-on thinking-core rule.
+  Triggers: attaching it to prompts when fanning out or running the main session on sonnet / haiku, temporarily using an older-generation model (Opus 4.8-class or earlier), "load the work contract", "apply thinking-core". Also invocable via /thinking-core.
+  Do not use when: 5-generation Fable / Opus is the main model (strictly never use) — a prescriptive procedure constrains a frontier model's performance, so leave it to plain judgment without loading this skill.
+user-invocable: true
+allowed-tools: Read
+compatibility: Claude Code
+---
 
-The thinking procedure for AI working in this harness. A contract that delivers quality through
-procedure, not by relying on model intelligence.
-Where a deterministic hook backs an item, it is marked "Enforced:" — breaking it still gets
-stopped by the hook, but following it is faster.
+# Thinking Core — Working Contract (on demand)
+
+The working contract for delivering quality through procedure, not by relying on model intelligence. **Load it only for sonnet / haiku and older-generation models (Opus 4.8-class or earlier). Never use it for 5-generation Fable / Opus (strictly never use)** — a boundary based on measured findings that a prescriptive procedure constrains a frontier model's performance.
+
+## Usage
+
+- **Fan-out attachment**: when the main AI launches a sonnet / haiku subagent, append the 7 sections below (or only the sections needed) to the end of the agent prompt. Do not attach it to 5-generation Fable / Opus agents
+- **Main session on a weaker model**: in a session running sonnet / haiku or an older-generation model as the main model, manually load this skill (/thinking-core) and apply it as the working contract
+
+Where a deterministic hook backs an item, it is marked "Enforced:" — breaking it still gets stopped by the hook, but following it is faster.
 
 ## 1. Before starting — state the acceptance criteria in one line
 

@@ -36,7 +36,7 @@ epic に値しない単発作業に epic を提案しない（誤発火の官僚
 
 ## 並列の自発提案（fan-out Agent vs worktree）
 
-ユーザーが「並行で」と言わなくても、独立した複数サブタスク（**同一ファイル非接触・直列依存なし**）に分割できると判断したら、直列実行せず並列化を**自発提案**する（intent-first の延長）。fan-out Agent（読み取り/独立編集・短命・最 lean）と task worktree（並走ブランチ・競合・長時間）の判断基準＋分割可能性テスト 3 条件: [`references/parallel-proposal.md`](references/parallel-proposal.md)。
+ユーザーが「並行で」と言わなくても、独立した複数サブタスク（**同一ファイル非接触・直列依存なし**）に分割できると判断したら、直列実行せず並列化を**自発提案**する（intent-first の延長）。fan-out Agent（読み取り/独立編集・短命・最 lean）と task worktree（並走ブランチ・競合・長時間）の判断基準＋分割可能性テスト 3 条件: [`references/parallel-proposal.md`](references/parallel-proposal.md)。既定は banto 自身による fan-out Agent 実行であり、worktree 上での別セッション手動起動は真に独立した長時間並走が要るときだけの明示オプトインとする。
 
 ## 使い方（エイリアス一覧 — どのコマンドも自然文で到達可能）
 
@@ -61,7 +61,7 @@ epic に値しない単発作業に epic を提案しない（誤発火の官僚
 
 要点（git-town 23.x で検証済み）:
 - **epic**: `git town hack <epic>`（main から分岐、parent を追跡）。同時に WS（`[feat] <epic>`）を作成
-- **task**: **必ず epic checkout 上で** `git town append <task>` を実行（current の子になる）→ `git worktree add ../<repo>-wt-<task> <task>` で物理分離 → そのディレクトリへ `cd` して素の `claude` で新セッションを開始（`claude -w` は別の worktree を新規作成する banto 非管理の臨時分離であり、3 階層の親子追跡から外れるためここでは使わない）
+- **task**: **必ず epic checkout 上で** `git town append <task>` を実行（current の子になる）→ `git worktree add ../<repo>-wt-<task> <task>` で物理分離 → 既定は banto が実行を駆動する（独立・非競合サブタスクは fan-out Agent、それ以外はオーケストレーション側セッションがそのまま worktree の作業を進める）。真に独立した長時間の並走セッションが必要な場合に限り、そのディレクトリで素の `claude` を手動起動する（明示オプトイン。`claude -w` は別の worktree を新規作成する banto 非管理の臨時分離であり、3 階層の親子追跡から外れるためここでは使わない）
 - **drift 伝播**: `git town sync`（epic 更新 → 全 task へ連鎖；worktree 内からも動作する）。task セッション開始時と done 前に自動実行
 - **done**: テスト PASS 確認 → task ブランチ上で `git town merge`（親 epic へマージ + ブランチ自動削除）→ `git town sync` → worktree remove。**`git town ship` は決して使わない**（main 専用；stacked 子では拒否されることが実証済み）
 - **ship**: `git town propose`（PR 作成；gh fallback あり）。**PR/main は人間ゲート** — 「これで出して」 / "ship it" のような発話で発火し、作成前に 1 度だけ確認する

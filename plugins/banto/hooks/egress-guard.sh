@@ -3,7 +3,7 @@
 # 内部メンバー名 / 他案件名 / PII が客先成果物（egress パス）へ流出するのを検出してブロックする。
 # secret 保護（safety 系）の兄弟。ロジックは egress-guard.py（堅牢な複数行 content 走査のため python3）。
 #
-# 設計: .ai-context/decisions/2026-05-29_006_ai-context-pii-name-isolation.md
+# 設計: decisions/2026-05-30_001_ai-context-pii-name-isolation_tatsuru-okada-business.md
 #
 # レジストリ: ~/.claude/banto-name-registry（user-scope, 1 行 1 名前/`re:`正規表現, # コメント可）
 #   ※ レジストリ自体は repo / store に置かない（名前一覧の漏洩防止）。

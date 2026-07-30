@@ -86,9 +86,6 @@ These never block (always exit 0); they surface a one-line stderr note and let t
   has staged changes but `plugin.json` is not part of the same commit (a possible missed version
   bump). No-op outside the banto repo itself (detected via the `plugin.json` marker) and when
   `jq`/`git` are missing.
-- `model-role-guard.sh` (PreToolUse Task|Agent) — warns once per session when a subagent is
-  launched without an explicit `model`, since it silently inherits the parent model at higher cost.
-  Role defaults (implement/mechanical/audit) come from `templates/model-policy.json`.
 - `ja-lint.sh` + `ja-lint.py` (PostToolUse Write|Edit on `.md`) — flags Japanese writes that
   deviate from `writing-ja.md` conventions. `ja-lint.sh` is the registered hook; the Unicode-range
   detection itself lives in `ja-lint.py` (python3-gated, same delegation pattern as

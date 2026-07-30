@@ -65,8 +65,10 @@ if [ ! -d "$RULES_DIR" ]; then
     exit 2
 fi
 
-THINKING_CORE="$RULES_DIR/thinking-core.md"
-[ -f "$THINKING_CORE" ] || { echo "export-agents-md: thinking-core.md not found ($THINKING_CORE)" >&2; exit 2; }
+# thinking-core は rules から skill へ移設済み（5.101.0）。エクスポートには従来どおり全文を含める —
+# AGENTS.md の宛先は任意ホスト・任意モデルであり、作業契約はそこでは常時散文が適切なため。
+THINKING_CORE="$RULES_DIR/../../skills/thinking-core/SKILL.md"
+[ -f "$THINKING_CORE" ] || { echo "export-agents-md: thinking-core skill not found ($THINKING_CORE)" >&2; exit 2; }
 
 # 統合対象の rule（この順序で連結。thinking-core は全文のまま別枠で採用する）
 RULE_FILES="quality.md safety.md evidence-first.md spec-fidelity.md pii-protection.md writing-ja.md"
@@ -98,7 +100,7 @@ _shift_headings() {
     echo "# AGENTS — banto 散文層のホスト横断出力"
     echo
     echo "banto（Claude Code plugin）の thinking-core + rules をホスト非依存の AGENTS.md 形式へ機械生成した出力。"
-    echo "正本は plugins/banto/templates/rules/ 配下。このファイルへの直接編集は次回生成で失われる。"
+    echo "正本は plugins/banto/templates/rules/ と plugins/banto/skills/thinking-core/ 配下。このファイルへの直接編集は次回生成で失われる。"
     echo
 
     _strip_frontmatter "$THINKING_CORE"

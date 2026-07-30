@@ -16,7 +16,7 @@ out_of_scope:
   - Searching the internal {base}/ (search skill)
   - A single simple fact check (one webread in the main session is enough)
   - Summarizing existing research only (direct Read)
-  - Investigation about code implementation (done on the self-driving implementation / code-editing rule side)
+  - Investigation about code implementation (done on the self-driving implementation side)
 
 safety_boundaries:
   - Parallel count of research-agent: max 10

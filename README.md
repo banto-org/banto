@@ -44,7 +44,7 @@ hooks, not promises.
   English set is generated from them and kept in sync by a deterministic gate. `/set-language ja|en`
   swaps the whole set to one language, and the choice survives plugin updates (public default: English).
 
-20 skills / 6 agents / 49 hooks / 10 behavioral rules. No bundled MCP servers. Security review and
+21 skills / 6 agents / 49 hooks / 7 behavioral rules. No bundled MCP servers. Security review and
 code review are deliberately **delegated to Anthropic's official plugins** rather than reimplemented.
 
 ## Requirements
@@ -133,7 +133,7 @@ To switch the skill / agent set to Japanese, run this **once**:
 /set-language ja
 ```
 
-then **restart Claude Code** to load the Japanese set. The choice is persisted and **survives plugin updates**, so you **never need to do it again** (use `/set-language en` + restart only to switch back).
+then run **/reload-plugins** (or restart Claude Code) to load the Japanese set. The choice is persisted and **survives plugin updates**, so you **never need to do it again** (use `/set-language en` + reload only to switch back).
 
 ## How it feels
 

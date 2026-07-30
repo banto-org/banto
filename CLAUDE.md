@@ -13,13 +13,13 @@ it.** (The concept → spec → autonomous-implementation pipeline is dogfooded 
 ## Project facts
 
 - Type: Claude Code plugin (marketplace distribution). Core: `plugins/banto/`.
-- Layout: 23 skills (20 in v1 public scope; 3 via PLUGIN_EXCLUDE: dev-only status [pending telemetry
+- Layout: 24 skills (21 in v1 public scope; 3 via PLUGIN_EXCLUDE: dev-only status [pending telemetry
   review] + harness-audit [meta self-audit] + banto-port [maintainer-only: ports banto's own dev tree
-  to public]) / 6 agents / 48 registered
-  hooks (57 script files — 9 unregistered helpers invoked indirectly: scaffold / dashboard /
+  to public]) / 6 agents / 49 registered
+  hooks (58 script files — 9 unregistered helpers invoked indirectly: scaffold / dashboard /
   pending-channel / egress-guard.py / verify-detect / verify-run / idle-checkpoint-watch / checkpoint-autofire /
   ja-lint.py; model-lab adds repro-gate /
-  model-claim-guard / compute-cost-gate + scripts/ helpers repro-check / eval-stats / claim-link) / 10 rules. No bundled MCP.
+  model-claim-guard / compute-cost-gate + scripts/ helpers repro-check / eval-stats / claim-link) / 7 rules. No bundled MCP.
   Version: `plugins/banto/.claude-plugin/plugin.json`.
 - Languages: POSIX sh (hooks) + Markdown (skills / rules / docs). `jq` required.
 - Knowledge base (store-first): the ai-context base injected at SessionStart — central store
@@ -31,7 +31,7 @@ it.** (The concept → spec → autonomous-implementation pipeline is dogfooded 
 
 - **Keep the edit repo = the live plugin in sync**: after editing skills/hooks, bump the version and run
   `claude plugin marketplace update banto-marketplace && claude plugin update banto@banto-marketplace`,
-  then restart Claude Code. Never leave same-version different-content drift.
+  then run /reload-plugins (or restart Claude Code). Never leave same-version different-content drift.
 - Meta tools: `/plugin-audit` (15-axis skill quality) / `/skill-audit` (7-axis single-skill context-
   engineering audit) / `/harness-audit` (5-axis whole-harness system audit) / `/plugin-dev` (generate
   & refactor). Self-check consistency with harness-audit after changes.

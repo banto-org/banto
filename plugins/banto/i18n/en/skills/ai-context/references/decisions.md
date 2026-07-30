@@ -33,14 +33,13 @@ Simple implementation work, typo fixes, and plain factual answers only.
 ## Naming convention (second-precision timestamp, v5.21.4+)
 
 - Filenames are made unique with a second-precision time (`YYYY-MM-DD-HHMMSS_topic_author`). No same-day collisions even under team concurrency or offline work (the NNN sequence number is retired)
-- The recommended name is injected into context at PreToolUse by the `ai-context-decisions-numbering.sh` hook
 - Existing files in the old `YYYY-MM-DD_NNN_` (sequence-number) format stay valid (no rename needed)
 
 ## Procedure for deciding the filename
 
-1. The PreToolUse hook shows the "recommended filename (second-precision timestamp)"
-2. Write `YYYY-MM-DD-HHMMSS_{topic}_{user}.md` under that name
-3. The PostToolUse hook validates the naming convention (if it starts with a date but is otherwise off-convention, it suggests a recommended `git mv`)
+1. Do not write the timestamp from memory. Run `date +%Y-%m-%d-%H%M%S` (for the filename) and `date +%Y-%m-%d` (for the front-matter `**日付**:` / `date:`) and use their output verbatim (do not round — a guessed "nice" time with `00` seconds like `09:45:00` is not allowed)
+2. Write `YYYY-MM-DD-HHMMSS_{topic}_{user}.md` under that value
+3. The PostToolUse hook validates it (off-convention names get a `git mv` suggestion; a Write whose filename date differs from today is warned as "likely written from memory")
 
 For the GitHub account name use `gh api user --jq '.login'`, falling back to `git config user.name` on failure.
 
@@ -67,7 +66,7 @@ status: accepted        # accepted | provisional
 date: YYYY-MM-DD
 topic: {one-line summary}
 supersedes: []          # older decisions this replaces (optional; freshness truth is the filename date — this is a traversal link)
-relates: []
+related: []
 ---
 
 # {Title}: {one-line summary of the decision}
