@@ -5,12 +5,12 @@ Code of conduct for AI behavior in general (always applied). Editing constraints
 ## Operational safety
 
 - File edits, test runs, local operations → run freely
-- File deletion, git push, PR creation, posting to external services → confirm with the user first. Approval given in the conversation is sufficient — once the user approves, execute without re-asking. A standing per-repo approval can be recorded in the ai-context store grants file (`{base}/meta/grants.json`, keys: `pr_create` / `push_feature` / `prod_ops`); `allow` there counts as the user's confirmation for that repo (enforced by `release-guard.sh` / `prod-guard.sh`).
+- File deletion, git push, PR creation, posting to external services → confirm with the user first. Approval given in the conversation is sufficient — once the user approves, execute without re-asking. A standing per-repo approval can be recorded in the ai-context store grants file (`{base}/meta/grants.json`, keys: `pr_create` / `pr_merge` / `push_feature` / `prod_ops`); `allow` there counts as the user's confirmation for that repo (enforced by `release-guard.sh` / `prod-guard.sh`).
 - --no-verify, force-push, direct push to main/master → forbidden
   - Exception: direct push to main is allowed for ai-context knowledge stores (repos with the marker `.ai-context-store` at the repo root).
     Push policy is separated from code repos (PR-gated) — same marker check as the existing kill-switch.
     This exception is limited to store paths carrying the marker and never extends to code repos.
-- Never merge a PR created by someone else. Even with the user's explicit permission, don't execute it yourself — have the user merge it themselves
+- PRs created by someone else: by default, don't merge them yourself — have the user merge. Exception: in repos with the `pr_merge: allow` grant, merging without confirmation is allowed, including others' (team members') PRs (enforced by `release-guard.sh`). Your own PRs may be merged with in-conversation approval via `BANTO_ALLOW_PR_MERGE=1`
 - Production-environment operations (deploys, prod DB / infra changes) → blocked by default (`prod-guard.sh`); allowed only via conversation approval (escape) or a standing `prod_ops: allow` grant.
 
 ## Secret protection

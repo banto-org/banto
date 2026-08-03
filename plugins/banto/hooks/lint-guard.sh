@@ -12,7 +12,7 @@ BASENAME=$(basename "$FILE_PATH")
 
 # 自動生成ファイルへの書き込みをブロック
 case "$BASENAME" in
-  package-lock.json|yarn.lock|pnpm-lock.yaml|bun.lock|bun.lockb|Gemfile.lock|poetry.lock|Cargo.lock|uv.lock|composer.lock|go.sum)
+  package-lock.json|yarn.lock|pnpm-lock.yaml|bun.lock|bun.lockb|Gemfile.lock|poetry.lock|Cargo.lock|uv.lock|composer.lock|go.sum|Pipfile.lock|pubspec.lock)
     echo "[Harness] Direct edits to the lockfile ${BASENAME} are discouraged. Update it via the package manager." >&2
     exit 2
     ;;

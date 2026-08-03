@@ -330,7 +330,7 @@ _ai_context_active_tasks() {
     echo "$_aat_base/tasks/active.md"
 }
 
-# Echoes the standing per-repo approval for <key> ("pr_create" / "push_feature" / "prod_ops" / …)
+# Echoes the standing per-repo approval for <key> ("pr_create" / "pr_merge" / "push_feature" / "prod_ops" / …)
 # from {base}/meta/grants.json: {"grants": {"<key>": "allow" | "deny" | "confirm"}}. A grant value
 # may also be a time-boxed object: {"<key>": {"value": "allow", "until": "YYYY-MM-DD"}} — once
 # `until` is strictly before today (string comparison on the fixed-width ISO date, so lexicographic

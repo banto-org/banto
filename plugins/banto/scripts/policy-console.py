@@ -31,6 +31,7 @@ import html
 import json
 import os
 import secrets
+import shutil
 import subprocess
 import sys
 import threading
@@ -39,10 +40,16 @@ from pathlib import Path
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
 
-KNOWN_GRANTS = ("pr_create", "push_feature", "prod_ops")
+KNOWN_GRANTS = ("pr_create", "pr_merge", "push_feature", "prod_ops")
 GRANT_VALUES = ("allow", "confirm", "deny")
 SYNC_DEBOUNCE_SEC = 4
 BYE_GRACE_SEC = 3
+
+# Claude Code 層（ユーザースコープ settings.json）の許可ルール。
+# banto の grants は repo 別の判定（層 2）、こちらはコマンド種別の全 repo 共通許可（層 1）。
+# この書き込みはブラウザでの人間のクリックだけが引き金になる（AI の自己許可はさせない）。
+CC_SETTINGS = Path.home() / ".claude" / "settings.json"
+CC_MERGE_RULES = ("Bash(gh pr merge:*)", "Bash(gh pr checks:*)")
 
 
 # ---- store / project の列挙と読み取り ----
@@ -139,6 +146,53 @@ def grant_keys(project):
     return keys
 
 
+# ---- Claude Code 層（ユーザースコープ settings.json）の読み書き ----
+
+def cc_rules_state():
+    """(enabled, parse_ok) を返す。enabled は CC_MERGE_RULES が全て allow に入っているか。"""
+    if not CC_SETTINGS.is_file():
+        return False, True
+    data = read_json(CC_SETTINGS)
+    if data is None:
+        return False, False
+    perms = data.get("permissions")
+    allow = perms.get("allow") if isinstance(perms, dict) else None
+    allow = allow if isinstance(allow, list) else []
+    return all(rule in allow for rule in CC_MERGE_RULES), True
+
+
+def apply_cc_rules(enabled):
+    """CC_MERGE_RULES を permissions.allow へ追加 / から除去する。他のキーには触れない。"""
+    if CC_SETTINGS.is_file():
+        data = read_json(CC_SETTINGS)
+        if data is None:
+            raise ValueError("~/.claude/settings.json を JSON として解析できません（手動で確認してください）")
+    else:
+        data = {}
+    perms = data.get("permissions")
+    perms = perms if isinstance(perms, dict) else {}
+    allow = perms.get("allow")
+    allow = list(allow) if isinstance(allow, list) else []
+    changed = False
+    for rule in CC_MERGE_RULES:
+        if enabled and rule not in allow:
+            allow.append(rule)
+            changed = True
+        elif not enabled and rule in allow:
+            allow.remove(rule)
+            changed = True
+    if not changed:
+        return False
+    perms["allow"] = allow
+    data["permissions"] = perms
+    CC_SETTINGS.parent.mkdir(parents=True, exist_ok=True)
+    if CC_SETTINGS.is_file():
+        shutil.copy2(CC_SETTINGS, CC_SETTINGS.with_name("settings.json.bak"))
+    CC_SETTINGS.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return True
+
+
 # ---- HTML レンダリング ----
 
 CSS = """
@@ -232,6 +286,28 @@ def card_html(p):
     )
 
 
+def cc_card_html():
+    enabled, parse_ok = cc_rules_state()
+    checked = " checked" if enabled else ""
+    rules = " + ".join(f"<code>{esc(r)}</code>" for r in CC_MERGE_RULES)
+    warn = ("" if parse_ok else
+            '<p class="note">⚠ settings.json を解析できないため、この画面からは変更できません。</p>')
+    disabled = "" if parse_ok else " disabled"
+    return (
+        '<h2>Claude Code 層（全 repo 共通・ユーザースコープ）</h2>\n'
+        '<div class="card">\n'
+        '<h3>PR マージの自走を許可<span class="chip">'
+        + ("設定済み" if enabled else "未設定") + "</span></h3>\n"
+        f'<p class="note">{rules} を <code>~/.claude/settings.json</code> の許可リストへ入れます。'
+        "これはコマンド種別の許可（層 1）で、実際にマージが通るのは下の grants で "
+        "<code>pr_merge: allow</code> にした repo だけ（層 2 が repo 別に判定）。"
+        "変更が効かない場合は Claude Code を再起動してください。</p>\n"
+        + warn +
+        f'<label><input type="checkbox" id="ccmerge"{checked}{disabled}> 許可する（あなたのクリックが承認になります）</label>\n'
+        "</div>"
+    )
+
+
 def store_sections(data):
     parts = []
     if not data:
@@ -296,6 +372,36 @@ CLIENT_JS = """
     });
   });
 
+  var cc = document.getElementById("ccmerge");
+  if (cc) {
+    cc.addEventListener("change", function () {
+      var card = cc.closest(".card");
+      var chip = card.querySelector(".chip");
+      chip.textContent = "保存中…";
+      chip.className = "chip";
+      var fd = new URLSearchParams();
+      fd.append("t", TOKEN);
+      fd.append("enabled", cc.checked ? "1" : "0");
+      fetch("/cc-save?t=" + encodeURIComponent(TOKEN), { method: "POST", body: fd })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.ok) {
+            chip.textContent = cc.checked ? "設定済み " + d.saved_at : "解除済み " + d.saved_at;
+            chip.className = "chip ok";
+          } else {
+            chip.textContent = "エラー: " + (d.error || "保存に失敗しました");
+            chip.className = "chip err";
+            cc.checked = !cc.checked;
+          }
+        })
+        .catch(function () {
+          chip.textContent = "エラー: サーバに接続できません";
+          chip.className = "chip err";
+          cc.checked = !cc.checked;
+        });
+    });
+  }
+
   var done = false;
   document.getElementById("donebtn").addEventListener("click", function () {
     done = true;
@@ -324,6 +430,7 @@ def render_console(data, token):
         '<p class="lead">repo 別ポリシー正典（meta/policy.json）の一覧と編集です。'
         "変更はその場で自動保存され、hook には即時に効きます。store への commit + 同期は"
         "数秒後に自動で走ります。会話からの変更も同じファイルを編集します（同一正典）。</p>\n"
+        + cc_card_html()
         + store_sections(data)
         + "\n<footer>このサーバは「完了して閉じる」・タブを閉じる・15 分の放置のいずれかで自動終了します。</footer>"
     )
@@ -543,6 +650,18 @@ class Handler(BaseHTTPRequestHandler):
             self._send(200, render_message(
                 "完了", "保存と store 同期を開始しました。このウィンドウは閉じて構いません。"))
             request_shutdown("done button")
+            return
+
+        if url.path == "/cc-save":
+            enabled = (form.get("enabled") or ["0"])[0] == "1"
+            try:
+                apply_cc_rules(enabled)
+            except (ValueError, OSError) as e:
+                self._json(400, {"ok": False, "error": str(e)})
+                return
+            print(f"[policy-console] cc rules {'enabled' if enabled else 'disabled'}: {CC_SETTINGS}",
+                  file=sys.stderr, flush=True)
+            self._json(200, {"ok": True, "saved_at": time.strftime("%H:%M:%S")})
             return
 
         if url.path != "/save":

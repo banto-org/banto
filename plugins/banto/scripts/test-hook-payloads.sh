@@ -92,6 +92,10 @@ write_payload "/proj/composer.lock" | sh "$LG" >/dev/null 2>&1; [ $? -eq 2 ] \
     && ok "lint: composer.lock blocked (H-20)" || bad "lint: composer.lock not blocked"
 write_payload "/proj/go.sum" | sh "$LG" >/dev/null 2>&1; [ $? -eq 2 ] \
     && ok "lint: go.sum blocked (H-20)" || bad "lint: go.sum not blocked"
+write_payload "/proj/Pipfile.lock" | sh "$LG" >/dev/null 2>&1; [ $? -eq 2 ] \
+    && ok "lint: Pipfile.lock blocked (H-20)" || bad "lint: Pipfile.lock not blocked"
+write_payload "/proj/pubspec.lock" | sh "$LG" >/dev/null 2>&1; [ $? -eq 2 ] \
+    && ok "lint: pubspec.lock blocked (H-20)" || bad "lint: pubspec.lock not blocked"
 write_payload "/proj/src/main.ts" | sh "$LG" >/dev/null 2>&1; [ $? -eq 0 ] \
     && ok "lint: source file passes" || bad "lint: source file blocked"
 write_payload "/proj/dist/bundle.js" | sh "$LG" >/dev/null 2>&1; [ $? -eq 2 ] \

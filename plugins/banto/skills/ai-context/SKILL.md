@@ -77,7 +77,7 @@ Once pinned, this repo's ai-context stays resident at `~/ai-context-local/<proje
 
 Record a per-repo standing approval in `{base}/meta/grants.json` (fires on "allow PR creation for this repo" / "allow production work" / "grant standing approval for push"). After writing, recording the change as one line under `decisions/` is recommended.
 
-Keys are `pr_create` (`gh pr create`), `push_feature` (push to a feature branch), and `prod_ops` (production-environment operations). Values are `allow` (standing approval — no further confirmation), `deny` (always block — an explicit refusal against accidental approval), or `confirm` (default — confirm every time). `allow`/`deny` are read deterministically by `release-guard.sh` (`pr_create`) and `prod-guard.sh` (`prod_ops`).
+Keys are `pr_create` (`gh pr create`), `pr_merge` (`gh pr merge` — covers others' PRs too), `push_feature` (push to a feature branch), and `prod_ops` (production-environment operations). Values are `allow` (standing approval — no further confirmation), `deny` (always block — an explicit refusal against accidental approval), or `confirm` (default — confirm every time). `allow`/`deny` are read deterministically by `release-guard.sh` (`pr_create` / `pr_merge`) and `prod-guard.sh` (`prod_ops`).
 
 Time-boxed approvals are also supported (e.g. "only allow it for a week"): set the value to the object form `{"value": "allow", "until": "YYYY-MM-DD"}`, and it automatically reverts to `confirm` (confirm every time) the day after `until` — it never decays into `deny`.
 

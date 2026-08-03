@@ -111,6 +111,13 @@ done
 cat > "$TARGET/CHANGELOG.md" <<'MD'
 # Changelog
 
+## 0.6.0
+
+- **Standing merge grant: `pr_merge`.** The release-guard merge gate is now grants-aware: in repos whose policy canon says `pr_merge: allow`, `gh pr merge` runs without per-command confirmation — a standing owner decision that covers teammates' PRs too. `deny` beats the env escape and shows no bypass guidance; a missing key keeps the previous confirm behavior. Six regression cases cover the three states.
+- **Policy console: the Claude Code permission layer is one click.** The `/policy` console gains a top card that adds or removes the merge-autonomy allow rules in user-scope settings with a single checkbox — the write fires only from a human click in the browser, so the feature stays consistent with Claude Code's design of blocking AI self-authorization. The settings file is backed up before every write, keys other than the allow list are never touched, and a broken settings file refuses the change instead of clobbering it.
+- **Lockfile enforcement matches its declaration.** `Pipfile.lock` and `pubspec.lock` were declared in the dependencies rule but missing from lint-guard's block list; the hook now blocks direct edits to both (declaration ⊆ enforcement restored), with regression tests.
+- **Site: merging is a human gate by default — standing per-repo grants can lift it.** The flow, mechanism, and toolset pages now describe the grant-gated exception instead of an unconditional "merging stays in your hands."
+
 ## 0.5.0
 
 - **Always-on rules slimmed from 6 to 3 (10 → 7 rule files).** Following the direction of Claude Code's own system-prompt reduction (drop prohibition lists, delegate judgment to the model), the `testing` and `code-editing` rules were removed — the lockfile discipline moved into `dependencies` (still deterministically enforced by `lint-guard.sh`) — and `quality` / `evidence-first` were compressed. The contracts only prose can carry (`safety`, `pii-protection`, `spec-fidelity`) stay.
@@ -232,7 +239,7 @@ MD
 
 # Public versions start fresh and must match the CHANGELOG stub above
 # (the internal 5.x line is private history and is not carried over)
-PUB_VERSION="0.5.0"
+PUB_VERSION="0.6.0"
 for j in "plugins/banto/.claude-plugin/plugin.json:.version = \$v" \
          ".claude-plugin/marketplace.json:.metadata.version = \$v | .plugins[0].version = \$v"; do
     f="$TARGET/${j%%:*}"

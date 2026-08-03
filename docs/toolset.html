@@ -589,7 +589,7 @@
         <span class="tf-step tf-a"><span class="lx" lang="en">"show me the policy"</span><span class="lx" lang="ja">「ポリシー見せて」</span></span><span class="tf-arrow">→</span><span class="tf-step tf-core tf-b">policy</span><span class="tf-arrow">→</span><span class="tf-step tf-c"><span class="lx" lang="en">grants + guards, one screen</span><span class="lx" lang="ja">許可 + 保護を 1 画面で</span></span>
       </div>
       <ul class="tm-points">
-        <li><span class="lx" lang="en">Say "show me the policy" and a console opens in the browser listing standing grants (PR creation, push, production ops) and protections (no-edit, no-sync files).</span><span class="lx" lang="ja">「ポリシー見せて」と言うとブラウザにコンソールが開き、常設許可（PR 作成・push・本番操作）と保護対象（編集禁止・同期除外のファイル）を一覧表示する。</span></li>
+        <li><span class="lx" lang="en">Say "show me the policy" and a console opens in the browser listing standing grants (PR creation, PR merge, push, production ops) and protections (no-edit, no-sync files). The Claude Code permission layer for merge autonomy is a one-click toggle at the top — your click is the approval, so the AI never edits its own permissions.</span><span class="lx" lang="ja">「ポリシー見せて」と言うとブラウザにコンソールが開き、常設許可（PR 作成・PR マージ・push・本番操作）と保護対象（編集禁止・同期除外のファイル）を一覧表示する。マージ自走に要る Claude Code 層の許可も最上部のトグル 1 クリックで入る — クリックが承認そのものになるため、AI が自分の許可を書き換えることはない。</span></li>
         <li><span class="lx" lang="en">Changes save automatically and take effect on the guard hooks immediately.</span><span class="lx" lang="ja">変更は自動保存され、ガード hook に即時反映される。</span></li>
         <li><span class="lx" lang="en">The server exits on the Done button, on tab close, or after 15 idle minutes — it never stays resident.</span><span class="lx" lang="ja">サーバは完了ボタン・タブを閉じる・15 分放置のどれかで自動終了し、常駐しない。</span></li>
       </ul>

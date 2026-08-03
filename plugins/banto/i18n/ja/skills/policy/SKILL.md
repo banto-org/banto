@@ -17,7 +17,7 @@ repo 別ポリシー正典は `{store}/{project}/meta/policy.json`:
 {"grants": {"pr_create": "allow"}, "ignore": {"no_edit": ["*.env"], "no_sync": ["private/**"]}}
 ```
 
-- `grants`（pr_create / push_feature / prod_ops + 任意キー）は release-guard / prod-guard が解決する。値は `allow` / `confirm` / `deny`（欠落は confirm）。時限 object 形式 `{"value": "allow", "until": "YYYY-MM-DD"}` も可。旧 `meta/grants.json` へ fallback
+- `grants`（pr_create / pr_merge / push_feature / prod_ops + 任意キー）は release-guard / prod-guard が解決する。値は `allow` / `confirm` / `deny`（欠落は confirm）。時限 object 形式 `{"value": "allow", "until": "YYYY-MM-DD"}` も可。旧 `meta/grants.json` へ fallback
 - `ignore.no_edit` は policy-guard.sh（編集ブロック）、`ignore.no_sync` は ai-context-sync.sh（store の `.git/info/exclude`）が強制する
 - 対象 store は `~/.claude/banto-ai-context-stores`（1 行 1 store パス）、無ければ `~/ai-context-store`
 
@@ -37,6 +37,7 @@ open "http://127.0.0.1:53201/?t=XXXX"
 画面の挙動（ユーザーに伝えること）:
 
 - **変更は自動保存**。保存ボタンはなく、セレクトやパターン欄を変えるとその場で policy.json に書かれ、hook には即時に効く。store への commit + 同期は数秒後に自動で走る
+- **Claude Code 層カード（画面最上部）**: `Bash(gh pr merge:*)` + `Bash(gh pr checks:*)` を `~/.claude/settings.json` の permissions.allow へ 1 クリックで追加 / 除去する（書き込み前に settings.json.bak へバックアップ）。これは層 1（コマンド種別の全 repo 共通許可）で、実際に通るかは層 2 = repo 別 grants の `pr_merge` が決める。**この書き込みの引き金は人間のクリックだけ** — AI の自己許可をブロックする Claude Code の設計と整合させるための分担であり、AI がこのファイルを直接編集してはならない
 - **サーバは常駐しない**。右上「完了して閉じる」で画面とサーバの両方が終了する。タブを閉じても数秒後に自動終了、放置しても 15 分で自動終了（`--idle-timeout 秒` で変更、0 で無効）
 - 127.0.0.1 束縛 + ランダムトークン必須（不一致は 403）。URL は起動ごとに変わる
 - grants.json しか無い project は変更時に policy.json を新規作成する（grants.json は残す）

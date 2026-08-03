@@ -11,6 +11,8 @@
 # ルール（全 block・全 escape ハッチ付き。対話的承認ゲートは作らない = CONCEPT anti-goal）:
 #   R1: main/master 上の git commit         → BANTO_ALLOW_MAIN_COMMIT=1 で escape（store repo は常時許可）
 #   R2: gh pr merge                          → BANTO_ALLOW_PR_MERGE=1 で escape（自分の PR のみ）
+#                                              または {base}/meta/grants.json の pr_merge: allow で
+#                                              repo 単位の常設許可 — 他者 PR も対象（deny なら常時 block）
 #   R3: パブリック公開系コマンド             → BANTO_ALLOW_PUBLISH=1 で escape（--dry-run は通過）
 #   R4: git push 時に repo の scripts/pre-push-check.sh を実行、fail で block
 #                                            → BANTO_SKIP_PUSH_CHECK=1 で escape
@@ -151,22 +153,30 @@ BLOCK_MAIN_COMMIT
     esac
 fi
 
-# ---- R2: gh pr merge ---- (BLOCK)
+# ---- R2: gh pr merge ---- (BLOCK, grants-aware)
 if [ "$_pr_merge" = "1" ]; then
-    if [ "${BANTO_ALLOW_PR_MERGE:-0}" = "1" ] || [ "${_pr_merge_esc:-0}" = "1" ]; then
+    _g_pr_merge=$(_grant pr_merge "$DIR")
+    if [ "$_g_pr_merge" = "deny" ]; then
+        printf '[release guard] `gh pr merge` is blocked (grants: pr_merge = deny in {base}/meta/grants.json).\n' >&2
+        exit 2
+    elif [ "$_g_pr_merge" = "allow" ]; then
+        warn "gh pr merge (allowed via grants: pr_merge — standing per-repo approval, incl. others' PRs)"
+    elif [ "${BANTO_ALLOW_PR_MERGE:-0}" = "1" ] || [ "${_pr_merge_esc:-0}" = "1" ]; then
         warn "gh pr merge (allowed via BANTO_ALLOW_PR_MERGE=1 — your own PR only)"
     else
         cat >&2 << 'BLOCK_PR_MERGE'
 [release guard] `gh pr merge` is blocked.
 
-Reason: safety.md — never merge a PR created by someone else, even with the user's
-        permission; the author cannot be verified offline, so all merges are gated.
+Reason: safety.md — without a standing grant, never merge a PR created by someone
+        else; merges land on main, so they are gated by default.
 
 Options:
   1. Ask the user to merge the PR themselves (recommended; required for others' PRs)
   2. For a PR you authored in this session, temporary escape:
        BANTO_ALLOW_PR_MERGE=1 gh pr merge ...
      (never use the escape for someone else's PR)
+  3. Standing per-repo approval (owner decision; covers others' PRs too):
+     write "pr_merge": "allow" to {base}/meta/grants.json (managed by the ai-context skill)
 BLOCK_PR_MERGE
         exit 2
     fi
