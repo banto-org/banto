@@ -77,7 +77,7 @@ sh "$CLAUDE_PLUGIN_ROOT/scripts/ai-context-store-init.sh" local
 
 repo 単位の常設承認を `{base}/meta/grants.json` に記録する（「このリポジトリでは PR 作成を許可して」「本番作業を許可」「push を常設許可」で発火）。書き込み後は変更を `decisions/` に 1 行記録することを推奨する。
 
-キーは `pr_create`（`gh pr create`）/ `push_feature`（feature ブランチへの push）/ `prod_ops`（本番環境操作）。値は `allow`（常設承認・以後確認不要）/ `deny`（常時 block・誤許可の明示的な拒否に使う）/ `confirm`（既定・毎回確認）。`allow`/`deny` は `release-guard.sh`（`pr_create`）と `prod-guard.sh`（`prod_ops`）が決定論で参照する。
+キーは `pr_create`（`gh pr create`）/ `pr_merge`（`gh pr merge` — 他者の PR も対象）/ `push_feature`（feature ブランチへの push）/ `prod_ops`（本番環境操作）。値は `allow`（常設承認・以後確認不要）/ `deny`（常時 block・誤許可の明示的な拒否に使う）/ `confirm`（既定・毎回確認）。`allow`/`deny` は `release-guard.sh`（`pr_create` / `pr_merge`）と `prod-guard.sh`（`prod_ops`）が決定論で参照する。
 
 期限付き許可（例: 1 週間だけ許可）も書ける。値をオブジェクト `{"value": "allow", "until": "YYYY-MM-DD"}` にすると、`until` の翌日から自動的に `confirm`（毎回確認）へ戻る — `deny` へは倒れない。
 

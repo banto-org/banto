@@ -56,9 +56,9 @@
       "ja_sha256": "ad682974713255a3e5582b8dec50be2472837f3745049c56697bbe1c7e486ac4"
     },
     "skills/ai-context/SKILL.md": {
-      "en_sha256": "0d669d53ad19c743215d1d5d4c4555fd4354186b750f19fbfb51bf14ec360d53",
+      "en_sha256": "661a5c0e527c31dff5bae505f83b3f9acc0b84af200b01d2120fc78c938dcdcf",
       "generated_at": "2026-07-10T00:05:16Z",
-      "ja_sha256": "31f53945ad74c36e13c8bdf7515317fa167c098419ef75b327ee88b97bff86ae"
+      "ja_sha256": "d08c3a3061e9cd7ede2dbd422e869a0eab953b6d8cc5a7b64232183ad166800b"
     },
     "skills/ai-context/odd.yaml": {
       "en_sha256": "73ad86f8b149031f09fa882b77e7b978e8075889b9ddf2a0cebe52e86dabe05f",
@@ -416,9 +416,9 @@
       "ja_sha256": "24f2d06565ab03861ad3e69cc3c4dcea60a1ff1a18f8d202be3758e82aa22985"
     },
     "skills/policy/SKILL.md": {
-      "en_sha256": "f71dc206b9d0f2c30ce2f988a8cc4dca92e777a2cf9b54763e6a18977658a24c",
+      "en_sha256": "913e180e7283774081278bd89dd9407d1329df100d641612509d44b4e0475f23",
       "generated_at": "2026-07-20T14:28:48Z",
-      "ja_sha256": "1bd26044c1938c24a8a10be8a18a1f59a3fc62839dc1f6a216d2bfc7ce8b0124"
+      "ja_sha256": "4ac03a614a2904327100adc439397c2794cf659b80c6776df9369ef1c25309b8"
     },
     "skills/policy/odd.yaml": {
       "en_sha256": "35441eefdb1b9bd6cc23987cf7372d90ed8dd4f77dddd860df309642fc66ea67",
@@ -601,9 +601,9 @@
       "ja_sha256": "894f26bb9e85741db269960800af497bbab0590e56634a3bcf343da8c7ae7b7d"
     },
     "templates/rules/safety.md": {
-      "en_sha256": "883f261a024f3dddbe21df1011e01557f776dad63c2558d35b3c2b6aaef5f4db",
+      "en_sha256": "f733d0169d487874799f7a9661d6938ec8f7de9771e0044ae0daad258431bd3a",
       "generated_at": "2026-07-12T01:21:44Z",
-      "ja_sha256": "9a3fd7b1d6c8583fb9415e7dc0467f75129f648919f679613498236298f5195c"
+      "ja_sha256": "feb04a3bce73c9b7a0ca3c81df755c88ea7468535ee4b39daabb5aec71073b5a"
     },
     "templates/rules/spec-fidelity.md": {
       "en_sha256": "3f710330d606571238571b6d0b21c8390a43d584eb9949a7669adc7490b8e7e4",
@@ -616,6 +616,6 @@
       "ja_sha256": "075e42636af2eaee50216c4cdd072526790c274936f0e8652d90f6db1912981f"
     }
   },
-  "generated_at": "2026-07-30T01:45:57Z",
-  "source_commit": "1ae1946"
+  "generated_at": "2026-08-02T11:11:04Z",
+  "source_commit": "9d1fae5"
 }

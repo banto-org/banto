@@ -120,6 +120,29 @@ rm -f "$GRANTS_FILE"
 AI_CONTEXT_MAPPING="$GRANT_MAP" run_hook 'gh pr create --title x --body y' "$REPO_FEAT"; [ $? -eq 2 ] \
     && ok "R5 grants: no grants.json falls back to confirm (blocked)" || bad "R5 grants: missing grants.json not fail-open to confirm"
 
+# === R2: grants（pr_merge 3 状態 — R5 と同じ store fixture を使う） ===
+printf '{"grants":{"pr_merge":"allow"}}' > "$GRANTS_FILE"
+AI_CONTEXT_MAPPING="$GRANT_MAP" run_hook 'gh pr merge 12 --squash' "$REPO_FEAT"; [ $? -eq 0 ] \
+    && ok "R2 grants: pr_merge=allow passes without escape" || bad "R2 grants: pr_merge=allow blocked"
+
+printf '{"grants":{"pr_merge":"deny"}}' > "$GRANTS_FILE"
+AI_CONTEXT_MAPPING="$GRANT_MAP" run_hook 'gh pr merge 12 --squash' "$REPO_FEAT"; [ $? -eq 2 ] \
+    && ok "R2 grants: pr_merge=deny blocked" || bad "R2 grants: pr_merge=deny not blocked"
+AI_CONTEXT_MAPPING="$GRANT_MAP" BANTO_ALLOW_PR_MERGE=1 run_hook 'gh pr merge 12 --squash' "$REPO_FEAT"; [ $? -eq 2 ] \
+    && ok "R2 grants: deny overrides env escape" || bad "R2 grants: deny bypassed by env escape"
+unset BANTO_ALLOW_PR_MERGE
+
+printf '{"grants":{"pr_merge":"confirm"}}' > "$GRANTS_FILE"
+AI_CONTEXT_MAPPING="$GRANT_MAP" run_hook 'gh pr merge 12 --squash' "$REPO_FEAT"; [ $? -eq 2 ] \
+    && ok "R2 grants: pr_merge=confirm behaves like default (blocked)" || bad "R2 grants: confirm state not blocked"
+AI_CONTEXT_MAPPING="$GRANT_MAP" BANTO_ALLOW_PR_MERGE=1 run_hook 'gh pr merge 12 --squash' "$REPO_FEAT"; [ $? -eq 0 ] \
+    && ok "R2 grants: confirm state still honors env escape" || bad "R2 grants: confirm state escape ineffective"
+unset BANTO_ALLOW_PR_MERGE
+
+rm -f "$GRANTS_FILE"
+AI_CONTEXT_MAPPING="$GRANT_MAP" run_hook 'gh pr merge 12 --squash' "$REPO_FEAT"; [ $? -eq 2 ] \
+    && ok "R2 grants: no grants.json falls back to confirm (blocked)" || bad "R2 grants: missing grants.json not fail-open to confirm"
+
 # === R3: 公開系コマンド ===
 run_hook 'gh repo create me/x --public' "$REPO_FEAT"; [ $? -eq 2 ] \
     && ok "R3: gh repo create --public blocked" || bad "R3: repo create --public not blocked"

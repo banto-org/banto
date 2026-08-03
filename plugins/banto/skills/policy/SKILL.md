@@ -17,7 +17,7 @@ The per-repo policy canon is `{store}/{project}/meta/policy.json`:
 {"grants": {"pr_create": "allow"}, "ignore": {"no_edit": ["*.env"], "no_sync": ["private/**"]}}
 ```
 
-- `grants` (`pr_create` / `push_feature` / `prod_ops` + any custom key) is resolved by release-guard / prod-guard. Values are `allow` / `confirm` / `deny` (missing defaults to `confirm`). A time-boxed object form `{"value": "allow", "until": "YYYY-MM-DD"}` is also supported. Falls back to the legacy `meta/grants.json`
+- `grants` (`pr_create` / `pr_merge` / `push_feature` / `prod_ops` + any custom key) is resolved by release-guard / prod-guard. Values are `allow` / `confirm` / `deny` (missing defaults to `confirm`). A time-boxed object form `{"value": "allow", "until": "YYYY-MM-DD"}` is also supported. Falls back to the legacy `meta/grants.json`
 - `ignore.no_edit` is enforced by policy-guard.sh (blocks edits); `ignore.no_sync` is enforced by ai-context-sync.sh (via the store's `.git/info/exclude`)
 - The target stores are listed in `~/.claude/banto-ai-context-stores` (one store path per line), falling back to `~/ai-context-store` if absent
 
@@ -37,6 +37,7 @@ open "http://127.0.0.1:53201/?t=XXXX"
 Screen behavior (tell the user about this):
 
 - **Changes save automatically**. There is no save button — changing a select or a pattern field writes to policy.json in place, taking effect on hooks immediately. Commit + sync to the store runs automatically a few seconds later
+- **Claude Code layer card (top of the screen)**: adds / removes `Bash(gh pr merge:*)` + `Bash(gh pr checks:*)` in the permissions.allow list of `~/.claude/settings.json` with one click (backs up to settings.json.bak before writing). This is layer 1 (a command-class allowance shared across all repos); whether a merge actually passes is decided by layer 2 = the per-repo `pr_merge` grant. **The only trigger for this write is a human click** — this split keeps the feature consistent with Claude Code's design of blocking AI self-authorization, and the AI must never edit this file directly
 - **The server does not stay resident**. Clicking "Done, close" in the top right shuts down both the screen and the server. Closing the tab auto-terminates it within a few seconds; leaving it idle auto-terminates it after 15 minutes (change with `--idle-timeout <seconds>`, or `0` to disable)
 - Bound to 127.0.0.1 and requires a random token (a mismatch returns 403). The URL changes on every launch
 - For a project that only has grants.json, a change creates a new policy.json (grants.json is kept)

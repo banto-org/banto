@@ -111,6 +111,7 @@ These never block (always exit 0); they surface a one-line stderr note and let t
   Fail-open on jq absence / undetected patterns.
 - grants file convention: `{base}/meta/grants.json` (`.grants.<key>` = `allow`/`deny`/`confirm`)
   records standing per-repo approvals, resolved deterministically via `_ai_context_grant`
-  (`scripts/_ai-context-paths.sh`). `release-guard.sh` reads `pr_create`; `prod-guard.sh` reads
+  (`scripts/_ai-context-paths.sh`). `release-guard.sh` reads `pr_create` and `pr_merge` (the
+  latter covers others' PRs too — a standing owner decision); `prod-guard.sh` reads
   `prod_ops`. `allow` passes without the env escape, `deny` blocks with no escape guidance, and a
   missing/unset key falls back to `confirm` (today's escape-gated behavior, unchanged).
